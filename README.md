@@ -22,15 +22,15 @@ A comprehensive Python learning repository!
 
 ### 学习文档
 
- [1_Python_数据类型分类详解.md](python_basic_learning\word\1_Python_数据类型分类详解.md) : Python 数据类型分类详解
+- [1_Python_数据类型分类详解.md](python_basic_learning\word\1_Python_数据类型分类详解.md) : Python 数据类型分类详解
 
- [2_Python_运算符核心类型及使用规则详解.md](python_basic_learning\word\2_Python_运算符核心类型及使用规则详解.md) : Python 运算符核心类型及使用规则详解
+- [2_Python_运算符核心类型及使用规则详解.md](python_basic_learning\word\2_Python_运算符核心类型及使用规则详解.md) : Python 运算符核心类型及使用规则详解
 
- [3_Python_流程控制语句及其应用详解.md](python_basic_learning\word\3_Python_流程控制语句及其应用详解.md) : Python 流程控制语句及其应用详解
+- [3_Python_流程控制语句及其应用详解.md](python_basic_learning\word\3_Python_流程控制语句及其应用详解.md) : Python 流程控制语句及其应用详解
 
- [4_Python_函数基础：掌握代码复用的关键.md](python_basic_learning\word\4_Python_函数基础：掌握代码复用的关键.md) : Python 函数基础：掌握代码复用的关键
+- [4_Python_函数基础：掌握代码复用的关键.md](python_basic_learning\word\4_Python_函数基础：掌握代码复用的关键.md) : Python 函数基础：掌握代码复用的关键
 
- [5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md](python_basic_learning\word\5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md) : Python 四大核心数据结构整合示例：从基础用法到综合应用
+- [5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md](python_basic_learning\word\5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md) : Python 四大核心数据结构整合示例：从基础用法到综合应用
 
 ## 进阶部分
 
