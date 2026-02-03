@@ -103,11 +103,91 @@ try:
     my_gen_send_obj.send(None)
 except StopIteration:
     print("动态累加求和结束")
+print("=" * 30)
+
 
 """
 3.闭包
 """
 
+
+# 1.简单的闭包实现
+# 实现要求：实现一个加法，知道一个加数，不知道另外一个加数
+def add_base(number):
+    # add_base 外部函数
+    def add_number(number_2):
+        # add_number 内部函数
+        return number + number_2
+
+    # 返回的内容：
+    # 内部函数（√）
+    # 内部函数的返回值（X）
+    return add_number
+
+
+ab_obj = add_base(10)
+print(ab_obj, type(ab_obj))
+print(f"10+2={ab_obj(2)}")
+print(f"10+10={ab_obj(10)}")
+
+
+# 思考？
+# 问题1：闭包能否嵌套2层，及其两层以上？
+# 答案：可以
+def func1(number_1):
+    def func2(number_2):
+        def func3(number_3):
+            return number_1 * number_2 * number_3
+
+        return func3
+
+    return func2
+
+
+# f_1指向的是func2
+f_1 = func1(10)
+print(f_1, f_1(10)(10))
+if f_1.__closure__:
+    for cho in f_1.__closure__:
+        print(cho)
+
+print("-" * 30)
+
+# 想要让f_1指向func3
+f_1_1 = func1(2)(3)
+print(f_1_1, f_1_1(3))
+if f_1_1.__closure__:
+    for cho in f_1_1.__closure__:
+        print(cho)
+
+
+# 问题2：闭包中变量的执行时机，是在什么时候？
+# 答案：内层函数执行时
+# === 变量延迟绑定 ===
+# 绑定时机：内层函数执行时，闭包被调用时
+
+
+def function1():
+    res = []
+    # x=0 1 2
+    for x in range(3):
+
+        def function2(x=x):
+            print(x)
+
+        res.append(function2)
+    return res
+
+
+# 打眼一看，可能觉得结果应该是 0；1；2（错误）
+f1_obj = function1()
+for cho in f1_obj:
+    cho()
+
+
 """
 4.装饰器
 """
+
+if __name__ == "__main":
+    pass
