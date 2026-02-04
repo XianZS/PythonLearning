@@ -3,6 +3,7 @@
 """
 
 # 创建可迭代对象 iterable
+from ntpath import exists
 from time import strftime
 
 
@@ -191,11 +192,125 @@ print("=" * 30)
 
 """
 4.装饰器
-先举例子：“穿衣服的例子”，然后引入装饰器概念，接下来对概念总结，然后对概念进行分类（基础和进阶）
-先论述基础装饰器，组成、执行顺序、代码实现
-再论述进阶装饰器，组成、执行顺序、代码实现
-之后再说一下如何保存元数据
 """
+
+
+# （1）装饰器的构成
+# - 基础装饰器 （无参数传入） 由2层闭包所构成
+# - 进阶装饰器 （由参数传入） 由3层闭包所构成
+# 装饰器 被装饰器函数
+# @装饰器 # 语法糖的格式
+# 被装饰函数
+def func_1(func):
+    print("=== 【装饰器】外层函数执行 ===")
+
+    def func_2():
+        func()
+        print("=== 【装饰器】内层函数执行 ===")
+        # func()
+
+    return func_2
+
+
+@func_1
+def func_3():
+    print("=== 被装饰函数执行 ===")
+
+
+func_3()
+# 被装饰函数的执行顺序和执行时机，是由装饰器所决定的
+
+
+# （2）基础装饰器 由两层闭包所构成的
+# 日志记录的装饰器
+def count_logs(func):
+    def wrapper():
+        import time
+        import os
+
+        begin_time = time.time()
+        func()
+        spend_time = time.time() - begin_time
+        if os.path.exists("./logs.txt"):
+            with open("./logs.txt", "a", encoding="utf-8") as f:
+                f.write(f"[{func}]：花费时间：{spend_time}\n")
+        else:
+            with open("./logs.txt", "w", encoding="utf-8") as f:
+                f.write(f"[{func}]：花费时间：{spend_time}\n")
+
+    return wrapper
+
+
+@count_logs
+def pr():
+    for x in range(1, 10000 + 1):
+        print(f"{x} ", end="")
+    print()
+
+
+pr()
+
+
+# 传入参数应该如何处理？
+# 进阶装饰器 （三层闭包实现）
+# 最外层：接收传入参数
+# 中间层：接收被装饰函数
+# 最内层：需要做一个兼容处理
+def out_func(judge_):
+    def middle_func(func):
+        def e_func(*args, **kwargs):
+            print(f"当前日志级别为:{judge_}")
+            res = func(*args, **kwargs)
+            return res
+
+        return e_func
+
+    return middle_func
+
+
+@out_func(judge_="级别A")
+def pr_function():
+    for x in range(1, 10 + 1):
+        print(f"{x} ", end="")
+    print()
+
+
+pr_function()
+
+
+@out_func(judge_="级别B")
+def pr_function_2():
+    for x in range(1, 10 + 1):
+        print(f"{x} ", end="")
+    print()
+
+
+pr_function_2()
+
+
+# 保存元数据
+from functools import wraps
+
+
+def o_func(func):
+    @wraps(func)
+    def e_func():
+        print("e_func")
+        func()
+
+    return e_func
+
+
+@o_func
+def function():
+    """
+    function 被装饰函数的自定义帮助文档
+    帮助文档内容
+    """
+    print("func元数据保存")
+
+
+help(function)
 
 
 if __name__ == "__main":

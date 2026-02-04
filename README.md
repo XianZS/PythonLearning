@@ -61,6 +61,8 @@
 
 - [1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md)
 - [2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
+-  [3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md) 
+-  [4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md) 
 
 ## 三、Python标准库学习部分（核心目标：熟练运用标准库解决实际问题，减少第三方库依赖）
 
