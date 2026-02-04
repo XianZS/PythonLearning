@@ -1,6 +1,6 @@
 # PythonLearning
 
-> Welcome！A comprehensive Python learning repository!
+> Welcome！A comprehensive Python learning repository! Hello !
 
 ## 一、Python基础学习部分
 
@@ -29,14 +29,14 @@
 
 ### 学习文档
 
--  [1_Python_数据类型分类详解.md](python_basic_learning\word\1_Python 数据类型分类详解.md) 
--  [2_Python_运算符核心类型及使用规则详解.md](python_basic_learning\word\2_Python 运算符核心类型及使用规则详解.md) 
--  [3_Python_流程控制语句及其应用详解.md](python_basic_learning\word\3_Python 流程控制语句及其应用详解.md) 
--  [4_Python_函数基础：掌握代码复用的关键.md](python_basic_learning\word\4_Python 函数基础：掌握代码复用的关键.md) 
--  [5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md](python_basic_learning\word\5_Python 四大核心数据结构整合示例：从基础用法到综合应用.md) 
--  [6_Python_文件操作：从基础到进阶的分步讲解.md](python_basic_learning\word\6_Python 文件操作：从基础到进阶的分步讲解.md) 
--  [7_Python_异常处理：从基础认知到最佳实践.md](python_basic_learning\word\7_Python 异常处理：从基础认知到最佳实践.md) 
--  [8_Python_模块与包：从浅入深的模块化讲解.md](python_basic_learning\word\8_Python 模块与包：从浅入深的模块化讲解.md) 
+- [1_Python_数据类型分类详解.md](python_basic_learning\word\1_Python 数据类型分类详解.md)
+- [2_Python_运算符核心类型及使用规则详解.md](python_basic_learning\word\2_Python 运算符核心类型及使用规则详解.md)
+- [3_Python_流程控制语句及其应用详解.md](python_basic_learning\word\3_Python 流程控制语句及其应用详解.md)
+- [4_Python_函数基础：掌握代码复用的关键.md](python_basic_learning\word\4_Python 函数基础：掌握代码复用的关键.md)
+- [5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md](python_basic_learning\word\5_Python 四大核心数据结构整合示例：从基础用法到综合应用.md)
+- [6_Python_文件操作：从基础到进阶的分步讲解.md](python_basic_learning\word\6_Python 文件操作：从基础到进阶的分步讲解.md)
+- [7_Python_异常处理：从基础认知到最佳实践.md](python_basic_learning\word\7_Python 异常处理：从基础认知到最佳实践.md)
+- [8_Python_模块与包：从浅入深的模块化讲解.md](python_basic_learning\word\8_Python 模块与包：从浅入深的模块化讲解.md)
 
 ## 二、Python进阶学习部分
 
@@ -59,8 +59,8 @@
 
 ### 学习文档
 
--  [1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md) 
--  [2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md) 
+- [1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md)
+- [2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
 
 ## 三、Python标准库学习部分（核心目标：熟练运用标准库解决实际问题，减少第三方库依赖）
 

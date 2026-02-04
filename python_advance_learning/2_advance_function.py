@@ -3,6 +3,9 @@
 """
 
 # 创建可迭代对象 iterable
+from time import strftime
+
+
 nums = [1, 2, 3]
 print(nums, type(nums))
 # 创建迭代器 iterator
@@ -184,10 +187,16 @@ f1_obj = function1()
 for cho in f1_obj:
     cho()
 
+print("=" * 30)
 
 """
 4.装饰器
+先举例子：“穿衣服的例子”，然后引入装饰器概念，接下来对概念总结，然后对概念进行分类（基础和进阶）
+先论述基础装饰器，组成、执行顺序、代码实现
+再论述进阶装饰器，组成、执行顺序、代码实现
+之后再说一下如何保存元数据
 """
+
 
 if __name__ == "__main":
     pass
