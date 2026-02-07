@@ -131,7 +131,7 @@ print(new_stu.get_stu_name)
 print()
 
 
-class People:
+class People1:
     def __init__(self, people_name, people_address):
         self.people_name = people_name
         self.people_address = people_address
@@ -151,7 +151,7 @@ class People:
         return res_2 + "\n" + res_1
 
 
-people_1 = People(people_name="kom", people_address="A市")
+people_1 = People1(people_name="kom", people_address="A市")
 res = people_1.super_format()
 
 print(res)
@@ -182,13 +182,13 @@ class Animal:
 
 
 # 狗 属于动物
-class Dog(Animal):
+class Dogi(Animal):
     pass
 
 
-dog = Dog(animal_name="狗", animal_note="我是一条狗")
+dog = Dogi(animal_name="狗", animal_note="我是一条狗")
 print(dog.animal_name)
-print(Dog.__mro__)
+print(Dogi.__mro__)
 
 
 # 猫 属于动物
@@ -301,6 +301,101 @@ for cho in mro_list:
 <class '__main__.Goods'>
 <class 'object'>
 """
+
+
+print("=" * 30)
+
+"""
+    多态
+"""
+
+
+class A:
+    def __init__(self, animal_name):
+        self.animal_name = animal_name
+
+    def call(self):
+        # 只是定义了有call这个动作
+        # “叫” 这个动作
+        pass
+
+
+class MyCat(A):
+    def __init__(self, animal_name):
+        super().__init__(animal_name)
+
+    def call(self):
+        print("喵喵喵")
+
+
+class MyDog(A):
+    def __init__(self, animal_name):
+        super().__init__(animal_name)
+
+    def call(self):
+        print("汪汪汪")
+
+
+# 多态 针对同一个方法，有不同的实现方式
+# （入口）可以确定的：只有一个方法
+# （出口）不可以确定的：实现方式
+
+
+def call_function(my_obj):
+    # 不需要关心 call_function 内部的实现方式
+    # 咱们只需要知道有这个 call 这个方法
+    # 不需要知道它的内部实现方式
+    # my_obj.call()
+    try:
+        my_obj.call()
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
+my_cat = MyCat("咪咪")
+my_dog = MyDog("旺财")
+# my_cat.call()
+# my_dog.call()
+call_function(my_cat)
+call_function(my_dog)
+
+
+# Python 动态类型语言
+# 鸭子类型
+# 在现实世界之中，是如何定义一个事物的？
+# 键盘：有按键 可输入 可连接电脑
+# 假设只要满足这三个要求，就可以被称为一个键盘
+# 物品B：有按键 可输入 可连接电脑
+# 那么它可不可以被成为键盘？
+# 答案：可以
+# 只要物品B满足三个条件，那么它就是一个键盘，不管他本身是不是一个键盘
+
+
+class KeyBoard:
+    def __init__(self):
+        self.a = "有按键"
+        self.b = "可输入"
+        self.c = "可连接电脑"
+
+
+key_board = KeyBoard()
+
+
+class B:
+    def __init__(self, a_judge, b_judge, c_judge):
+        self.a = a_judge
+        self.b = b_judge
+        self.c = c_judge
+
+
+b = B(True, True, True)
+# b 是不是一个键盘？
+# b 就是一个键盘
+# 不管 b 本质上是不是一个键盘
+# 只要 b 满足了键盘的要求
+# 那么就是一个键盘
 
 
 if __name__ == "__main__":
