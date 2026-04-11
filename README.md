@@ -64,16 +64,20 @@
 -  [3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md) 
 -  [4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md) 
 
-## 三、Python标准库学习部分（核心目标：熟练运用标准库解决实际问题，减少第三方库依赖）
+## 三、Python标准库学习部分
 
-| 模块顺序（按使用频率排序）                  | 核心讲解内容                                                 |
-| ------------------------------------------- | ------------------------------------------------------------ |
-| 1. sys/os模块（系统交互核心）               | ① sys：命令行参数（sys.argv）、退出程序（sys.exit）、获取系统信息（sys.platform）；<br />② os：路径处理（os.path/Pathlib，重点，避坑：跨平台路径问题）、文件夹操作（创建/删除/遍历）、系统命令调用（os.system）；<br />③ 实操练习：批量重命名文件、遍历指定文件夹下的所有CSV文件 |
-| 2. datetime模块（时间处理唯一选择）         | ① 时间对象（datetime.datetime/datetime.date）；<br />② 时间格式化（strftime/strptime，重点，避坑：格式符错误）；<br />③ 时间计算（timedelta，案例：计算距离生日还有多少天）；<br />④ 时区处理（简单入门，pytz库辅助）；<br />⑤ 实操练习：生成每日日志文件名（包含日期）、计算项目耗时 |
-| 3. json/csv模块（数据序列化高频）           | ① json：dump/dumps/load/loads（案例：保存配置文件、接口数据处理）；<br />② csv：reader/writer/DictReader（案例：批量导入/导出表格数据）；<br />③ 避坑：json中文编码问题、csv换行符问题；<br />④ 实操练习：将数据库中的学生成绩导出为CSV/JSON文件 |
-| 4. re模块（正则表达式，文本处理必备）       | ① 正则基础语法（元字符、量词、分组）；<br />② 常用方法（match/search/findall/sub，案例：提取文本中的URL、替换敏感词）；<br />③ 避坑：贪婪匹配/非贪婪匹配、转义字符问题；<br />④ 实操练习：批量清洗文本数据（去除空格、提取关键信息） |
-| 5. urllib模块（网络请求基础，无第三方依赖） | ① urlopen（简单GET请求）；<br />② Request对象（设置请求头、POST请求）；<br />③ 异常处理（HTTPError/URLError）；<br />④ 案例：爬取简单网页、获取接口数据；<br />⑤ 实操练习：爬取股票行情简单数据并保存为JSON |
-| 6. logging模块（日志记录，项目必备）        | ① 日志级别（DEBUG/INFO/WARNING/ERROR/CRITICAL）；<br />② 日志配置（基本配置、输出到文件、格式化日志）；<br />③ 案例：为学生成绩管理系统添加日志（记录操作行为、错误信息）；<br />④ 避坑：日志重复输出、编码问题；<br />⑤ 实操练习：优化之前的项目，添加完整日志功能 |
-| 7. collections模块（高级数据结构补充）      | ① 常用子类（defaultdict、OrderedDict、Counter、deque）；<br />② 案例：Counter统计词频、deque实现队列（高效）；<br />③ 对比普通数据结构（dict/list）的优势；<br />④ 实操练习：统计文本词频并排序 |
-| 8. 其他高频辅助模块（按需选讲）             | ① random模块（随机数生成，案例：抽奖程序、随机密码生成）；<br />② math模块（数学计算，案例：几何计算、三角函数）；<br />③ hashlib模块（加密，案例：密码加密存储）；<br />④ 实操练习：生成随机密码并加密保存 |
-| 9. 标准库综合实战                           | ① 项目：批量数据处理工具（覆盖os/sys/json/csv/re/logging模块，实现批量读取文件、清洗数据、保存结果、记录日志）；<br />② 代码复盘：梳理各模块协同逻辑；<br />③ 作业布置：优化工具，添加自定义配置功能 |
+| 使用场景           | 标准库模块                                                   | 主要用途说明                                                 |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **文件与目录操作** | `os`, `os.path`, `shutil`, `pathlib`, `tempfile`             | 提供文件/目录创建、删除、复制、移动、路径处理及临时文件管理等操作系统接口。 |
+| **网络通信**       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
+| **数据处理与格式** | `json`, `xml`, `csv`, `configparser`, `pickle`, `sqlite3`, `collections`, `itertools` | 处理JSON/XML/CSV数据、解析配置文件、序列化对象、操作SQLite数据库，及提供高效容器/迭代器工具。 |
+| **系统交互与进程** | `sys`, `subprocess`, `argparse`, `logging`, `platform`       | 访问命令行参数、启动子进程、记录日志、获取系统信息，及与Python解释器交互。 |
+| **文本处理**       | `re`, `string`, `difflib`, `textwrap`                        | 正则表达式匹配、字符串操作、文本差异对比、自动换行/填充等文本处理功能。 |
+| **日期与时间**     | `datetime`, `time`, `calendar`                               | 处理日期、时间、日历，支持时间计算、格式化输出及时区转换。   |
+| **数学与科学计算** | `math`, `cmath`, `random`, `statistics`, `fractions`, `decimal` | 提供数学函数、复数运算、随机数生成、统计计算，及高精度分数/小数运算。 |
+| **并发与异步**     | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | 实现多线程、多进程、线程池/进程池，及异步IO编程，支持任务队列与并发控制。 |
+| **调试与测试**     | `pdb`, `unittest`, `doctest`, `traceback`                    | 代码调试、单元测试、文档测试，及异常堆栈信息获取，助力开发与测试流程。 |
+| **加密与安全**     | `hashlib`, `hmac`, `secrets`, `ssl`                          | 提供哈希算法、消息认证码、安全随机数生成，及SSL/TLS加密通信支持。 |
+
+
+
