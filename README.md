@@ -56,6 +56,11 @@
 
 - [1_super_struct.py](python_advance_learning/1_super_struct.py)：高级数据结构
 - [2_advance_function.py](python_advance_learning/2_advance_function.py)：高级函数
+-  [3_oop_code](python_advance_learning\3_oop_code) ：面向对象编程模块核心内容
+-  [4_module_use](python_advance_learning\4_module_use) ：模块工程化开发
+-  [5_data_processing](python_advance_learning\5_data_processing) ：数据处理
+-  [6_web_code](python_advance_learning\6_web_code) ：网络编程部分
+-  [7_sql_code](python_advance_learning\7_sql_code) ：数据库进阶编程
 
 ### 学习文档
 
@@ -63,6 +68,9 @@
 - [2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
 -  [3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md) 
 -  [4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md) 
+-   [5_Python 数据处理：字符串与日期时间模块详解.md](python_advance_learning\word\5_Python 数据处理：字符串与日期时间模块详解.md) 
+-   [6_Python 进阶：网络编程基础全面解析.md](python_advance_learning\word\6_Python 进阶：网络编程基础全面解析.md) 
+-   [7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](python_advance_learning\word\7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md) 
 
 ## 三、Python标准库学习部分
 
