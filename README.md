@@ -87,5 +87,10 @@
 | **调试与测试**     | `pdb`, `unittest`, `doctest`, `traceback`                    | 代码调试、单元测试、文档测试，及异常堆栈信息获取，助力开发与测试流程。 |
 | **加密与安全**     | `hashlib`, `hmac`, `secrets`, `ssl`                          | 提供哈希算法、消息认证码、安全随机数生成，及SSL/TLS加密通信支持。 |
 
+### 学习文档
 
+ [1.1-os标准库.md](python_stdlib_learning\word\1.1-os标准库.md) ：OS标准库学习
 
+ [1.2-shutil 高级文件操作详解.md](python_stdlib_learning\word\1.2-shutil 高级文件操作详解.md) ：ShUtil标准库学习
+
+ [1.3-Pathlib 标准库——路径操作新革命.md](python_stdlib_learning\word\1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
