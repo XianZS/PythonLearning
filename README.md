@@ -77,10 +77,10 @@
 | 使用场景           | 标准库模块                                                   | 主要用途说明                                                 |
 | ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | **文件与目录操作** | `os`, `os.path`, `shutil`, `pathlib`, `tempfile`             | 提供文件/目录创建、删除、复制、移动、路径处理及临时文件管理等操作系统接口。 |
-| **网络通信**       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
 | **数据处理与格式** | `json`, `xml`, `csv`, `configparser`, `pickle`, `sqlite3`, `collections`, `itertools` | 处理JSON/XML/CSV数据、解析配置文件、序列化对象、操作SQLite数据库，及提供高效容器/迭代器工具。 |
 | **系统交互与进程** | `sys`, `subprocess`, `argparse`, `logging`, `platform`       | 访问命令行参数、启动子进程、记录日志、获取系统信息，及与Python解释器交互。 |
 | **文本处理**       | `re`, `string`, `difflib`, `textwrap`                        | 正则表达式匹配、字符串操作、文本差异对比、自动换行/填充等文本处理功能。 |
+| **网络通信**       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
 | **日期与时间**     | `datetime`, `time`, `calendar`                               | 处理日期、时间、日历，支持时间计算、格式化输出及时区转换。   |
 | **数学与科学计算** | `math`, `cmath`, `random`, `statistics`, `fractions`, `decimal` | 提供数学函数、复数运算、随机数生成、统计计算，及高精度分数/小数运算。 |
 | **并发与异步**     | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | 实现多线程、多进程、线程池/进程池，及异步IO编程，支持任务队列与并发控制。 |
@@ -94,3 +94,5 @@
  [1.2-shutil 高级文件操作详解.md](python_stdlib_learning\word\1.2-shutil 高级文件操作详解.md) ：ShUtil标准库学习
 
  [1.3-Pathlib 标准库——路径操作新革命.md](python_stdlib_learning\word\1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
+
+ [1.4-tempfile标准库——临时文件_目录管理.md](python_stdlib_learning\word\1.4-tempfile标准库——临时文件_目录管理.md) ：tempfile标准库学习
