@@ -96,3 +96,14 @@
  [1.3-Pathlib 标准库——路径操作新革命.md](python_stdlib_learning\word\1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
 
  [1.4-tempfile标准库——临时文件_目录管理.md](python_stdlib_learning\word\1.4-tempfile标准库——临时文件_目录管理.md) ：tempfile标准库学习
+
+ [2.1-JSON 标准库——跨语言数据交换的桥梁.md](python_stdlib_learning\word\2.1-JSON 标准库——跨语言数据交换的桥梁.md) ：JSON标准库学习
+
+ [2.2-XML 标准库——结构化数据处理利器.md](python_stdlib_learning\word\2.2-XML 标准库——结构化数据处理利器.md) ：XML标准库学习
+
+ [2.3-`csv` 库在数据处理中的应用.md](python_stdlib_learning\word\2.3-`csv` 库在数据处理中的应用.md) ：csv标准库学习
+
+ [2.4-configparser 标准库详解.md](python_stdlib_learning\word\2.4-configparser 标准库详解.md) ：configparser标准库学习
+
+
+
