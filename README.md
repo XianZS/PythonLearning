@@ -105,5 +105,15 @@
 
  [2.4-configparser 标准库详解.md](python_stdlib_learning\word\2.4-configparser 标准库详解.md) ：configparser标准库学习
 
+ [2.5-B站 Python 课程之 pickle 标准库.md](python_stdlib_learning\word\2.5-B站 Python 课程之 pickle 标准库.md) ：pickle标准库学习
 
+ [2.6-`sqlite3` 标准库详解.md](python_stdlib_learning\word\2.6-`sqlite3` 标准库详解.md) ：sqlite3标准库学习
+
+ [2.7-`collections`标准库详解.md](python_stdlib_learning\word\2.7-`collections`标准库详解.md) ：collections标准库学习
+
+ [2.8-`itertools`标准库详解.md](python_stdlib_learning\word\2.8-`itertools`标准库详解.md) ：itertools标准库学习
+
+ [3.1-Bilibili Python：`sys`标准库详解.md](python_stdlib_learning\word\3.1-Bilibili Python：`sys`标准库详解.md) ：sys标准库学习
+
+ [3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md](python_stdlib_learning\word\3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md) ：subprocess标准库学习
 
