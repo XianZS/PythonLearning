@@ -56,36 +56,36 @@
 
 - [1_super_struct.py](python_advance_learning/1_super_struct.py)：高级数据结构
 - [2_advance_function.py](python_advance_learning/2_advance_function.py)：高级函数
--  [3_oop_code](python_advance_learning\3_oop_code) ：面向对象编程模块核心内容
--  [4_module_use](python_advance_learning\4_module_use) ：模块工程化开发
--  [5_data_processing](python_advance_learning\5_data_processing) ：数据处理
--  [6_web_code](python_advance_learning\6_web_code) ：网络编程部分
--  [7_sql_code](python_advance_learning\7_sql_code) ：数据库进阶编程
+- [3_oop_code](python_advance_learning\3_oop_code) ：面向对象编程模块核心内容
+- [4_module_use](python_advance_learning\4_module_use) ：模块工程化开发
+- [5_data_processing](python_advance_learning\5_data_processing) ：数据处理
+- [6_web_code](python_advance_learning\6_web_code) ：网络编程部分
+- [7_sql_code](python_advance_learning\7_sql_code) ：数据库进阶编程
 
 ### 学习文档
 
 - [1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md)
 - [2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
--  [3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md) 
--  [4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md) 
--   [5_Python 数据处理：字符串与日期时间模块详解.md](python_advance_learning\word\5_Python 数据处理：字符串与日期时间模块详解.md) 
--   [6_Python 进阶：网络编程基础全面解析.md](python_advance_learning\word\6_Python 进阶：网络编程基础全面解析.md) 
--   [7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](python_advance_learning\word\7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md) 
+- [3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md)
+- [4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md)
+- [5_Python 数据处理：字符串与日期时间模块详解.md](python_advance_learning\word\5_Python 数据处理：字符串与日期时间模块详解.md)
+- [6_Python 进阶：网络编程基础全面解析.md](python_advance_learning\word\6_Python 进阶：网络编程基础全面解析.md)
+- [7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](python_advance_learning\word\7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md)
 
 ## 三、Python标准库学习部分
 
 | 使用场景           | 标准库模块                                                   | 主要用途说明                                                 |
 | ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **文件与目录操作** | `os`, `os.path`, `shutil`, `pathlib`, `tempfile`             | 提供文件/目录创建、删除、复制、移动、路径处理及临时文件管理等操作系统接口。 |
-| **数据处理与格式** | `json`, `xml`, `csv`, `configparser`, `pickle`, `sqlite3`, `collections`, `itertools` | 处理JSON/XML/CSV数据、解析配置文件、序列化对象、操作SQLite数据库，及提供高效容器/迭代器工具。 |
-| **系统交互与进程** | `sys`, `subprocess`, `argparse`, `logging`, `platform`       | 访问命令行参数、启动子进程、记录日志、获取系统信息，及与Python解释器交互。 |
-| **文本处理**       | `re`, `string`, `difflib`, `textwrap`                        | 正则表达式匹配、字符串操作、文本差异对比、自动换行/填充等文本处理功能。 |
-| **网络通信**       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
-| **日期与时间**     | `datetime`, `time`, `calendar`                               | 处理日期、时间、日历，支持时间计算、格式化输出及时区转换。   |
-| **数学与科学计算** | `math`, `cmath`, `random`, `statistics`, `fractions`, `decimal` | 提供数学函数、复数运算、随机数生成、统计计算，及高精度分数/小数运算。 |
-| **并发与异步**     | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | 实现多线程、多进程、线程池/进程池，及异步IO编程，支持任务队列与并发控制。 |
-| **调试与测试**     | `pdb`, `unittest`, `doctest`, `traceback`                    | 代码调试、单元测试、文档测试，及异常堆栈信息获取，助力开发与测试流程。 |
-| **加密与安全**     | `hashlib`, `hmac`, `secrets`, `ssl`                          | 提供哈希算法、消息认证码、安全随机数生成，及SSL/TLS加密通信支持。 |
+| __文件与目录操作__ | `os`, `os.path`, `shutil`, `pathlib`, `tempfile`             | 提供文件/目录创建、删除、复制、移动、路径处理及临时文件管理等操作系统接口。 |
+| __数据处理与格式__ | `json`, `xml`, `csv`, `configparser`, `pickle`, `sqlite3`, `collections`, `itertools` | 处理JSON/XML/CSV数据、解析配置文件、序列化对象、操作SQLite数据库，及提供高效容器/迭代器工具。 |
+| __系统交互与进程__ | `sys`, `subprocess`, `argparse`, `logging`, `platform`       | 访问命令行参数、启动子进程、记录日志、获取系统信息，及与Python解释器交互。 |
+| __文本处理__       | `re`, `string`, `difflib`, `textwrap`                        | 正则表达式匹配、字符串操作、文本差异对比、自动换行/填充等文本处理功能。 |
+| __网络通信__       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
+| __日期与时间__     | `datetime`, `time`, `calendar`                               | 处理日期、时间、日历，支持时间计算、格式化输出及时区转换。   |
+| __数学与科学计算__ | `math`, `cmath`, `random`, `statistics`, `fractions`, `decimal` | 提供数学函数、复数运算、随机数生成、统计计算，及高精度分数/小数运算。 |
+| __并发与异步__     | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | 实现多线程、多进程、线程池/进程池，及异步IO编程，支持任务队列与并发控制。 |
+| __调试与测试__     | `pdb`, `unittest`, `doctest`, `traceback`                    | 代码调试、单元测试、文档测试，及异常堆栈信息获取，助力开发与测试流程。 |
+| __加密与安全__     | `hashlib`, `hmac`, `secrets`, `ssl`                          | 提供哈希算法、消息认证码、安全随机数生成，及SSL/TLS加密通信支持。 |
 
 ### 学习文档
 
@@ -116,4 +116,3 @@
  [3.1-Bilibili Python：`sys`标准库详解.md](python_stdlib_learning\word\3.1-Bilibili Python：`sys`标准库详解.md) ：sys标准库学习
 
  [3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md](python_stdlib_learning\word\3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md) ：subprocess标准库学习
-
