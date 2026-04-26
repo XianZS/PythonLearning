@@ -1,6 +1,6 @@
 # PythonLearning
 
-> Welcome！A comprehensive Python learning repository! Hello !
+> A comprehensive Python learning repository! Hello !
 
 ## 一、Python基础学习部分
 
@@ -18,14 +18,21 @@
 
 ### 代码文件
 
-- [1_Variables_and_Data_Types.py](python_basic_learning/1_Variables_and_Data_Types.py)：变量和数据类型
-- [2_Operators_and_Expressions.py](python_basic_learning/2_Operators_and_Expressions.py)：运算符和表达式
-- [3_process_control.py](python_basic_learning/3_process_control.py)：流程控制
-- [4_Function_Basics.py](python_basic_learning/4_Function_Basics.py)：函数基础
-- [5_container_structure.py](python_basic_learning/5_container_structure.py)：容器结构
-- [6_file_operate.py](python_basic_learning/6_file_operate.py)：文件操作
-- [7_try_except.py](python_basic_learning/7_try_except.py)：异常处理
-- [8_module.py](python_basic_learning/8_module.py)：模块
+[1_Variables_and_Data_Types.py](python_basic_learning/1_Variables_and_Data_Types.py)：变量和数据类型
+
+[2_Operators_and_Expressions.py](python_basic_learning/2_Operators_and_Expressions.py)：运算符和表达式
+
+[3_process_control.py](python_basic_learning/3_process_control.py)：流程控制
+
+[4_Function_Basics.py](python_basic_learning/4_Function_Basics.py)：函数基础
+
+[5_container_structure.py](python_basic_learning/5_container_structure.py)：容器结构
+
+[6_file_operate.py](python_basic_learning/6_file_operate.py)：文件操作
+
+[7_try_except.py](python_basic_learning/7_try_except.py)：异常处理
+
+[8_module.py](python_basic_learning/8_module.py)：模块
 
 ### 学习文档
 
@@ -54,23 +61,35 @@
 
 ### 代码文件
 
-- [1_super_struct.py](python_advance_learning/1_super_struct.py)：高级数据结构
-- [2_advance_function.py](python_advance_learning/2_advance_function.py)：高级函数
-- [3_oop_code](python_advance_learning\3_oop_code) ：面向对象编程模块核心内容
-- [4_module_use](python_advance_learning\4_module_use) ：模块工程化开发
-- [5_data_processing](python_advance_learning\5_data_processing) ：数据处理
-- [6_web_code](python_advance_learning\6_web_code) ：网络编程部分
-- [7_sql_code](python_advance_learning\7_sql_code) ：数据库进阶编程
+[1_super_struct.py](python_advance_learning/1_super_struct.py)：高级数据结构
+
+[2_advance_function.py](python_advance_learning/2_advance_function.py)：高级函数
+
+[3_oop_code](python_advance_learning\3_oop_code) ：面向对象编程模块核心内容
+
+[4_module_use](python_advance_learning\4_module_use) ：模块工程化开发
+
+[5_data_processing](python_advance_learning\5_data_processing) ：数据处理
+
+[6_web_code](python_advance_learning\6_web_code) ：网络编程部分
+
+[7_sql_code](python_advance_learning\7_sql_code) ：数据库进阶编程
 
 ### 学习文档
 
-- [1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md)
-- [2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
-- [3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md)
-- [4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md)
-- [5_Python 数据处理：字符串与日期时间模块详解.md](python_advance_learning\word\5_Python 数据处理：字符串与日期时间模块详解.md)
-- [6_Python 进阶：网络编程基础全面解析.md](python_advance_learning\word\6_Python 进阶：网络编程基础全面解析.md)
-- [7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](python_advance_learning\word\7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md)
+[1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md)
+
+[2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
+
+[3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md)
+
+[4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md)
+
+[5_Python 数据处理：字符串与日期时间模块详解.md](python_advance_learning\word\5_Python 数据处理：字符串与日期时间模块详解.md)
+
+[6_Python 进阶：网络编程基础全面解析.md](python_advance_learning\word\6_Python 进阶：网络编程基础全面解析.md)
+
+[7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](python_advance_learning\word\7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md)
 
 ## 三、Python标准库学习部分
 
@@ -89,30 +108,44 @@
 
 ### 学习文档
 
- [1.1-os标准库.md](python_stdlib_learning\word\1.1-os标准库.md) ：OS标准库学习
+[1.1-os标准库.md](python_stdlib_learning\word\1.1-os标准库.md) ：OS标准库学习
 
- [1.2-shutil 高级文件操作详解.md](python_stdlib_learning\word\1.2-shutil 高级文件操作详解.md) ：ShUtil标准库学习
+[1.2-shutil 高级文件操作详解.md](python_stdlib_learning\word\1.2-shutil 高级文件操作详解.md) ：ShUtil标准库学习
 
- [1.3-Pathlib 标准库——路径操作新革命.md](python_stdlib_learning\word\1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
+[1.3-Pathlib 标准库——路径操作新革命.md](python_stdlib_learning\word\1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
 
- [1.4-tempfile标准库——临时文件_目录管理.md](python_stdlib_learning\word\1.4-tempfile标准库——临时文件_目录管理.md) ：tempfile标准库学习
+[1.4-tempfile标准库——临时文件_目录管理.md](python_stdlib_learning\word\1.4-tempfile标准库——临时文件_目录管理.md) ：tempfile标准库学习
 
- [2.1-JSON 标准库——跨语言数据交换的桥梁.md](python_stdlib_learning\word\2.1-JSON 标准库——跨语言数据交换的桥梁.md) ：JSON标准库学习
+[2.1-JSON 标准库——跨语言数据交换的桥梁.md](python_stdlib_learning\word\2.1-JSON 标准库——跨语言数据交换的桥梁.md) ：JSON标准库学习
 
- [2.2-XML 标准库——结构化数据处理利器.md](python_stdlib_learning\word\2.2-XML 标准库——结构化数据处理利器.md) ：XML标准库学习
+[2.2-XML 标准库——结构化数据处理利器.md](python_stdlib_learning\word\2.2-XML 标准库——结构化数据处理利器.md) ：XML标准库学习
 
- [2.3-`csv` 库在数据处理中的应用.md](python_stdlib_learning\word\2.3-`csv` 库在数据处理中的应用.md) ：csv标准库学习
+[2.3-`csv` 库在数据处理中的应用.md](python_stdlib_learning\word\2.3-`csv` 库在数据处理中的应用.md) ：csv标准库学习
 
- [2.4-configparser 标准库详解.md](python_stdlib_learning\word\2.4-configparser 标准库详解.md) ：configparser标准库学习
+[2.4-configparser 标准库详解.md](python_stdlib_learning\word\2.4-configparser 标准库详解.md) ：configparser标准库学习
 
- [2.5-B站 Python 课程之 pickle 标准库.md](python_stdlib_learning\word\2.5-B站 Python 课程之 pickle 标准库.md) ：pickle标准库学习
+[2.5-B站 Python 课程之 pickle 标准库.md](python_stdlib_learning\word\2.5-B站 Python 课程之 pickle 标准库.md) ：pickle标准库学习
 
- [2.6-`sqlite3` 标准库详解.md](python_stdlib_learning\word\2.6-`sqlite3` 标准库详解.md) ：sqlite3标准库学习
+[2.6-`sqlite3` 标准库详解.md](python_stdlib_learning\word\2.6-`sqlite3` 标准库详解.md) ：sqlite3标准库学习
 
- [2.7-`collections`标准库详解.md](python_stdlib_learning\word\2.7-`collections`标准库详解.md) ：collections标准库学习
+[2.7-`collections`标准库详解.md](python_stdlib_learning\word\2.7-`collections`标准库详解.md) ：collections标准库学习
 
- [2.8-`itertools`标准库详解.md](python_stdlib_learning\word\2.8-`itertools`标准库详解.md) ：itertools标准库学习
+[2.8-`itertools`标准库详解.md](python_stdlib_learning\word\2.8-`itertools`标准库详解.md) ：itertools标准库学习
 
- [3.1-Bilibili Python：`sys`标准库详解.md](python_stdlib_learning\word\3.1-Bilibili Python：`sys`标准库详解.md) ：sys标准库学习
+[3.1-Bilibili Python：`sys`标准库详解.md](python_stdlib_learning\word\3.1-Bilibili Python：`sys`标准库详解.md) ：sys标准库学习
 
- [3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md](python_stdlib_learning\word\3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md) ：subprocess标准库学习
+[3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md](python_stdlib_learning\word\3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md) ：subprocess标准库学习
+
+[3.3-B站 Python 课程：argparse 标准库解析.md](python_stdlib_learning\word\3.3-B站 Python 课程：argparse 标准库解析.md) ：argparse标准库学习
+
+[3.4-Python `logging` 标准库实战教学文档.md](python_stdlib_learning\word\3.4-Python `logging` 标准库实战教学文档.md) ：logging标准库学习
+
+[3.5-Python `platform` 标准库 B 站教学文档.md](python_stdlib_learning\word\3.5-Python `platform` 标准库 B 站教学文档.md) ：platform标准库学习
+
+[4.1-Python `re` 标准库教学：从基础到进阶.md](python_stdlib_learning\word\4.1-Python `re` 标准库教学：从基础到进阶.md) ：re标准库学习
+
+[4.2-Pythonstring标准库教学：从基础到实战.md](python_stdlib_learning\word\4.2-Pythonstring标准库教学：从基础到实战.md) ：string标准库学习
+
+[4.3-Python `difflib` 标准库教学：从基础到进阶.md](python_stdlib_learning\word\4.3-Python `difflib` 标准库教学：从基础到进阶.md) ：difflib标准库学习
+
+[4.4-Python `textwrap` 标准库教学：从基础到进阶.md](python_stdlib_learning\word\4.4-Python `textwrap` 标准库教学：从基础到进阶.md) ：textwrap标准库学习
