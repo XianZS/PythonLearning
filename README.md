@@ -2,6 +2,10 @@
 
 > A comprehensive Python learning repository! Hello !
 
+> 教学视频：（teaching video）
+>
+> https://space.bilibili.com/3690991649294439/lists/7284550
+
 ## 一、Python基础学习部分
 
 | 模块顺序                           | 核心讲解内容                                                 |
