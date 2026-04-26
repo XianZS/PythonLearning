@@ -103,10 +103,10 @@
 | __数据处理与格式__ | `json`, `xml`, `csv`, `configparser`, `pickle`, `sqlite3`, `collections`, `itertools` | 处理JSON/XML/CSV数据、解析配置文件、序列化对象、操作SQLite数据库，及提供高效容器/迭代器工具。 |
 | __系统交互与进程__ | `sys`, `subprocess`, `argparse`, `logging`, `platform`       | 访问命令行参数、启动子进程、记录日志、获取系统信息，及与Python解释器交互。 |
 | __文本处理__       | `re`, `string`, `difflib`, `textwrap`                        | 正则表达式匹配、字符串操作、文本差异对比、自动换行/填充等文本处理功能。 |
-| __网络通信__       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
 | __日期与时间__     | `datetime`, `time`, `calendar`                               | 处理日期、时间、日历，支持时间计算、格式化输出及时区转换。   |
 | __数学与科学计算__ | `math`, `cmath`, `random`, `statistics`, `fractions`, `decimal` | 提供数学函数、复数运算、随机数生成、统计计算，及高精度分数/小数运算。 |
 | __并发与异步__     | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | 实现多线程、多进程、线程池/进程池，及异步IO编程，支持任务队列与并发控制。 |
+| __网络通信__       | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | 实现底层网络通信、HTTP请求、FTP文件传输、邮件发送等网络协议功能。 |
 | __调试与测试__     | `pdb`, `unittest`, `doctest`, `traceback`                    | 代码调试、单元测试、文档测试，及异常堆栈信息获取，助力开发与测试流程。 |
 | __加密与安全__     | `hashlib`, `hmac`, `secrets`, `ssl`                          | 提供哈希算法、消息认证码、安全随机数生成，及SSL/TLS加密通信支持。 |
 
