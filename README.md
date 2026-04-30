@@ -6,6 +6,8 @@
 >
 > https://space.bilibili.com/3690991649294439/lists/7284550
 
+[![Star History Chart](https://api.star-history.com/chart?repos=XianZS/PythonLearning&type=date&legend=top-left)](https://www.star-history.com/?repos=XianZS%2FPythonLearning&type=date&legend=top-left)
+
 ## 一、Python基础学习部分
 
 | 模块顺序                           | 核心讲解内容                                                 |
