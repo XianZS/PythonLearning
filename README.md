@@ -42,14 +42,14 @@
 
 ### 学习文档
 
-- [1_Python_数据类型分类详解.md](python_basic_learning\word\1_Python 数据类型分类详解.md)
-- [2_Python_运算符核心类型及使用规则详解.md](python_basic_learning\word\2_Python 运算符核心类型及使用规则详解.md)
-- [3_Python_流程控制语句及其应用详解.md](python_basic_learning\word\3_Python 流程控制语句及其应用详解.md)
-- [4_Python_函数基础：掌握代码复用的关键.md](python_basic_learning\word\4_Python 函数基础：掌握代码复用的关键.md)
-- [5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md](python_basic_learning\word\5_Python 四大核心数据结构整合示例：从基础用法到综合应用.md)
-- [6_Python_文件操作：从基础到进阶的分步讲解.md](python_basic_learning\word\6_Python 文件操作：从基础到进阶的分步讲解.md)
-- [7_Python_异常处理：从基础认知到最佳实践.md](python_basic_learning\word\7_Python 异常处理：从基础认知到最佳实践.md)
-- [8_Python_模块与包：从浅入深的模块化讲解.md](python_basic_learning\word\8_Python 模块与包：从浅入深的模块化讲解.md)
+- [1_Python_数据类型分类详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/1_Python 数据类型分类详解.md)
+- [2_Python_运算符核心类型及使用规则详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/2_Python 运算符核心类型及使用规则详解.md)
+- [3_Python_流程控制语句及其应用详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/3_Python 流程控制语句及其应用详解.md)
+- [4_Python_函数基础：掌握代码复用的关键.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/4_Python 函数基础：掌握代码复用的关键.md)
+- [5_Python_四大核心数据结构整合示例：从基础用法到综合应用.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/5_Python 四大核心数据结构整合示例：从基础用法到综合应用.md)
+- [6_Python_文件操作：从基础到进阶的分步讲解.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/6_Python 文件操作：从基础到进阶的分步讲解.md)
+- [7_Python_异常处理：从基础认知到最佳实践.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/7_Python 异常处理：从基础认知到最佳实践.md)
+- [8_Python_模块与包：从浅入深的模块化讲解.md](https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word/8_Python 模块与包：从浅入深的模块化讲解.md)
 
 ## 二、Python进阶学习部分
 
@@ -83,19 +83,19 @@
 
 ### 学习文档
 
-[1_Python_高级数据结构之 collections 模块详解.md](python_advance_learning\word\1_Python 高级数据结构之 collections 模块详解.md)
+[1_Python_高级数据结构之 collections 模块详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/1_Python 高级数据结构之 collections 模块详解.md)
 
-[2_Python_函数进阶：深入剖析迭代器与生成器.md](python_advance_learning\word\2_Python 函数进阶：深入剖析迭代器与生成器.md)
+[2_Python_函数进阶：深入剖析迭代器与生成器.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/2_Python 函数进阶：深入剖析迭代器与生成器.md)
 
-[3_Python 面向对象编程核心模块详解.md](python_advance_learning\word\3_Python 面向对象编程核心模块详解.md)
+[3_Python 面向对象编程核心模块详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/3_Python 面向对象编程核心模块详解.md)
 
-[4_Python 工程化开发：模块化与包管理（进阶内容）.md](python_advance_learning\word\4_Python 工程化开发：模块化与包管理（进阶内容）.md)
+[4_Python 工程化开发：模块化与包管理（进阶内容）.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/4_Python 工程化开发：模块化与包管理（进阶内容）.md)
 
-[5_Python 数据处理：字符串与日期时间模块详解.md](python_advance_learning\word\5_Python 数据处理：字符串与日期时间模块详解.md)
+[5_Python 数据处理：字符串与日期时间模块详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/5_Python 数据处理：字符串与日期时间模块详解.md)
 
-[6_Python 进阶：网络编程基础全面解析.md](python_advance_learning\word\6_Python 进阶：网络编程基础全面解析.md)
+[6_Python 进阶：网络编程基础全面解析.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/6_Python 进阶：网络编程基础全面解析.md)
 
-[7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](python_advance_learning\word\7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md)
+[7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md](https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word/7_Python 进阶数据库编程：从核心基础到 SQLite 实战.md)
 
 ## 三、Python标准库学习部分
 
@@ -114,44 +114,44 @@
 
 ### 学习文档
 
-[1.1-os标准库.md](python_stdlib_learning\word\1.1-os标准库.md) ：OS标准库学习
+[1.1-os标准库.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/1.1-os标准库.md) ：OS标准库学习
 
-[1.2-shutil 高级文件操作详解.md](python_stdlib_learning\word\1.2-shutil 高级文件操作详解.md) ：ShUtil标准库学习
+[1.2-shutil 高级文件操作详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/1.2-shutil 高级文件操作详解.md) ：ShUtil标准库学习
 
-[1.3-Pathlib 标准库——路径操作新革命.md](python_stdlib_learning\word\1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
+[1.3-Pathlib 标准库——路径操作新革命.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/1.3-Pathlib 标准库——路径操作新革命.md) ：pathlib标准库学习
 
-[1.4-tempfile标准库——临时文件_目录管理.md](python_stdlib_learning\word\1.4-tempfile标准库——临时文件_目录管理.md) ：tempfile标准库学习
+[1.4-tempfile标准库——临时文件_目录管理.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/1.4-tempfile标准库——临时文件_目录管理.md) ：tempfile标准库学习
 
-[2.1-JSON 标准库——跨语言数据交换的桥梁.md](python_stdlib_learning\word\2.1-JSON 标准库——跨语言数据交换的桥梁.md) ：JSON标准库学习
+[2.1-JSON 标准库——跨语言数据交换的桥梁.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.1-JSON 标准库——跨语言数据交换的桥梁.md) ：JSON标准库学习
 
-[2.2-XML 标准库——结构化数据处理利器.md](python_stdlib_learning\word\2.2-XML 标准库——结构化数据处理利器.md) ：XML标准库学习
+[2.2-XML 标准库——结构化数据处理利器.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.2-XML 标准库——结构化数据处理利器.md) ：XML标准库学习
 
-[2.3-`csv` 库在数据处理中的应用.md](python_stdlib_learning\word\2.3-`csv` 库在数据处理中的应用.md) ：csv标准库学习
+[2.3-`csv` 库在数据处理中的应用.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.3-`csv` 库在数据处理中的应用.md) ：csv标准库学习
 
-[2.4-configparser 标准库详解.md](python_stdlib_learning\word\2.4-configparser 标准库详解.md) ：configparser标准库学习
+[2.4-configparser 标准库详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.4-configparser 标准库详解.md) ：configparser标准库学习
 
-[2.5-B站 Python 课程之 pickle 标准库.md](python_stdlib_learning\word\2.5-B站 Python 课程之 pickle 标准库.md) ：pickle标准库学习
+[2.5-B站 Python 课程之 pickle 标准库.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.5-B站 Python 课程之 pickle 标准库.md) ：pickle标准库学习
 
-[2.6-`sqlite3` 标准库详解.md](python_stdlib_learning\word\2.6-`sqlite3` 标准库详解.md) ：sqlite3标准库学习
+[2.6-`sqlite3` 标准库详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.6-`sqlite3` 标准库详解.md) ：sqlite3标准库学习
 
-[2.7-`collections`标准库详解.md](python_stdlib_learning\word\2.7-`collections`标准库详解.md) ：collections标准库学习
+[2.7-`collections`标准库详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.7-`collections`标准库详解.md) ：collections标准库学习
 
-[2.8-`itertools`标准库详解.md](python_stdlib_learning\word\2.8-`itertools`标准库详解.md) ：itertools标准库学习
+[2.8-`itertools`标准库详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/2.8-`itertools`标准库详解.md) ：itertools标准库学习
 
-[3.1-Bilibili Python：`sys`标准库详解.md](python_stdlib_learning\word\3.1-Bilibili Python：`sys`标准库详解.md) ：sys标准库学习
+[3.1-Bilibili Python：`sys`标准库详解.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/3.1-Bilibili Python：`sys`标准库详解.md) ：sys标准库学习
 
-[3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md](python_stdlib_learning\word\3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md) ：subprocess标准库学习
+[3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/3.2-Python 从 B 站：`subprocess` 标准库的深度解析.md) ：subprocess标准库学习
 
-[3.3-B站 Python 课程：argparse 标准库解析.md](python_stdlib_learning\word\3.3-B站 Python 课程：argparse 标准库解析.md) ：argparse标准库学习
+[3.3-B站 Python 课程：argparse 标准库解析.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/3.3-B站 Python 课程：argparse 标准库解析.md) ：argparse标准库学习
 
-[3.4-Python `logging` 标准库实战教学文档.md](python_stdlib_learning\word\3.4-Python `logging` 标准库实战教学文档.md) ：logging标准库学习
+[3.4-Python `logging` 标准库实战教学文档.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/3.4-Python `logging` 标准库实战教学文档.md) ：logging标准库学习
 
-[3.5-Python `platform` 标准库 B 站教学文档.md](python_stdlib_learning\word\3.5-Python `platform` 标准库 B 站教学文档.md) ：platform标准库学习
+[3.5-Python `platform` 标准库 B 站教学文档.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/3.5-Python `platform` 标准库 B 站教学文档.md) ：platform标准库学习
 
-[4.1-Python `re` 标准库教学：从基础到进阶.md](python_stdlib_learning\word\4.1-Python `re` 标准库教学：从基础到进阶.md) ：re标准库学习
+[4.1-Python `re` 标准库教学：从基础到进阶.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/4.1-Python `re` 标准库教学：从基础到进阶.md) ：re标准库学习
 
-[4.2-Pythonstring标准库教学：从基础到实战.md](python_stdlib_learning\word\4.2-Pythonstring标准库教学：从基础到实战.md) ：string标准库学习
+[4.2-Pythonstring标准库教学：从基础到实战.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/4.2-Pythonstring标准库教学：从基础到实战.md) ：string标准库学习
 
-[4.3-Python `difflib` 标准库教学：从基础到进阶.md](python_stdlib_learning\word\4.3-Python `difflib` 标准库教学：从基础到进阶.md) ：difflib标准库学习
+[4.3-Python `difflib` 标准库教学：从基础到进阶.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/4.3-Python `difflib` 标准库教学：从基础到进阶.md) ：difflib标准库学习
 
-[4.4-Python `textwrap` 标准库教学：从基础到进阶.md](python_stdlib_learning\word\4.4-Python `textwrap` 标准库教学：从基础到进阶.md) ：textwrap标准库学习
+[4.4-Python `textwrap` 标准库教学：从基础到进阶.md](https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word/4.4-Python `textwrap` 标准库教学：从基础到进阶.md) ：textwrap标准库学习
