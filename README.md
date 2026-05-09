@@ -42,7 +42,7 @@
 
 ### Learning Documents
 
-> //PythonLearning//python_basic_learning//word
+> https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word
 
 ## 2. Python Advanced Learning Section
 
@@ -76,7 +76,7 @@
 
 ### Learning Documents
 
-> //PythonLearning//python_advance_learning//word
+> https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word
 
 ## 3. Python Standard Library Learning Section
 
@@ -89,10 +89,10 @@
 | __Date and Time__    | `datetime`, `time`, `calendar`                               | Process dates, times, and calendars, supporting time calculation, formatted output, and time zone conversion. |
 | __Mathematics and Scientific Computing__ | `math`, `cmath`, `random`, `statistics`, `fractions`, `decimal` | Provide mathematical functions, complex number operations, random number generation, statistical calculations, and high-precision fraction/decimal operations. |
 | __Concurrency and Asynchrony__ | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | Implement multi-threading, multi-processing, thread pools/process pools, and asynchronous IO programming, supporting task queues and concurrency control. |
-| __Network Communication__ | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | Implement low-level network communication, HTTP requests, FTP file transfer, email sending and other network protocol functions. |
 | __Debugging and Testing__ | `pdb`, `unittest`, `doctest`, `traceback`                    | Code debugging, unit testing, document testing, and exception stack information acquisition, facilitating development and testing processes. |
+| __Network Communication__ | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | Implement low-level network communication, HTTP requests, FTP file transfer, email sending and other network protocol functions. |
 | __Encryption and Security__ | `hashlib`, `hmac`, `secrets`, `ssl`                          | Provide hash algorithms, message authentication codes, secure random number generation, and SSL/TLS encrypted communication support. |
 
 ### Learning Documents
 
-> //PythonLearning//python_stdlib_learning//word
+> https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word
