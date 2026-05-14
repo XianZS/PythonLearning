@@ -1,14 +1,72 @@
-# PythonLearning
+# PythonLearning-2026
+
+## ✨ Key highlights（关键亮点）
 
 > A comprehensive Python learning repository! Hello!
+>
+> 这是一个包含了“基础”、“进阶”、“标准库”和“实战”的`python`学习仓库
 
-> Teaching Videos:
+> Free Teaching Videos:（最新教学视频-完全免费）
 >
 > https://space.bilibili.com/3690991649294439/lists/7284550
 
-[![Star History Chart](https://api.star-history.com/chart?repos=XianZS/PythonLearning&type=date&legend=top-left)](https://www.star-history.com/?repos=XianZS%2FPythonLearning&type=date&legend=top-left)
+## 🚀 Get Started Quickly（快速上手）
 
-## 1. Python Basic Learning Section
+You need to make sure that the git tool has been installed on your computer.
+
+```
+## use git tool
+git clone https://github.com/XianZS/PythonLearning
+```
+
+## 💬 Feedback exchange（交流反馈）
+
+Welcome everyone's participation in the discussion. Thank you.（欢迎各位的交流，谢谢。）
+
+`Email`:`xianzhisen_yang@outlook.com`
+
+`QQ`:`3135989009`
+
+## 📂 Module Order / Complete Directory Structure（项目架构）
+
+```
+PythonLearning/
+├── Python Basic Learning Section/ [python 基础学习]
+│   ├── 1. Getting Started Guide (Icebreaker)
+│   ├── 2. Variables and Data Types
+│   ├── 3. Operators and Expressions
+│   ├── 4. Flow Control (Core Foundation)
+│   ├── 5. Function Basics
+│   ├── 6. Data Structures (List/Tuple/Dictionary/Set)
+│   ├── 7. File Operations
+│   ├── 8. Exception Handling
+│   └── 9. Basic Comprehensive Practical Project
+├── Python Advanced Learning Section/ [python 进阶学习]
+│   ├── 1. Advanced Functions
+│   ├── 2. Object-Oriented Programming (OOP)
+│   ├── 3. Modularization and Package Management
+│   ├── 4. Basic Data Processing (Connecting Standard Libraries/Third-Party Libraries)
+│   ├── 5. Basic Network Programming
+│   ├── 6. Database Programming
+│   ├── 7. Introduction to Concurrent Programming
+│   ├── 8. Advanced Comprehensive Practical Projects (2 Projects, Covering Multiple Modules)
+│   └── 9. Advanced Stage Review and Direction Guidance
+└── Python Standard Library Learning Section/ [python 标准库学习]
+    ├── 1. File and Directory Operations
+    ├── 2. Data Processing and Formats
+    ├── 3. System Interaction and Processes
+    ├── 4. Text Processing
+    ├── 5. Date and Time
+    ├── 6. Mathematics and Scientific Computing
+    ├── 7. Concurrency and Asynchrony
+    ├── 8. Debugging and Testing
+    ├── 9. Network Communication
+    └── 10. Encryption and Security
+```
+
+## 📖 document description（学习文档详细描述）
+
+### 1.1 Python Basic Learning Section
 
 | Module Order                         | Core Content                                                 |
 | ------------------------------------ | ------------------------------------------------------------ |
@@ -22,29 +80,15 @@
 | 8. Exception Handling                | ① Concept of Exceptions (try-except-finally);<br />② Common Exceptions (ValueError/TypeError/FileNotFoundError, etc.);<br />③ Custom Exceptions (simple case);<br />④ Practical Exercise: Optimize the Number Guessing Game/Calculator (add exception capture to avoid crashes) |
 | 9. Basic Comprehensive Practical Project | ① Project: Simple Address Book (implement addition/deletion/modification/query + file saving);<br />② Code Review: Sort out core knowledge points + common errors;<br />③ Assignment: Optimize the address book (add search function) |
 
-### Code Files
+### 1.2 Code Files
 
-[1_Variables_and_Data_Types.py](python_basic_learning/1_Variables_and_Data_Types.py): Variables and Data Types
+> https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning
 
-[2_Operators_and_Expressions.py](python_basic_learning/2_Operators_and_Expressions.py): Operators and Expressions
-
-[3_process_control.py](python_basic_learning/3_process_control.py): Flow Control
-
-[4_Function_Basics.py](python_basic_learning/4_Function_Basics.py): Function Basics
-
-[5_container_structure.py](python_basic_learning/5_container_structure.py): Container Structures
-
-[6_file_operate.py](python_basic_learning/6_file_operate.py): File Operations
-
-[7_try_except.py](python_basic_learning/7_try_except.py): Exception Handling
-
-[8_module.py](python_basic_learning/8_module.py): Modules
-
-### Learning Documents
+### 1.3 Learning Documents
 
 > https://github.com/XianZS/PythonLearning/tree/main/python_basic_learning/word
 
-## 2. Python Advanced Learning Section
+### 2.1 Python Advanced Learning Section
 
 | Module Order                         | Core Content                                                 |
 | ------------------------------------ | ------------------------------------------------------------ |
@@ -58,27 +102,15 @@
 | 8. Advanced Comprehensive Practical Projects (2 Projects, Covering Multiple Modules) | ① Project 1: Simple Web Crawler + Data Visualization (crawl commodity prices from a platform, plot with matplotlib, covering network requests, data processing, visualization);<br />② Project 2: Student Score Management System (upgraded version, covering OOP, database, modularization, exception handling);<br />③ Each project is divided into 3 videos: "Requirements Analysis → Code Implementation → Optimization Review" |
 | 9. Advanced Stage Review and Direction Guidance | ① Core Knowledge Point Sorting (mind map format);<br />② Summary of Common Errors and Solutions;<br />③ Follow-up Direction Guidance (data analysis/web crawling/automation/backend development) |
 
-### Code Files
+### 2.2 Code Files
 
-[1_super_struct.py](python_advance_learning/1_super_struct.py): Advanced Data Structures
+> https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning
 
-[2_advance_function.py](python_advance_learning/2_advance_function.py): Advanced Functions
-
-[3_oop_code](python_advance_learning\3_oop_code): Core Content of Object-Oriented Programming Module
-
-[4_module_use](python_advance_learning\4_module_use): Modular Engineering Development
-
-[5_data_processing](python_advance_learning\5_data_processing): Data Processing
-
-[6_web_code](python_advance_learning\6_web_code): Network Programming Section
-
-[7_sql_code](python_advance_learning\7_sql_code): Advanced Database Programming
-
-### Learning Documents
+### 2.3 Learning Documents
 
 > https://github.com/XianZS/PythonLearning/tree/main/python_advance_learning/word
 
-## 3. Python Standard Library Learning Section
+### 3.1 Python Standard Library Learning Section
 
 | Usage Scenario      | Standard Library Modules                                     | Main Usage Description                                       |
 | ------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -93,6 +125,14 @@
 | __Network Communication__ | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | Implement low-level network communication, HTTP requests, FTP file transfer, email sending and other network protocol functions. |
 | __Encryption and Security__ | `hashlib`, `hmac`, `secrets`, `ssl`                          | Provide hash algorithms, message authentication codes, secure random number generation, and SSL/TLS encrypted communication support. |
 
-### Learning Documents
+### 3.2 Code Files
+
+> https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning
+
+### 3.3 Learning Documents
 
 > https://github.com/XianZS/PythonLearning/tree/main/python_stdlib_learning/word
+
+## 📅 Project Star Icon（项目星标）
+
+[![Star History Chart](https://api.star-history.com/chart?repos=XianZS/PythonLearning&type=date&legend=top-left)](https://www.star-history.com/?repos=XianZS%2FPythonLearning&type=date&legend=top-left)
