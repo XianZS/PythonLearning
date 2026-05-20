@@ -1,24 +1,27 @@
-# 进阶-1：多客户端TCP服务器
 import socket
 import threading
+
+# 进阶-1：多客户端TCP服务器
 
 
 def handle_client(client_sock, client_addr):
     """
     处理单个客户端的通信
     """
-    print(f"新客户端链接:{client_addr}")
+    print(f"新客户端的连接通信:{client_addr}")
     try:
         while True:
             data = client_sock.recv(1024)
             if not data:
+                # 客户端主动关闭连接
                 break
-            print(f"[客户端——>服务端]:{data.decode('utf-8')}")
-            client_sock.send("服务端响应的数据".encode("utf-8"))
-
+            print(f"来自{client_addr}接收到的数据为:{data.decode('utf-8')}")
+            # 数据回显
+            client_sock.send("服务端已经成功接收到你的数据，请保持持续连接")
     except Exception as e:
         print(f"[Error]:{e}")
     finally:
+        print(f"已经关闭来自:{client_addr}的连接")
         client_sock.close()
 
 
@@ -27,18 +30,18 @@ def main():
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_sock.bind(("0.0.0.0", 12345))
     server_sock.listen(10)
-    print("多线程TCP服务器已经启动")
+    print("多线程服务器已经成功启动")
     try:
         while True:
             client_sock, client_addr = server_sock.accept()
-            # 创建新线程来处理客户端
+            # 创建新线程处理当前的客户端
             thread = threading.Thread(
                 target=handle_client, args=(client_sock, client_addr)
             )
             thread.daemon = True
             thread.start()
     except KeyboardInterrupt:
-        print("手动中止 ...")
+        print("成功手动终止TCP服务器")
     finally:
         server_sock.close()
 
