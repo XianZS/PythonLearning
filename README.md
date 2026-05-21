@@ -15,8 +15,17 @@
 You need to make sure that the git tool has been installed on your computer.
 
 ```
-## use git tool
+## 1.use git tool
 git clone https://github.com/XianZS/PythonLearning
+## 2.Configuration Environment (either-or)
+cd PythonLearning
+### 2.1 if you use conda
+conda env create -f environment.yml
+### 2.2 if you use pip
+pip install -r requirements.txt
+## 3.Export environment
+conda env export > environment.yml
+pip freeze > requirements.txt
 ```
 
 ## 💬 Feedback exchange（交流反馈）
