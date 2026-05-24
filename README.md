@@ -132,7 +132,7 @@ PythonLearning/
 | __Concurrency and Asynchrony__ | `threading`, `multiprocessing`, `concurrent.futures`, `asyncio`, `queue` | Implement multi-threading, multi-processing, thread pools/process pools, and asynchronous IO programming, supporting task queues and concurrency control. |
 | __Debugging and Testing__ | `pdb`, `unittest`, `doctest`, `traceback`                    | Code debugging, unit testing, document testing, and exception stack information acquisition, facilitating development and testing processes. |
 | __Network Communication__ | `socket`, `urllib`, `http`, `ftplib`, `smtplib`              | Implement low-level network communication, HTTP requests, FTP file transfer, email sending and other network protocol functions. |
-| __Encryption and Security__ | `hashlib`, `hmac`, `secrets`, `ssl`                          | Provide hash algorithms, message authentication codes, secure random number generation, and SSL/TLS encrypted communication support. |
+| __Encryption and Security__ | `hashlib`, `hmac`, `secrets`                          | Provide hash algorithms, message authentication codes, secure random number generation, and SSL/TLS encrypted communication support. |
 
 ### 3.2 Code Files
 
