@@ -7,9 +7,9 @@ from email.mime.application import MIMEApplication
 from ssl import enum_certificates
 
 # 配置信息
-sender_email = "3135989009@qq.com"
+sender_email = "your_send_email"
 sender_password = "qegpizcjxcckdebe"
-recv_email = "xianzhisen_yang@outlook.com"
+recv_email = "your_recv_email"
 smtp_server = "smtp.qq.com"
 smtp_port = 465
 attach_path = "./email_html.html"

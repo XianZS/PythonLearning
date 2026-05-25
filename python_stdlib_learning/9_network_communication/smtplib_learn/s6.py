@@ -12,10 +12,10 @@ from smtplib import (
 )
 
 # 配置信息
-sender_email = "3135989009@qq.com"
+sender_email = "your_send_email"
 # sender_password = "qegpizcjxcckdebe"
 sender_password = "qegpizcjxcckdadw"
-recv_email = "xianzhisen_yang@outlook.com"
+recv_email = "your_recv_email"
 smtp_server = "smtp.qq.com"
 smtp_port = 465
 max_retres = 3

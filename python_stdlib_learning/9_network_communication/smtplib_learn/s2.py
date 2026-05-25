@@ -3,11 +3,11 @@ import smtplib
 from email.mime.text import MIMEText
 
 # 配置信息
-sender_email = "3135989009@qq.com"
+sender_email = "your_send_email"
 sender_password = "qegpizcjxcckdebe"
-to_email = "3135989009@qq.com"
-cc_email = "xianzhisen_yang@outlook.com"
-bcc_email = "xianzhisen3135@gmail.com"
+to_email = "your_send_email"
+cc_email = "your_recv_email"
+bcc_email = "other_your_recv_email"
 smtp_server = "smtp.qq.com"
 smtp_port = 465
 

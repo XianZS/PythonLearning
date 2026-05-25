@@ -5,9 +5,9 @@ from email.mime.text import MIMEText
 from typing import final
 
 # 配置信息
-sender_email = "3135989009@qq.com"
+sender_email = "your_send_email"
 sender_password = "qegpizcjxcckdebe"
-recv_email = "xianzhisen_yang@outlook.com"
+recv_email = "your_recv_email"
 smtp_server = "smtp.qq.com"
 smtp_port = 587
 
