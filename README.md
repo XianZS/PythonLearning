@@ -9,6 +9,8 @@
 > Free Teaching Videos:（最新教学视频-完全免费）
 >
 > https://space.bilibili.com/3690991649294439/lists/7284550
+>
+> https://xianzs.github.io/
 
 ## 🚀 Get Started Quickly（快速上手）
 
