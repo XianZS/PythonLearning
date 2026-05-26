@@ -2,7 +2,7 @@
 
 ## ✨ Key highlights（关键亮点）
 
-> A comprehensive Python learning repository! Hello!
+> A comprehensive Python learning repository! Welcome!
 >
 > 这是一个包含了“基础”、“进阶”、“标准库”和“实战”的`python`学习仓库
 
