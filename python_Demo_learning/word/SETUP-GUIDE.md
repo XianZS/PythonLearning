@@ -580,6 +580,18 @@ hugo --minify
 
 构建完成后，静态网站在 `public/` 目录下。把这个目录的内容推送到 `gh-pages` 分支即可。
 
+### 10.3-new：后几次提交
+
+```bash
+hugo --minify
+cd public
+git add --all
+git commit -m "首次部署"
+git push -f origin gh-pages
+
+cd ..
+```
+
 ### 10.3 推送到 gh-pages 分支
 
 **首次部署（二选一）**：
