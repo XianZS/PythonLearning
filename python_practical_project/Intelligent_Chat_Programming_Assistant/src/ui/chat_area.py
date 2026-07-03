@@ -3,6 +3,8 @@
 import streamlit as st
 from typing import Optional
 
+from ..chat_manager import get_all_messages
+
 
 def render_message(role: str, content: str, reasoning_content: Optional[str] = None) -> None:
     """渲染单条消息气泡
@@ -29,8 +31,6 @@ def render_message(role: str, content: str, reasoning_content: Optional[str] = N
 
 def render_all_messages() -> None:
     """渲染所有历史消息"""
-    from ..chat_manager import get_all_messages
-
     messages = get_all_messages()
     for msg in messages:
         role = msg.get("role", "user")

@@ -1,13 +1,25 @@
-"""会话管理：处理多轮对话历史、思维链内容裁剪、上下文限制"""
+"""会话管理：处理多轮对话历史、思维链内容裁剪、上下文限制
+
+本模块封装了 Streamlit session_state 的所有读写操作，
+让上层调用方无需直接操作 session_state 原始数据结构。
+
+教学要点：
+- 如何使用 st.session_state 在 Streamlit 无状态 rerun 循环中持久化数据
+- 多轮对话的数据结构设计（role / content / reasoning_content）
+- 发送 API 前如何处理历史消息（裁剪 reasoning_content 防止 400 错误）
+- 如何使用字符数粗略估算 token 数量
+"""
 
 from typing import Optional
+import streamlit as st
+
+from .config import CHARS_PER_TOKEN, TOKEN_WARNING_THRESHOLD
 
 
 # ---- 消息初始化 ----
 
 def init_messages() -> None:
     """初始化消息列表（如果不存在）"""
-    import streamlit as st
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -16,7 +28,6 @@ def init_messages() -> None:
 
 def add_user_message(text: str) -> None:
     """添加用户消息到对话历史"""
-    import streamlit as st
     init_messages()
     st.session_state.messages.append({
         "role": "user",
@@ -31,7 +42,6 @@ def add_assistant_message(content: str, reasoning_content: Optional[str] = None)
         content: 助手的回复文本
         reasoning_content: 思维链推理内容（如有），仅用于本地展示
     """
-    import streamlit as st
     init_messages()
     st.session_state.messages.append({
         "role": "assistant",
@@ -42,20 +52,18 @@ def add_assistant_message(content: str, reasoning_content: Optional[str] = None)
 
 def clear_history() -> None:
     """清空所有对话历史"""
-    import streamlit as st
+    init_messages()
     st.session_state.messages = []
 
 
 def get_message_count() -> int:
     """获取当前消息总数"""
-    import streamlit as st
     init_messages()
     return len(st.session_state.messages)
 
 
 def get_all_messages() -> list[dict]:
     """获取所有消息"""
-    import streamlit as st
     init_messages()
     return st.session_state.messages
 
@@ -71,7 +79,6 @@ def build_api_messages() -> list[dict[str, str]]:
     由于我们只在接收完整个回复后才将消息持久化到 session_state，
     所以所有历史消息中的 reasoning_content 都应该被裁剪。
     """
-    import streamlit as st
     init_messages()
 
     api_messages = []
@@ -95,7 +102,6 @@ def estimate_token_count() -> int:
     - 英文字符 ~4 char/token
     - 取保守值 2 char/token
     """
-    import streamlit as st
     init_messages()
 
     total_chars = 0
@@ -105,11 +111,9 @@ def estimate_token_count() -> int:
         if msg.get("reasoning_content"):
             total_chars += len(msg["reasoning_content"])
 
-    from .config import CHARS_PER_TOKEN
     return total_chars // CHARS_PER_TOKEN
 
 
 def should_warn_token_limit() -> bool:
     """判断是否应该发出 token 限制警告"""
-    from .config import TOKEN_WARNING_THRESHOLD
     return estimate_token_count() >= TOKEN_WARNING_THRESHOLD
