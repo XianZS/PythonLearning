@@ -24,14 +24,14 @@ st.set_page_config(
 
 from src.ui.utils import inject_custom_css
 from src.ui.sidebar import render as render_sidebar
-from src.ui.chat_area import render_all_messages, render_welcome
+from src.ui.chat_area import render_all_message, render_welcome, render_message
 from src.config import get_api_key, validate_config
 from src.chat_manager import (
-    init_messages,
+    init_message,
     add_user_message,
     add_assistant_message,
     get_message_count,
-    build_api_messages,
+    build_api_message,
 )
 from src.stream_handler import process_stream
 
@@ -40,7 +40,7 @@ def main() -> None:
     """主程序入口：编排应用生命周期"""
 
     inject_custom_css()
-    init_messages()
+    init_message()
 
     # ---- 侧边栏 ----
     settings = render_sidebar()
@@ -52,7 +52,7 @@ def main() -> None:
     if get_message_count() == 0:
         render_welcome()
     else:
-        render_all_messages()
+        render_all_message()
 
     # ---- 聊天输入 ----
     chat_disabled = not valid
@@ -61,13 +61,12 @@ def main() -> None:
         "输入你的问题..." if not chat_disabled else "请先在侧边栏配置 API 密钥",
         disabled=chat_disabled,
     ):
-        # 1. 记录用户消息
+        # 1. 记录 + 渲染用户消息
         add_user_message(prompt)
-        with st.chat_message("user", avatar="🧑‍💻"):
-            st.markdown(prompt)
+        render_message("user", prompt)
 
         # 2. 构建 API 消息（不含历史 reasoning_content）
-        api_messages = build_api_messages()
+        api_message = build_api_message()
 
         # 3. 流式处理 LLM 响应
         with st.chat_message("assistant", avatar="🤖"):
@@ -76,7 +75,7 @@ def main() -> None:
 
             reasoning_text, content_text, _ = process_stream(
                 api_key=api_key,
-                api_messages=api_messages,
+                api_message=api_message,
                 settings=settings,
                 reasoning_placeholder=reasoning_placeholder,
                 content_placeholder=content_placeholder,

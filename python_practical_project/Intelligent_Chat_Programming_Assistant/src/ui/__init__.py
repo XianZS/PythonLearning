@@ -10,11 +10,11 @@
 
 from .utils import inject_custom_css
 from .sidebar import render as render_sidebar
-from .chat_area import render_all_messages, render_welcome
+from .chat_area import render_all_message, render_welcome
 
 __all__ = [
     "inject_custom_css",
     "render_sidebar",
-    "render_all_messages",
+    "render_all_message",
     "render_welcome",
 ]

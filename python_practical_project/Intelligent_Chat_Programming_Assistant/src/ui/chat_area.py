@@ -3,7 +3,7 @@
 import streamlit as st
 from typing import Optional
 
-from ..chat_manager import get_all_messages
+from ..chat_manager import get_all_message
 
 
 def render_message(role: str, content: str, reasoning_content: Optional[str] = None) -> None:
@@ -29,10 +29,10 @@ def render_message(role: str, content: str, reasoning_content: Optional[str] = N
         st.markdown(content)
 
 
-def render_all_messages() -> None:
-    """渲染所有历史消息"""
-    messages = get_all_messages()
-    for msg in messages:
+def render_all_message() -> None:
+    """渲染全部历史消息"""
+    message = get_all_message()
+    for msg in message:
         role = msg.get("role", "user")
         content = msg.get("content", "")
         reasoning = msg.get("reasoning_content")

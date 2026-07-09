@@ -13,7 +13,7 @@ def _create_client(api_key: str) -> OpenAI:
 
 def chat_stream(
     api_key: str,
-    messages: list[dict[str, str]],
+    message: list[dict[str, str]],
     model: str = MODEL_FLASH,
     temperature: float = 0.7,
     max_tokens: int = 4096,
@@ -23,7 +23,7 @@ def chat_stream(
 
     Args:
         api_key: DeepSeek API 密钥
-        messages: 对话消息列表 [{"role": "user"/"assistant", "content": "..."}]
+        message: 对话消息列表，格式 [{"role": "user"/"assistant", "content": "..."}]
         model: 模型标识 (deepseek-v4-flash / deepseek-v4-pro)
         temperature: 采样温度 (0.0 ~ 2.0)，对话模式有效，思维链模式被忽略
         max_tokens: 最大输出 token 数
@@ -41,7 +41,7 @@ def chat_stream(
         # 构建 API 请求参数
         kwargs: dict = {
             "model": model,
-            "messages": messages,
+            "messages": message,
             "stream": True,
             "max_tokens": max_tokens,
         }

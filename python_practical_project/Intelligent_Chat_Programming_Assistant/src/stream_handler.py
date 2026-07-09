@@ -34,7 +34,7 @@ def _render_reasoning_html(text: str, *, streaming: bool) -> str:
 
 def process_stream(
     api_key: str,
-    api_messages: list[dict[str, str]],
+    api_message: list[dict[str, str]],
     settings: dict,
     reasoning_placeholder,
     content_placeholder,
@@ -46,7 +46,7 @@ def process_stream(
 
     Args:
         api_key: DeepSeek API 密钥
-        api_messages: 发送给 API 的消息列表（不含 reasoning_content）
+        api_message: 发送给 API 的消息列表（不含 reasoning_content）
         settings: 用户设置字典，包含 model / temperature / max_tokens / enable_thinking
         reasoning_placeholder: 思维链展示区的 st.empty() 占位符
         content_placeholder: 回复内容的 st.empty() 占位符
@@ -63,7 +63,7 @@ def process_stream(
 
     for chunk in chat_stream(
         api_key=api_key,
-        messages=api_messages,
+        message=api_message,
         model=settings["model"],
         temperature=settings["temperature"],
         max_tokens=settings["max_tokens"],

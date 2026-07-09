@@ -18,13 +18,13 @@ from .config import (
 )
 from .deepseek_client import chat_stream
 from .chat_manager import (
-    init_messages,
+    init_message,
     add_user_message,
     add_assistant_message,
     clear_history,
     get_message_count,
-    get_all_messages,
-    build_api_messages,
+    get_all_message,
+    build_api_message,
     estimate_token_count,
     should_warn_token_limit,
 )
@@ -40,13 +40,13 @@ __all__ = [
     # deepseek_client
     "chat_stream",
     # chat_manager
-    "init_messages",
+    "init_message",
     "add_user_message",
     "add_assistant_message",
     "clear_history",
     "get_message_count",
-    "get_all_messages",
-    "build_api_messages",
+    "get_all_message",
+    "build_api_message",
     "estimate_token_count",
     "should_warn_token_limit",
     # stream_handler
