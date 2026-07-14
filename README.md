@@ -4,13 +4,22 @@
 
 > A comprehensive Python learning repository! Welcome!
 >
-> 这是一个包含了“基础”、“进阶”、“标准库”和“实战”的`python`学习仓库
+> 这是一个包含了“基础”、“进阶”、“标准库”、“实战”和“八股文”的`python`学习仓库
 
 > Free Teaching Videos:（最新教学视频-完全免费）
 >
 > https://space.bilibili.com/3690991649294439/lists/7284550
 >
 > https://xianzs.github.io/
+
+## 🧪 学习路线
+
+- 1.<font color="red">（必选-已完成更新）</font>`Python基础学习`：`./python_basic_learning/`
+- 2.<font color="red">（必选-已完成更新）</font>`Python进阶学习`：`./python_advance_learning/`
+- 3.<font color="red">（必选-已完成更新）</font>`Python标准库学习`：`./python_stdlib_learning/`
+- 4.<font color="red">（可选-正在更新）</font>`Python小Demo实现`：`./python_demo_learning/`
+- 5.<font color="red">（必选-正在更新）</font>`Python项目-RAG`：`./python_practical_project/`
+- 6.<font color="red">（必选-正在更新）</font>`Python八股文`：`./python_common_interview_questions_and_answers/`
 
 ## 🚀 Get Started Quickly（快速上手）
 
