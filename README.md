@@ -4,7 +4,7 @@
 
 > A comprehensive Python learning repository! Welcome!
 >
-> 这是一个包含了“基础”、“进阶”、“标准库”、“实战”和“八股文”的`python`学习仓库
+> 这是一个包含了“基础”、“进阶”、“标准库”、“实战”和“八股文”的`python`学习仓库。
 
 > Free Teaching Videos:（最新教学视频-完全免费）
 >
