@@ -155,4 +155,6 @@ PythonLearning/
 
 ## 📅 Project Star Icon（项目星标）
 
-[![Star History Chart](https://api.star-history.com/chart?repos=XianZS/PythonLearning&type=date&legend=top-left)](https://www.star-history.com/?repos=XianZS%2FPythonLearning&type=date&legend=top-left)
+[star-history](https://www.star-history.com/?repos=XianZS%2FPythonLearning&type=date&legend=top-left)
+
+![star-history](assets/2026-08-27-17-49-58.png)
