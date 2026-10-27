@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="types --- 动态类型创建和内置类型名称" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/types.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/types.py 此模块定义了一些工具函数，用于协助动态创建新的类型。 它还为某些对象类型定义了名称，这些名称由标准 Python 解释器所使用，但并不像内置的 int 或 str 那样对外公开。 最后，它还额外提供了一些类型相关但重要程度不足以作为内置对象的工具类和函数。 动态类型创建: 标准解释器类型: 此模块为许多类型提供了实现 Python 解释器所要求的名称。 它..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_types_7f4f2f03.png" />
+<meta property="og:image:alt" content="源代码: Lib/types.py 此模块定义了一些工具函数，用于协助动态创建新的类型。 它还为某些对象类型定义了名称，这些名称由标准 Python 解释器所使用，但并不像内置的 int 或 str 那样对外公开。 最后，它还额外提供了一些类型相关但重要程度不足以作为内置对象的工具类和函数。 动态类型创建: 标准解释器类型: 此模块为许多类型提供了实现 Python 解释器所要求的名称。 它..." />
+<meta name="description" content="源代码: Lib/types.py 此模块定义了一些工具函数，用于协助动态创建新的类型。 它还为某些对象类型定义了名称，这些名称由标准 Python 解释器所使用，但并不像内置的 int 或 str 那样对外公开。 最后，它还额外提供了一些类型相关但重要程度不足以作为内置对象的工具类和函数。 动态类型创建: 标准解释器类型: 此模块为许多类型提供了实现 Python 解释器所要求的名称。 它..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>types --- 动态类型创建和内置类型名称 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="copy --- 浅层及深层拷贝操作" href="copy.html" />
+    <link rel="prev" title="weakref --- 弱引用" href="weakref.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/types.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">types</span></code> --- 动态类型创建和内置类型名称</a><ul>
+<li><a class="reference internal" href="#dynamic-type-creation">动态类型创建</a></li>
+<li><a class="reference internal" href="#standard-interpreter-types">标准解释器类型</a></li>
+<li><a class="reference internal" href="#additional-utility-classes-and-functions">附加工具类和函数</a></li>
+<li><a class="reference internal" href="#coroutine-utility-functions">协程工具函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="weakref.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">weakref</span></code> --- 弱引用</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="copy.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code> --- 浅层及深层拷贝操作</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/types.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/types.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/types.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="copy.html" title="copy --- 浅层及深层拷贝操作"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="weakref.html" title="weakref --- 弱引用"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="datatypes.html" accesskey="U">数据类型</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">types</span></code> --- 动态类型创建和内置类型名称</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-types">
+<span id="types-dynamic-type-creation-and-names-for-built-in-types"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">types</span></code> --- 动态类型创建和内置类型名称<a class="headerlink" href="#module-types" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/types.py">Lib/types.py</a></p>
+<hr class="docutils" />
+<p class="translated">此模块定义了一些工具函数，用于协助动态创建新的类型。</p>
+<p class="translated">它还为某些对象类型定义了名称，这些名称由标准 Python 解释器所使用，但并不像内置的 <a class="reference internal" href="functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> 或 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 那样对外公开。</p>
+<p class="translated">最后，它还额外提供了一些类型相关但重要程度不足以作为内置对象的工具类和函数。</p>
+<section id="dynamic-type-creation">
+<h2 class="translated">动态类型创建<a class="headerlink" href="#dynamic-type-creation" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="types.new_class">
+<span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">new_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exec_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.new_class" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用适当的元类动态地创建一个类对象。</p>
+<p class="translated">前三个参数是组成类定义头的部件：类名称，基类 (有序排列)，关键字参数 (例如 <code class="docutils literal notranslate"><span class="pre">metaclass</span></code>)。</p>
+<p class="translated"><em>exec_body</em> 参数是一个回调函数，用于填充新创建类的命名空间。 它应当接受类命名空间作为其唯一的参数并使用类内容直接更新命名空间。  如果未提供回调函数，则它就等效于传入 <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">ns:</span> <span class="pre">None</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="types.prepare_class">
+<span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">prepare_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.prepare_class" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">计算适当的元类并创建类命名空间。</p>
+<p class="translated">参数是组成类定义头的部件：类名称，基类 (有序排列) 以及关键字参数 (例如 <code class="docutils literal notranslate"><span class="pre">metaclass</span></code>)。</p>
+<p class="translated">返回值是一个 3 元组: <code class="docutils literal notranslate"><span class="pre">metaclass,</span> <span class="pre">namespace,</span> <span class="pre">kwds</span></code></p>
+<p class="translated"><em>metaclass</em> 是适当的元类，<em>namespace</em> 是预备好的类命名空间而 <em>kwds</em> 是所传入 <em>kwds</em> 参数移除每个 <code class="docutils literal notranslate"><span class="pre">'metaclass'</span></code> 条目后的已更新副本。 如果未传入 <em>kwds</em> 参数，这将为一个空字典。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>所返回元组中 <code class="docutils literal notranslate"><span class="pre">namespace</span></code> 元素的默认值已被改变。 现在当元类没有 <code class="docutils literal notranslate"><span class="pre">__prepare__</span></code> 方法时将会使用一个保留插入顺序的映射。</p>
+</div>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><a class="reference internal" href="../reference/datamodel.html#metaclasses"><span class="std std-ref">元类</span></a></dt><dd><p class="translated">这些函数所支持的类创建过程的完整细节</p>
+</dd>
+<dt class="translated"><span class="target" id="index-13"></span><a class="pep reference external" href="https://peps.python.org/pep-3115/"><strong>PEP 3115</strong></a> - Python 3000 中的元类</dt><dd><p class="translated">引入 <code class="docutils literal notranslate"><span class="pre">__prepare__</span></code> 命名空间钩子</p>
+</dd>
+</dl>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="types.resolve_bases">
+<span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">resolve_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bases</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.resolve_bases" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">动态地解析 MRO 条目，具体描述见 <span class="target" id="index-14"></span><a class="pep reference external" href="https://peps.python.org/pep-0560/"><strong>PEP 560</strong></a>。</p>
+<p class="translated">此函数会在 <em>bases</em> 中查找不是 <a class="reference internal" href="functions.html#type" title="type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a> 的实例的项，并返回一个元组，其中每个具有 <a class="reference internal" href="../reference/datamodel.html#object.__mro_entries__" title="object.__mro_entries__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__mro_entries__()</span></code></a> 方法的此种对象将被替换为调用该方法解包后的结果。 如果一个 <em>bases</em> 项是 <code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code> 的实例，或它不具有 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__mro_entries__()</span></code> 方法 ，则它将不加改变地被包括在返回的元组中。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="types.get_original_bases">
+<span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">get_original_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.get_original_bases" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <a class="reference internal" href="../reference/datamodel.html#object.__mro_entries__" title="object.__mro_entries__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__mro_entries__()</span></code></a> 方法在任何基类上被调用之前返回最初是作为 <em>cls</em> 的基类给出的对象元组（根据 <span class="target" id="index-15"></span><a class="pep reference external" href="https://peps.python.org/pep-0560/"><strong>PEP 560</strong></a> 所描述的机制）。 这在对 <a class="reference internal" href="typing.html#user-defined-generics"><span class="std std-ref">泛型</span></a> 进行内省时很有用处。</p>
+<p class="translated">对于具有 <code class="docutils literal notranslate"><span class="pre">__orig_bases__</span></code> 属性的类，此函数将返回 <code class="docutils literal notranslate"><span class="pre">cls.__orig_bases__</span></code> 的值。 对于没有 <code class="docutils literal notranslate"><span class="pre">__orig_bases__</span></code> 属性的类，则将返回 <a class="reference internal" href="../reference/datamodel.html#type.__bases__" title="type.__bases__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cls.__bases__</span></code></a>。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">TypedDict</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Foo</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Bar</span><span class="p">(</span><span class="n">Foo</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Baz</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span> <span class="o">...</span>
+<span class="n">Eggs</span> <span class="o">=</span> <span class="n">NamedTuple</span><span class="p">(</span><span class="s2">&quot;Eggs&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)])</span>
+<span class="n">Spam</span> <span class="o">=</span> <span class="n">TypedDict</span><span class="p">(</span><span class="s2">&quot;Spam&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+
+<span class="k">assert</span> <span class="n">Bar</span><span class="o">.</span><span class="vm">__bases__</span> <span class="o">==</span> <span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="n">Bar</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">Foo</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">Baz</span><span class="o">.</span><span class="vm">__bases__</span> <span class="o">==</span> <span class="p">(</span><span class="nb">list</span><span class="p">,)</span>
+<span class="k">assert</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="n">Baz</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],)</span>
+
+<span class="k">assert</span> <span class="n">Eggs</span><span class="o">.</span><span class="vm">__bases__</span> <span class="o">==</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,)</span>
+<span class="k">assert</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="n">Eggs</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">NamedTuple</span><span class="p">,)</span>
+
+<span class="k">assert</span> <span class="n">Spam</span><span class="o">.</span><span class="vm">__bases__</span> <span class="o">==</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,)</span>
+<span class="k">assert</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="n">Spam</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">TypedDict</span><span class="p">,)</span>
+
+<span class="k">assert</span> <span class="nb">int</span><span class="o">.</span><span class="vm">__bases__</span> <span class="o">==</span> <span class="p">(</span><span class="nb">object</span><span class="p">,)</span>
+<span class="k">assert</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="nb">object</span><span class="p">,)</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><span class="target" id="index-16"></span><a class="pep reference external" href="https://peps.python.org/pep-0560/"><strong>PEP 560</strong></a> - 对 typing 模块和泛型类型的核心支持</p>
+</div>
+</section>
+<section id="standard-interpreter-types">
+<h2 class="translated">标准解释器类型<a class="headerlink" href="#standard-interpreter-types" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块为许多类型提供了实现 Python 解释器所要求的名称。 它刻意地避免了包含某些仅在处理过程中偶然出现的类型，例如 <code class="docutils literal notranslate"><span class="pre">listiterator</span></code> 类型。</p>
+<p class="translated">此种名称的典型应用如 <a class="reference internal" href="functions.html#isinstance" title="isinstance"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> 或 <a class="reference internal" href="functions.html#issubclass" title="issubclass"><code class="xref py py-func docutils literal notranslate"><span class="pre">issubclass()</span></code></a> 检测。</p>
+<p class="translated">如果你要实例化这些类型中的任何一种，请注意其签名在不同 Python 版本之间可能出现变化。</p>
+<p class="translated">以下类型有相应的标准名称定义：</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="types.NoneType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">NoneType</span></span><a class="headerlink" href="#types.NoneType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.FunctionType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">FunctionType</span></span><a class="headerlink" href="#types.FunctionType" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="types.LambdaType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">LambdaType</span></span><a class="headerlink" href="#types.LambdaType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用户自定义函数以及由 <a class="reference internal" href="../reference/expressions.html#lambda"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">lambda</span></code></a>  表达式所创建函数的类型。</p>
+<p class="audit-hook translated">引发一个 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">function.__new__</span></code> 并附带参数 <code class="docutils literal notranslate"><span class="pre">code</span></code>。</p>
+<p class="translated">此审计事件只会被函数对象的直接实例化引发，而不会被普通编译所引发。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.GeneratorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">GeneratorType</span></span><a class="headerlink" href="#types.GeneratorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="../glossary.html#term-generator"><span class="xref std std-term">generator</span></a> 迭代器对象的类型，由生成器函数创建。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.CoroutineType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">CoroutineType</span></span><a class="headerlink" href="#types.CoroutineType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="../glossary.html#term-coroutine"><span class="xref std std-term">coroutine</span></a> 对象的类型，由 <a class="reference internal" href="../reference/compound_stmts.html#async-def"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">async</span> <span class="pre">def</span></code></a> 函数创建。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.AsyncGeneratorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">AsyncGeneratorType</span></span><a class="headerlink" href="#types.AsyncGeneratorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="../glossary.html#term-asynchronous-generator"><span class="xref std std-term">asynchronous generator</span></a> 迭代器对象的类型，由异步生成器函数创建。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.CodeType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">CodeType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.CodeType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated" id="index-4"><a class="reference internal" href="../reference/datamodel.html#code-objects"><span class="std std-ref">代码对象</span></a> 例如 <a class="reference internal" href="functions.html#compile" title="compile"><code class="xref py py-func docutils literal notranslate"><span class="pre">compile()</span></code></a> 返回值的类型。</p>
+<p class="audit-hook translated">引发一个 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">code.__new__</span></code> 并附带参数 <code class="docutils literal notranslate"><span class="pre">code</span></code>, <code class="docutils literal notranslate"><span class="pre">filename</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">argcount</span></code>, <code class="docutils literal notranslate"><span class="pre">posonlyargcount</span></code>, <code class="docutils literal notranslate"><span class="pre">kwonlyargcount</span></code>, <code class="docutils literal notranslate"><span class="pre">nlocals</span></code>, <code class="docutils literal notranslate"><span class="pre">stacksize</span></code>, <code class="docutils literal notranslate"><span class="pre">flags</span></code>。</p>
+<p class="translated">请注意被审计的参数可能与初始化代码所要求的名称或位置不相匹配。 审计事件只会被代码对象的直接实例化引发，而不会被普通编译所引发。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.CellType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">CellType</span></span><a class="headerlink" href="#types.CellType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">单元对象的类型：这种对象被用作函数中 <a class="reference internal" href="../glossary.html#term-closure-variable"><span class="xref std std-term">闭包变量</span></a> 的容器。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.MethodType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">MethodType</span></span><a class="headerlink" href="#types.MethodType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用户自定义类实例方法的类型。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.BuiltinFunctionType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">BuiltinFunctionType</span></span><a class="headerlink" href="#types.BuiltinFunctionType" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="types.BuiltinMethodType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">BuiltinMethodType</span></span><a class="headerlink" href="#types.BuiltinMethodType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">内置函数例如 <a class="reference internal" href="functions.html#len" title="len"><code class="xref py py-func docutils literal notranslate"><span class="pre">len()</span></code></a> 或 <a class="reference internal" href="sys.html#sys.exit" title="sys.exit"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.exit()</span></code></a> 以及内置类方法的类型。 （这里所说的“内置”是指“以 C 语言编写”。）</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.WrapperDescriptorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">WrapperDescriptorType</span></span><a class="headerlink" href="#types.WrapperDescriptorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">某些内置数据类型和基类的方法的类型，例如 <a class="reference internal" href="../reference/datamodel.html#object.__init__" title="object.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__init__()</span></code></a> 或 <a class="reference internal" href="../reference/datamodel.html#object.__lt__" title="object.__lt__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__lt__()</span></code></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.MethodWrapperType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">MethodWrapperType</span></span><a class="headerlink" href="#types.MethodWrapperType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">某些内置数据类型和基类的 <em>绑定</em> 方法的类型。 例如 <code class="code docutils literal notranslate"><span class="pre">object().__str__</span></code> 所属的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.NotImplementedType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">NotImplementedType</span></span><a class="headerlink" href="#types.NotImplementedType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="constants.html#NotImplemented" title="NotImplemented"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.MethodDescriptorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">MethodDescriptorType</span></span><a class="headerlink" href="#types.MethodDescriptorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">某些内置数据类型方法例如 <a class="reference internal" href="stdtypes.html#str.join" title="str.join"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.join()</span></code></a> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.ClassMethodDescriptorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">ClassMethodDescriptorType</span></span><a class="headerlink" href="#types.ClassMethodDescriptorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">某些内置数据类型 <em>非绑定</em> 类方法例如 <code class="docutils literal notranslate"><span class="pre">dict.__dict__['fromkeys']</span></code> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.ModuleType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">ModuleType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.ModuleType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="../glossary.html#term-module"><span class="xref std std-term">模块</span></a> 的类型。 构造器接受待创建模块的名称并以其 <a class="reference internal" href="../glossary.html#term-docstring"><span class="xref std std-term">docstring</span></a> 作为可选参数。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><a class="reference internal" href="../reference/datamodel.html#module-objects"><span class="std std-ref">模块对象的文档</span></a></dt><dd><p class="translated">提供了有关可在 <code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleType</span></code> 的实例上找到的特殊属性的详情。</p>
+</dd>
+<dt class="translated"><a class="reference internal" href="importlib.html#importlib.util.module_from_spec" title="importlib.util.module_from_spec"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.util.module_from_spec()</span></code></a></dt><dd><p class="translated">使用 <code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleType</span></code> 构造器创建的模块在被创建时将有许多特殊属性未设置或设为默认值。 <code class="xref py py-func docutils literal notranslate"><span class="pre">module_from_spec()</span></code> 提供了一种创建 <code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleType</span></code> 实例的更健壮方式，可确保各个属性被正确地设置。</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.EllipsisType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">EllipsisType</span></span><a class="headerlink" href="#types.EllipsisType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="constants.html#Ellipsis" title="Ellipsis"><code class="xref py py-data docutils literal notranslate"><span class="pre">Ellipsis</span></code></a> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.GenericAlias">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">GenericAlias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.GenericAlias" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="stdtypes.html#types-genericalias"><span class="std std-ref">形参化泛型</span></a> 的类型，例如 <code class="docutils literal notranslate"><span class="pre">list[int]</span></code>。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">t_origin</span></code> 应当是一个非形参化的泛型类，例如 <code class="docutils literal notranslate"><span class="pre">list</span></code>, <code class="docutils literal notranslate"><span class="pre">tuple</span></code> 或 <code class="docutils literal notranslate"><span class="pre">dict</span></code>。 <code class="docutils literal notranslate"><span class="pre">t_args</span></code> 应当是一个形参化 <code class="docutils literal notranslate"><span class="pre">t_origin</span></code> 的 <a class="reference internal" href="stdtypes.html#tuple" title="tuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> (长度可以为 1):</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericAlias</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">==</span> <span class="n">GenericAlias</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">==</span> <span class="n">GenericAlias</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9.2 版本发生变更: </span>此类型现在可以被子类化。</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><a class="reference internal" href="stdtypes.html#types-genericalias"><span class="std std-ref">泛用别名类型</span></a></dt><dd><p class="translated">有关 <code class="xref py py-class docutils literal notranslate"><span class="pre">types.GenericAlias</span></code> 实例的详细文档</p>
+</dd>
+<dt class="translated"><span class="target" id="index-17"></span><a class="pep reference external" href="https://peps.python.org/pep-0585/"><strong>PEP 585</strong></a> - 标准多项集中的类型提示泛型</dt><dd><p class="translated">引入 <code class="xref py py-class docutils literal notranslate"><span class="pre">types.GenericAlias</span></code> 类</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.UnionType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">UnionType</span></span><a class="headerlink" href="#types.UnionType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="stdtypes.html#types-union"><span class="std std-ref">合并类型表达式</span></a> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>此名称现在是 <a class="reference internal" href="typing.html#typing.Union" title="typing.Union"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Union</span></code></a> 的别名。</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.TracebackType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">TracebackType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tb_next</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb_lasti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb_lineno</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.TracebackType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">回溯对象的类型，如在 <code class="docutils literal notranslate"><span class="pre">sys.exception().__traceback__</span></code> 中找到的一样。</p>
+<p class="translated">请查看 <a class="reference internal" href="../reference/datamodel.html#traceback-objects"><span class="std std-ref">语言参考</span></a> 了解可用属性和操作的细节，以及动态地创建回溯对象的指南。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.FrameType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">FrameType</span></span><a class="headerlink" href="#types.FrameType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="../reference/datamodel.html#frame-objects"><span class="std std-ref">帧对象</span></a> 的类型，例如当 <code class="docutils literal notranslate"><span class="pre">tb</span></code> 是一个回溯对象时 <a class="reference internal" href="../reference/datamodel.html#traceback.tb_frame" title="traceback.tb_frame"><code class="xref py py-attr docutils literal notranslate"><span class="pre">tb.tb_frame</span></code></a> 中的对象。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.GetSetDescriptorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">GetSetDescriptorType</span></span><a class="headerlink" href="#types.GetSetDescriptorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用 <code class="docutils literal notranslate"><span class="pre">PyGetSetDef</span></code> 在扩展模块中定义的对象的类型，例如 <a class="reference internal" href="../reference/datamodel.html#frame.f_locals" title="frame.f_locals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FrameType.f_locals</span></code></a> 或 <code class="docutils literal notranslate"><span class="pre">array.array.typecode</span></code>。 此类型被用作对象属性的描述器；它的目的与 <a class="reference internal" href="functions.html#property" title="property"><code class="xref py py-class docutils literal notranslate"><span class="pre">property</span></code></a> 类型相同，但专门针对在扩展模块中定义的类。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.MemberDescriptorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">MemberDescriptorType</span></span><a class="headerlink" href="#types.MemberDescriptorType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用 <code class="docutils literal notranslate"><span class="pre">PyMemberDef</span></code> 在扩展模块中定义的对象的类型，例如 <code class="docutils literal notranslate"><span class="pre">datetime.timedelta.days</span></code>。 此类型被用作使用标准转换函数的简单 C 数据成员的描述器；它的目的与 <a class="reference internal" href="functions.html#property" title="property"><code class="xref py py-class docutils literal notranslate"><span class="pre">property</span></code></a> 类型相同，但专门针对在扩展模块中定义的类。</p>
+<p class="translated">此外，当一个类定义了 <a class="reference internal" href="../reference/datamodel.html#object.__slots__" title="object.__slots__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__slots__</span></code></a> 属性时，对于每个槽位，都将添加一个 <code class="xref py py-class docutils literal notranslate"><span class="pre">MemberDescriptorType</span></code> 的实例作为该类上的属性。 这将允许槽位显示在类的 <a class="reference internal" href="../reference/datamodel.html#type.__dict__" title="type.__dict__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> 中。</p>
+<div class="impl-detail compound">
+<p class="translated">在 Python 的其它实现中，此类型可能与 <code class="docutils literal notranslate"><span class="pre">GetSetDescriptorType</span></code> 完全相同。</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.MappingProxyType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">MappingProxyType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.MappingProxyType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个映射的只读代理。 它提供了对映射条目的动态视图，这意味着当映射发生改变时，视图会反映这些改变。</p>
+<p class="untranslated"><code class="xref py py-class docutils literal notranslate"><span class="pre">MappingProxyType</span></code>s are <a class="reference internal" href="typing.html#generics"><span class="std std-ref">generic</span></a> over two types,
+signifying (respectively) the types of the underlying mapping's keys and
+values.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>更新为支持 <span class="target" id="index-18"></span><a class="pep reference external" href="https://peps.python.org/pep-0584/"><strong>PEP 584</strong></a> 所新增的合并 (<code class="docutils literal notranslate"><span class="pre">|</span></code>) 运算符，它会简单地委托给下层的映射。</p>
+</div>
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">key</span> <span class="pre">in</span> <span class="pre">proxy</span></span></dt>
+<dd><p class="translated">如果下层的映射中存在键 <em>key</em> 则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>，否则返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">proxy[key]</span></span></dt>
+<dd><p class="translated">返回下层的映射中以 <em>key</em> 为键的项。 如果下层的映射中不存在键 <em>key</em> 则引发 <a class="reference internal" href="exceptions.html#KeyError" title="KeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">iter(proxy)</span></span></dt>
+<dd><p class="translated">返回由下层映射的键为元素的迭代器。 这是 <code class="docutils literal notranslate"><span class="pre">iter(proxy.keys())</span></code> 的快捷方式。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">len(proxy)</span></span></dt>
+<dd><p class="translated">返回下层映射中的项数。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="types.MappingProxyType.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#types.MappingProxyType.copy" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回下层映射的浅拷贝。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="types.MappingProxyType.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#types.MappingProxyType.get" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 <em>key</em> 存在于下层映射中则返回 <em>key</em> 的值，否则返回 <em>default</em>。 如果 <em>default</em> 未给出则默认为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，因而此方法绝不会引发 <a class="reference internal" href="exceptions.html#KeyError" title="KeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="types.MappingProxyType.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#types.MappingProxyType.items" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回由下层映射的项 (<code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">value)</span></code> 对) 组成的一个新视图。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="types.MappingProxyType.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#types.MappingProxyType.keys" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回由下层映射的键组成的一个新视图。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="types.MappingProxyType.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#types.MappingProxyType.values" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回由下层映射的值组成的一个新视图。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">reversed(proxy)</span></span></dt>
+<dd><p class="translated">返回一个包含下层映射的键的反向迭代器。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">hash(proxy)</span></span></dt>
+<dd><p class="translated">返回下层映射的哈希值。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="types.CapsuleType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">CapsuleType</span></span><a class="headerlink" href="#types.CapsuleType" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="../c-api/capsule.html#capsules"><span class="std std-ref">capsule 对象</span></a> 的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="additional-utility-classes-and-functions">
+<h2 class="translated">附加工具类和函数<a class="headerlink" href="#additional-utility-classes-and-functions" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="types.SimpleNamespace">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">SimpleNamespace</span></span><a class="headerlink" href="#types.SimpleNamespace" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个简单的 <a class="reference internal" href="functions.html#object" title="object"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> 子类，提供了访问其命名空间的属性，以及一个有意义的 repr。</p>
+<p class="translated">与 <a class="reference internal" href="functions.html#object" title="object"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> 不同的是，对于 <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleNamespace</span></code> 你可以添加和移除属性。</p>
+<p class="translated"><a class="reference internal" href="#types.SimpleNamespace" title="types.SimpleNamespace"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleNamespace</span></code></a> 对象可以使用与 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 相同的方式来初始化：关键字参数、单个位置参数或者两者兼有。 当使用关键字参数来初始化时，参数值会被直接加入到下层的命名空间。 而当使用一个位置参数来初始化时，下层的命名空间将以来自该参数（为一个映射对象或是产生键值对的 <a class="reference internal" href="../glossary.html#term-iterable"><span class="xref std std-term">iterable</span></a> 对象）的键值对来更新。 所有这样的键都必须为字符串。</p>
+<p class="translated">此类型大致等价于以下代码:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SimpleNamespace</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping_or_iterable</span><span class="o">=</span><span class="p">(),</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mapping_or_iterable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">!r}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SimpleNamespace</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">SimpleNamespace</span><span class="p">):</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+</pre></div>
+</div>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">SimpleNamespace</span></code> 可被用于替代 <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">NS:</span> <span class="pre">pass</span></code>。 但是，对于结构化记录类型则应改用 <a class="reference internal" href="collections.html#collections.namedtuple" title="collections.namedtuple"><code class="xref py py-func docutils literal notranslate"><span class="pre">namedtuple()</span></code></a>。</p>
+<p class="translated"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleNamespace</span></code> 对象受到 <a class="reference internal" href="copy.html#copy.replace" title="copy.replace"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.replace()</span></code></a> 的支持。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>repr 中的属性顺序由字母顺序改为插入顺序 (类似 <code class="docutils literal notranslate"><span class="pre">dict</span></code>)。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>增加了对可选的位置参数的支持。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="types.DynamicClassAttribute">
+<span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">DynamicClassAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fdel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.DynamicClassAttribute" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将类上的属性访问路由到 __getattr__。</p>
+<p class="translated">这是一个描述器，用于定义通过实例与通过类访问时具有不同行为的属性。 当实例访问时保持正常行为，但当类访问属性时将被路由至类的 __getattr__ 方法；这是通过引发 AttributeError 来完成的。</p>
+<p class="translated">这允许有在实例上激活的特性属性，同时又有在类上的同名虚拟属性 (一个例子请参见 <a class="reference internal" href="enum.html#enum.Enum" title="enum.Enum"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a>)。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="coroutine-utility-functions">
+<h2 class="translated">协程工具函数<a class="headerlink" href="#coroutine-utility-functions" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="types.coroutine">
+<span class="sig-prename descclassname"><span class="pre">types.</span></span><span class="sig-name descname"><span class="pre">coroutine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gen_func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#types.coroutine" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此函数可将 <a class="reference internal" href="../glossary.html#term-generator"><span class="xref std std-term">generator</span></a> 函数转换为一个返回基于生成器的协程的 <a class="reference internal" href="../glossary.html#term-coroutine-function"><span class="xref std std-term">coroutine function</span></a>。 基于生成器的协程仍然属于 <a class="reference internal" href="../glossary.html#term-generator-iterator"><span class="xref std std-term">generator iterator</span></a>，但同时又可被视为 <a class="reference internal" href="../glossary.html#term-coroutine"><span class="xref std std-term">coroutine</span></a> 对象兼 <a class="reference internal" href="../glossary.html#term-awaitable"><span class="xref std std-term">awaitable</span></a>。 不过，它不一定会实现 <a class="reference internal" href="../reference/datamodel.html#object.__await__" title="object.__await__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__await__()</span></code></a> 方法。</p>
+<p class="translated">如果 <em>gen_func</em> 是一个生成器函数，它将被原地修改。</p>
+<p class="translated">如果 <em>gen_func</em> 不是一个生成器函数，则它会被包装。 如果它返回一个 <a class="reference internal" href="collections.abc.html#collections.abc.Generator" title="collections.abc.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Generator</span></code></a> 的实例，该实例将被包装在一个 <em>awaitable</em> 代理对象中。 所有其他对象类型将被原样返回。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">types</span></code> --- 动态类型创建和内置类型名称</a><ul>
+<li><a class="reference internal" href="#dynamic-type-creation">动态类型创建</a></li>
+<li><a class="reference internal" href="#standard-interpreter-types">标准解释器类型</a></li>
+<li><a class="reference internal" href="#additional-utility-classes-and-functions">附加工具类和函数</a></li>
+<li><a class="reference internal" href="#coroutine-utility-functions">协程工具函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="weakref.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">weakref</span></code> --- 弱引用</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="copy.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code> --- 浅层及深层拷贝操作</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/types.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/types.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/types.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="copy.html" title="copy --- 浅层及深层拷贝操作"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="weakref.html" title="weakref --- 弱引用"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="datatypes.html" >数据类型</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">types</span></code> --- 动态类型创建和内置类型名称</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

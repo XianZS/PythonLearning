@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="email.headerregistry: 自定义标头对象" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/email.headerregistry.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/email/headerregistry.py 标头是由 str 的自定义子类来表示的。用于表示给定标头的特定类则由创建标头时生效的 policy 的 header_factory 确定。这一节记录了 email 包为处理兼容 RFC 5322 的电子邮件消息所实现的特定 header_factory ，它不仅为各种标头类型提供了自定义的标头对象，还为应用程序提供了添加其自..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_email.headerregistry_03a14f5e.png" />
+<meta property="og:image:alt" content="源代码: Lib/email/headerregistry.py 标头是由 str 的自定义子类来表示的。用于表示给定标头的特定类则由创建标头时生效的 policy 的 header_factory 确定。这一节记录了 email 包为处理兼容 RFC 5322 的电子邮件消息所实现的特定 header_factory ，它不仅为各种标头类型提供了自定义的标头对象，还为应用程序提供了添加其自..." />
+<meta name="description" content="源代码: Lib/email/headerregistry.py 标头是由 str 的自定义子类来表示的。用于表示给定标头的特定类则由创建标头时生效的 policy 的 header_factory 确定。这一节记录了 email 包为处理兼容 RFC 5322 的电子邮件消息所实现的特定 header_factory ，它不仅为各种标头类型提供了自定义的标头对象，还为应用程序提供了添加其自..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>email.headerregistry: 自定义标头对象 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="email.contentmanager: 管理 MIME 内容" href="email.contentmanager.html" />
+    <link rel="prev" title="email.errors: 异常和缺陷类" href="email.errors.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/email.headerregistry.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="email.errors.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.errors</span></code>: 异常和缺陷类</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="email.contentmanager.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/email.headerregistry.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/email.headerregistry.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/email.headerregistry.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="email.contentmanager.html" title="email.contentmanager: 管理 MIME 内容"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="email.errors.html" title="email.errors: 异常和缺陷类"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="netdata.html" >互联网数据处理</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="email.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email</span></code> --- 电子邮件与 MIME 处理包</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.headerregistry</span></code>: 自定义标头对象</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-email.headerregistry">
+<span id="email-headerregistry-custom-header-objects"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.headerregistry</span></code>: 自定义标头对象<a class="headerlink" href="#module-email.headerregistry" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/email/headerregistry.py">Lib/email/headerregistry.py</a></p>
+<hr class="docutils" />
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6: </span><a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+</div>
+<p class="translated">标头是由 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 的自定义子类来表示的。用于表示给定标头的特定类则由创建标头时生效的 <a class="reference internal" href="email.policy.html#module-email.policy" title="email.policy: Controlling the parsing and generating of messages"><code class="xref py py-mod docutils literal notranslate"><span class="pre">policy</span></code></a> 的 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy.header_factory" title="email.policy.EmailPolicy.header_factory"><code class="xref py py-attr docutils literal notranslate"><span class="pre">header_factory</span></code></a> 确定。这一节记录了 email 包为处理兼容 <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 的电子邮件消息所实现的特定 <code class="docutils literal notranslate"><span class="pre">header_factory</span></code>，它不仅为各种标头类型提供了自定义的标头对象，还为应用程序提供了添加其自定义标头类型的扩展机制。</p>
+<p class="translated">当使用派生自 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy" title="email.policy.EmailPolicy"><code class="xref py py-data docutils literal notranslate"><span class="pre">EmailPolicy</span></code></a> 的任何策略对象时，所有标头都通过 <a class="reference internal" href="#email.headerregistry.HeaderRegistry" title="email.headerregistry.HeaderRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeaderRegistry</span></code></a> 产生并且以 <a class="reference internal" href="#email.headerregistry.BaseHeader" title="email.headerregistry.BaseHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHeader</span></code></a> 作为其最后一个基类。 每个标头类都有一个由该标头类型确定的附加基类。例如，许多标头都以 <a class="reference internal" href="#email.headerregistry.UnstructuredHeader" title="email.headerregistry.UnstructuredHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnstructuredHeader</span></code></a> 类作为其另一个基类。 一个标头专用的第二个类是由标头名称使用存储在 <code class="xref py py-class docutils literal notranslate"><span class="pre">HeaderRegistry</span></code> 中的查找表来确定的。 所有这些都针对典型应用程序进行透明的管理，但也为修改默认行为提供了接口，以便由更复杂的应用使用。</p>
+<p class="translated">以下各节首先记录了标头基类及其属性，然后是用于修改 <a class="reference internal" href="#email.headerregistry.HeaderRegistry" title="email.headerregistry.HeaderRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeaderRegistry</span></code></a> 行为的 API，最后是用于表示从结构化标头解析的数据的支持类。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.BaseHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">BaseHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.BaseHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><em>name</em> 和 <em>value</em> 会从 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy.header_factory" title="email.policy.EmailPolicy.header_factory"><code class="xref py py-attr docutils literal notranslate"><span class="pre">header_factory</span></code></a> 调用传递给 <code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code>。任何标头对象的字符串值都是完成解码为 unicode 的 <em>value</em>。</p>
+<p class="translated">这个基类定义了下列只读属性：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.BaseHeader.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#email.headerregistry.BaseHeader.name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">标头的名称（字段在 ':' 之前的部分）。这就是 <em>name</em> 的 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy.header_factory" title="email.policy.EmailPolicy.header_factory"><code class="xref py py-attr docutils literal notranslate"><span class="pre">header_factory</span></code></a> 调用所传递的值；也就是说会保持大小写形式。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.BaseHeader.defects">
+<span class="sig-name descname"><span class="pre">defects</span></span><a class="headerlink" href="#email.headerregistry.BaseHeader.defects" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个包含 <a class="reference internal" href="email.errors.html#email.errors.HeaderDefect" title="email.errors.HeaderDefect"><code class="xref py py-exc docutils literal notranslate"><span class="pre">HeaderDefect</span></code></a> 实例的元组，这些实例报告了在解析期间发现的任何 RFC 合规性问题。 email 包会尝试尽可能地检测合规性问题。请参阅 <a class="reference internal" href="email.errors.html#module-email.errors" title="email.errors: The exception classes used by the email package."><code class="xref py py-mod docutils literal notranslate"><span class="pre">errors</span></code></a> 模块了解可能被报告的缺陷类型的相关讨论。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.BaseHeader.max_count">
+<span class="sig-name descname"><span class="pre">max_count</span></span><a class="headerlink" href="#email.headerregistry.BaseHeader.max_count" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此类型标头可具有相同 <code class="docutils literal notranslate"><span class="pre">name</span></code> 的最大数量。<code class="docutils literal notranslate"><span class="pre">None</span></code> 值表示无限制。此属性的 <code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> 值为 <code class="docutils literal notranslate"><span class="pre">None</span></code>；专用的标头类预期将根据需要覆盖这个值。</p>
+</dd></dl>
+
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> 还提供了以下方法，它由 email 库代码调用，通常不应当由应用程序来调用。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="email.headerregistry.BaseHeader.fold">
+<span class="sig-name descname"><span class="pre">fold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.BaseHeader.fold" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个字符串，其中包含用来根据 <em>policy</em> 正确地折叠标头的 <a class="reference internal" href="email.policy.html#email.policy.Policy.linesep" title="email.policy.Policy.linesep"><code class="xref py py-attr docutils literal notranslate"><span class="pre">linesep</span></code></a> 字符。  <a class="reference internal" href="email.policy.html#email.policy.Policy.cte_type" title="email.policy.Policy.cte_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cte_type</span></code></a> 为 <code class="docutils literal notranslate"><span class="pre">8bit</span></code> 时将被作为 <code class="docutils literal notranslate"><span class="pre">7bit</span></code> 来处理，因为标头不能包含任意二进制数据。如果 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy.utf8" title="email.policy.EmailPolicy.utf8"><code class="xref py py-attr docutils literal notranslate"><span class="pre">utf8</span></code></a> 为 <code class="docutils literal notranslate"><span class="pre">False</span></code>，则非 ASCII 数据将根据 <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2047.html"><strong>RFC 2047</strong></a> 来编码。</p>
+</dd></dl>
+
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> 本身不能被用于创建标头对象。它定义了一个与每个专用标头相配合的协议以便生成标头对象。 具体来说，<code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> 要求专用类提供一个名为 <code class="docutils literal notranslate"><span class="pre">parse</span></code> 的 <a class="reference internal" href="functions.html#classmethod" title="classmethod"><code class="xref py py-func docutils literal notranslate"><span class="pre">classmethod()</span></code></a>。 此方法的调用形式如下:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="untranslated"><code class="docutils literal notranslate"><span class="pre">kwds</span></code> is a dictionary containing one pre-initialized key, <code class="docutils literal notranslate"><span class="pre">defects</span></code>.
+<code class="docutils literal notranslate"><span class="pre">defects</span></code> is an empty list.  The parse method should append any detected
+defects to this list.  On return, the <code class="docutils literal notranslate"><span class="pre">kwds</span></code> dictionary <em>must</em> contain
+values for at least the keys <code class="docutils literal notranslate"><span class="pre">decoded</span></code>, <code class="docutils literal notranslate"><span class="pre">defects</span></code> and <code class="docutils literal notranslate"><span class="pre">parse_tree</span></code>.
+<code class="docutils literal notranslate"><span class="pre">decoded</span></code> should be the string value for the header (that is, the header
+value fully decoded to unicode). <code class="docutils literal notranslate"><span class="pre">parse_tree</span></code> is set to the parse tree obtained
+from parsing the header. The parse method should assume that <em>string</em> may
+contain content-transfer-encoded parts, but should correctly handle all valid
+unicode characters as well so that it can parse un-encoded header values.</p>
+<p class="translated">随后 <code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> 的 <code class="docutils literal notranslate"><span class="pre">__new__</span></code> 会创建标头实例，并调用其 <code class="docutils literal notranslate"><span class="pre">init</span></code> 方法。专属类如果想要设置 <code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> 自身所提供的属性之外的附加属性，只需提供一个 <code class="docutils literal notranslate"><span class="pre">init</span></code> 方法。这样的 <code class="docutils literal notranslate"><span class="pre">init</span></code> 看起来应该是这样:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_myattr</span> <span class="o">=</span> <span class="n">kw</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;myattr&#39;</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">也就是说，专属类放入 <code class="docutils literal notranslate"><span class="pre">kwds</span></code> 字典的任何额外内容都应当被移除和处理，并且 <code class="docutils literal notranslate"><span class="pre">kw</span></code> (和 <code class="docutils literal notranslate"><span class="pre">args</span></code>) 的剩余内容会被传递给 <code class="docutils literal notranslate"><span class="pre">BaseHeader</span></code> <code class="docutils literal notranslate"><span class="pre">init</span></code> 方法。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.UnstructuredHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">UnstructuredHeader</span></span><a class="headerlink" href="#email.headerregistry.UnstructuredHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">An &quot;unstructured&quot; header is the default type of header in <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a>.
+Any header that does not have a specified syntax is treated as
+unstructured.  The classic example of an unstructured header is the
+<em class="mailheader">Subject</em> header.</p>
+<p class="translated">在 <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 中，非结构化标头是指一段以 ASCII 字符集表示的任意文本。但是 <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2047.html"><strong>RFC 2047</strong></a> 具有一个 <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 兼容机制用来将标头值中的非 ASCII 文本编码为 ASCII 字符。当包含已编码字的 <em>value</em> 被传递给构造器时，<code class="docutils literal notranslate"><span class="pre">UnstructuredHeader</span></code> 解析器会按照非结构化文本的 <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2047.html"><strong>RFC 2047</strong></a> 规则将此类已编码字转换为 unicode。解析器会使用启发式机制来尝试解码一些不合规的已编码字。 在此种情况下各类缺陷，例如已编码字或未编码文本中的无效字符问题等缺陷将会被注册。</p>
+<p class="translated">此标头类型未提供附加属性。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.DateHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">DateHeader</span></span><a class="headerlink" href="#email.headerregistry.DateHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 为电子邮件标头内的日期指定了非常明确的格式。<code class="docutils literal notranslate"><span class="pre">DateHeader</span></code> 解析器会识别该日期格式，并且也能识别间或出现的一些“不规范”变种形式。</p>
+<p class="translated">这个标头类型提供了以下附加属性。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.DateHeader.datetime">
+<span class="sig-name descname"><span class="pre">datetime</span></span><a class="headerlink" href="#email.headerregistry.DateHeader.datetime" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果标头值能被识别为某一种有效的日期形式，此属性将包含一个代表该日期的 <a class="reference internal" href="datetime.html#datetime.datetime" title="datetime.datetime"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> 实例。 如果输入日期的时区被指定为 <code class="docutils literal notranslate"><span class="pre">-0000</span></code> (表示它是 UTC 但不包含源时区的相关信息)，则 <a class="reference internal" href="#email.headerregistry.DateHeader.datetime" title="email.headerregistry.DateHeader.datetime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datetime</span></code></a> 将为简单型 <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>。如果找到了特定的时区时差值 (包括 <code class="docutils literal notranslate"><span class="pre">+0000</span></code>)，则 <code class="xref py py-attr docutils literal notranslate"><span class="pre">datetime</span></code> 将包含一个使用 <a class="reference internal" href="datetime.html#datetime.timezone" title="datetime.timezone"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.timezone</span></code></a> 来记录时区时差的感知型 <code class="docutils literal notranslate"><span class="pre">datetime</span></code>.</p>
+</dd></dl>
+
+<p class="translated">标头的 <code class="docutils literal notranslate"><span class="pre">decoded</span></code> 值是由按照 <span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 对 <code class="docutils literal notranslate"><span class="pre">datetime</span></code> 进行格式化来确定的；也就是说，它会被设为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">email</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">format_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">当创建 <code class="docutils literal notranslate"><span class="pre">DateHeader</span></code> 时，<em>value</em> 可以为 <a class="reference internal" href="datetime.html#datetime.datetime" title="datetime.datetime"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> 实例。 例如这意味着以下代码是有效的并能实现人们预期的行为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2011</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">因为这是个简单型 <code class="docutils literal notranslate"><span class="pre">datetime</span></code> 它将被解读为 UTC 时间戳，并且结果值的时区将为 <code class="docutils literal notranslate"><span class="pre">-0000</span></code>。使用来自 <a class="reference internal" href="email.utils.html#module-email.utils" title="email.utils: Miscellaneous email package utilities."><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a> 模块的 <a class="reference internal" href="email.utils.html#email.utils.localtime" title="email.utils.localtime"><code class="xref py py-func docutils literal notranslate"><span class="pre">localtime()</span></code></a> 函数会更有用:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">localtime</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">这个例子将日期标头设为使用当前时区时差值的当前时间和日期。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.AddressHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">AddressHeader</span></span><a class="headerlink" href="#email.headerregistry.AddressHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">地址标头是最复杂的结构化标头类型之一。<code class="docutils literal notranslate"><span class="pre">AddressHeader</span></code> 类提供了适合任何地址标头的泛用型接口。</p>
+<p class="translated">这个标头类型提供了以下附加属性。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.AddressHeader.groups">
+<span class="sig-name descname"><span class="pre">groups</span></span><a class="headerlink" href="#email.headerregistry.AddressHeader.groups" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">编码了在标头值中找到的地址和分组的 <a class="reference internal" href="#email.headerregistry.Group" title="email.headerregistry.Group"><code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></a> 对象的元组。非分组成员的地址在此列表中表示为 <a class="reference internal" href="#email.headerregistry.Group.display_name" title="email.headerregistry.Group.display_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">display_name</span></code></a> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 的单地址 <code class="docutils literal notranslate"><span class="pre">Groups</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.AddressHeader.addresses">
+<span class="sig-name descname"><span class="pre">addresses</span></span><a class="headerlink" href="#email.headerregistry.AddressHeader.addresses" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">编码了来自标头值的所有单独地址的 <a class="reference internal" href="#email.headerregistry.Address" title="email.headerregistry.Address"><code class="xref py py-class docutils literal notranslate"><span class="pre">Address</span></code></a> 对象的元组。 如果标头值包含任何分组，则来自分组的单个地址将包含在该分组出现在值中的点上列出（也就是说，地址列表会被“展平”为一维列表）。</p>
+</dd></dl>
+
+<p class="translated">标头的 <code class="docutils literal notranslate"><span class="pre">decoded</span></code> 值将把所有已编码字解码为 unicode。 <a class="reference internal" href="codecs.html#module-encodings.idna" title="encodings.idna: Internationalized Domain Names implementation"><code class="xref py py-class docutils literal notranslate"><span class="pre">idna</span></code></a> 编码的域名也会被解码为 unicode。<code class="docutils literal notranslate"><span class="pre">decoded</span></code> 值是通过对 <code class="docutils literal notranslate"><span class="pre">groups</span></code> 属性的元素的 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 值使用 <code class="docutils literal notranslate"><span class="pre">',</span> <span class="pre">'</span></code> 进行 <a class="reference internal" href="stdtypes.html#meth-str-join"><span class="std std-ref">合并</span></a> 来设置的。</p>
+<p class="translated">可以使用 <a class="reference internal" href="#email.headerregistry.Address" title="email.headerregistry.Address"><code class="xref py py-class docutils literal notranslate"><span class="pre">Address</span></code></a> 与 <a class="reference internal" href="#email.headerregistry.Group" title="email.headerregistry.Group"><code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></a> 对象的任意组合的列表来设置一个地址标头的值。 <code class="docutils literal notranslate"><span class="pre">display_name</span></code> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 的 <code class="docutils literal notranslate"><span class="pre">Group</span></code> 对象将被解读为单独地址，这允许一个地址列表可以附带通过使用从源标头的 <code class="docutils literal notranslate"><span class="pre">groups</span></code> 属性获取的列表而保留原分组。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.SingleAddressHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">SingleAddressHeader</span></span><a class="headerlink" href="#email.headerregistry.SingleAddressHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#email.headerregistry.AddressHeader" title="email.headerregistry.AddressHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">AddressHeader</span></code></a> 的子类，添加了一个额外的属性：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.SingleAddressHeader.address">
+<span class="sig-name descname"><span class="pre">address</span></span><a class="headerlink" href="#email.headerregistry.SingleAddressHeader.address" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">由标头值编码的单个地址。如果标头值实际上包含一个以上的地址（这在默认 <a class="reference internal" href="email.policy.html#module-email.policy" title="email.policy: Controlling the parsing and generating of messages"><code class="xref py py-mod docutils literal notranslate"><span class="pre">policy</span></code></a> 下将违反 RFC），则访问此属性将导致 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">上述类中许多还具有一个 <code class="docutils literal notranslate"><span class="pre">Unique</span></code> 变体 (例如 <code class="docutils literal notranslate"><span class="pre">UniqueUnstructuredHeader</span></code>)。 其唯一差别是在 <code class="docutils literal notranslate"><span class="pre">Unique</span></code> 变体中 <a class="reference internal" href="#email.headerregistry.BaseHeader.max_count" title="email.headerregistry.BaseHeader.max_count"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_count</span></code></a> 被设为 1。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.MIMEVersionHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">MIMEVersionHeader</span></span><a class="headerlink" href="#email.headerregistry.MIMEVersionHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实际上 <em class="mailheader">MIME-Version</em> 标头只有一个有效的值，即 <code class="docutils literal notranslate"><span class="pre">1.0</span></code>。 为了将来的扩展，这个标头类还支持其他的有效版本号。如果一个版本号是 <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2045.html"><strong>RFC 2045</strong></a> 的有效值，则标头对象的以下属性将具有不为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 的值：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.MIMEVersionHeader.version">
+<span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#email.headerregistry.MIMEVersionHeader.version" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">字符串形式的版本号。任何空格和/或注释都会被移除。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.MIMEVersionHeader.major">
+<span class="sig-name descname"><span class="pre">major</span></span><a class="headerlink" href="#email.headerregistry.MIMEVersionHeader.major" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">整数形式的主版本号</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.MIMEVersionHeader.minor">
+<span class="sig-name descname"><span class="pre">minor</span></span><a class="headerlink" href="#email.headerregistry.MIMEVersionHeader.minor" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">整数形式的次版本号</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.ParameterizedMIMEHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">ParameterizedMIMEHeader</span></span><a class="headerlink" href="#email.headerregistry.ParameterizedMIMEHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">MIME 标头都以前缀 'Content-' 打头。每个特定标头都具有特定的值，其描述在该标头的类之中。 有些也可以接受一个具有通用格式的补充参数列表。这个类被用作所有接受参数的 MIME 标头的基类。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.ParameterizedMIMEHeader.params">
+<span class="sig-name descname"><span class="pre">params</span></span><a class="headerlink" href="#email.headerregistry.ParameterizedMIMEHeader.params" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个将参数名映射到参数值的字典。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.ContentTypeHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">ContentTypeHeader</span></span><a class="headerlink" href="#email.headerregistry.ContentTypeHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">处理 <em class="mailheader">Content-Type</em> 标头的  <a class="reference internal" href="#email.headerregistry.ParameterizedMIMEHeader" title="email.headerregistry.ParameterizedMIMEHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterizedMIMEHeader</span></code></a> 类。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.ContentTypeHeader.content_type">
+<span class="sig-name descname"><span class="pre">content_type</span></span><a class="headerlink" href="#email.headerregistry.ContentTypeHeader.content_type" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><code class="docutils literal notranslate"><span class="pre">maintype/subtype</span></code> 形式的内容类型字符串。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.ContentTypeHeader.maintype">
+<span class="sig-name descname"><span class="pre">maintype</span></span><a class="headerlink" href="#email.headerregistry.ContentTypeHeader.maintype" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.ContentTypeHeader.subtype">
+<span class="sig-name descname"><span class="pre">subtype</span></span><a class="headerlink" href="#email.headerregistry.ContentTypeHeader.subtype" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.ContentDispositionHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">ContentDispositionHeader</span></span><a class="headerlink" href="#email.headerregistry.ContentDispositionHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">处理 <em class="mailheader">Content-Disposition</em> 标头的 <a class="reference internal" href="#email.headerregistry.ParameterizedMIMEHeader" title="email.headerregistry.ParameterizedMIMEHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterizedMIMEHeader</span></code></a> 类。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.ContentDispositionHeader.content_disposition">
+<span class="sig-name descname"><span class="pre">content_disposition</span></span><a class="headerlink" href="#email.headerregistry.ContentDispositionHeader.content_disposition" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><code class="docutils literal notranslate"><span class="pre">inline</span></code> 和 <code class="docutils literal notranslate"><span class="pre">attachment</span></code> 是仅有的常用有效值。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.ContentTransferEncodingHeader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">ContentTransferEncodingHeader</span></span><a class="headerlink" href="#email.headerregistry.ContentTransferEncodingHeader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">处理 <em class="mailheader">Content-Transfer-Encoding</em> 标头。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.ContentTransferEncodingHeader.cte">
+<span class="sig-name descname"><span class="pre">cte</span></span><a class="headerlink" href="#email.headerregistry.ContentTransferEncodingHeader.cte" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">可用的有效值为 <code class="docutils literal notranslate"><span class="pre">7bit</span></code>, <code class="docutils literal notranslate"><span class="pre">8bit</span></code>, <code class="docutils literal notranslate"><span class="pre">base64</span></code> 和 <code class="docutils literal notranslate"><span class="pre">quoted-printable</span></code>。更多信息请参阅 <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2045.html"><strong>RFC 2045</strong></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.HeaderRegistry">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">HeaderRegistry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">BaseHeader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">UnstructuredHeader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_default_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.HeaderRegistry" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是由 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy" title="email.policy.EmailPolicy"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailPolicy</span></code></a> 在默认情况下使用的工厂函数。 <code class="docutils literal notranslate"><span class="pre">HeaderRegistry</span></code> 会使用 <em>base_class</em> 和从它所保存的注册表中获取的专用类来构建用于动态地创建标头实例的类。 当给定的标头名称未在注册表中出现时，则会使用由 <em>default_class</em> 所指定的类作为专用类。 当 <em>use_default_map</em> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code> (默认值) 时，则会在初始化期间把从标头名称到类的标准映射拷贝到注册表中。 <em>base_class</em> 始终会是所生成的类的 <a class="reference internal" href="../reference/datamodel.html#type.__bases__" title="type.__bases__"><code class="xref py py-class docutils literal notranslate"><span class="pre">__bases__</span></code></a> 列表中的最后一个类。</p>
+<p class="translated">默认的映射有：</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd translated">subject<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueUnstructuredHeader</p>
+</dd>
+<dt class="field-even translated">date<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">UniqueDateHeader</p>
+</dd>
+<dt class="field-odd translated">resent-date<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">DateHeader</p>
+</dd>
+<dt class="field-even translated">orig-date<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">UniqueDateHeader</p>
+</dd>
+<dt class="field-odd translated">sender<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueSingleAddressHeader</p>
+</dd>
+<dt class="field-even translated">resent-sender<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">SingleAddressHeader</p>
+</dd>
+<dt class="field-odd translated">to<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueAddressHeader</p>
+</dd>
+<dt class="field-even translated">resent-to<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">AddressHeader</p>
+</dd>
+<dt class="field-odd translated">cc<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueAddressHeader</p>
+</dd>
+<dt class="field-even translated">resent-cc<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">AddressHeader</p>
+</dd>
+<dt class="field-odd translated">bcc<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueAddressHeader</p>
+</dd>
+<dt class="field-even translated">resent-bcc<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">AddressHeader</p>
+</dd>
+<dt class="field-odd translated">from<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueAddressHeader</p>
+</dd>
+<dt class="field-even translated">resent-from<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">AddressHeader</p>
+</dd>
+<dt class="field-odd translated">reply-to<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">UniqueAddressHeader</p>
+</dd>
+<dt class="field-even translated">mime-version<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">MIMEVersionHeader</p>
+</dd>
+<dt class="field-odd translated">content-type<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">ContentTypeHeader</p>
+</dd>
+<dt class="field-even translated">content-disposition<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">ContentDispositionHeader</p>
+</dd>
+<dt class="field-odd translated">content-transfer-encoding<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">ContentTransferEncodingHeader</p>
+</dd>
+<dt class="field-even translated">message-id<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">MessageIDHeader</p>
+</dd>
+</dl>
+</div></blockquote>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">HeaderRegistry</span></code> 具有下列方法：</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="email.headerregistry.HeaderRegistry.map_to_type">
+<span class="sig-name descname"><span class="pre">map_to_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.HeaderRegistry.map_to_type" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><em>name</em> 是要映射的标头名称。它将在注册表中被转换为小写形式。 <em>cls</em> 是要与 <em>base_class</em> 一起被用来创建用于实例化与 <em>name</em> 相匹配的标头的类的专用类。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.headerregistry.HeaderRegistry.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.HeaderRegistry.__getitem__" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">构造并返回一个类来处理 <em>name</em> 标头的创建。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.headerregistry.HeaderRegistry.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.HeaderRegistry.__call__" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从注册表获得与 <em>name</em> 相关联的专用标头 (如果 <em>name</em> 未在注册表中出现则使用 <em>default_class</em>) 并将其与 <em>base_class</em> 相组合以产生类，调用被构造类的构造器，传入相同的参数列表，并最终返回由此创建的类实例。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">以下的类是用于表示从结构化标头解析的数据的类，并且通常会由应用程序使用以构造结构化的值并赋给特定的标头。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.Address">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">Address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.Address" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于表示电子邮件地址的类。地址的一般形式为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">display_name</span><span class="p">]</span> <span class="o">&lt;</span><span class="n">username</span><span class="nd">@domain</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p class="translated">或者:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">username</span><span class="nd">@domain</span>
+</pre></div>
+</div>
+<p class="translated">其中每个部分都必须符合在 <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 中阐述的特定语法规则。</p>
+<p class="translated">为了方便起见可以指定 <em>addr_spec</em> 来替代 <em>username</em> 和 <em>domain</em>，在此情况下 <em>username</em> 和 <em>domain</em> 将从 <em>addr_spec</em> 中解析。 <em>addr_spec</em> 应当是一个正确地引用了 RFC 的字符串；如果它不是 <code class="docutils literal notranslate"><span class="pre">Address</span></code> 则将引发错误。Unicode 字符也允许使用并将在序列化时被正确地编码。但是，根据 RFC，地址的 username 部分 <em>不允许</em> 有 unicode.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.Address.display_name">
+<span class="sig-name descname"><span class="pre">display_name</span></span><a class="headerlink" href="#email.headerregistry.Address.display_name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">地址的显示名称部分（如果有的话）并去除所有引用项。如果地址没有显示名称，则此属性将为空字符串。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.Address.username">
+<span class="sig-name descname"><span class="pre">username</span></span><a class="headerlink" href="#email.headerregistry.Address.username" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">地址的 <code class="docutils literal notranslate"><span class="pre">username</span></code> 部分，去除所有引用项。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.Address.domain">
+<span class="sig-name descname"><span class="pre">domain</span></span><a class="headerlink" href="#email.headerregistry.Address.domain" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">地址的 <code class="docutils literal notranslate"><span class="pre">domain</span></code> 部分。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.Address.addr_spec">
+<span class="sig-name descname"><span class="pre">addr_spec</span></span><a class="headerlink" href="#email.headerregistry.Address.addr_spec" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">地址的 <code class="docutils literal notranslate"><span class="pre">username&#64;domain</span></code> 部分，经过正确引用处理以作为纯地址使用（上面显示的第二种形式）。此属性不可变。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.headerregistry.Address.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.Address.__str__" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对象的 <code class="docutils literal notranslate"><span class="pre">str</span></code> 值是根据 <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 规则进行引用处理的地址，但不带任何非 ASCII 字符的 Content Transfer Encoding.</p>
+</dd></dl>
+
+<p class="translated">为了支持 SMTP (<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5321.html"><strong>RFC 5321</strong></a>)，<code class="docutils literal notranslate"><span class="pre">Address</span></code> 会处理一种特殊情况：如果 <code class="docutils literal notranslate"><span class="pre">username</span></code> 和 <code class="docutils literal notranslate"><span class="pre">domain</span></code> 均为空字符串 (或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>)，则 <code class="docutils literal notranslate"><span class="pre">Address</span></code> 的字符串值为 <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code>。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="email.headerregistry.Group">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.headerregistry.</span></span><span class="sig-name descname"><span class="pre">Group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addresses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.Group" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于表示地址组的类。地址组的一般形式为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">display_name</span><span class="p">:</span> <span class="p">[</span><span class="n">address</span><span class="o">-</span><span class="nb">list</span><span class="p">];</span>
+</pre></div>
+</div>
+<p class="translated">作为处理由组和单个地址混合构成的列表的便捷方式，<code class="docutils literal notranslate"><span class="pre">Group</span></code> 也可以通过将 <em>display_name</em> 设为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 以用来表示不是某个组的一部分的单独地址并提供单独地址的列表作为 <em>addresses</em>。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.Group.display_name">
+<span class="sig-name descname"><span class="pre">display_name</span></span><a class="headerlink" href="#email.headerregistry.Group.display_name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">组的 <code class="docutils literal notranslate"><span class="pre">display_name</span></code>。如果其为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 并且恰好有一个 <code class="docutils literal notranslate"><span class="pre">Address</span></code> 在 <code class="docutils literal notranslate"><span class="pre">addresses</span></code> 中，则 <code class="docutils literal notranslate"><span class="pre">Group</span></code> 表示一个不在某个组中的单独地址。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="email.headerregistry.Group.addresses">
+<span class="sig-name descname"><span class="pre">addresses</span></span><a class="headerlink" href="#email.headerregistry.Group.addresses" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个可能为空的表示组中地址的包含 <a class="reference internal" href="#email.headerregistry.Address" title="email.headerregistry.Address"><code class="xref py py-class docutils literal notranslate"><span class="pre">Address</span></code></a> 对象的元组。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.headerregistry.Group.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#email.headerregistry.Group.__str__" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><code class="docutils literal notranslate"><span class="pre">Group</span></code> 的 <code class="docutils literal notranslate"><span class="pre">str</span></code> 值会根据 <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5322.html"><strong>RFC 5322</strong></a> 进行格式化，但不带任何非 ASCII 字符的 Content Transfer Encoding。如果 <code class="docutils literal notranslate"><span class="pre">display_name</span></code> 为空值且只有一个单独 <code class="docutils literal notranslate"><span class="pre">Address</span></code> 在 <code class="docutils literal notranslate"><span class="pre">addresses</span></code> 列表中，则 <code class="docutils literal notranslate"><span class="pre">str</span></code> 值将与该单独 <code class="docutils literal notranslate"><span class="pre">Address</span></code> 的 <code class="docutils literal notranslate"><span class="pre">str</span></code> 相同。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated rubric">脚注</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p class="translated">最初在 3.3 中作为 <a class="reference internal" href="../glossary.html#term-provisional-package"><span class="xref std std-term">暂定模块</span></a> 添加</p>
+</aside>
+</aside>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="email.errors.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.errors</span></code>: 异常和缺陷类</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="email.contentmanager.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/email.headerregistry.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/email.headerregistry.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/email.headerregistry.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="email.contentmanager.html" title="email.contentmanager: 管理 MIME 内容"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="email.errors.html" title="email.errors: 异常和缺陷类"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="netdata.html" >互联网数据处理</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="email.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">email</span></code> --- 电子邮件与 MIME 处理包</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.headerregistry</span></code>: 自定义标头对象</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

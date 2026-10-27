@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="内存管理" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/memory.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="概述: 在 Python 中，内存管理涉及到一个包含所有 Python 对象和数据结构的私有堆（heap）。这个私有堆的管理由内部的 Python 内存管理器（Python memory manager） 保证。Python 内存管理器有不同的组件来处理各种动态存储管理方面的问题，如共享、分割、预分配或缓存。 在最底层，一个原始内存分配器通过与操作系统的内存管理器交互，确保私有堆中有足够的空..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_memory_094c0a38.png" />
+<meta property="og:image:alt" content="概述: 在 Python 中，内存管理涉及到一个包含所有 Python 对象和数据结构的私有堆（heap）。这个私有堆的管理由内部的 Python 内存管理器（Python memory manager） 保证。Python 内存管理器有不同的组件来处理各种动态存储管理方面的问题，如共享、分割、预分配或缓存。 在最底层，一个原始内存分配器通过与操作系统的内存管理器交互，确保私有堆中有足够的空..." />
+<meta name="description" content="概述: 在 Python 中，内存管理涉及到一个包含所有 Python 对象和数据结构的私有堆（heap）。这个私有堆的管理由内部的 Python 内存管理器（Python memory manager） 保证。Python 内存管理器有不同的组件来处理各种动态存储管理方面的问题，如共享、分割、预分配或缓存。 在最底层，一个原始内存分配器通过与操作系统的内存管理器交互，确保私有堆中有足够的空..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>内存管理 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="对象实现支持" href="objimpl.html" />
+    <link rel="prev" title="Python 初始化配置" href="init_config.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/memory.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">内存管理</a><ul>
+<li><a class="reference internal" href="#overview">概述</a></li>
+<li><a class="reference internal" href="#allocator-domains">分配器域</a></li>
+<li><a class="reference internal" href="#raw-memory-interface">原始内存接口</a></li>
+<li><a class="reference internal" href="#memory-interface">内存接口</a><ul>
+<li><a class="reference internal" href="#deprecated-aliases">一些已被弃用的别名</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#object-allocators">对象分配器</a></li>
+<li><a class="reference internal" href="#default-memory-allocators">默认内存分配器</a></li>
+<li><a class="reference internal" href="#customize-memory-allocators">自定义内存分配器</a></li>
+<li><a class="reference internal" href="#debug-hooks-on-the-python-memory-allocators">Python 内存分配器的调试钩子</a></li>
+<li><a class="reference internal" href="#the-pymalloc-allocator">pymalloc 分配器</a><ul>
+<li><a class="reference internal" href="#customize-pymalloc-arena-allocator">自定义 pymalloc Arena 分配器</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-mimalloc-allocator">mimalloc 分配器</a></li>
+<li><a class="reference internal" href="#tracemalloc-c-api">tracemalloc C API</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="init_config.html"
+                          title="上一章">Python 初始化配置</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="objimpl.html"
+                          title="下一章">对象实现支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/memory.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/memory.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/memory.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="objimpl.html" title="对象实现支持"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="init_config.html" title="Python 初始化配置"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">内存管理</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="memory-management">
+<span id="memory"></span><h1 class="translated">内存管理<a class="headerlink" href="#memory-management" title="Link to this heading">¶</a></h1>
+<section id="overview">
+<span id="memoryoverview"></span><h2 class="translated">概述<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p class="translated">在 Python 中，内存管理涉及到一个包含所有 Python 对象和数据结构的私有堆（heap）。这个私有堆的管理由内部的 <em>Python 内存管理器（Python memory manager）</em> 保证。Python 内存管理器有不同的组件来处理各种动态存储管理方面的问题，如共享、分割、预分配或缓存。</p>
+<p class="translated">在最底层，一个原始内存分配器通过与操作系统的内存管理器交互，确保私有堆中有足够的空间来存储所有与 Python 相关的数据。在原始内存分配器的基础上，几个对象特定的分配器在同一堆上运行，并根据每种对象类型的特点实现不同的内存管理策略。例如，整数对象在堆内的管理方式不同于字符串、元组或字典，因为整数需要不同的存储需求和速度与空间的权衡。因此，Python 内存管理器将一些工作分配给对象特定分配器，但确保后者在私有堆的范围内运行。</p>
+<p class="translated">Python 堆内存的管理是由解释器来执行，用户对它没有控制权，即使他们经常操作指向堆内内存块的对象指针，理解这一点十分重要。Python 对象和其他内部缓冲区的堆空间分配是由 Python 内存管理器按需通过本文档中列出的 Python/C API 函数进行的。</p>
+<p class="translated" id="index-0">为了避免内存破坏，扩展的作者永远不应该试图用 C 库函数导出的函数来对 Python 对象进行操作，这些函数包括： <code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code>, <code class="xref c c-func docutils literal notranslate"><span class="pre">calloc()</span></code>, <code class="xref c c-func docutils literal notranslate"><span class="pre">realloc()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">free()</span></code>。这将导致 C 分配器和 Python 内存管理器之间的混用，引发严重后果，这是由于它们实现了不同的算法，并在不同的堆上操作。但是，我们可以安全地使用 C 库分配器为单独的目的分配和释放内存块，如下例所示：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">res</span><span class="p">;</span>
+<span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">BUFSIZ</span><span class="p">);</span><span class="w"> </span><span class="cm">/* for I/O */</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">buf</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">PyErr_NoMemory</span><span class="p">();</span>
+<span class="p">...</span><span class="n">执行一些涉及</span><span class="w"> </span><span class="n">buf</span><span class="w"> </span><span class="n">的</span><span class="w"> </span><span class="n">I</span><span class="o">/</span><span class="n">O</span><span class="w"> </span><span class="n">操作</span><span class="p">...</span>
+<span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyBytes_FromString</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
+<span class="n">free</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span><span class="w"> </span><span class="cm">/* 已分配的 */</span>
+<span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+</pre></div>
+</div>
+<p class="translated">在这个例子中，I/O 缓冲区的内存请求是由 C 库分配器处理的。Python 内存管理器只参与了分配作为结果返回的字节对象。</p>
+<p class="untranslated">In most situations, however, it is recommended to allocate memory from the
+Python heap specifically because the latter is under control of the Python
+memory manager. For example, this is required when the interpreter is extended
+with new object types written in C. Another reason for using the Python heap is
+the desire to <em>inform</em> the Python memory manager about the memory needs of the
+extension module. Even when the requested memory is used exclusively for
+internal, highly specific purposes, delegating all memory requests to the Python
+memory manager causes the interpreter to have a more accurate image of its
+memory footprint as a whole. Consequently, under certain circumstances, the
+Python memory manager may or may not trigger appropriate actions, like garbage
+collection, memory compaction or other preventive procedures. Note that by using
+the C library allocator as shown in the previous example, the allocated memory
+for the I/O buffer completely escapes the Python memory manager.</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated">环境变量 <span class="target" id="index-12"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONMALLOC"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONMALLOC</span></code></a> 可被用来配置 Python 所使用的内存分配器。</p>
+<p class="translated">环境变量 <span class="target" id="index-13"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONMALLOCSTATS"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONMALLOCSTATS</span></code></a> 可以用来在每次创建新的 pymalloc 对象区域时以及在关闭时打印 <a class="reference internal" href="#pymalloc"><span class="std std-ref">pymalloc 内存分配器</span></a> 的统计数据。</p>
+</div>
+</section>
+<section id="allocator-domains">
+<h2 class="translated">分配器域<a class="headerlink" href="#allocator-domains" title="Link to this heading">¶</a></h2>
+<p class="translated" id="id1">所有分配函数都归属于三个不同的“域”之一 (另请参阅 <a class="reference internal" href="#c.PyMemAllocatorDomain" title="PyMemAllocatorDomain"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMemAllocatorDomain</span></code></a>)。 这些域代表不同的分配策略并针对不同的目的进行了优化。每个域如何分配内存以及每个域会调用哪些内部函数的详情被认为是实现细节，但是出于调试目的可以在 <a class="reference internal" href="#default-memory-allocators"><span class="std std-ref">默认内存分配器</span></a> 找到一张简化的表格。用于分配和释放内存的 API 必须来自同一个域。例如，<a class="reference internal" href="#c.PyMem_Free" title="PyMem_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Free()</span></code></a> 必须被用来释放使用 <a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a> 分配的内存。</p>
+<p class="translated">三个分配域分别是：</p>
+<ul class="simple">
+<li><p class="translated">原始域：用于为通用内存缓冲区分配内存，其分配 <em>必须</em> 转到系统分配器或者可在没有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 的情况下使用的分配器。内存将直接自系统请求。参见 <a class="reference internal" href="#raw-memoryinterface"><span class="std std-ref">原始内存接口</span></a>。</p></li>
+<li><p class="translated">“内存”域：用于为 Python 缓冲区和通用内存缓冲区分配内存，其分配必须在具有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 的情况下进行。内存将从 Python 私有堆获取。参见 <a class="reference internal" href="#memoryinterface"><span class="std std-ref">内存接口</span></a>。</p></li>
+<li><p class="translated">对象域：用于为 Python 对象分配内存。内存将从 Python 私有堆获取。参见 <a class="reference internal" href="#objectinterface"><span class="std std-ref">对象分配器</span></a>。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">自由线程</span></a> 构建版要求仅 Python 对象使用&quot;对象&quot;域来分配并且所有 Python 对象都使用该域来分配。这不同于之前的 Python 版本，在之前版本中这只是最佳实践而非硬性要求。</p>
+<p class="translated">例如，缓冲区（非 Python 对象）的分配应当使用 <a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a>, <a class="reference internal" href="#c.PyMem_RawMalloc" title="PyMem_RawMalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawMalloc()</span></code></a> 或 <code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code>，而不能用 <a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a>。</p>
+<p class="translated">参见 <a class="reference internal" href="../howto/free-threading-extensions.html#free-threaded-memory-allocation"><span class="std std-ref">内存分配 API</span></a>。</p>
+</div>
+</section>
+<section id="raw-memory-interface">
+<span id="raw-memoryinterface"></span><h2 class="translated">原始内存接口<a class="headerlink" href="#raw-memory-interface" title="Link to this heading">¶</a></h2>
+<p class="translated">以下函数集是系统分配器的包装器。这些函数是线程安全的，因此不需要 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">附加</span></a> <a class="reference internal" href="../glossary.html#term-thread-state"><span class="xref std std-term">thread state</span></a> 对象。</p>
+<p class="translated"><a class="reference internal" href="#default-memory-allocators"><span class="std std-ref">默认原始内存分配器</span></a> 使用以下函数：<code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code>, <code class="xref c c-func docutils literal notranslate"><span class="pre">calloc()</span></code>, <code class="xref c c-func docutils literal notranslate"><span class="pre">realloc()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">free()</span></code>；当请求零个字节时则调用 <code class="docutils literal notranslate"><span class="pre">malloc(1)</span></code> (或 <code class="docutils literal notranslate"><span class="pre">calloc(1,</span> <span class="pre">1)</span></code>)。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_RawMalloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_RawMalloc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_RawMalloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.13 版起.</em><p class="translated">分配 <em>n</em> 个字节并返回一个指向所分配内存的 <span class="c-expr sig sig-inline c"><span class="kt">void</span><span class="p">*</span></span> 类型指针，如果请求失败则返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">请求零字节可能返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针，就像调用了 <code class="docutils literal notranslate"><span class="pre">PyMem_RawMalloc(1)</span></code> 一样。但是内存不会以任何方式被初始化。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_RawCalloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_RawCalloc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">nelem</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">elsize</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_RawCalloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.13 版起.</em><p class="untranslated">Allocates <em>nelem</em> elements each of size <em>elsize</em> bytes and returns
+a pointer of type <span class="c-expr sig sig-inline c"><span class="kt">void</span><span class="p">*</span></span> to the allocated memory, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if the
+request fails. The memory is initialized to zeros.</p>
+<p class="translated">请求零字节可能返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针，就像调用了 <code class="docutils literal notranslate"><span class="pre">PyMem_RawCalloc(1,</span> <span class="pre">1)</span></code> 一样。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_RawRealloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_RawRealloc</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_RawRealloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.13 版起.</em><p class="translated">将 <em>p</em> 指向的内存块大小调整为 <em>n</em> 字节。以新旧内存块大小中的最小值为准，其中内容保持不变，</p>
+<p class="translated">如果 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则相当于调用 <code class="docutils literal notranslate"><span class="pre">PyMem_RawMalloc(n)</span></code>；如果 <em>n</em> 等于 0，则内存块大小会被调整，但不会被释放，返回非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针。</p>
+<p class="translated">除非 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，否则它必须是之前调用 <a class="reference internal" href="#c.PyMem_RawMalloc" title="PyMem_RawMalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawMalloc()</span></code></a>、<a class="reference internal" href="#c.PyMem_RawRealloc" title="PyMem_RawRealloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawRealloc()</span></code></a> 或 <a class="reference internal" href="#c.PyMem_RawCalloc" title="PyMem_RawCalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawCalloc()</span></code></a> 所返回的。</p>
+<p class="translated">如果请求失败，<a class="reference internal" href="#c.PyMem_RawRealloc" title="PyMem_RawRealloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawRealloc()</span></code></a> 返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，<em>p</em> 仍然是指向先前内存区域的有效指针。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_RawFree">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_RawFree</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_RawFree" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.13 版起.</em><p class="translated">释放 <em>p</em> 指向的内存块。<em>p</em> 必须是之前调用 <a class="reference internal" href="#c.PyMem_RawMalloc" title="PyMem_RawMalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawMalloc()</span></code></a>、<a class="reference internal" href="#c.PyMem_RawRealloc" title="PyMem_RawRealloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawRealloc()</span></code></a> 或 <a class="reference internal" href="#c.PyMem_RawCalloc" title="PyMem_RawCalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawCalloc()</span></code></a> 所返回的指针。否则，或在 <code class="docutils literal notranslate"><span class="pre">PyMem_RawFree(p)</span></code> 之前已经调用过的情况下，未定义的行为会发生。</p>
+<p class="translated">如果 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, 那么什么操作也不会进行。</p>
+</dd></dl>
+
+</section>
+<section id="memory-interface">
+<span id="memoryinterface"></span><h2 class="translated">内存接口<a class="headerlink" href="#memory-interface" title="Link to this heading">¶</a></h2>
+<p class="translated">以下函数集，仿照 ANSI C 标准，并指定了请求零字节时的行为，可用于从 Python 堆分配和释放内存。</p>
+<p class="translated">在启用 GIL 的构建（默认构建）上 <a class="reference internal" href="#default-memory-allocators"><span class="std std-ref">默认内存分配器</span></a> 使用 <a class="reference internal" href="#pymalloc"><span class="std std-ref">pymalloc 内存分配器</span></a>，而在 <a class="reference internal" href="../glossary.html#term-free-threaded-build"><span class="xref std std-term">free-threaded build</span></a> 上，默认改用 <a class="reference internal" href="#mimalloc"><span class="std std-ref">mimalloc 内存分配器</span></a>。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated">在使用这些函数时必须有一个 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>现在默认的分配器是 pymalloc 而非系统的 <code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code> 函数。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>在 <a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">free-threaded</span></a> 构建上，现在默认的分配器是 <a class="reference internal" href="#mimalloc"><span class="std std-ref">mimalloc</span></a>。</p>
+</div>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_Malloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_Malloc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_Malloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">分配 <em>n</em> 个字节并返回一个指向所分配内存的 <span class="c-expr sig sig-inline c"><span class="kt">void</span><span class="p">*</span></span> 类型指针，如果请求失败则返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">请求零字节可能返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针，就像调用了 <code class="docutils literal notranslate"><span class="pre">PyMem_Malloc(1)</span></code> 一样。但是内存不会以任何方式被初始化。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_Calloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_Calloc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">nelem</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">elsize</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_Calloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="untranslated">Allocates <em>nelem</em> elements each of size <em>elsize</em> bytes and returns
+a pointer of type <span class="c-expr sig sig-inline c"><span class="kt">void</span><span class="p">*</span></span> to the allocated memory, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if the
+request fails. The memory is initialized to zeros.</p>
+<p class="translated">请求零字节可能返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针，就像调用了 <code class="docutils literal notranslate"><span class="pre">PyMem_Calloc(1,</span> <span class="pre">1)</span></code> 一样。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_Realloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_Realloc</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_Realloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">将 <em>p</em> 指向的内存块大小调整为 <em>n</em> 字节。以新旧内存块大小中的最小值为准，其中内容保持不变，</p>
+<p class="translated">如果 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则相当于调用 <code class="docutils literal notranslate"><span class="pre">PyMem_Malloc(n)</span></code>；如果 <em>n</em> 等于 0，则内存块大小会被调整，但不会被释放，返回非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针。</p>
+<p class="translated">除非 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，否则它必须是之前调用 <a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a>、<a class="reference internal" href="#c.PyMem_Realloc" title="PyMem_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Realloc()</span></code></a> 或 <a class="reference internal" href="#c.PyMem_Calloc" title="PyMem_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Calloc()</span></code></a> 所返回的。</p>
+<p class="translated">如果请求失败，<a class="reference internal" href="#c.PyMem_Realloc" title="PyMem_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Realloc()</span></code></a> 返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，<em>p</em> 仍然是指向先前内存区域的有效指针。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_Free">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_Free</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_Free" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">释放 <em>p</em> 指向的内存块。<em>p</em> 必须是之前调用 <a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a>、<a class="reference internal" href="#c.PyMem_Realloc" title="PyMem_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Realloc()</span></code></a> 或 <a class="reference internal" href="#c.PyMem_Calloc" title="PyMem_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Calloc()</span></code></a> 所返回的指针。否则，或在 <code class="docutils literal notranslate"><span class="pre">PyMem_Free(p)</span></code> 之前已经调用过的情况下，未定义的行为会发生。</p>
+<p class="translated">如果 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, 那么什么操作也不会进行。</p>
+</dd></dl>
+
+<p class="translated">以下面向类型的宏为方便而提供。注意 <em>TYPE</em> 可以指任何 C 类型。</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_New">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_New</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TYPE</span></span>, <span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_New" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">与 <a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a> 相同，但会分配 <code class="docutils literal notranslate"><span class="pre">(n</span> <span class="pre">*</span> <span class="pre">sizeof(TYPE))</span></code> 字节的内存。返回一个转换为 <code class="docutils literal notranslate"><span class="pre">TYPE*</span></code> 的指针。内存不会以任何方式被初始化。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_Resize">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_Resize</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">p</span></span>, <span class="n"><span class="pre">TYPE</span></span>, <span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_Resize" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">与 <a class="reference internal" href="#c.PyMem_Realloc" title="PyMem_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Realloc()</span></code></a> 类似，但内存块的大小被调整为 <code class="docutils literal notranslate"><span class="pre">(n</span> <span class="pre">*</span> <span class="pre">sizeof(TYPE))</span></code> 个字节。返回一个转换为 <code class="docutils literal notranslate"><span class="pre">TYPE*</span></code> 的指针。在返回时，<em>p</em> 将是一个指向新内存区域的指针，或者如果执行失败则为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">这是一个 C 预处理宏， <em>p</em> 总是被重新赋值。请保存 <em>p</em> 的原始值，以避免在处理错误时丢失内存。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_Del">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_Del</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_Del" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">与 <a class="reference internal" href="#c.PyMem_Free" title="PyMem_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Free()</span></code></a> 相同</p>
+</dd></dl>
+
+<section id="deprecated-aliases">
+<h3 class="translated">一些已被弃用的别名<a class="headerlink" href="#deprecated-aliases" title="Link to this heading">¶</a></h3>
+<p class="translated">这些是现有函数和宏的已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated"><span class="xref std std-term">soft deprecated</span></a> 状态的别名。它们的存在只是为了向下兼容。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">已弃用的别名</p></th>
+<th class="head"><p class="translated">对应的函数或宏</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_MALLOC">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_MALLOC</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_MALLOC" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_NEW">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_NEW</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">type</span></span>, <span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_NEW" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="#c.PyMem_New" title="PyMem_New"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyMem_New</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_REALLOC">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_REALLOC</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ptr</span></span>, <span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_REALLOC" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="#c.PyMem_Realloc" title="PyMem_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Realloc()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_RESIZE">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_RESIZE</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ptr</span></span>, <span class="n"><span class="pre">type</span></span>, <span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_RESIZE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="#c.PyMem_Resize" title="PyMem_Resize"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyMem_Resize</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_FREE">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_FREE</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_FREE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="#c.PyMem_Free" title="PyMem_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Free()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyMem_DEL">
+<span class="sig-name descname"><span class="n"><span class="pre">PyMem_DEL</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_DEL" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="#c.PyMem_Free" title="PyMem_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Free()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>这些宏现在是对应的函数和宏的别名。在之前版本中，它们的行为是相同的，但它们的使用不一定能跨 Python 版本保持二进制兼容。</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 2.0 版本弃用.</span></p>
+</div>
+</section>
+</section>
+<section id="object-allocators">
+<span id="objectinterface"></span><h2 class="translated">对象分配器<a class="headerlink" href="#object-allocators" title="Link to this heading">¶</a></h2>
+<p class="translated">以下函数集，仿照 ANSI C 标准，并指定了请求零字节时的行为，可用于从 Python 堆分配和释放内存。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">当通过 <a class="reference internal" href="#customize-memory-allocators"><span class="std std-ref">自定义内存分配器</span></a> 部分描述的方法拦截该域中的分配函数时，无法保证这些分配器返回的内存可以被成功地转换成 Python 对象。</p>
+</div>
+<p class="translated"><a class="reference internal" href="#default-memory-allocators"><span class="std std-ref">默认对象分配器</span></a> 使用 <a class="reference internal" href="#pymalloc"><span class="std std-ref">pymalloc 内存分配器</span></a>。 在 <a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">自由线程</span></a> 构建上，默认改用 <a class="reference internal" href="#mimalloc"><span class="std std-ref">mimalloc 内存分配器</span></a>。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated">在使用这些函数时必须有一个 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</div>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_Malloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_Malloc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_Malloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">分配 <em>n</em> 个字节并返回一个指向所分配内存的 <span class="c-expr sig sig-inline c"><span class="kt">void</span><span class="p">*</span></span> 类型指针，如果请求失败则返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">请求零字节可能返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针，就像调用了 <code class="docutils literal notranslate"><span class="pre">PyObject_Malloc(1)</span></code> 一样。但是内存不会以任何方式被初始化。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_Calloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_Calloc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">nelem</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">elsize</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_Calloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="untranslated">Allocates <em>nelem</em> elements each of size <em>elsize</em> bytes and returns
+a pointer of type <span class="c-expr sig sig-inline c"><span class="kt">void</span><span class="p">*</span></span> to the allocated memory, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if the
+request fails. The memory is initialized to zeros.</p>
+<p class="translated">请求零字节可能返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针，就像调用了 <code class="docutils literal notranslate"><span class="pre">PyObject_Calloc(1,</span> <span class="pre">1)</span></code> 一样。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_Realloc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_Realloc</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_Realloc" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">将 <em>p</em> 指向的内存块大小调整为 <em>n</em> 字节。以新旧内存块大小中的最小值为准，其中内容保持不变，</p>
+<p class="translated">如果 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则相当于调用 <code class="docutils literal notranslate"><span class="pre">PyObject_Malloc(n)</span></code>；如果 <em>n</em> 等于 0，则内存块大小会被调整，但不会被释放，返回非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针。</p>
+<p class="translated">除非 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，否则它必须是之前调用 <a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a>、<a class="reference internal" href="#c.PyObject_Realloc" title="PyObject_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Realloc()</span></code></a> 或 <a class="reference internal" href="#c.PyObject_Calloc" title="PyObject_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Calloc()</span></code></a> 所返回的。</p>
+<p class="translated">如果请求失败，<a class="reference internal" href="#c.PyObject_Realloc" title="PyObject_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Realloc()</span></code></a> 返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，<em>p</em> 仍然是指向先前内存区域的有效指针。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_Free">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_Free</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_Free" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">释放 <em>p</em> 指向的内存块。<em>p</em> 必须是之前调用 <a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a>、<a class="reference internal" href="#c.PyObject_Realloc" title="PyObject_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Realloc()</span></code></a> 或 <a class="reference internal" href="#c.PyObject_Calloc" title="PyObject_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Calloc()</span></code></a> 所返回的指针。否则，或在 <code class="docutils literal notranslate"><span class="pre">PyObject_Free(p)</span></code> 之前已经调用过的情况下，未定义行为会发生。</p>
+<p class="translated">如果 <em>p</em> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, 那么什么操作也不会进行。</p>
+<p class="translated">请不要直接调用此函数来释放对象的内存；而应调用类型的 <a class="reference internal" href="typeobj.html#c.PyTypeObject.tp_free" title="PyTypeObject.tp_free"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_free</span></code></a> 槽位。</p>
+<p class="translated">请不要为 <a class="reference internal" href="gcsupport.html#c.PyObject_GC_New" title="PyObject_GC_New"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyObject_GC_New</span></code></a> 或 <a class="reference internal" href="gcsupport.html#c.PyObject_GC_NewVar" title="PyObject_GC_NewVar"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyObject_GC_NewVar</span></code></a> 所分配的内存使用此宏；而应改用 <a class="reference internal" href="gcsupport.html#c.PyObject_GC_Del" title="PyObject_GC_Del"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GC_Del()</span></code></a>。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="gcsupport.html#c.PyObject_GC_Del" title="PyObject_GC_Del"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GC_Del()</span></code></a> 是该函数针对由支持垃圾回收的类型分配的内存的等价物。</p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Realloc" title="PyObject_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Realloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Calloc" title="PyObject_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Calloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="allocation.html#c.PyObject_New" title="PyObject_New"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyObject_New</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="allocation.html#c.PyObject_NewVar" title="PyObject_NewVar"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyObject_NewVar</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="type.html#c.PyType_GenericAlloc" title="PyType_GenericAlloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GenericAlloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="typeobj.html#c.PyTypeObject.tp_free" title="PyTypeObject.tp_free"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_free</span></code></a></p></li>
+</ul>
+</div>
+</dd></dl>
+
+</section>
+<section id="default-memory-allocators">
+<span id="id2"></span><h2 class="translated">默认内存分配器<a class="headerlink" href="#default-memory-allocators" title="Link to this heading">¶</a></h2>
+<p class="translated">默认内存分配器：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">配置</p></th>
+<th class="head"><p class="translated">名称</p></th>
+<th class="head"><p class="translated">PyMem_RawMalloc</p></th>
+<th class="head"><p class="translated">PyMem_Malloc</p></th>
+<th class="head"><p class="translated">PyObject_Malloc</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">发布版本</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">&quot;pymalloc&quot;</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">pymalloc</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">pymalloc</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">调试构建</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">&quot;pymalloc_debug&quot;</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code> + debug</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">pymalloc</span></code> + debug</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">pymalloc</span></code> + debug</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">没有 pymalloc 的发布版本</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">&quot;malloc&quot;</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">没有 pymalloc 的调试构建</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">&quot;malloc_debug&quot;</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code> + debug</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code> + debug</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code> + debug</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">自由线程构建版</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">&quot;mimalloc&quot;</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">自由线程调试构建版</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">&quot;mimalloc_debug&quot;</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code> + debug</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code> + debug</p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code> + debug</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated">说明：</p>
+<ul class="simple">
+<li><p class="translated">名称：<span class="target" id="index-14"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONMALLOC"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONMALLOC</span></code></a> 环境变量的值。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">malloc</span></code>: 来自 C 标准库的系统分配器，C 函数：<code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code>、<code class="xref c c-func docutils literal notranslate"><span class="pre">calloc()</span></code>、<code class="xref c c-func docutils literal notranslate"><span class="pre">realloc()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">free()</span></code>。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">pymalloc</span></code>: <a class="reference internal" href="#pymalloc"><span class="std std-ref">pymalloc 内存分配器</span></a>。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">mimalloc</span></code>: <a class="reference internal" href="#mimalloc"><span class="std std-ref">mimalloc 内存分配器</span></a>。</p></li>
+<li><p class="translated">&quot;+ debug&quot;: 附带 <a class="reference internal" href="#pymem-debug-hooks"><span class="std std-ref">Python 内存分配器的调试钩子</span></a>.</p></li>
+<li><p class="translated">“调试构建”：<a class="reference internal" href="../using/configure.html#debug-build"><span class="std std-ref">调试模式下的 Python 构建</span></a>。</p></li>
+</ul>
+</section>
+<section id="customize-memory-allocators">
+<span id="id3"></span><h2 class="translated">自定义内存分配器<a class="headerlink" href="#customize-memory-allocators" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyMemAllocatorEx">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMemAllocatorEx</span></span></span><a class="headerlink" href="#c.PyMemAllocatorEx" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">用于描述内存块分配器的结构体。该结构体具有下列字段：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">域</p></th>
+<th class="head"><p class="translated">含义</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">*ctx</span></code></p></td>
+<td><p class="translated">作为第一个参数传入的用户上下文</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void*</span> <span class="pre">malloc(void</span> <span class="pre">*ctx,</span> <span class="pre">size_t</span> <span class="pre">size)</span></code></p></td>
+<td><p class="translated">分配一个内存块</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void*</span> <span class="pre">calloc(void</span> <span class="pre">*ctx,</span> <span class="pre">size_t</span> <span class="pre">nelem,</span> <span class="pre">size_t</span> <span class="pre">elsize)</span></code></p></td>
+<td><p class="translated">分配一个初始化为 0 的内存块</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void*</span> <span class="pre">realloc(void</span> <span class="pre">*ctx,</span> <span class="pre">void</span> <span class="pre">*ptr,</span> <span class="pre">size_t</span> <span class="pre">new_size)</span></code></p></td>
+<td><p class="translated">分配一个内存块或调整其大小</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">free(void</span> <span class="pre">*ctx,</span> <span class="pre">void</span> <span class="pre">*ptr)</span></code></p></td>
+<td><p class="translated">释放一个内存块</p></td>
+</tr>
+</tbody>
+</table>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMemAllocator</span></code> 结构被重命名为 <a class="reference internal" href="#c.PyMemAllocatorEx" title="PyMemAllocatorEx"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMemAllocatorEx</span></code></a> 并新增了一个 <code class="docutils literal notranslate"><span class="pre">calloc</span></code> 字段。</p>
+</div>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyMemAllocatorDomain">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMemAllocatorDomain</span></span></span><a class="headerlink" href="#c.PyMemAllocatorDomain" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">用来识别分配器域的枚举类。域有：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PYMEM_DOMAIN_RAW">
+<span class="sig-name descname"><span class="n"><span class="pre">PYMEM_DOMAIN_RAW</span></span></span><a class="headerlink" href="#c.PYMEM_DOMAIN_RAW" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">函数</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_RawMalloc" title="PyMem_RawMalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawMalloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_RawRealloc" title="PyMem_RawRealloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawRealloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_RawCalloc" title="PyMem_RawCalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawCalloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_RawFree" title="PyMem_RawFree"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawFree()</span></code></a></p></li>
+</ul>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PYMEM_DOMAIN_MEM">
+<span class="sig-name descname"><span class="n"><span class="pre">PYMEM_DOMAIN_MEM</span></span></span><a class="headerlink" href="#c.PYMEM_DOMAIN_MEM" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">函数</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a>,</p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_Realloc" title="PyMem_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Realloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_Calloc" title="PyMem_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Calloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyMem_Free" title="PyMem_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Free()</span></code></a></p></li>
+</ul>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PYMEM_DOMAIN_OBJ">
+<span class="sig-name descname"><span class="n"><span class="pre">PYMEM_DOMAIN_OBJ</span></span></span><a class="headerlink" href="#c.PYMEM_DOMAIN_OBJ" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">函数</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Realloc" title="PyObject_Realloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Realloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Calloc" title="PyObject_Calloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Calloc()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#c.PyObject_Free" title="PyObject_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Free()</span></code></a></p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_GetAllocator">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_GetAllocator</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMemAllocatorDomain" title="PyMemAllocatorDomain"><span class="n"><span class="pre">PyMemAllocatorDomain</span></span></a><span class="w"> </span><span class="n"><span class="pre">domain</span></span>, <a class="reference internal" href="#c.PyMemAllocatorEx" title="PyMemAllocatorEx"><span class="n"><span class="pre">PyMemAllocatorEx</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_GetAllocator" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">获取指定域的内存块分配器。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_SetAllocator">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_SetAllocator</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMemAllocatorDomain" title="PyMemAllocatorDomain"><span class="n"><span class="pre">PyMemAllocatorDomain</span></span></a><span class="w"> </span><span class="n"><span class="pre">domain</span></span>, <a class="reference internal" href="#c.PyMemAllocatorEx" title="PyMemAllocatorEx"><span class="n"><span class="pre">PyMemAllocatorEx</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_SetAllocator" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">设置指定域的内存块分配器。</p>
+<p class="translated">当请求零字节时，新的分配器必须返回一个独特的非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 指针。</p>
+<p class="translated">对于 <a class="reference internal" href="#c.PYMEM_DOMAIN_RAW" title="PYMEM_DOMAIN_RAW"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_RAW</span></code></a> 域，分配器必须是线程安全的：当分配器被调用时 <a class="reference internal" href="../glossary.html#term-thread-state"><span class="xref std std-term">thread state</span></a> 是没有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">附加的</span></a>。</p>
+<p class="translated">对于其余的域，分配器也必须是线程安全的：分配器可以在不共享 <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a> 的不同解释器中被调用。</p>
+<p class="translated">如果新的分配器不是钩子（不调用之前的分配器），必须调用 <a class="reference internal" href="#c.PyMem_SetupDebugHooks" title="PyMem_SetupDebugHooks"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_SetupDebugHooks()</span></code></a> 函数在新分配器上重新安装调试钩子。</p>
+<p class="translated">另请参阅 <a class="reference internal" href="init_config.html#c.PyPreConfig.allocator" title="PyPreConfig.allocator"><code class="xref c c-member docutils literal notranslate"><span class="pre">PyPreConfig.allocator</span></code></a> 和 <a class="reference internal" href="init_config.html#c-preinit"><span class="std std-ref">Preinitialize Python with PyPreConfig</span></a> 一节。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated"><a class="reference internal" href="#c.PyMem_SetAllocator" title="PyMem_SetAllocator"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_SetAllocator()</span></code></a> 确实具有以下合约：</p>
+<ul class="simple">
+<li><p class="translated">可以在 <a class="reference internal" href="init_config.html#c.Py_PreInitialize" title="Py_PreInitialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_PreInitialize()</span></code></a> 之后和 <a class="reference internal" href="interp-lifecycle.html#c.Py_InitializeFromConfig" title="Py_InitializeFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_InitializeFromConfig()</span></code></a> 之前调用它来安装自定义的内存分配器。对于所安装的分配器除了域的规定以外没有任何其他限制（例如 Raw Domain 允许分配器在没有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 的情况下被调用）。请参阅 <a class="reference internal" href="#id1"><span class="std std-ref">有关分配器域的章节</span></a> 来了解详情。</p></li>
+<li><p class="translated">如果在 Python 已完成初始化之后（即 <a class="reference internal" href="interp-lifecycle.html#c.Py_InitializeFromConfig" title="Py_InitializeFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_InitializeFromConfig()</span></code></a> 被调用之后）被调用则自定义分配器**必须**包装现有的分配器。将现有分配器替换为任意的其他分配器是 <strong>不受支持的</strong>。</p></li>
+</ul>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>所有分配器都必须是线程安全的。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMem_SetupDebugHooks">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMem_SetupDebugHooks</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMem_SetupDebugHooks" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">设置 <a class="reference internal" href="#pymem-debug-hooks"><span class="std std-ref">Python 内存分配器的调试钩子</span></a> 以检测内存错误。</p>
+</dd></dl>
+
+</section>
+<section id="debug-hooks-on-the-python-memory-allocators">
+<span id="pymem-debug-hooks"></span><h2 class="translated">Python 内存分配器的调试钩子<a class="headerlink" href="#debug-hooks-on-the-python-memory-allocators" title="Link to this heading">¶</a></h2>
+<p class="translated">当 <a class="reference internal" href="../using/configure.html#debug-build"><span class="std std-ref">Python 在调试模式下构建</span></a>，<a class="reference internal" href="#c.PyMem_SetupDebugHooks" title="PyMem_SetupDebugHooks"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_SetupDebugHooks()</span></code></a> 函数在 <a class="reference internal" href="init_config.html#c-preinit"><span class="std std-ref">Python 预初始化</span></a> 时被调用，以在 Python 内存分配器上设置调试钩子以检测内存错误。</p>
+<p class="translated"><span class="target" id="index-15"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONMALLOC"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONMALLOC</span></code></a> 环境变量可被用于在以发行模式下编译的 Python 上安装调试钩子 (例如: <code class="docutils literal notranslate"><span class="pre">PYTHONMALLOC=debug</span></code>)。</p>
+<p class="translated"><a class="reference internal" href="#c.PyMem_SetupDebugHooks" title="PyMem_SetupDebugHooks"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_SetupDebugHooks()</span></code></a> 函数可被用于在调用了 <a class="reference internal" href="#c.PyMem_SetAllocator" title="PyMem_SetAllocator"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_SetAllocator()</span></code></a> 之后设置调试钩子。</p>
+<p class="translated">这些调试钩子用特殊的、可辨认的位模式填充动态分配的内存块。新分配的内存用字节 <code class="docutils literal notranslate"><span class="pre">0xCD</span></code> (<code class="docutils literal notranslate"><span class="pre">PYMEM_CLEANBYTE</span></code>) 填充，释放的内存用字节 <code class="docutils literal notranslate"><span class="pre">0xDD</span></code> (<code class="docutils literal notranslate"><span class="pre">PYMEM_DEADBYTE</span></code>) 填充。内存块被填充了字节 <code class="docutils literal notranslate"><span class="pre">0xFD</span></code> (<code class="docutils literal notranslate"><span class="pre">PYMEM_FORBIDDENBYTE</span></code>) 的“禁止字节”包围。这些字节串不太可能是合法的地址、浮点数或 ASCII 字符串。</p>
+<p class="translated">运行时检查：</p>
+<ul class="simple">
+<li><p class="translated">检测对 API 的违反。例如：检测对 <a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a> 分配的内存块调用 <a class="reference internal" href="#c.PyObject_Free" title="PyObject_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Free()</span></code></a>。</p></li>
+<li><p class="translated">检测缓冲区起始位置前的写入（缓冲区下溢）。</p></li>
+<li><p class="translated">检测缓冲区终止位置后的写入（缓冲区溢出）。</p></li>
+<li><p class="translated">检测当调用 <a class="reference internal" href="#c.PYMEM_DOMAIN_OBJ" title="PYMEM_DOMAIN_OBJ"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_OBJ</span></code></a> (如：<a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a>) 和 <a class="reference internal" href="#c.PYMEM_DOMAIN_MEM" title="PYMEM_DOMAIN_MEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_MEM</span></code></a> (如：<a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a>) 域的分配器函数时是否持有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 状态。</p></li>
+</ul>
+<p class="translated">在出错时，调试钩子使用 <a class="reference internal" href="../library/tracemalloc.html#module-tracemalloc" title="tracemalloc: Trace memory allocations."><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracemalloc</span></code></a> 模块来回溯内存块被分配的位置。只有当 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tracemalloc</span></code> 正在追踪 Python 内存分配，并且内存块被追踪时，才会显示回溯。</p>
+<p class="translated">让 <em>S</em> = <code class="docutils literal notranslate"><span class="pre">sizeof(size_t)</span></code>。将 <code class="docutils literal notranslate"><span class="pre">2*S</span></code> 个字节添加到每个被请求的 <em>N</em> 字节数据块的两端。内存的布局像是这样，其中 p 代表由类似 malloc 或类似 realloc 的函数所返回的地址 (<code class="docutils literal notranslate"><span class="pre">p[i:j]</span></code> 表示从 <code class="docutils literal notranslate"><span class="pre">*(p+i)</span></code> 左侧开始到 <code class="docutils literal notranslate"><span class="pre">*(p+j)</span></code> 左侧止的字节数据切片；请注意对负索引号的处理与 Python 切片是不同的）:</p>
+<dl>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">p[-2*S:-S]</span></code></dt><dd><p class="translated">最初所要求的字节数。这是一个 size_t，为大端序（易于在内存转储中读取）。</p>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">p[-S]</span></code></dt><dd><p class="translated">API 标识符（ASCII 字符）:</p>
+<ul class="simple">
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">'r'</span></code> 表示 <a class="reference internal" href="#c.PYMEM_DOMAIN_RAW" title="PYMEM_DOMAIN_RAW"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_RAW</span></code></a>。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">'m'</span></code> 表示 <a class="reference internal" href="#c.PYMEM_DOMAIN_MEM" title="PYMEM_DOMAIN_MEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_MEM</span></code></a>。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">'o'</span></code> 表示 <a class="reference internal" href="#c.PYMEM_DOMAIN_OBJ" title="PYMEM_DOMAIN_OBJ"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_OBJ</span></code></a>。</p></li>
+</ul>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">p[-S+1:0]</span></code></dt><dd><p class="translated">PYMEM_FORBIDDENBYTE 的副本。用于捕获下层的写入和读取。</p>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">p[0:N]</span></code></dt><dd><p class="translated">所请求的内存，用 PYMEM_CLEANBYTE 的副本填充，用于捕获对未初始化内存的引用。当调用 realloc 之类的函数来请求更大的内存块时，额外新增的字节也会用 PYMEM_CLEANBYTE 来填充。当调用 free 之类的函数时，这些字节会用 PYMEM_DEADBYTE 来重写，以捕获对已释放内存的引用。当调用 realloc 之类的函数来请求更小的内存块时，多余的旧字节也会用 PYMEM_DEADBYTE 来填充。</p>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">p[N:N+S]</span></code></dt><dd><p class="translated">PYMEM_FORBIDDENBYTE 的副本。用于捕获超限的写入和读取。</p>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">p[N+S:N+2*S]</span></code></dt><dd><p class="translated">仅当定义了 <code class="docutils literal notranslate"><span class="pre">PYMEM_DEBUG_SERIALNO</span></code> 宏时会被使用（默认未定义）。</p>
+<p class="translated">一个序列号，每次调用 malloc 或 realloc 之类的函数时都会递增 1。大端序的 <code class="xref c c-type docutils literal notranslate"><span class="pre">size_t</span></code>。如果之后检测到了“被破坏的内存”，此序列号提供了一个很好的手段用来在下次运行时设置中断点，以捕获该内存块被破坏的瞬间。obmalloc.c 中的静态函数 bumpserialno() 是唯一会递增序列号的函数，它的存在让你可以轻松地设置这样的中断点。</p>
+</dd>
+</dl>
+<p class="translated">一个 realloc 之类或 free 之类的函数会先检查两端的 PYMEM_FORBIDDENBYTE 字节是否完好。 如果它们被改变了，则会将诊断输出写入到 stderr，并且程序将通过 Py_FatalError() 中止。 另一种主要的失败模式是当程序读到某种特殊的比特模式并试图将其用作地址时触发内存错误。如果你随即进入调试器并查看该对象，你很可能会看到它已完全被填充为 PYMEM_DEADBYTE (意味着已释放的内存被使用) 或 PYMEM_CLEANBYTE (意味着未初始化的内存被使用)。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span><a class="reference internal" href="#c.PyMem_SetupDebugHooks" title="PyMem_SetupDebugHooks"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_SetupDebugHooks()</span></code></a> 函数现在也能在使用发布模式编译的 Python 上工作。 当发生错误时，调试钩子现在会使用 <a class="reference internal" href="../library/tracemalloc.html#module-tracemalloc" title="tracemalloc: Trace memory allocations."><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracemalloc</span></code></a> 来获取已分配内存块的回溯信息。调试钩子现在还会在 <a class="reference internal" href="#c.PYMEM_DOMAIN_OBJ" title="PYMEM_DOMAIN_OBJ"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_OBJ</span></code></a> 和 <a class="reference internal" href="#c.PYMEM_DOMAIN_MEM" title="PYMEM_DOMAIN_MEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_MEM</span></code></a> 作用域的函数被调用时检查是否有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 状态。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>字节模式 <code class="docutils literal notranslate"><span class="pre">0xCB</span></code> (<code class="docutils literal notranslate"><span class="pre">PYMEM_CLEANBYTE</span></code>)、<code class="docutils literal notranslate"><span class="pre">0xDB</span></code> (<code class="docutils literal notranslate"><span class="pre">PYMEM_DEADBYTE</span></code>) 和 <code class="docutils literal notranslate"><span class="pre">0xFB</span></code> (<code class="docutils literal notranslate"><span class="pre">PYMEM_FORBIDDENBYTE</span></code>) 已被 <code class="docutils literal notranslate"><span class="pre">0xCD</span></code>、<code class="docutils literal notranslate"><span class="pre">0xDD</span></code> 和 <code class="docutils literal notranslate"><span class="pre">0xFD</span></code> 替代以使用与 Windows CRT 调试 <code class="docutils literal notranslate"><span class="pre">malloc()</span></code> 和 <code class="docutils literal notranslate"><span class="pre">free()</span></code> 相同的值。</p>
+</div>
+</section>
+<section id="the-pymalloc-allocator">
+<span id="pymalloc"></span><h2 class="translated">pymalloc 分配器<a class="headerlink" href="#the-pymalloc-allocator" title="Link to this heading">¶</a></h2>
+<p class="translated">Python 有一个针对短生命周期的小对象（小于或等于 512 字节）进行了优化的 <em>pymalloc</em> 分配器。 它使用名为“arena”的内存映射，在 32 位平台上的固定大小为 256 KiB，在 64 位平台上的固定大小为 1 MiB。对于大于 512 字节的分配，它会回退为 <a class="reference internal" href="#c.PyMem_RawMalloc" title="PyMem_RawMalloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawMalloc()</span></code></a> 和 <a class="reference internal" href="#c.PyMem_RawRealloc" title="PyMem_RawRealloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_RawRealloc()</span></code></a>。</p>
+<p class="translated"><em>pymalloc</em> 是 <a class="reference internal" href="#c.PYMEM_DOMAIN_MEM" title="PYMEM_DOMAIN_MEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_MEM</span></code></a> (例如：<a class="reference internal" href="#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a>) 和 <a class="reference internal" href="#c.PYMEM_DOMAIN_OBJ" title="PYMEM_DOMAIN_OBJ"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_OBJ</span></code></a> (例如：<a class="reference internal" href="#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a>) 域的 <a class="reference internal" href="#default-memory-allocators"><span class="std std-ref">默认分配器</span></a> 实现。</p>
+<p class="translated">arena 分配器使用以下函数：</p>
+<ul class="simple">
+<li><p class="translated">Windows 上的 <code class="xref c c-func docutils literal notranslate"><span class="pre">VirtualAlloc()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">VirtualFree()</span></code>，</p></li>
+<li><p class="translated"><code class="xref c c-func docutils literal notranslate"><span class="pre">mmap()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">munmap()</span></code>，如果可用的话，</p></li>
+<li><p class="translated">否则，<code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">free()</span></code>。</p></li>
+</ul>
+<p class="translated">如果 Python 配置了 <a class="reference internal" href="../using/configure.html#cmdoption-without-pymalloc"><code class="xref std std-option docutils literal notranslate"><span class="pre">--without-pymalloc</span></code></a> 选项，那么此分配器将被禁用。 也可以在运行时使用 <span class="target" id="index-16"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONMALLOC"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONMALLOC</span></code></a> (例如: <code class="docutils literal notranslate"><span class="pre">PYTHONMALLOC=malloc</span></code>) 环境变量来禁用它。</p>
+<p class="translated">通常，在使用 AddressSanitizer（通过 <a class="reference internal" href="../using/configure.html#cmdoption-with-address-sanitizer"><code class="xref std std-option docutils literal notranslate"><span class="pre">--with-address-sanitizer</span></code></a> 选项）构建 Python 时，建议禁用 pymalloc 内存分配器，这有助于发现 C 代码中的底层错误。</p>
+<section id="customize-pymalloc-arena-allocator">
+<h3 class="translated">自定义 pymalloc Arena 分配器<a class="headerlink" href="#customize-pymalloc-arena-allocator" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyObjectArenaAllocator">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObjectArenaAllocator</span></span></span><a class="headerlink" href="#c.PyObjectArenaAllocator" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">用来描述一个 arena 分配器的结构体。这个结构体有三个字段：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">域</p></th>
+<th class="head"><p class="translated">含义</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">*ctx</span></code></p></td>
+<td><p class="translated">作为第一个参数传入的用户上下文</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void*</span> <span class="pre">alloc(void</span> <span class="pre">*ctx,</span> <span class="pre">size_t</span> <span class="pre">size)</span></code></p></td>
+<td><p class="translated">分配一块 size 字节的区域</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">free(void</span> <span class="pre">*ctx,</span> <span class="pre">void</span> <span class="pre">*ptr,</span> <span class="pre">size_t</span> <span class="pre">size)</span></code></p></td>
+<td><p class="translated">释放一块区域</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_GetArenaAllocator">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_GetArenaAllocator</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyObjectArenaAllocator" title="PyObjectArenaAllocator"><span class="n"><span class="pre">PyObjectArenaAllocator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_GetArenaAllocator" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">获取 arena 分配器</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_SetArenaAllocator">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_SetArenaAllocator</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyObjectArenaAllocator" title="PyObjectArenaAllocator"><span class="n"><span class="pre">PyObjectArenaAllocator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_SetArenaAllocator" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">设置 arena 分配器</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="the-mimalloc-allocator">
+<span id="mimalloc"></span><h2 class="translated">mimalloc 分配器<a class="headerlink" href="#the-mimalloc-allocator" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+<p class="translated">Python 会在下层平台支持可用时支持 <a class="reference external" href="https://github.com/microsoft/mimalloc/">mimalloc</a> 分配器。 mimalloc 是一款具有优良运行效率特性的通用分配器，它最初由 Daan Leijen 针对 Koka 和 Lean 语言运行时系统开发。</p>
+<p class="untranslated">Unlike <a class="reference internal" href="#pymalloc"><span class="std std-ref">pymalloc</span></a>, which is optimized for small objects (512
+bytes or fewer), mimalloc handles allocations of any size.</p>
+<p class="untranslated">In the <a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">free-threaded</span></a> build, mimalloc is the default
+and <strong>required</strong> allocator for the <a class="reference internal" href="#c.PYMEM_DOMAIN_MEM" title="PYMEM_DOMAIN_MEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_MEM</span></code></a> and
+<a class="reference internal" href="#c.PYMEM_DOMAIN_OBJ" title="PYMEM_DOMAIN_OBJ"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYMEM_DOMAIN_OBJ</span></code></a> domains.  It cannot be disabled in free-threaded
+builds.  The free-threaded build uses per-thread mimalloc heaps, which allows
+allocation and deallocation to proceed without locking in most cases.</p>
+<p class="untranslated">In the default (non-free-threaded) build, mimalloc is available but not the
+default allocator.  It can be selected at runtime using
+<span class="target" id="index-6"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONMALLOC"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONMALLOC</span></code></a><code class="docutils literal notranslate"><span class="pre">=mimalloc</span></code> (or <code class="docutils literal notranslate"><span class="pre">mimalloc_debug</span></code> to include
+<a class="reference internal" href="#pymem-debug-hooks"><span class="std std-ref">debug hooks</span></a>).  It can be disabled at build time
+using the <a class="reference internal" href="../using/configure.html#cmdoption-without-mimalloc"><code class="xref std std-option docutils literal notranslate"><span class="pre">--without-mimalloc</span></code></a> configure option, but this option
+cannot be combined with <a class="reference internal" href="../using/configure.html#cmdoption-disable-gil"><code class="xref std std-option docutils literal notranslate"><span class="pre">--disable-gil</span></code></a>.</p>
+</section>
+<section id="tracemalloc-c-api">
+<h2 class="translated">tracemalloc C API<a class="headerlink" href="#tracemalloc-c-api" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyTraceMalloc_Track">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyTraceMalloc_Track</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">domain</span></span>, <span class="n"><span class="pre">uintptr_t</span></span><span class="w"> </span><span class="n"><span class="pre">ptr</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyTraceMalloc_Track" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在 <a class="reference internal" href="../library/tracemalloc.html#module-tracemalloc" title="tracemalloc: Trace memory allocations."><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracemalloc</span></code></a> 模块中跟踪一个已分配的内存块。</p>
+<p class="translated">成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>，出错时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> (无法分配内存来保存跟踪信息)。如果禁用了 tracemalloc 则返回 <code class="docutils literal notranslate"><span class="pre">-2</span></code>。</p>
+<p class="translated">如果内存块已被跟踪，则更新现有跟踪信息。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyTraceMalloc_Untrack">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyTraceMalloc_Untrack</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">domain</span></span>, <span class="n"><span class="pre">uintptr_t</span></span><span class="w"> </span><span class="n"><span class="pre">ptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyTraceMalloc_Untrack" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在 <a class="reference internal" href="../library/tracemalloc.html#module-tracemalloc" title="tracemalloc: Trace memory allocations."><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracemalloc</span></code></a> 模块中取消跟踪一个已分配的内存块。如果内存块未被跟踪则不执行任何操作。</p>
+<p class="translated">如果 tracemalloc 被禁用则返回 <code class="docutils literal notranslate"><span class="pre">-2</span></code>，否则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+</dd></dl>
+
+</section>
+<section id="examples">
+<span id="memoryexamples"></span><h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p class="translated">以下是来自 <a class="reference internal" href="#memoryoverview"><span class="std std-ref">概述</span></a> 小节的示例，经过重写以使 I/O 缓冲区是通过使用第一个函数集从 Python 堆中分配的:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">res</span><span class="p">;</span>
+<span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">PyMem_Malloc</span><span class="p">(</span><span class="n">BUFSIZ</span><span class="p">);</span><span class="w"> </span><span class="cm">/* for I/O */</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">buf</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">PyErr_NoMemory</span><span class="p">();</span>
+<span class="cm">/* ...执行一些涉及 buf 的 I/O 操作... */</span>
+<span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyBytes_FromString</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
+<span class="n">PyMem_Free</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span><span class="w"> </span><span class="cm">/* 使用 PyMem_Malloc 分配的 */</span>
+<span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+</pre></div>
+</div>
+<p class="translated">使用面向类型函数集的相同代码:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">res</span><span class="p">;</span>
+<span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyMem_New</span><span class="p">(</span><span class="kt">char</span><span class="p">,</span><span class="w"> </span><span class="n">BUFSIZ</span><span class="p">);</span><span class="w"> </span><span class="cm">/* 用于 I/O */</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">buf</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">PyErr_NoMemory</span><span class="p">();</span>
+<span class="cm">/* ...执行一些涉及 buf 的 I/O 操作... */</span>
+<span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyBytes_FromString</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
+<span class="n">PyMem_Free</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span><span class="w"> </span><span class="cm">/* 使用 PyMem_New 分配的 */</span>
+<span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+</pre></div>
+</div>
+<p class="translated">请注意在以上两个示例中，缓冲区总是通过归属于相同集的函数来操纵的。事实上，对于一个给定的内存块必须使用相同的内存 API 族，以便使得混合不同分配器的风险减至最低。以下代码序列包含两处错误，其中一个被标记为 <em>fatal</em> 因为它混合了两种在不同堆上操作的不同分配器。:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyMem_New</span><span class="p">(</span><span class="kt">char</span><span class="p">,</span><span class="w"> </span><span class="n">BUFSIZ</span><span class="p">);</span>
+<span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">BUFSIZ</span><span class="p">);</span>
+<span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">PyMem_Malloc</span><span class="p">(</span><span class="n">BUFSIZ</span><span class="p">);</span>
+<span class="p">...</span>
+<span class="n">PyMem_Del</span><span class="p">(</span><span class="n">buf3</span><span class="p">);</span><span class="w">  </span><span class="cm">/* 错误 -- 应为 PyMem_Free() */</span>
+<span class="n">free</span><span class="p">(</span><span class="n">buf2</span><span class="p">);</span><span class="w">       </span><span class="cm">/* 正确 -- 通过 malloc() 分配的 */</span>
+<span class="n">free</span><span class="p">(</span><span class="n">buf1</span><span class="p">);</span><span class="w">       </span><span class="cm">/* 致命错误 -- 应为 PyMem_Free()  */</span>
+</pre></div>
+</div>
+<p class="translated">除了用于处理来自 Python 堆的原始内存块的函数，Python 中的对象还通过 <a class="reference internal" href="allocation.html#c.PyObject_New" title="PyObject_New"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyObject_New</span></code></a>, <a class="reference internal" href="allocation.html#c.PyObject_NewVar" title="PyObject_NewVar"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyObject_NewVar</span></code></a> 和 <a class="reference internal" href="#c.PyObject_Free" title="PyObject_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Free()</span></code></a> 进行分配和释放。</p>
+<p class="translated">这些将在有关如何在 C 中定义和实现新对象类型的下一章中讲解。</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">内存管理</a><ul>
+<li><a class="reference internal" href="#overview">概述</a></li>
+<li><a class="reference internal" href="#allocator-domains">分配器域</a></li>
+<li><a class="reference internal" href="#raw-memory-interface">原始内存接口</a></li>
+<li><a class="reference internal" href="#memory-interface">内存接口</a><ul>
+<li><a class="reference internal" href="#deprecated-aliases">一些已被弃用的别名</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#object-allocators">对象分配器</a></li>
+<li><a class="reference internal" href="#default-memory-allocators">默认内存分配器</a></li>
+<li><a class="reference internal" href="#customize-memory-allocators">自定义内存分配器</a></li>
+<li><a class="reference internal" href="#debug-hooks-on-the-python-memory-allocators">Python 内存分配器的调试钩子</a></li>
+<li><a class="reference internal" href="#the-pymalloc-allocator">pymalloc 分配器</a><ul>
+<li><a class="reference internal" href="#customize-pymalloc-arena-allocator">自定义 pymalloc Arena 分配器</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-mimalloc-allocator">mimalloc 分配器</a></li>
+<li><a class="reference internal" href="#tracemalloc-c-api">tracemalloc C API</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="init_config.html"
+                          title="上一章">Python 初始化配置</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="objimpl.html"
+                          title="下一章">对象实现支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/memory.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/memory.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/memory.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="objimpl.html" title="对象实现支持"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="init_config.html" title="Python 初始化配置"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">内存管理</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

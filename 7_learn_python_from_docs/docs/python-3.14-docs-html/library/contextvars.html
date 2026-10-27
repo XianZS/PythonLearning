@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="contextvars --- 上下文变量" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/contextvars.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="本模块提供了相关API用于管理、存储和访问上下文相关的状态。 ContextVar 类用于声明 上下文变量 并与其一起使用。函数 copy_context() 和类 Context 用于管理异步框架中的当前上下文。 当在并发代码中使用时，有状态的上下文管理器应当使用上下文变量而不是 threading.local() 以防止它们的状态意外地泄露到其他代码中。 更多信息参见 PEP 567 。..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_contextvars_811da711.png" />
+<meta property="og:image:alt" content="本模块提供了相关API用于管理、存储和访问上下文相关的状态。 ContextVar 类用于声明 上下文变量 并与其一起使用。函数 copy_context() 和类 Context 用于管理异步框架中的当前上下文。 当在并发代码中使用时，有状态的上下文管理器应当使用上下文变量而不是 threading.local() 以防止它们的状态意外地泄露到其他代码中。 更多信息参见 PEP 567 。..." />
+<meta name="description" content="本模块提供了相关API用于管理、存储和访问上下文相关的状态。 ContextVar 类用于声明 上下文变量 并与其一起使用。函数 copy_context() 和类 Context 用于管理异步框架中的当前上下文。 当在并发代码中使用时，有状态的上下文管理器应当使用上下文变量而不是 threading.local() 以防止它们的状态意外地泄露到其他代码中。 更多信息参见 PEP 567 。..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>contextvars --- 上下文变量 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="_thread --- 低层级多线程 API" href="_thread.html" />
+    <link rel="prev" title="queue --- 同步队列类" href="queue.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/contextvars.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextvars</span></code> --- 上下文变量</a><ul>
+<li><a class="reference internal" href="#context-variables">上下文变量</a></li>
+<li><a class="reference internal" href="#manual-context-management">手动上下文管理</a></li>
+<li><a class="reference internal" href="#asyncio-support">asyncio 支持</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="queue.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">queue</span></code> --- 同步队列类</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="_thread.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">_thread</span></code> --- 低层级多线程 API</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/contextvars.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/contextvars.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/contextvars.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="_thread.html" title="_thread --- 低层级多线程 API"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="queue.html" title="queue --- 同步队列类"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concurrency.html" accesskey="U">并发执行</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextvars</span></code> --- 上下文变量</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-contextvars">
+<span id="contextvars-context-variables"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextvars</span></code> --- 上下文变量<a class="headerlink" href="#module-contextvars" title="Link to this heading">¶</a></h1>
+<hr class="docutils" />
+<p class="translated">本模块提供了相关API用于管理、存储和访问上下文相关的状态。 <a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> 类用于声明 <em>上下文变量</em> 并与其一起使用。函数 <a class="reference internal" href="#contextvars.copy_context" title="contextvars.copy_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy_context()</span></code></a> 和类 <a class="reference internal" href="#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> 用于管理异步框架中的当前上下文。</p>
+<p class="translated">当在并发代码中使用时，有状态的上下文管理器应当使用上下文变量而不是 <a class="reference internal" href="threading.html#threading.local" title="threading.local"><code class="xref py py-func docutils literal notranslate"><span class="pre">threading.local()</span></code></a> 以防止它们的状态意外地泄露到其他代码中。</p>
+<p class="translated">更多信息参见  <span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0567/"><strong>PEP 567</strong></a> 。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+<section id="context-variables">
+<h2 class="translated">上下文变量<a class="headerlink" href="#context-variables" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="contextvars.ContextVar">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextvars.</span></span><span class="sig-name descname"><span class="pre">ContextVar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.ContextVar" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此类用于声明一个新的上下文变量，如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">var</span><span class="p">:</span> <span class="n">ContextVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s1">&#39;var&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><em>name</em> 参数用于内省和调试，必需。</p>
+<p class="translated">调用 <a class="reference internal" href="#contextvars.ContextVar.get" title="contextvars.ContextVar.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.get()</span></code></a>  时，如果上下文中没有找到此变量的值，则返回可选的仅限关键字参数 <em>default</em>  。</p>
+<p class="translated"><strong>重要：</strong> 上下文变量应该在顶级模块中创建，且永远不要在闭包中创建。  <a class="reference internal" href="#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> 对象拥有对上下文变量的强引用，这会阻止上下文变量被垃圾收集器正确回收。</p>
+<p class="untranslated"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code>s are <a class="reference internal" href="typing.html#generics"><span class="std std-ref">generic</span></a> over the type of
+their contained value.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="contextvars.ContextVar.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#contextvars.ContextVar.name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">上下文变量的名称，只读属性。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.ContextVar.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">default</span></span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.ContextVar.get" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前上下文中此上下文变量的值。</p>
+<p class="translated">如果当前上下文中此变量没有值，则此方法会:</p>
+<ul class="simple">
+<li><p class="translated">如果提供了 <em>default</em>，返回其值；或者</p></li>
+<li><p class="translated">返回上下文变量本身的默认值， 如果创建此上下文变量时提供了默认值；或者</p></li>
+<li><p class="translated">抛出  <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a> 异常。</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.ContextVar.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.ContextVar.set" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">调用此方法设置上下文变量在当前上下文中的值。</p>
+<p class="translated">必选参数 <em>value</em> 是上下文变量的新值。</p>
+<p class="translated">返回一个 <a class="reference internal" href="#contextvars.Token" title="contextvars.Token"><code class="xref py py-class docutils literal notranslate"><span class="pre">Token</span></code></a> 对象，可通过 <a class="reference internal" href="#contextvars.ContextVar.reset" title="contextvars.ContextVar.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.reset()</span></code></a>  方法将上下文变量还原为之前某个状态。</p>
+<p class="translated">出于方便考虑，token 对象可被用作上下文管理器以避免手动调用 <a class="reference internal" href="#contextvars.ContextVar.reset" title="contextvars.ContextVar.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.reset()</span></code></a>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s1">&#39;var&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;default value&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;new value&#39;</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;new value&#39;</span>
+
+<span class="k">assert</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;default value&#39;</span>
+</pre></div>
+</div>
+<p class="translated">这是以下代码的快捷写法:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s1">&#39;var&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;default value&#39;</span><span class="p">)</span>
+
+<span class="n">token</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;new value&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;new value&#39;</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">var</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;default value&#39;</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14: </span>增加对使用 token 作为上下文管理器的支持。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.ContextVar.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.ContextVar.reset" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将上下文变量重置为调用 <a class="reference internal" href="#contextvars.ContextVar.set" title="contextvars.ContextVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.set()</span></code></a> 之前、创建 <em>token</em> 时候的状态。</p>
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s1">&#39;var&#39;</span><span class="p">)</span>
+
+<span class="n">token</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;new value&#39;</span><span class="p">)</span>
+<span class="c1"># 使用 &#39;var&#39; 的代码；var.get() 将返回 &#39;new value&#39;。</span>
+<span class="n">var</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+<span class="c1"># 在重置调用之后 var 将不再有值，</span>
+<span class="c1"># 因此 var.get() 将引发一个 LookupError。</span>
+</pre></div>
+</div>
+<p class="translated">同一个 <em>token</em> 不能被重复使用。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextvars.Token">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextvars.</span></span><span class="sig-name descname"><span class="pre">Token</span></span><a class="headerlink" href="#contextvars.Token" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><em>Token</em> 对象是由 <a class="reference internal" href="#contextvars.ContextVar.set" title="contextvars.ContextVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.set()</span></code></a> 方法返回的。 它们可以被传入 <a class="reference internal" href="#contextvars.ContextVar.reset" title="contextvars.ContextVar.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.reset()</span></code></a> 方法来恢复在对应的 <em>set</em> 之前状态的变量值。 同一个 token 不能多次重置上下文变量。</p>
+<p class="translated">Token 支持 <a class="reference internal" href="../reference/datamodel.html#context-managers"><span class="std std-ref">上下文管理器协议</span></a> 以自动重置上下文变量。 参见 <a class="reference internal" href="#contextvars.ContextVar.set" title="contextvars.ContextVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.set()</span></code></a>。</p>
+<p class="untranslated">Tokens are <a class="reference internal" href="typing.html#generics"><span class="std std-ref">generic</span></a> over the same type as the
+<a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> which created them.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14: </span>增加对用作上下文管理器的支持。</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="contextvars.Token.var">
+<span class="sig-name descname"><span class="pre">var</span></span><a class="headerlink" href="#contextvars.Token.var" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">只读属性。指向创建此 token 的 <a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> 对象。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="contextvars.Token.old_value">
+<span class="sig-name descname"><span class="pre">old_value</span></span><a class="headerlink" href="#contextvars.Token.old_value" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个只读属性。 会被设为在创建此令牌的 <a class="reference internal" href="#contextvars.ContextVar.set" title="contextvars.ContextVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.set()</span></code></a> 方法调用之前该变量所具有的值。 如果调用之前变量没有设置值则它会指向 <a class="reference internal" href="#contextvars.Token.MISSING" title="contextvars.Token.MISSING"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Token.MISSING</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="contextvars.Token.MISSING">
+<span class="sig-name descname"><span class="pre">MISSING</span></span><a class="headerlink" href="#contextvars.Token.MISSING" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#contextvars.Token.old_value" title="contextvars.Token.old_value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Token.old_value</span></code></a> 会用到的一个标记对象。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="manual-context-management">
+<h2 class="translated">手动上下文管理<a class="headerlink" href="#manual-context-management" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="contextvars.copy_context">
+<span class="sig-prename descclassname"><span class="pre">contextvars.</span></span><span class="sig-name descname"><span class="pre">copy_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.copy_context" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前 <a class="reference internal" href="#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> 对象的拷贝。</p>
+<p class="translated">以下代码片段会获取当前上下文的拷贝并打印设置到其中的所有变量及其值:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span> <span class="o">=</span> <span class="n">copy_context</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p class="translated">此函数具有 <em>O</em>(1) 复杂度，也就是说对于只包含几个上下文变量和很多上下文变量的情况运行速度是相同的。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextvars.Context">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextvars.</span></span><span class="sig-name descname"><span class="pre">Context</span></span><a class="headerlink" href="#contextvars.Context" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVars</span></code></a> 与其值的映射。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">Context()</span></code> 创建一个不包含任何值的空上下文。如果要获取当前上下文的拷贝，使用 <a class="reference internal" href="#contextvars.copy_context" title="contextvars.copy_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy_context()</span></code></a> 函数。</p>
+<p class="translated">每个线程有它自己在用的 <code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code> 对象栈。 <a class="reference internal" href="../glossary.html#term-current-context"><span class="xref std std-term">current context</span></a> 是位于当前线程的栈的顶部的 <code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code> 对象。 栈中所有的 <code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code> 对象都被视为是 <em>进入过的</em>。</p>
+<p class="translated"><em>进入</em> 一个上下文，这可以通过调用其 <a class="reference internal" href="#contextvars.Context.run" title="contextvars.Context.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> 方法来完成，将把该上下文推入当前线程的栈的顶部使它成为当前上下文。</p>
+<p class="translated"><em>退出</em> 当前上下文，这可以通过从传给 <a class="reference internal" href="#contextvars.Context.run" title="contextvars.Context.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> 方法的回调退出，通过将该上下文弹出上下文栈的顶部将当前上下文恢复至该上下文被进入之前的上下文来完成。</p>
+<p class="translated">由于每个线程都有它自己的上下文栈，<a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> 对象的行为类似于 <a class="reference internal" href="threading.html#threading.local" title="threading.local"><code class="xref py py-func docutils literal notranslate"><span class="pre">threading.local()</span></code></a> 在不同线程中赋值时的行为。</p>
+<p class="translated">尝试进入一个已被进入的上下文，包括在其他线程中被进入的上下文，将会引发 <a class="reference internal" href="exceptions.html#RuntimeError" title="RuntimeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>。</p>
+<p class="translated">在退出一个上下文之后，它可以在稍后被重新进入（从任何线程）。</p>
+<p class="translated">任何通过 <a class="reference internal" href="#contextvars.ContextVar.set" title="contextvars.ContextVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.set()</span></code></a> 方法对 <a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> 值的修改都将在当前上下文中被记录。 <a class="reference internal" href="#contextvars.ContextVar.get" title="contextvars.ContextVar.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ContextVar.get()</span></code></a> 方法将返回关联到当前上下文的值。 退出一个上下文将有效地撤销在进入该上下文期间对上下文变量的任何修改（如有必要，这些值可通过重新进入相应的上下文来恢复）。</p>
+<p class="translated">Context 实现了 <a class="reference internal" href="collections.abc.html#collections.abc.Mapping" title="collections.abc.Mapping"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a> 接口。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.Context.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.Context.run" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">进入 Context，执行 <code class="docutils literal notranslate"><span class="pre">callable(*args,</span> <span class="pre">**kwargs)</span></code>，然后退出 Context。 返回 <em>callable</em> 的返回值，或者如果发生了异常则传播该异常。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
+
+<span class="n">var</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">&#39;var&#39;</span><span class="p">)</span>
+<span class="n">var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;spam&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>  <span class="c1"># &#39;spam&#39;</span>
+
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">copy_context</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 在调用 &#39;copy_context()&#39; 和 &#39;ctx.run(main)&#39; 之前</span>
+    <span class="c1"># &#39;var&#39; 被设为 &#39;spam&#39;，因此：</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>  <span class="c1"># &#39;spam&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>  <span class="c1"># &#39;spam&#39;</span>
+
+    <span class="n">var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;ham&#39;</span><span class="p">)</span>
+
+    <span class="c1"># 在将 &#39;var&#39; 设为 &#39;ham&#39; 之后：</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>  <span class="c1"># &#39;ham&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>  <span class="c1"># &#39;ham&#39;</span>
+
+<span class="c1"># &#39;main&#39; 函数对 &#39;var&#39; 的任何修改</span>
+<span class="c1"># 都将包含在 &#39;ctx&#39; 中。</span>
+<span class="n">ctx</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+
+<span class="c1"># &#39;main()&#39; 函数是在 &#39;ctx&#39; 上下文中运行的，</span>
+<span class="c1"># 因此对 &#39;var&#39; 的修改将包含在其中：</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>  <span class="c1"># &#39;ham&#39;</span>
+
+<span class="c1"># 不过，在 &#39;ctx&#39; 之外，&#39;var&#39; 仍为 &#39;spam&#39;：</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>  <span class="c1"># &#39;spam&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.Context.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.Context.copy" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回此上下文对象的浅拷贝。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">var</span> <span class="pre">in</span> <span class="pre">context</span></span></dt>
+<dd><p class="translated">如果 <em>context</em> 中设置了 <em>var</em> 的值，返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>，否则返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">context[var]</span></span></dt>
+<dd><p class="translated">返回 <em>var</em> <a class="reference internal" href="#contextvars.ContextVar" title="contextvars.ContextVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> 变量的值。如果上下文对象中未设置该变量，则抛出 <a class="reference internal" href="exceptions.html#KeyError" title="KeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> 异常。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.Context.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.Context.get" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 <em>var</em> 在上下文对象中具有值则返回 <em>var</em> 的值。 在其他情况下返回 <em>default</em>。 如果未给出 <em>default</em> 则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">iter(context)</span></span></dt>
+<dd><p class="translated">返回一个存储在上下文对象中的变量的迭代器。</p>
+</dd></dl>
+
+<dl class="describe">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">len(proxy)</span></span></dt>
+<dd><p class="translated">返回上下文对象中所设的变量的数量。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.Context.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.Context.keys" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回上下文对象中的所有变量的列表。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.Context.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.Context.values" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回上下文对象中所有变量值的列表。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextvars.Context.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextvars.Context.items" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回包含上下文对象中所有变量及其值的 2 元组的列表。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="asyncio-support">
+<h2 class="translated">asyncio 支持<a class="headerlink" href="#asyncio-support" title="Link to this heading">¶</a></h2>
+<p class="translated">上下文变量在 <a class="reference internal" href="asyncio.html#module-asyncio" title="asyncio: Asynchronous I/O."><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code></a> 中有原生的支持并且无需任何额外配置即可被使用。 例如，以下是一个简单的回显服务器，它使用上下文变量来让远程客户端的地址在处理该客户端的 Task 中可用:</p>
+<div class="untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
+
+<span class="n">client_addr_var</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">&#39;client_addr&#39;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">render_goodbye</span><span class="p">():</span>
+    <span class="c1"># The address of the currently handled client can be accessed</span>
+    <span class="c1"># without passing it explicitly to this function.</span>
+
+    <span class="n">client_addr</span> <span class="o">=</span> <span class="n">client_addr_var</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Good bye, client @ </span><span class="si">{</span><span class="n">client_addr</span><span class="si">}</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_request</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">writer</span><span class="p">):</span>
+    <span class="n">addr</span> <span class="o">=</span> <span class="n">writer</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">get_extra_info</span><span class="p">(</span><span class="s1">&#39;socket&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">getpeername</span><span class="p">()</span>
+    <span class="n">client_addr_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+
+    <span class="c1"># In any code that we call is now possible to get</span>
+    <span class="c1"># client&#39;s address by calling &#39;client_addr_var.get()&#39;.</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">break</span>
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;HTTP/1.1 200 OK</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># status line</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># headers</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">render_goodbye</span><span class="p">())</span>  <span class="c1"># body</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">srv</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">start_server</span><span class="p">(</span>
+        <span class="n">handle_request</span><span class="p">,</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="mi">8081</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">srv</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">srv</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+
+<span class="c1"># To test it you can use telnet or curl:</span>
+<span class="c1">#     telnet 127.0.0.1 8081</span>
+<span class="c1">#     curl 127.0.0.1:8081</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextvars</span></code> --- 上下文变量</a><ul>
+<li><a class="reference internal" href="#context-variables">上下文变量</a></li>
+<li><a class="reference internal" href="#manual-context-management">手动上下文管理</a></li>
+<li><a class="reference internal" href="#asyncio-support">asyncio 支持</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="queue.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">queue</span></code> --- 同步队列类</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="_thread.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">_thread</span></code> --- 低层级多线程 API</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/contextvars.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/contextvars.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/contextvars.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="_thread.html" title="_thread --- 低层级多线程 API"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="queue.html" title="queue --- 同步队列类"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concurrency.html" >并发执行</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextvars</span></code> --- 上下文变量</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

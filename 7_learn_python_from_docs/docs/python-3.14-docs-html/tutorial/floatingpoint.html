@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="15. 浮点算术：问题和限制" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/tutorial/floatingpoint.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="浮点数在计算机硬件中是以基数为 2 (二进制) 的小数来表示的。 例如， 十进制 小数 0.625 的值为 6/10 + 2/100 + 5/1000，而同样的 二进制 小数 0.101 的值为 1/2 + 0/4 + 1/8。 这两个小数具有相同的值，唯一的区别在于第一个写成了基数为 10 的小数形式，而第二个则写成了基数为 2 的小数形式。 不幸的是，大多数的十进制小数都不能精确地表示为..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_tutorial_floatingpoint_f0fd346c.png" />
+<meta property="og:image:alt" content="浮点数在计算机硬件中是以基数为 2 (二进制) 的小数来表示的。 例如， 十进制 小数 0.625 的值为 6/10 + 2/100 + 5/1000，而同样的 二进制 小数 0.101 的值为 1/2 + 0/4 + 1/8。 这两个小数具有相同的值，唯一的区别在于第一个写成了基数为 10 的小数形式，而第二个则写成了基数为 2 的小数形式。 不幸的是，大多数的十进制小数都不能精确地表示为..." />
+<meta name="description" content="浮点数在计算机硬件中是以基数为 2 (二进制) 的小数来表示的。 例如， 十进制 小数 0.625 的值为 6/10 + 2/100 + 5/1000，而同样的 二进制 小数 0.101 的值为 1/2 + 0/4 + 1/8。 这两个小数具有相同的值，唯一的区别在于第一个写成了基数为 10 的小数形式，而第二个则写成了基数为 2 的小数形式。 不幸的是，大多数的十进制小数都不能精确地表示为..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>15. 浮点算术：问题和限制 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="16. 附录" href="appendix.html" />
+    <link rel="prev" title="14. 交互式编辑和编辑历史" href="interactive.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/tutorial/floatingpoint.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">15. 浮点算术：问题和限制</a><ul>
+<li><a class="reference internal" href="#representation-error">15.1. 表示性错误</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="interactive.html"
+                          title="上一章"><span class="section-number">14. </span>交互式编辑和编辑历史</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="appendix.html"
+                          title="下一章"><span class="section-number">16. </span>附录</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "tutorial/floatingpoint.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/tutorial/floatingpoint.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/tutorial/floatingpoint.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="appendix.html" title="16. 附录"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="interactive.html" title="14. 交互式编辑和编辑历史"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 教程</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">15. </span>浮点算术：问题和限制</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="floating-point-arithmetic-issues-and-limitations">
+<span id="tut-fp-issues"></span><h1 class="translated"><span class="section-number">15. </span>浮点算术：问题和限制<a class="headerlink" href="#floating-point-arithmetic-issues-and-limitations" title="Link to this heading">¶</a></h1>
+<p class="translated">浮点数在计算机硬件中是以基数为 2 (二进制) 的小数来表示的。 例如，<strong>十进制</strong> 小数 <code class="docutils literal notranslate"><span class="pre">0.625</span></code> 的值为 6/10 + 2/100 + 5/1000，而同样的 <strong>二进制</strong> 小数 <code class="docutils literal notranslate"><span class="pre">0.101</span></code> 的值为 1/2 + 0/4 + 1/8。 这两个小数具有相同的值，唯一的区别在于第一个写成了基数为 10 的小数形式，而第二个则写成了基数为 2 的小数形式。</p>
+<p class="translated">不幸的是，大多数的十进制小数都不能精确地表示为二进制小数。这导致在大多数情况下，你输入的十进制浮点数都只能近似地以二进制浮点数形式储存在计算机中。</p>
+<p class="translated">用十进制来理解这个问题显得更加容易一些。考虑分数 1/3 。我们可以得到它在十进制下的一个近似值</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">0.3</span>
+</pre></div>
+</div>
+<p class="translated">或者，更近似的，:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">0.33</span>
+</pre></div>
+</div>
+<p class="translated">或者，更近似的，:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">0.333</span>
+</pre></div>
+</div>
+<p class="translated">以此类推。结果是无论你写下多少的数字，它都永远不会等于 1/3 ，只是更加更加地接近 1/3 。</p>
+<p class="translated">同样的道理，无论你使用多少位以 2 为基数的数码，十进制的 0.1 都无法精确地表示为一个以 2 为基数的小数。 在以 2 为基数的情况下， 1/10 是一个无限循环小数</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">0.0001100110011001100110011001100110011001100110011</span><span class="o">...</span>
+</pre></div>
+</div>
+<p class="translated">在任何一个位置停下，你都只能得到一个近似值。在今天的大部分架构上，浮点数都只能近似地使用二进制小数表示，对应分数的分子使用从最高有效位开始的前 53 位表示，分母则表示为 2 的幂次。在 1/10 这个例子中，相应的二进制分数是 <code class="docutils literal notranslate"><span class="pre">3602879701896397</span> <span class="pre">/</span> <span class="pre">2</span> <span class="pre">**</span> <span class="pre">55</span></code> ，它很接近 1/10 ，但并不是 1/10 。</p>
+<p class="translated">由于值的显示方式大多数用户都不会意识到这个差异的存在。 Python 只会打印计算机中存储的二进制值的十进制近似值。 在大部分计算机中，如果 Python 要把 0.1 的二进制值对应的准确的十进制值打印出来，将会显示成这样:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mf">0.1</span>
+<span class="go">0.1000000000000000055511151231257827021181583404541015625</span>
+</pre></div>
+</div>
+<p class="translated">这比大多数人认为有用的数位更多，因此 Python 通过改为显示舍入值来保留可管理的数位:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="o">/</span> <span class="mi">10</span>
+<span class="go">0.1</span>
+</pre></div>
+</div>
+<p class="translated">牢记，即使输出的结果看起来好像就是 1/10 的精确值，实际储存的值只是最接近 1/10 的计算机可表示的二进制分数。</p>
+<p class="translated">有趣的是，有许多不同的十进制数共享相同的最接近的近似二进制小数。例如， <code class="docutils literal notranslate"><span class="pre">0.1</span></code> 、 <code class="docutils literal notranslate"><span class="pre">0.10000000000000001</span></code> 、 <code class="docutils literal notranslate"><span class="pre">0.1000000000000000055511151231257827021181583404541015625</span></code> 全都近似于 <code class="docutils literal notranslate"><span class="pre">3602879701896397</span> <span class="pre">/</span> <span class="pre">2</span> <span class="pre">**</span> <span class="pre">55</span></code> 。由于所有这些十进制值都具有相同的近似值，因此可以显示其中任何一个，同时仍然保留不变的 <code class="docutils literal notranslate"><span class="pre">eval(repr(x))</span> <span class="pre">==</span> <span class="pre">x</span></code> 。</p>
+<p class="translated">在历史上，Python 提示符和内置的 <a class="reference internal" href="../library/functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 函数会选择具有 17 位有效数字的来显示，即 <code class="docutils literal notranslate"><span class="pre">0.10000000000000001</span></code>。 从 Python 3.1 开始，Python（在大多数系统上）现在能够选择这些表示中最短的并简单地显示 <code class="docutils literal notranslate"><span class="pre">0.1</span></code> 。</p>
+<p class="translated">请注意这种情况是二进制浮点数的本质特性：它不是 Python 的错误，也不是你代码中的错误。 你会在所有支持你的硬件中的浮点运算的语言中发现同样的情况（虽然某些语言在默认状态或所有输出模式下都不会 <em>显示</em> 这种差异）。</p>
+<p class="translated">想要更美观的输出，你可能会希望使用字符串格式化来产生限定长度的有效位数:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">format</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="s1">&#39;.12g&#39;</span><span class="p">)</span>  <span class="c1"># 有 12 个有效数位</span>
+<span class="go">&#39;3.14159265359&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">format</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="s1">&#39;.2f&#39;</span><span class="p">)</span>   <span class="c1"># 小数点后有 2 个数位</span>
+<span class="go">&#39;3.14&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">repr</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="go">&#39;3.141592653589793&#39;</span>
+</pre></div>
+</div>
+<p class="translated">必须重点了解的是，这在实际上只是一个假象：你只是将真正的机器值进行了舍入操作再 <em>显示</em> 而已。</p>
+<p class="translated">一个假象还可能导致另一个假象。 例如，由于这个 0.1 并非真正的 1/10，将三个 0.1 的值相加也无法恰好得到 0.3:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">==</span> <span class="mf">0.3</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p class="translated">而且，由于这个 0.1 无法精确表示 1/10 而这个 0.3 也无法精确表示 3/10 的值，使用 <a class="reference internal" href="../library/functions.html#round" title="round"><code class="xref py py-func docutils literal notranslate"><span class="pre">round()</span></code></a> 函数进行预先舍入也是没用的:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p class="translated">虽然这些数字无法精确表示其所要代表的实际值，但是可以使用 <a class="reference internal" href="../library/math.html#math.isclose" title="math.isclose"><code class="xref py py-func docutils literal notranslate"><span class="pre">math.isclose()</span></code></a> 函数来进行不精确的值比较:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="translated">或者，也可以使用 <a class="reference internal" href="../library/functions.html#round" title="round"><code class="xref py py-func docutils literal notranslate"><span class="pre">round()</span></code></a> 函数来大致地比较近似程度：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">ndigits</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">round</span><span class="p">(</span><span class="mi">22</span> <span class="o">/</span> <span class="mi">7</span><span class="p">,</span> <span class="n">ndigits</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="translated">二进制浮点运算会有许多这样令人惊讶的情况。 有关 &quot;0.1&quot; 的问题会在下面 &quot;表示性错误&quot; 一节中更精确详细地描述。 请参阅 <a class="reference external" href="https://jvns.ca/blog/2023/01/13/examples-of-floating-point-problems/">Examples of Floating Point Problems</a> 获取针对二进制浮点运算机制及在实践中各种常见问题的概要说明。 还可参阅 <a class="reference external" href="http://www.indowsway.com/floatingpoint.htm">The Perils of Floating Point</a> 获取其他常见意外现象的更完整介绍。</p>
+<p class="translated">正如那篇文章的结尾所言，“对此问题并无简单的答案。” 但是也不必过于担心浮点数的问题！ Python 浮点运算中的错误是从浮点运算硬件继承而来，而在大多数机器上每次浮点运算的误差不超过 2**53 分之一。 这对大多数任务来说都已足够，但你确实需要记住它并非十进制算术，且每次浮点运算都可能会导致新的舍入错误。</p>
+<p class="translated">虽然病态的情况确实存在，但对于大多数正常的浮点运算使用来说，你只需简单地将最终显示的结果舍入为你期望的十进制数值即可得到你期望的结果。 <a class="reference internal" href="../library/stdtypes.html#str" title="str"><code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code></a> 通常已足够，对于更精细的控制可参看 <a class="reference internal" href="../library/string.html#formatstrings"><span class="std std-ref">Format string syntax</span></a> 中 <a class="reference internal" href="../library/stdtypes.html#str.format" title="str.format"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.format()</span></code></a> 方法的格式描述符。</p>
+<p class="translated">对于需要精确十进制表示的使用场景，请尝试使用 <a class="reference internal" href="../library/decimal.html#module-decimal" title="decimal: Implementation of the General Decimal Arithmetic Specification."><code class="xref py py-mod docutils literal notranslate"><span class="pre">decimal</span></code></a> 模块，该模块实现了适合会计应用和高精度应用的十进制运算。</p>
+<p class="translated">另一种形式的精确运算由 <a class="reference internal" href="../library/fractions.html#module-fractions" title="fractions: Rational numbers."><code class="xref py py-mod docutils literal notranslate"><span class="pre">fractions</span></code></a> 模块提供支持，该模块实现了基于有理数的算术运算（因此可以精确表示像 1/3 这样的数值）。</p>
+<p class="translated">如果你是浮点运算的重度用户那么你应当了解一下 NumPy 包以及由 SciPy 项目所提供的许多其他数学和统计运算包。 参见 &lt;<a class="reference external" href="https://scipy.org">https://scipy.org</a>&gt;。</p>
+<p class="translated">Python 还提供了一些工具，可能在你 <em>确实</em> 想要知道一个浮点数精确值的少数情况下提供帮助。 例如 <a class="reference internal" href="../library/stdtypes.html#float.as_integer_ratio" title="float.as_integer_ratio"><code class="xref py py-meth docutils literal notranslate"><span class="pre">float.as_integer_ratio()</span></code></a> 方法会将浮点数值表示为一个分数:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="mf">3.14159</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
+<span class="go">(3537115888337719, 1125899906842624)</span>
+</pre></div>
+</div>
+<p class="translated">由于这个比值是精确的，它可以被用来无损地重建原始值:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">==</span> <span class="mi">3537115888337719</span> <span class="o">/</span> <span class="mi">1125899906842624</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../library/stdtypes.html#float.hex" title="float.hex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">float.hex()</span></code></a> 方法会以十六进制（以 16 为基数）来表示浮点数，同样能给出保存在你的计算机中的精确值:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+<span class="go">&#39;0x1.921f9f01b866ep+1&#39;</span>
+</pre></div>
+</div>
+<p class="translated">这种精确的十六进制表示形式可被用来精确地重建浮点数值:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">==</span> <span class="nb">float</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s1">&#39;0x1.921f9f01b866ep+1&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="translated">由于这种表示法是精确的，它适用于跨越不同版本（平台无关）的 Python 移植数值，以及与支持相同格式的其他语言（例如 Java 和 C99）交换数据。</p>
+<p class="translated">另一个有用的工具是 <a class="reference internal" href="../library/functions.html#sum" title="sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">sum()</span></code></a> 函数，它能够帮助减少求和过程中的精度损失。 它会在数值被添加到总计值的时候为中间舍入步骤使用扩展的精度。 这可以更好地保持总体精确度，使得错误不会积累到能够影响最终总计值的程度:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">==</span> <span class="mf">1.0</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sum</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../library/math.html#math.fsum" title="math.fsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">math.fsum()</span></code></a> 函数进一步追踪在累加过程中“丢失的数位”，因此结果只会经过一次舍入。 相比于 <a class="reference internal" href="../library/functions.html#sum" title="sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">sum()</span></code></a> 它的执行速度较慢，但在一些不常见的情况下会更加准确，尤其是当大数值输入彼此几乎相互抵消，最终结果接近零时：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.10430216751806065</span><span class="p">,</span> <span class="o">-</span><span class="mf">266310978.67179024</span><span class="p">,</span> <span class="mf">143401161448607.16</span><span class="p">,</span>
+<span class="gp">... </span>       <span class="o">-</span><span class="mf">143401161400469.7</span><span class="p">,</span> <span class="mf">266262841.31058735</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.003244936839808227</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">Fraction</span><span class="p">,</span> <span class="n">arr</span><span class="p">)))</span>   <span class="c1"># 精确求和，结果经过一次四舍五入</span>
+<span class="go">8.042173697819788e-13</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">math</span><span class="o">.</span><span class="n">fsum</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>                   <span class="c1"># 一次四舍五入</span>
+<span class="go">8.042173697819788e-13</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sum</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>                         <span class="c1"># 多次四舍五入，扩展精度</span>
+<span class="go">8.042178034628478e-13</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">total</span> <span class="o">+=</span> <span class="n">x</span>                   <span class="c1"># 多次四舍五入，标准精度</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">total</span>                            <span class="c1"># 直接加法没有一个正确的数字！</span>
+<span class="go">-0.0051575902860057365</span>
+</pre></div>
+</div>
+<section id="representation-error">
+<span id="tut-fp-error"></span><h2 class="translated"><span class="section-number">15.1. </span>表示性错误<a class="headerlink" href="#representation-error" title="Link to this heading">¶</a></h2>
+<p class="translated">本小节将详细解释 &quot;0.1&quot; 的例子，并说明你可以怎样亲自对此类情况进行精确分析。 假定前提是已基本熟悉二进制浮点表示法。</p>
+<p class="translated"><em class="dfn">表示性错误</em> 是指某些（其实是大多数）十进制小数无法以二进制（以 2 为基数的计数制）精确表示这一事实造成的错误。 这就是为什么 Python（或者 Perl、C、C++、Java、Fortran 以及许多其他语言）经常不会显示你所期待的精确十进制数值的主要原因。</p>
+<p class="translated">为什么会这样？ 1/10 是无法用二进制小数精确表示的。 至少从 2000 年起，几乎所有机器都使用 IEEE 754 二进制浮点运算标准，而几乎所有系统平台都将 Python 浮点数映射为 IEEE 754 binary64 &quot;双精度&quot; 值。 IEEE 754 binary64 值包含 53 位精度，因此在输入时计算机会尽量将 0.1 转换为以 <em>J</em>/2**<em>N</em> 形式所能表示的最接近的小数，其中 <em>J</em> 为恰好包含 53 比特位的整数。 重新将</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">~=</span> <span class="n">J</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">N</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">写为</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">J</span> <span class="o">~=</span> <span class="mi">2</span><span class="o">**</span><span class="n">N</span> <span class="o">/</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p class="translated">并且由于 <em>J</em> 恰好有 53 位 (即 <code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">2**52</span></code> 但 <code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">2**53</span></code>)，<em>N</em> 的最佳值为 56:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">2</span><span class="o">**</span><span class="mi">52</span> <span class="o">&lt;=</span>  <span class="mi">2</span><span class="o">**</span><span class="mi">56</span> <span class="o">//</span> <span class="mi">10</span>  <span class="o">&lt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">53</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p class="translated">也就是说，56 是唯一能使 <em>J</em> 恰好有 53 位的 <em>N</em> 值。 这样 <em>J</em> 可能的最佳就是舍入之后的商:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">56</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span>
+<span class="go">6</span>
+</pre></div>
+</div>
+<p class="translated">由于余数超过 10 的一半，所以最佳近似值可通过向上舍入获得:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="o">+</span><span class="mi">1</span>
+<span class="go">7205759403792794</span>
+</pre></div>
+</div>
+<p class="translated">因此在 IEEE 754 双精度下可能达到的 1/10 的最佳近似值为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">7205759403792794</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">56</span>
+</pre></div>
+</div>
+<p class="translated">分子和分母都除以二则结果小数为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">3602879701896397</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">55</span>
+</pre></div>
+</div>
+<p class="translated">请注意由于我们做了向上舍入，这个结果实际上略大于 1/10；如果我们没有向上舍入，则商将会略小于 1/10。 但无论如何它都不会是 <em>精确的</em> 1/10！</p>
+<p class="translated">因此计算机永远不会 &quot;看到&quot; 1/10: 它实际看到的就是上面所给出的小数，即它能达到的最佳 IEEE 754 双精度近似值:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mf">0.1</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">55</span>
+<span class="go">3602879701896397.0</span>
+</pre></div>
+</div>
+<p class="translated">如果我们将该小数乘以 10**55，我们可以看到该值输出 55 个十进制数位:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">3602879701896397</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">55</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">55</span>
+<span class="go">1000000000000000055511151231257827021181583404541015625</span>
+</pre></div>
+</div>
+<p class="translated">这意味着存储在计算机中的确切数字等于十进制数值 0.1000000000000000055511151231257827021181583404541015625。 许多语言（包括较旧版本的 Python）都不会显示这个完整的十进制数值，而是将结果舍入到 17 位有效数字:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">format</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="s1">&#39;.17f&#39;</span><span class="p">)</span>
+<span class="go">&#39;0.10000000000000001&#39;</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../library/fractions.html#module-fractions" title="fractions: Rational numbers."><code class="xref py py-mod docutils literal notranslate"><span class="pre">fractions</span></code></a> 和 <a class="reference internal" href="../library/decimal.html#module-decimal" title="decimal: Implementation of the General Decimal Arithmetic Specification."><code class="xref py py-mod docutils literal notranslate"><span class="pre">decimal</span></code></a> 模块使得这样的计算更为容易:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fractions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fraction</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Fraction</span><span class="o">.</span><span class="n">from_float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="go">Fraction(3602879701896397, 36028797018963968)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
+<span class="go">(3602879701896397, 36028797018963968)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="o">.</span><span class="n">from_float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="go">Decimal(&#39;0.1000000000000000055511151231257827021181583404541015625&#39;)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">format</span><span class="p">(</span><span class="n">Decimal</span><span class="o">.</span><span class="n">from_float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">),</span> <span class="s1">&#39;.17&#39;</span><span class="p">)</span>
+<span class="go">&#39;0.10000000000000001&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">15. 浮点算术：问题和限制</a><ul>
+<li><a class="reference internal" href="#representation-error">15.1. 表示性错误</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="interactive.html"
+                          title="上一章"><span class="section-number">14. </span>交互式编辑和编辑历史</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="appendix.html"
+                          title="下一章"><span class="section-number">16. </span>附录</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "tutorial/floatingpoint.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/tutorial/floatingpoint.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/tutorial/floatingpoint.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="appendix.html" title="16. 附录"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="interactive.html" title="14. 交互式编辑和编辑历史"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 教程</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">15. </span>浮点算术：问题和限制</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

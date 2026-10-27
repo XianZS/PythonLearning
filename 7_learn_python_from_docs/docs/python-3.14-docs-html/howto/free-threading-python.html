@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Python 对自由线程的支持" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/free-threading-python.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="从 3.13 发布版开始，CPython 支持 free threading 的 Python 构建，其禁用 global interpreter lock(GIL)。自由线程化的执行允许在可用的 CPU 核心上并行运行线程，充分利用可用的处理能力。 尽管并非所有软件都能自动地从中受益，但是考虑到线程设计的程序在多核硬件上运行速度会更快。 某些第三方包，特别是带有 extension mod..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_free-threading-python_d878c289.png" />
+<meta property="og:image:alt" content="从 3.13 发布版开始，CPython 支持 free threading 的 Python 构建，其禁用 global interpreter lock(GIL)。自由线程化的执行允许在可用的 CPU 核心上并行运行线程，充分利用可用的处理能力。 尽管并非所有软件都能自动地从中受益，但是考虑到线程设计的程序在多核硬件上运行速度会更快。 某些第三方包，特别是带有 extension mod..." />
+<meta name="description" content="从 3.13 发布版开始，CPython 支持 free threading 的 Python 构建，其禁用 global interpreter lock(GIL)。自由线程化的执行允许在可用的 CPU 核心上并行运行线程，充分利用可用的处理能力。 尽管并非所有软件都能自动地从中受益，但是考虑到线程设计的程序在多核硬件上运行速度会更快。 某些第三方包，特别是带有 extension mod..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>Python 对自由线程的支持 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="自由线程的 C API 扩展支持" href="free-threading-extensions.html" />
+    <link rel="prev" title="Python 2.3 方法解析顺序" href="mro.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/free-threading-python.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Python 对自由线程的支持</a><ul>
+<li><a class="reference internal" href="#installation">安装</a></li>
+<li><a class="reference internal" href="#identifying-free-threaded-python">识别自由线程 Python</a></li>
+<li><a class="reference internal" href="#the-global-interpreter-lock-in-free-threaded-python">自由线程版 Python 中的全局解释器锁</a></li>
+<li><a class="reference internal" href="#thread-safety">线程安全</a></li>
+<li><a class="reference internal" href="#known-limitations">已知的限制</a><ul>
+<li><a class="reference internal" href="#immortalization">永生化</a></li>
+<li><a class="reference internal" href="#frame-objects">帧对象</a></li>
+<li><a class="reference internal" href="#iterators">迭代器</a></li>
+<li><a class="reference internal" href="#single-threaded-performance">单线程性能</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#behavioral-changes">行为的变化</a><ul>
+<li><a class="reference internal" href="#context-variables">上下文变量</a></li>
+<li><a class="reference internal" href="#warning-filters">警告过滤器</a></li>
+<li><a class="reference internal" href="#increased-memory-usage">Increased memory usage</a><ul>
+<li><a class="reference internal" href="#all-interned-strings-are-immortal">All interned strings are immortal</a></li>
+<li><a class="reference internal" href="#non-gc-objects-have-a-larger-object-header">Non-GC objects have a larger object header</a></li>
+<li><a class="reference internal" href="#qsbr-can-delay-freeing-of-memory">QSBR can delay freeing of memory</a></li>
+<li><a class="reference internal" href="#mimalloc-allocator-vs-pymalloc">mimalloc allocator vs pymalloc</a></li>
+<li><a class="reference internal" href="#free-threaded-reference-counting-can-cause-objects-to-live-longer">Free-threaded reference counting can cause objects to live longer</a></li>
+<li><a class="reference internal" href="#per-thread-reference-counting-can-delay-freeing-objects">Per-thread reference counting can delay freeing objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="mro.html"
+                          title="上一章">Python 2.3 方法解析顺序</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="free-threading-extensions.html"
+                          title="下一章">自由线程的 C API 扩展支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/free-threading-python.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/free-threading-python.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/free-threading-python.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="free-threading-extensions.html" title="自由线程的 C API 扩展支持"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="mro.html" title="Python 2.3 方法解析顺序"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Python 对自由线程的支持</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="python-support-for-free-threading">
+<span id="freethreading-python-howto"></span><h1 class="translated">Python 对自由线程的支持<a class="headerlink" href="#python-support-for-free-threading" title="Link to this heading">¶</a></h1>
+<p class="translated">从 3.13 发布版开始，CPython 支持 <a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">free threading</span></a> 的 Python 构建，其禁用 <a class="reference internal" href="../glossary.html#term-global-interpreter-lock"><span class="xref std std-term">global interpreter lock</span></a> (GIL)。自由线程化的执行允许在可用的 CPU 核心上并行运行线程，充分利用可用的处理能力。 尽管并非所有软件都能自动地从中受益，但是考虑到线程设计的程序在多核硬件上运行速度会更快。</p>
+<p class="translated">某些第三方包，特别是带有 <a class="reference internal" href="../glossary.html#term-extension-module"><span class="xref std std-term">extension module</span></a> 的包，可能尚不适用于自由线程构建版，并将重新启用 <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a>。</p>
+<p class="translated">本文档描述了自由线程对 Python 代码的影响。请参阅 <a class="reference internal" href="free-threading-extensions.html#freethreading-extensions-howto"><span class="std std-ref">自由线程的 C API 扩展支持</span></a> 了解如何编写支持自由线程构建的 C 扩展。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><span class="target" id="index-5"></span><a class="pep reference external" href="https://peps.python.org/pep-0703/"><strong>PEP 703</strong></a> —— 查阅《在 CPython 中使全局解释器锁成为可选项》以了解对自由线程 Python 的整体描述。</p>
+</div>
+<section id="installation">
+<h2 class="translated">安装<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p class="translated">从 Python 3.13 开始，官方 macOS 和 Windows 安装器提供了对可选安装自由线程 Python 二进制文件的支持。安装器可在 <a class="reference external" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a> 获取。</p>
+<p class="translated">有关其他平台的信息，请参阅 <a class="reference external" href="https://py-free-threading.github.io/installing-cpython/">Installing a Free-Threaded Python</a>，这是一份由社区维护的针对安装自由线程版 Python 的安装指南。</p>
+<p class="translated">当从源码构建 CPython 时，应使用 <a class="reference internal" href="../using/configure.html#cmdoption-disable-gil"><code class="xref std std-option docutils literal notranslate"><span class="pre">--disable-gil</span></code></a> 配置选项以构建自由线程 Python 解释器。</p>
+</section>
+<section id="identifying-free-threaded-python">
+<h2 class="translated">识别自由线程 Python<a class="headerlink" href="#identifying-free-threaded-python" title="Link to this heading">¶</a></h2>
+<p class="translated">要判断当前解释器是否支持自由线程，可检查 <a class="reference internal" href="../using/cmdline.html#cmdoption-V"><code class="xref std std-option docutils literal notranslate"><span class="pre">python</span> <span class="pre">-VV</span></code></a> 和 <a class="reference internal" href="../library/sys.html#sys.version" title="sys.version"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.version</span></code></a> 是否包含 &quot;free-threading build&quot;。新的 <a class="reference internal" href="../library/sys.html#sys._is_gil_enabled" title="sys._is_gil_enabled"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys._is_gil_enabled()</span></code></a> 函数可用于检查在运行进程中 GIL 是否确实被关闭。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">sysconfig.get_config_var(&quot;Py_GIL_DISABLED&quot;)</span></code> 配置变量可用于确定构建是否支持自由线程。 如果该变量设置为 <code class="docutils literal notranslate"><span class="pre">1</span></code>，则构建支持自由线程。这是与构建配置相关的决策的推荐机制。</p>
+</section>
+<section id="the-global-interpreter-lock-in-free-threaded-python">
+<h2 class="translated">自由线程版 Python 中的全局解释器锁<a class="headerlink" href="#the-global-interpreter-lock-in-free-threaded-python" title="Link to this heading">¶</a></h2>
+<p class="translated">CPython 的自由线程构建版支持在运行时使用环境变量 <span class="target" id="index-6"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHON_GIL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHON_GIL</span></code></a> 或命令行选项 <a class="reference internal" href="../using/cmdline.html#cmdoption-X"><code class="xref std std-option docutils literal notranslate"><span class="pre">-X</span> <span class="pre">gil</span></code></a> 选择性地启用 GIL。</p>
+<p class="translated">GIL 也可能在导入未显式标记为支持自由线程模式的 C-API 扩展模块时被自动启用。在这种情况下将会打印一条警告。</p>
+<p class="translated">在单独软件包的文档以外，还有下列网站在追踪热门软件包对自由线程模式的支持状态：</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference external" href="https://py-free-threading.github.io/tracking/">https://py-free-threading.github.io/tracking/</a></p></li>
+<li><p class="translated"><a class="reference external" href="https://hugovk.github.io/free-threaded-wheels/">https://hugovk.github.io/free-threaded-wheels/</a></p></li>
+</ul>
+</section>
+<section id="thread-safety">
+<h2 class="translated">线程安全<a class="headerlink" href="#thread-safety" title="Link to this heading">¶</a></h2>
+<p class="translated">自由线程构建的 CPython 旨在 Python 层级提供与默认全局解释器锁启用构建相似的线程安全行为。内置类型（如 <a class="reference internal" href="../library/stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>、 <a class="reference internal" href="../library/stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> 和 <a class="reference internal" href="../library/stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> 等）使用内部上锁来防止并发修改，其行为方式与全局解释器锁相似。但是，Python 历来不对这些内置类型的并发修改提供特定的行为保证，因此这应被视为对当前实现的描述，而不是对当前或未来行为的保证。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">建议尽可能使用 <a class="reference internal" href="../library/threading.html#threading.Lock" title="threading.Lock"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Lock</span></code></a> 或其他同步原语，而不是依赖内置类型的内部锁。</p>
+</div>
+</section>
+<section id="known-limitations">
+<h2 class="translated">已知的限制<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
+<p class="translated">本节介绍自由线程 CPython 构建的已知限制。</p>
+<section id="immortalization">
+<h3 class="translated">永生化<a class="headerlink" href="#immortalization" title="Link to this heading">¶</a></h3>
+<p class="translated">在自由线程构建中，某些对象属于 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象。永生对象不会被释放且具有永远不会被修改的引用计数。 这样做是为了避免发生可能妨碍高效的多线程伸缩调整的引用计数争夺问题。</p>
+<p class="translated">对于 3.14 发布版，永生对象只限于：</p>
+<ul class="simple">
+<li><p class="translated">代码常量：数字字面值，字符串字面值，以及由其他常量组成的元组字面值。</p></li>
+<li><p class="translated">由 <a class="reference internal" href="../library/sys.html#sys.intern" title="sys.intern"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.intern()</span></code></a> 所内化的字符串。</p></li>
+</ul>
+</section>
+<section id="frame-objects">
+<h3 class="translated">帧对象<a class="headerlink" href="#frame-objects" title="Link to this heading">¶</a></h3>
+<p class="translated">从一个 <a class="reference internal" href="../reference/datamodel.html#frame-objects"><span class="std std-ref">帧对象</span></a> 访问 <a class="reference internal" href="../reference/datamodel.html#frame.f_locals" title="frame.f_locals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame.f_locals</span></code></a> 是不安全的，如果该帧目前是在另一个线程中执行的话，这样做可能会导致解释器崩溃。</p>
+</section>
+<section id="iterators">
+<h3 class="translated">迭代器<a class="headerlink" href="#iterators" title="Link to this heading">¶</a></h3>
+<p class="translated">从多个线程并发地访问同一个迭代器对象通常不是线程安全的，可能导致各个线程中出现重复或丢失的元素。</p>
+</section>
+<section id="single-threaded-performance">
+<h3 class="translated">单线程性能<a class="headerlink" href="#single-threaded-performance" title="Link to this heading">¶</a></h3>
+<p class="translated">自由线程构建在执行 Python 代码时相比默认启用 GIL 的构建会有额外的开销。具体的开销取决于工作量和硬件环境。在 pyperformance 基准测试套件中，平均开销增幅在 macOS aarch64 上约为 1% 而在 x86-64 Linux 系统上约为 8%。</p>
+</section>
+</section>
+<section id="behavioral-changes">
+<h2 class="translated">行为的变化<a class="headerlink" href="#behavioral-changes" title="Link to this heading">¶</a></h2>
+<p class="translated">本节描述 CPython 在自由线程构建时的行为变化。</p>
+<section id="context-variables">
+<h3 class="translated">上下文变量<a class="headerlink" href="#context-variables" title="Link to this heading">¶</a></h3>
+<p class="translated">在自由线程构建中，<a class="reference internal" href="../library/sys.html#sys.flags.thread_inherit_context" title="sys.flags.thread_inherit_context"><code class="xref py py-data docutils literal notranslate"><span class="pre">thread_inherit_context</span></code></a> 标志默认设置为 true，这会导致使用 <a class="reference internal" href="../library/threading.html#threading.Thread" title="threading.Thread"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></a> 创建的线程以 <a class="reference internal" href="../library/threading.html#threading.Thread.start" title="threading.Thread.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> 的调用程序的 <a class="reference internal" href="../library/contextvars.html#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context()</span></code></a> 的副本启动。在默认启用 GIL 的构建中，该标志默认为 false，因此线程以空 <code class="xref py py-class docutils literal notranslate"><span class="pre">Context()</span></code> 启动。</p>
+</section>
+<section id="warning-filters">
+<h3 class="translated">警告过滤器<a class="headerlink" href="#warning-filters" title="Link to this heading">¶</a></h3>
+<p class="translated">在自由线程构建中，<a class="reference internal" href="../library/sys.html#sys.flags.context_aware_warnings" title="sys.flags.context_aware_warnings"><code class="xref py py-data docutils literal notranslate"><span class="pre">context_aware_warnings</span></code></a> 标志默认设置为 true。在默认启用 GIL 的构建中，该标志默认设置为 false。如果该标志为 true，则 <a class="reference internal" href="../library/warnings.html#warnings.catch_warnings" title="warnings.catch_warnings"><code class="xref py py-class docutils literal notranslate"><span class="pre">warnings.catch_warnings</span></code></a> 上下文管理器使用上下文变量用于警告过滤器。如果该标志为 false，则 <code class="xref py py-class docutils literal notranslate"><span class="pre">catch_warnings</span></code> 修改全局过滤器列表，这不是线程安全的。详情请参阅 <a class="reference internal" href="../library/warnings.html#module-warnings" title="warnings: Issue warning messages and control their disposition."><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> 模块。</p>
+</section>
+<section id="increased-memory-usage">
+<h3 class="untranslated">Increased memory usage<a class="headerlink" href="#increased-memory-usage" title="Link to this heading">¶</a></h3>
+<p class="untranslated">The free-threaded build will typically use more memory compared to the default
+build.  There are multiple reasons for this, mostly due to design decisions.</p>
+<section id="all-interned-strings-are-immortal">
+<h4 class="untranslated">All interned strings are immortal<a class="headerlink" href="#all-interned-strings-are-immortal" title="Link to this heading">¶</a></h4>
+<p class="untranslated">For modern Python versions (since version 2.3), interning a string (e.g. with
+<a class="reference internal" href="../library/sys.html#sys.intern" title="sys.intern"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.intern()</span></code></a>) does not cause it to become immortal.  Instead, if the last
+reference to that string disappears, it will be removed from the interned
+string table.  This is not the case for the free-threaded build and any interned
+string will become immortal, surviving until interpreter shutdown.</p>
+</section>
+<section id="non-gc-objects-have-a-larger-object-header">
+<h4 class="untranslated">Non-GC objects have a larger object header<a class="headerlink" href="#non-gc-objects-have-a-larger-object-header" title="Link to this heading">¶</a></h4>
+<p class="untranslated">The free-threaded build uses a different <a class="reference internal" href="../c-api/structures.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyObject</span></code></a> structure.  Instead
+of having the GC related information allocated before the <code class="xref c c-type docutils literal notranslate"><span class="pre">PyObject</span></code>
+structure, like in the default build, the GC related info is part of the normal
+object header.  For example, on the AMD64 platform, <code class="docutils literal notranslate"><span class="pre">None</span></code> uses 32 bytes on
+the free-threaded build vs 16 bytes for the default build.  GC objects (such as
+dicts and lists) are the same size for both builds since the free-threaded
+build does not use additional space for the GC info.</p>
+</section>
+<section id="qsbr-can-delay-freeing-of-memory">
+<h4 class="untranslated">QSBR can delay freeing of memory<a class="headerlink" href="#qsbr-can-delay-freeing-of-memory" title="Link to this heading">¶</a></h4>
+<p class="untranslated">In order to safely implement lock-free data structures, a safe memory
+reclamation (SMR) scheme is used, known as quiescent state-based reclamation
+(QSBR).  This means that the memory backing data structures allowing lock-free
+access will use QSBR, which defers the free operation, rather than immediately
+freeing the memory.  Two examples of these data structures are the list object
+and the dictionary keys object.  See <code class="docutils literal notranslate"><span class="pre">InternalDocs/qsbr.md</span></code> in the CPython
+source tree for more details on how QSBR is implemented.  Running
+<a class="reference internal" href="../library/gc.html#gc.collect" title="gc.collect"><code class="xref py py-func docutils literal notranslate"><span class="pre">gc.collect()</span></code></a> should cause all memory being held by QSBR to be actually
+freed.  Note that even when QSBR frees the memory, the underlying memory
+allocator may not immediately return that memory to the OS and so the resident
+set size (RSS) of the process might not decrease.</p>
+</section>
+<section id="mimalloc-allocator-vs-pymalloc">
+<h4 class="untranslated">mimalloc allocator vs pymalloc<a class="headerlink" href="#mimalloc-allocator-vs-pymalloc" title="Link to this heading">¶</a></h4>
+<p class="untranslated">The default build will normally use the &quot;pymalloc&quot; memory allocator for small
+allocations (512 bytes or smaller).  The free-threaded build does not use
+pymalloc and allocates all Python objects using the &quot;mimalloc&quot; allocator.  The
+pymalloc allocator has the following properties that help keep memory usage
+low: small per-allocated-block overhead, effective memory fragmentation
+prevention, and quick return of free memory to the operating system.  The
+mimalloc allocator does quite well in these respects as well but can have some
+more overhead.</p>
+<p class="untranslated">In the free-threaded build, mimalloc manages memory in a number of separate
+heaps (currently four).  For example, all GC supporting objects are allocated
+from their own heap.  Using separate heaps means that free memory in one heap
+cannot be used for an allocation that uses another heap.  Also, some heaps are
+configured to use QSBR (quiescent-state based reclamation) when freeing the
+memory that backs up the heap (known as &quot;pages&quot; in mimalloc terminology).  The
+use of QSBR creates a delay between all memory blocks for a page being freed
+and the memory page being released, either for new allocations or back to the
+OS.</p>
+<p class="untranslated">The mimalloc allocator also defers returning freed memory back to the OS.  You
+can reduce that delay by setting the environment variable
+<code class="xref std std-envvar docutils literal notranslate"><span class="pre">MIMALLOC_PURGE_DELAY</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code>.  Note that this will likely reduce
+the performance of the allocator.</p>
+</section>
+<section id="free-threaded-reference-counting-can-cause-objects-to-live-longer">
+<h4 class="untranslated">Free-threaded reference counting can cause objects to live longer<a class="headerlink" href="#free-threaded-reference-counting-can-cause-objects-to-live-longer" title="Link to this heading">¶</a></h4>
+<p class="untranslated">In the default build, when an object's reference count reaches zero, it is
+normally deallocated.  The free-threaded build uses &quot;biased reference
+counting&quot;, with a fast-path for objects &quot;owned&quot; by the current thread and a
+slow path for other objects.  See <span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0703/"><strong>PEP 703</strong></a> for additional details.  Any time
+an object's reference count ends up in a &quot;queued&quot; state, deallocation can be
+deferred.  The queued state is cleared from the &quot;eval breaker&quot; section of the
+bytecode evaluator.</p>
+<p class="untranslated">The free-threaded build also allows a different mode of reference counting,
+known as &quot;deferred reference counting&quot;.  This mode is enabled by setting a flag
+on a per-object basis.  Deferred reference counting is enabled for the
+following types:</p>
+<ul class="simple">
+<li><p class="untranslated">module objects</p></li>
+<li><p class="untranslated">module top-level functions</p></li>
+<li><p class="untranslated">class methods defined in the class scope</p></li>
+<li><p class="untranslated">descriptor objects</p></li>
+<li><p class="untranslated">thread-local objects, created by <a class="reference internal" href="../library/threading.html#threading.local" title="threading.local"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.local</span></code></a></p></li>
+</ul>
+<p class="untranslated">When deferred reference counting is enabled, references from Python function
+stacks are not added to the reference count.  This scheme reduces the overhead
+of reference counting, especially for objects used from multiple threads.
+Because the stack references are not counted, objects with deferred reference
+counting are not immediately freed when their internal reference count goes to
+zero.  Instead, they are examined by the next GC run and, if no stack
+references to them are found, they are freed.  This means these objects are
+freed by the GC and not when their reference count goes to zero, as is typical.</p>
+</section>
+<section id="per-thread-reference-counting-can-delay-freeing-objects">
+<h4 class="untranslated">Per-thread reference counting can delay freeing objects<a class="headerlink" href="#per-thread-reference-counting-can-delay-freeing-objects" title="Link to this heading">¶</a></h4>
+<p class="untranslated">To avoid contention on the reference count fields of frequently shared
+objects, the free-threaded build also uses &quot;per-thread reference counting&quot;
+for a few selected object types.  Rather than updating a single shared
+reference count, each thread maintains its own local reference count array,
+indexed by a unique id assigned to the object.  The true reference count is
+only computed by summing the per-thread counts when the object's local
+count drops to zero.  Per-thread reference counting is currently used for:</p>
+<ul class="simple">
+<li><p class="untranslated">heap type objects (classes created in Python)</p></li>
+<li><p class="untranslated">code objects</p></li>
+<li><p class="untranslated">the <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> of module objects</p></li>
+</ul>
+<p class="untranslated">Because the per-thread counts must be merged back to the object before it
+can be deallocated, objects using per-thread reference counting are
+typically freed later than they would be in the default build.  In
+particular, such an object is usually not freed until the thread that
+referenced it reaches a safe point (for example, in the &quot;eval breaker&quot;
+section of the bytecode evaluator) or exits.  Running <a class="reference internal" href="../library/gc.html#gc.collect" title="gc.collect"><code class="xref py py-func docutils literal notranslate"><span class="pre">gc.collect()</span></code></a>
+will merge the per-thread counts and allow these objects to be freed.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Python 对自由线程的支持</a><ul>
+<li><a class="reference internal" href="#installation">安装</a></li>
+<li><a class="reference internal" href="#identifying-free-threaded-python">识别自由线程 Python</a></li>
+<li><a class="reference internal" href="#the-global-interpreter-lock-in-free-threaded-python">自由线程版 Python 中的全局解释器锁</a></li>
+<li><a class="reference internal" href="#thread-safety">线程安全</a></li>
+<li><a class="reference internal" href="#known-limitations">已知的限制</a><ul>
+<li><a class="reference internal" href="#immortalization">永生化</a></li>
+<li><a class="reference internal" href="#frame-objects">帧对象</a></li>
+<li><a class="reference internal" href="#iterators">迭代器</a></li>
+<li><a class="reference internal" href="#single-threaded-performance">单线程性能</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#behavioral-changes">行为的变化</a><ul>
+<li><a class="reference internal" href="#context-variables">上下文变量</a></li>
+<li><a class="reference internal" href="#warning-filters">警告过滤器</a></li>
+<li><a class="reference internal" href="#increased-memory-usage">Increased memory usage</a><ul>
+<li><a class="reference internal" href="#all-interned-strings-are-immortal">All interned strings are immortal</a></li>
+<li><a class="reference internal" href="#non-gc-objects-have-a-larger-object-header">Non-GC objects have a larger object header</a></li>
+<li><a class="reference internal" href="#qsbr-can-delay-freeing-of-memory">QSBR can delay freeing of memory</a></li>
+<li><a class="reference internal" href="#mimalloc-allocator-vs-pymalloc">mimalloc allocator vs pymalloc</a></li>
+<li><a class="reference internal" href="#free-threaded-reference-counting-can-cause-objects-to-live-longer">Free-threaded reference counting can cause objects to live longer</a></li>
+<li><a class="reference internal" href="#per-thread-reference-counting-can-delay-freeing-objects">Per-thread reference counting can delay freeing objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="mro.html"
+                          title="上一章">Python 2.3 方法解析顺序</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="free-threading-extensions.html"
+                          title="下一章">自由线程的 C API 扩展支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/free-threading-python.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/free-threading-python.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/free-threading-python.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="free-threading-extensions.html" title="自由线程的 C API 扩展支持"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="mro.html" title="Python 2.3 方法解析顺序"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Python 对自由线程的支持</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Multiple interpreters in a Python process" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/subinterpreters.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="虽然在大多数用例中，你都只会嵌入一个单独的 Python 解释器，但某些场景需要你在同一个进程甚至同一个线程中创建多个独立的解释器。 子解释器让你能够做到这一点。 “主”解释器是在运行时初始化时创建的第一个解释器。它通常是一个进程中唯一的 Python 解释器。与子解释器不同，主解释器具有唯一的进程全局责任比如信号处理等。它还负责在运行时初始化期间的执行并且通常还是运行时最终化期间的活动解释..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_subinterpreters_83a26e76.png" />
+<meta property="og:image:alt" content="虽然在大多数用例中，你都只会嵌入一个单独的 Python 解释器，但某些场景需要你在同一个进程甚至同一个线程中创建多个独立的解释器。 子解释器让你能够做到这一点。 “主”解释器是在运行时初始化时创建的第一个解释器。它通常是一个进程中唯一的 Python 解释器。与子解释器不同，主解释器具有唯一的进程全局责任比如信号处理等。它还负责在运行时初始化期间的执行并且通常还是运行时最终化期间的活动解释..." />
+<meta name="description" content="虽然在大多数用例中，你都只会嵌入一个单独的 Python 解释器，但某些场景需要你在同一个进程甚至同一个线程中创建多个独立的解释器。 子解释器让你能够做到这一点。 “主”解释器是在运行时初始化时创建的第一个解释器。它通常是一个进程中唯一的 Python 解释器。与子解释器不同，主解释器具有唯一的进程全局责任比如信号处理等。它还负责在运行时初始化期间的执行并且通常还是运行时最终化期间的活动解释..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>Multiple interpreters in a Python process &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="Profiling and tracing" href="profiling.html" />
+    <link rel="prev" title="线程本地存储支持" href="tls.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/subinterpreters.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Multiple interpreters in a Python process</a><ul>
+<li><a class="reference internal" href="#a-per-interpreter-gil">A per-interpreter GIL</a></li>
+<li><a class="reference internal" href="#bugs-and-caveats">错误和注意事项</a></li>
+<li><a class="reference internal" href="#high-level-apis">高层级 API</a></li>
+<li><a class="reference internal" href="#low-level-apis">低层级 API</a></li>
+<li><a class="reference internal" href="#advanced-debugger-support">Advanced debugger support</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="tls.html"
+                          title="上一章">线程本地存储支持</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="profiling.html"
+                          title="下一章">Profiling and tracing</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/subinterpreters.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/subinterpreters.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/subinterpreters.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="profiling.html" title="Profiling and tracing"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="tls.html" title="线程本地存储支持"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Multiple interpreters in a Python process</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="multiple-interpreters-in-a-python-process">
+<span id="sub-interpreter-support"></span><h1 class="untranslated">Multiple interpreters in a Python process<a class="headerlink" href="#multiple-interpreters-in-a-python-process" title="Link to this heading">¶</a></h1>
+<p class="translated">虽然在大多数用例中，你都只会嵌入一个单独的 Python 解释器，但某些场景需要你在同一个进程甚至同一个线程中创建多个独立的解释器。 子解释器让你能够做到这一点。</p>
+<p class="translated">“主”解释器是在运行时初始化时创建的第一个解释器。它通常是一个进程中唯一的 Python 解释器。与子解释器不同，主解释器具有唯一的进程全局责任比如信号处理等。它还负责在运行时初始化期间的执行并且通常还是运行时最终化期间的活动解释器。<a class="reference internal" href="#c.PyInterpreterState_Main" title="PyInterpreterState_Main"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyInterpreterState_Main()</span></code></a> 函数将返回一个指向其状态的指针。</p>
+<p class="translated">你可以使用 <a class="reference internal" href="threads.html#c.PyThreadState_Swap" title="PyThreadState_Swap"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyThreadState_Swap()</span></code></a> 函数在子解释器之间进行切换。你可以使用下列函数来创建和销毁它们：</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterConfig</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">包含用于配置子解释器的大部分形参的结构体。其值仅在 <a class="reference internal" href="#c.Py_NewInterpreterFromConfig" title="Py_NewInterpreterFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewInterpreterFromConfig()</span></code></a> 中被使用而绝不会被运行时所修改。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+<p class="translated">结构体字段：</p>
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.use_main_obmalloc">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">use_main_obmalloc</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.use_main_obmalloc" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则子解释器将使用自己的“对象”分配器状态。否则它将使用（共享）主解释器的状态。</p>
+<p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则 <a class="reference internal" href="#c.PyInterpreterConfig.check_multi_interp_extensions" title="PyInterpreterConfig.check_multi_interp_extensions"><code class="xref c c-member docutils literal notranslate"><span class="pre">check_multi_interp_extensions</span></code></a> 必须为 <code class="docutils literal notranslate"><span class="pre">1</span></code> (非零值)。如果该值为 <code class="docutils literal notranslate"><span class="pre">1</span></code> 则 <a class="reference internal" href="#c.PyInterpreterConfig.gil" title="PyInterpreterConfig.gil"><code class="xref c c-member docutils literal notranslate"><span class="pre">gil</span></code></a> 不可为 <a class="reference internal" href="#c.PyInterpreterConfig_OWN_GIL" title="PyInterpreterConfig_OWN_GIL"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyInterpreterConfig_OWN_GIL</span></code></a> 选项。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.allow_fork">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">allow_fork</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.allow_fork" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则运行时将不支持在当前激活了子解释器的任何线程中 fork 进程。否则 fork 将不受限制。</p>
+<p class="translated">请注意当 fork 被禁止时 <a class="reference internal" href="../library/subprocess.html#module-subprocess" title="subprocess: Subprocess management."><code class="xref py py-mod docutils literal notranslate"><span class="pre">subprocess</span></code></a> 模块将仍然可用。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.allow_exec">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">allow_exec</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.allow_exec" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则运行时将不支持在当前激活了子解释器的任何线程中通过 exec (例如 <a class="reference internal" href="../library/os.html#os.execv" title="os.execv"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.execv()</span></code></a>) 替换当前进程。否则 exec 将不受限制。</p>
+<p class="translated">请注意当 exec 被禁止时 <a class="reference internal" href="../library/subprocess.html#module-subprocess" title="subprocess: Subprocess management."><code class="xref py py-mod docutils literal notranslate"><span class="pre">subprocess</span></code></a> 模块将仍然可用。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.allow_threads">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">allow_threads</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.allow_threads" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则子解释器的 <a class="reference internal" href="../library/threading.html#module-threading" title="threading: Thread-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">threading</span></code></a> 模块将不会创建线程。否则线程将被允许。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.allow_daemon_threads">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">allow_daemon_threads</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.allow_daemon_threads" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则子解释器的 <a class="reference internal" href="../library/threading.html#module-threading" title="threading: Thread-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">threading</span></code></a> 模块将不会创建守护线程。否则将允许守护线程（只要 <a class="reference internal" href="#c.PyInterpreterConfig.allow_threads" title="PyInterpreterConfig.allow_threads"><code class="xref c c-member docutils literal notranslate"><span class="pre">allow_threads</span></code></a> 是非零值）。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.check_multi_interp_extensions">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">check_multi_interp_extensions</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.check_multi_interp_extensions" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果该值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则所有扩展模块均可在当前子解释器被激活的任何线程中被导入，包括旧式的 (单阶段初始化) 模块。否则将只有多阶段初始化扩展模块 (参见 <span class="target" id="index-17"></span><a class="pep reference external" href="https://peps.python.org/pep-0489/"><strong>PEP 489</strong></a>) 可以被导入。 (另请参阅 <a class="reference internal" href="module.html#c.Py_mod_multiple_interpreters" title="Py_mod_multiple_interpreters"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_mod_multiple_interpreters</span></code></a>。)</p>
+<p class="translated">如果 <a class="reference internal" href="#c.PyInterpreterConfig.use_main_obmalloc" title="PyInterpreterConfig.use_main_obmalloc"><code class="xref c c-member docutils literal notranslate"><span class="pre">use_main_obmalloc</span></code></a> 为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则该值必须为 <code class="docutils literal notranslate"><span class="pre">1</span></code> (非零值)。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig.gil">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">gil</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig.gil" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">这将确定针对子解释器的 GIL 操作方式。它可以是以下的几种之一：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig_DEFAULT_GIL">
+<span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterConfig_DEFAULT_GIL</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig_DEFAULT_GIL" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用默认选择 (<a class="reference internal" href="#c.PyInterpreterConfig_SHARED_GIL" title="PyInterpreterConfig_SHARED_GIL"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyInterpreterConfig_SHARED_GIL</span></code></a>)。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig_SHARED_GIL">
+<span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterConfig_SHARED_GIL</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig_SHARED_GIL" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用（共享）主解释器的 GIL。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyInterpreterConfig_OWN_GIL">
+<span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterConfig_OWN_GIL</span></span></span><a class="headerlink" href="#c.PyInterpreterConfig_OWN_GIL" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用子解释器自己的 GIL。</p>
+</dd></dl>
+
+<p class="translated">如果该值为 <a class="reference internal" href="#c.PyInterpreterConfig_OWN_GIL" title="PyInterpreterConfig_OWN_GIL"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyInterpreterConfig_OWN_GIL</span></code></a> 则 <a class="reference internal" href="#c.PyInterpreterConfig.use_main_obmalloc" title="PyInterpreterConfig.use_main_obmalloc"><code class="xref c c-member docutils literal notranslate"><span class="pre">PyInterpreterConfig.use_main_obmalloc</span></code></a> 必须为 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_NewInterpreterFromConfig">
+<a class="reference internal" href="init_config.html#c.PyStatus" title="PyStatus"><span class="n"><span class="pre">PyStatus</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_NewInterpreterFromConfig</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tstate_p</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.PyInterpreterConfig" title="PyInterpreterConfig"><span class="n"><span class="pre">PyInterpreterConfig</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">config</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_NewInterpreterFromConfig" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated" id="index-1">新建一个子解释器。这是一个 (几乎) 完全隔离的 Python 代码执行环境。 特别需要注意，新的子解释器具有全部已导入模块的隔离的、独立的版本，包括基本模块 <a class="reference internal" href="../library/builtins.html#module-builtins" title="builtins: The module that provides the built-in namespace."><code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code></a>, <a class="reference internal" href="../library/__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a> 和 <a class="reference internal" href="../library/sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> 等。已加载模块表 (<code class="docutils literal notranslate"><span class="pre">sys.modules</span></code>) 和模块搜索路径 (<code class="docutils literal notranslate"><span class="pre">sys.path</span></code>) 也是隔离的。新环境没有 <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code> 变量。它具有新的标准 I/O 流文件对象 <code class="docutils literal notranslate"><span class="pre">sys.stdin</span></code>, <code class="docutils literal notranslate"><span class="pre">sys.stdout</span></code> 和 <code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code> (不过这些对象都指向相同的底层文件描述符)。</p>
+<p class="translated">给定的 <em>config</em> 控制着初始化解释器所使用的选项。</p>
+<p class="translated">成功后，<em>tstate_p</em> 将被设为新的子解释器中创建的第一个 <a class="reference internal" href="../glossary.html#term-thread-state"><span class="xref std std-term">thread state</span></a>。该线程状态是 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">已附加的</span></a>。请注意并没有真实的线程被创建；请参阅下文有关线程状态的讨论。如果新解释器的创建没有成功，则 <em>tstate_p</em> 将被设为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>；不会设置任何异常因为异常状态是存储在 <span class="xref std std-term">attached thread state</span> 中的，而它并不一定存在。</p>
+<p class="translated">与所有其他 Python/C API 函数一样，调用此函数前必须存在 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>，但返回时该状态可能会被分离。成功时，返回的线程状态将处于 <span class="xref std std-term">已附加</span> 状态。 如果子解释器使用自己的 <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a> 创建，则调用解释器的 <span class="xref std std-term">attached thread state</span> 将被分离。 当函数返回时，新解释器的 <a class="reference internal" href="../glossary.html#term-thread-state"><span class="xref std std-term">thread state</span></a> 将 <span class="xref std std-term">已附加</span> 到当前线程，而先前解释器的 <span class="xref std std-term">attached thread state</span> 将保持分离状态。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+<p class="translated">子解释器在彼此相互隔离，并让特定功能受限的情况下是最有效率的:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyInterpreterConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">.</span><span class="n">use_main_obmalloc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">allow_fork</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">allow_exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">allow_threads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">allow_daemon_threads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">check_multi_interp_extensions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">gil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyInterpreterConfig_OWN_GIL</span><span class="p">,</span>
+<span class="p">};</span>
+<span class="n">PyThreadState</span><span class="w"> </span><span class="o">*</span><span class="n">tstate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="n">PyStatus</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Py_NewInterpreterFromConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tstate</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">PyStatus_Exception</span><span class="p">(</span><span class="n">status</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Py_ExitStatusException</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">请注意该配置只会被短暂使用而不会被修改。在初始化期间配置的值会被转换成各种 <a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyInterpreterState</span></code></a> 值。 配置的只读副本可以被内部存储于 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyInterpreterState</span></code> 中。</p>
+<p class="translated" id="index-2">扩展模块将以如下方式在（子）解释器之间共享：</p>
+<ul>
+<li><p class="translated">对于使用多阶段初始化的模块，例如 <a class="reference internal" href="module.html#c.PyModule_FromDefAndSpec" title="PyModule_FromDefAndSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_FromDefAndSpec()</span></code></a>，将为每个解释器创建并初始化一个单独的模块对象。 只有 C 层级的静态和全局变量能在这些模块 对象之间共享。</p></li>
+<li><p class="untranslated">For modules using legacy
+<a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">single-phase initialization</span></a>,
+e.g. <a class="reference internal" href="module.html#c.PyModule_Create" title="PyModule_Create"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_Create()</span></code></a>, the first time a particular extension
+is imported, it is initialized normally, and a (shallow) copy of its
+module's dictionary is squirreled away.
+When the same extension is imported by another (sub-)interpreter, a new
+module is initialized and filled with the contents of this copy; the
+extension's <code class="docutils literal notranslate"><span class="pre">init</span></code> function is not called.
+Objects in the module's dictionary thus end up shared across
+(sub-)interpreters, which might cause unwanted behavior (see
+<a class="reference internal" href="#bugs-and-caveats">Bugs and caveats</a> below).</p>
+<p class="translated">请注意这不同于在调用 <a class="reference internal" href="interp-lifecycle.html#c.Py_FinalizeEx" title="Py_FinalizeEx"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_FinalizeEx()</span></code></a> 和 <a class="reference internal" href="interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a> 完全重新初始化解释器之后导入扩展时所发生的情况；对于那种情况，扩展的 <code class="docutils literal notranslate"><span class="pre">initmodule</span></code> 函数 <em>会被</em> 再次调用。 与多阶段初始化一样，这意味着只有 C 层级的静态和全局变量能在这些模块之间共享。</p>
+</li>
+</ul>
+<span class="target" id="index-3"></span></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_NewInterpreter">
+<a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Py_NewInterpreter</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_NewInterpreter" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated" id="index-4">新建一个子解释器。这在本质上只是针对 <a class="reference internal" href="#c.Py_NewInterpreterFromConfig" title="Py_NewInterpreterFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewInterpreterFromConfig()</span></code></a> 的包装器，其配置保留了现有的行为。 结果是一个未隔离的子解释器，它会共享主解释器的 GIL，允许 fork/exec，允许守护线程，也允许单阶段初始化模块。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_EndInterpreter">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_EndInterpreter</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tstate</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_EndInterpreter" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated" id="index-5">销毁由给定 <a class="reference internal" href="../glossary.html#term-thread-state"><span class="xref std std-term">thread state</span></a> 表示的（子）解释器。给定的线程状态必须处于 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">已附加</span></a> 状态。调用返回时，将不存在任何 <span class="xref std std-term">attached thread state</span>。与此解释器关联的所有线程状态都会被销毁。</p>
+<p class="translated"><a class="reference internal" href="interp-lifecycle.html#c.Py_FinalizeEx" title="Py_FinalizeEx"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_FinalizeEx()</span></code></a> 将销毁所有在当前时间点上尚未被明确销毁的子解释器。</p>
+</dd></dl>
+
+<section id="a-per-interpreter-gil">
+<span id="per-interpreter-gil"></span><h2 class="untranslated">A per-interpreter GIL<a class="headerlink" href="#a-per-interpreter-gil" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+<p class="translated">使用 <a class="reference internal" href="#c.Py_NewInterpreterFromConfig" title="Py_NewInterpreterFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewInterpreterFromConfig()</span></code></a> 你将可以创建一个与其他解释器完全隔离的子解释器，包括具有自己的 GIL。这种隔离带来的最大好处在于这样的解释器执行 Python 代码时不会被其他解释器所阻塞或者阻塞任何其他解释器。因此在运行 Python 代码时单个 Python 进程可以真正地利用多个 CPU 核心。这种隔离还能鼓励开发者采取不同于仅使用线程的并发方式。 (参见 <span class="target" id="index-18"></span><a class="pep reference external" href="https://peps.python.org/pep-0554/"><strong>PEP 554</strong></a> 和 <span class="target" id="index-19"></span><a class="pep reference external" href="https://peps.python.org/pep-0684/"><strong>PEP 684</strong></a> )。</p>
+<p class="translated">使用隔离的解释器要求谨慎地保持隔离状态。尤其是意味着不要在未确保线程安全的情况下共享任何对象或可变的状态。由于引用计数的存在即使是在其他情况下不可变的对象 (例如 <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">5)</span></code>) 通常也不可被共享。 针对此问题的一种简单但效率较低的解决方式是在使用某些状态 (或对象) 时总是使用一个全局锁。或者，实际上不可变的对象 (如整数或字符串) 可以通过将其设为 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象而无视其引用计数来确保其安全性。事实上，对于内置单例、小整数和其他一些内置对象都是这样做的。</p>
+<p class="translated">如果你能保持隔离状态那么你将能获得真正的多核计算能力而不会遇到自由线程所带来的复杂性。 如果未能保持隔离状态那么你将面对自由线程所带来的全部后果，包括线程竞争和难以调试的崩溃。</p>
+<p class="translated">除此之外，使用多个相互隔离的解释器的一个主要挑战是如何在它们之间安全 (不破坏隔离状态)、高效地进行通信。运行时和标准库还没有为此提供任何标准方式。 未来的标准库模块将会帮助减少保持隔离状态所需的工作量并为解释器之间的数据通信（和共享）公开有效的工具。</p>
+</section>
+<section id="bugs-and-caveats">
+<h2 class="translated">错误和注意事项<a class="headerlink" href="#bugs-and-caveats" title="Link to this heading">¶</a></h2>
+<p class="untranslated">Because sub-interpreters (and the main interpreter) are part of the same
+process, the insulation between them isn't perfect --- for example, using
+low-level file operations like <a class="reference internal" href="../library/os.html#os.close" title="os.close"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.close()</span></code></a> they can
+(accidentally or maliciously) affect each other's open files.  Because of the
+way extensions are shared between (sub-)interpreters, some extensions may not
+work properly; this is especially likely when using single-phase initialization
+or (static) global variables.
+It is possible to insert objects created in one sub-interpreter into
+a namespace of another (sub-)interpreter; this should be avoided if possible.</p>
+<p class="translated">应当特别注意避免在子解释器之间共享用户自定义的函数、方法、实例或类，因为由这些对象执行的导入 操作可能会影响错误的已加载模块的 (子) 解释器的字典。 同样重要的一点是应当避免共享可被上述对象访问的对象。</p>
+<p class="translated">还要注意的一点是将此功能与 <code class="docutils literal notranslate"><span class="pre">PyGILState_*</span></code> API 结合使用是很微妙的，因为这些 API 会假定 Python 线程状态与操作系统级线程之间存在双向投影关系，而子解释器的存在打破了这一假定。强烈建议你不要在一对互相匹配的 <a class="reference internal" href="threads.html#c.PyGILState_Ensure" title="PyGILState_Ensure"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyGILState_Ensure()</span></code></a> 和 <a class="reference internal" href="threads.html#c.PyGILState_Release" title="PyGILState_Release"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyGILState_Release()</span></code></a> 调用之间切换子解释器。 此外，使用这些 API 以允许从非 Python 创建的线程调用 Python 代码的扩展 (如 <a class="reference internal" href="../library/ctypes.html#module-ctypes" title="ctypes: A foreign function library for Python."><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a>) 在使用子解释器时很可能会出现问题。</p>
+</section>
+<section id="high-level-apis">
+<h2 class="translated">高层级 API<a class="headerlink" href="#high-level-apis" title="Link to this heading">¶</a></h2>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyInterpreterState">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState</span></span></span><a class="headerlink" href="#c.PyInterpreterState" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">受限 API</span></a> （作为不透明的结构体）.</em><p class="translated">该数据结构代表多个合作线程所共享的状态。属于同一解释器的线程将共享其模块管理以及其他一些内部条目。该结构体中不包含公有成员。</p>
+<p class="translated">最初归属于不同解释器的线程不会共享任何东西，但进程状态如可用内存、打开的文件描述符等等除外。全局解释器锁也会被所有线程共享，无论它们归属于哪个解释器。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span><span class="target" id="index-20"></span><a class="pep reference external" href="https://peps.python.org/pep-0684/"><strong>PEP 684</strong></a> 引入了 <a class="reference internal" href="#per-interpreter-gil"><span class="std std-ref">单解释器 GIL</span></a> 的可能性。请参阅 <a class="reference internal" href="#c.Py_NewInterpreterFromConfig" title="Py_NewInterpreterFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewInterpreterFromConfig()</span></code></a> 函数。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_Get">
+<a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_Get</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_Get" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.9 版起.</em><p class="translated">获取当前解释器。</p>
+<p class="translated">如果没有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 则会发生致命错误。 此函数不会返回 NULL。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_GetID">
+<span class="n"><span class="pre">int64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_GetID</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_GetID" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated">返回解释器的唯一 ID。如果执行过程中发生任何错误则将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置错误。</p>
+<p class="translated">调用方必须有已附加的线程状态 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_GetDict">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_GetDict</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_GetDict" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_borrowed_ref">返回值：借入的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.8 版起.</em><p class="translated">返回一个存储解释器专属数据的字典。如果此函数返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 则没有任何异常被引发并且调用方应当将解释器专属字典视为不可用。</p>
+<p class="translated">这不是 <a class="reference internal" href="module.html#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 的替代，扩展仍应使用它来存储解释器专属的状态信息。</p>
+<p class="translated">返回的字典是从解释器借入的并将保持可用直到解释器关闭。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c._PyFrameEvalFunction">
+<span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">_PyFrameEvalFunction</span></span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tstate</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="frame.html#c._PyInterpreterFrame" title="_PyInterpreterFrame"><span class="n"><span class="pre">_PyInterpreterFrame</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">throwflag</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#c._PyFrameEvalFunction" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">帧评估函数的类型</p>
+<p class="translated"><em>throwflag</em> 形参将由生成器的 <code class="docutils literal notranslate"><span class="pre">throw()</span></code> 方法来使用：如为非零值，则处理当前异常。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>此函数现在可接受一个 <em>tstate</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span><em>frame</em> 形参由 <code class="docutils literal notranslate"><span class="pre">PyFrameObject*</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">_PyInterpreterFrame*</span></code>。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c._PyInterpreterState_GetEvalFrameFunc">
+<a class="reference internal" href="#c._PyFrameEvalFunction" title="_PyFrameEvalFunction"><span class="n"><span class="pre">_PyFrameEvalFunction</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_PyInterpreterState_GetEvalFrameFunc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c._PyInterpreterState_GetEvalFrameFunc" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">获取帧评估函数。</p>
+<p class="translated">请参阅 <span class="target" id="index-21"></span><a class="pep reference external" href="https://peps.python.org/pep-0523/"><strong>PEP 523</strong></a> &quot;Adding a frame evaluation API to CPython&quot;。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c._PyInterpreterState_SetEvalFrameFunc">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_PyInterpreterState_SetEvalFrameFunc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span>, <a class="reference internal" href="#c._PyFrameEvalFunction" title="_PyFrameEvalFunction"><span class="n"><span class="pre">_PyFrameEvalFunction</span></span></a><span class="w"> </span><span class="n"><span class="pre">eval_frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c._PyInterpreterState_SetEvalFrameFunc" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">设置帧评估函数。</p>
+<p class="translated">请参阅 <span class="target" id="index-22"></span><a class="pep reference external" href="https://peps.python.org/pep-0523/"><strong>PEP 523</strong></a> &quot;Adding a frame evaluation API to CPython&quot;。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="low-level-apis">
+<h2 class="translated">低层级 API<a class="headerlink" href="#low-level-apis" title="Link to this heading">¶</a></h2>
+<p class="translated">下列所有函数都必须在 <a class="reference internal" href="interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a> 之后被调用。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>现在 <a class="reference internal" href="interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a> 会初始化 <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a> 并设置一个 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a> 线程状态。</p>
+</div>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_New">
+<a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_New</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_New" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">新建一个解释器状态对象。不需要有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>，但如果有必要序列化对此函数的调用则可能选择有。</p>
+<p class="audit-hook translated">引发一个不带参数的 <a class="reference internal" href="../library/sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">cpython.PyInterpreterState_New</span></code>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_Clear">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_Clear</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_Clear" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">重置解释器状态对象中的所有信息。解释器必须存在一个 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+<p class="audit-hook translated">引发一个不带参数的 <a class="reference internal" href="../library/sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">cpython.PyInterpreterState_Clear</span></code>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_Delete">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_Delete</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_Delete" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">销毁一个解释器状态对象。目标解释器 <strong>不应</strong> 存在 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。在调用此函数之前，必须先调用 <a class="reference internal" href="#c.PyInterpreterState_Clear" title="PyInterpreterState_Clear"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyInterpreterState_Clear()</span></code></a> 重置解释器状态。</p>
+</dd></dl>
+
+</section>
+<section id="advanced-debugger-support">
+<span id="advanced-debugging"></span><h2 class="untranslated">Advanced debugger support<a class="headerlink" href="#advanced-debugger-support" title="Link to this heading">¶</a></h2>
+<p class="translated">这些函数仅供高级调试工具使用。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_Head">
+<a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_Head</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_Head" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">返回由所有此类对象组成的列表中位于开头的解释器状态对象。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_Main">
+<a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_Main</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_Main" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">返回主解释器状态对象。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_Next">
+<a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_Next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_Next" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">从由解释器状态对象组成的列表中返回 <em>interp</em> 之后的下一项。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyInterpreterState_ThreadHead">
+<a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyInterpreterState_ThreadHead</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><span class="n"><span class="pre">PyInterpreterState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">interp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyInterpreterState_ThreadHead" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在由与解释器 <em>interp</em> 相关联的线程组成的列表中返回指向第一个 <a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyThreadState</span></code></a> 对象的指针。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyThreadState_Next">
+<a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyThreadState_Next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tstate</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyThreadState_Next" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">从由属于同一个 <a class="reference internal" href="#c.PyInterpreterState" title="PyInterpreterState"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyInterpreterState</span></code></a> 对象的线程状态对象组成的列表中返回 <em>tstate</em> 之后的下一项。</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Multiple interpreters in a Python process</a><ul>
+<li><a class="reference internal" href="#a-per-interpreter-gil">A per-interpreter GIL</a></li>
+<li><a class="reference internal" href="#bugs-and-caveats">错误和注意事项</a></li>
+<li><a class="reference internal" href="#high-level-apis">高层级 API</a></li>
+<li><a class="reference internal" href="#low-level-apis">低层级 API</a></li>
+<li><a class="reference internal" href="#advanced-debugger-support">Advanced debugger support</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="tls.html"
+                          title="上一章">线程本地存储支持</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="profiling.html"
+                          title="下一章">Profiling and tracing</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/subinterpreters.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/subinterpreters.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/subinterpreters.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="profiling.html" title="Profiling and tracing"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="tls.html" title="线程本地存储支持"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Multiple interpreters in a Python process</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

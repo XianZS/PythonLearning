@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="2. 词法分析" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/reference/lexical_analysis.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="Python 程序将由一个 解析器 来读取。 输入解析器的是 词元 的流，由 词法分析器(或称 分词器) 生成。 本章将介绍词法分析器是如何产生词元的。 词法分析器会确定程序文本的 编码格式(默认为 UTF-8)，并将文本解码为 源字符 。 如果文本无法解码，将会引发 SyntaxError 。 接下来，词法分析器将使用源字符生成词元流。 所生成的词元类型取决于下一个要处理的源字符。 类似地..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_reference_lexical_analysis_5a4f0d2b.png" />
+<meta property="og:image:alt" content="Python 程序将由一个 解析器 来读取。 输入解析器的是 词元 的流，由 词法分析器(或称 分词器) 生成。 本章将介绍词法分析器是如何产生词元的。 词法分析器会确定程序文本的 编码格式(默认为 UTF-8)，并将文本解码为 源字符 。 如果文本无法解码，将会引发 SyntaxError 。 接下来，词法分析器将使用源字符生成词元流。 所生成的词元类型取决于下一个要处理的源字符。 类似地..." />
+<meta name="description" content="Python 程序将由一个 解析器 来读取。 输入解析器的是 词元 的流，由 词法分析器(或称 分词器) 生成。 本章将介绍词法分析器是如何产生词元的。 词法分析器会确定程序文本的 编码格式(默认为 UTF-8)，并将文本解码为 源字符 。 如果文本无法解码，将会引发 SyntaxError 。 接下来，词法分析器将使用源字符生成词元流。 所生成的词元类型取决于下一个要处理的源字符。 类似地..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>2. 词法分析 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="3. 数据模型" href="datamodel.html" />
+    <link rel="prev" title="1. 概述" href="introduction.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/reference/lexical_analysis.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">2. 词法分析</a><ul>
+<li><a class="reference internal" href="#line-structure">2.1. 行结构</a><ul>
+<li><a class="reference internal" href="#logical-lines">2.1.1. 逻辑行</a></li>
+<li><a class="reference internal" href="#physical-lines">2.1.2. 物理行</a></li>
+<li><a class="reference internal" href="#comments">2.1.3. 注释</a></li>
+<li><a class="reference internal" href="#encoding-declarations">2.1.4. 编码声明</a></li>
+<li><a class="reference internal" href="#explicit-line-joining">2.1.5. 显式拼接行</a></li>
+<li><a class="reference internal" href="#implicit-line-joining">2.1.6. 隐式拼接行</a></li>
+<li><a class="reference internal" href="#blank-lines">2.1.7. 空白行</a></li>
+<li><a class="reference internal" href="#indentation">2.1.8. 缩进</a></li>
+<li><a class="reference internal" href="#whitespace-between-tokens">2.1.9. 标记间的空白字符</a></li>
+<li><a class="reference internal" href="#end-marker">2.1.10. 结束标记</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-tokens">2.2. 其他标记</a></li>
+<li><a class="reference internal" href="#names-identifiers-and-keywords">2.3. 名称（标识符和关键字）</a><ul>
+<li><a class="reference internal" href="#keywords">2.3.1. 关键字</a></li>
+<li><a class="reference internal" href="#soft-keywords">2.3.2. 软关键字</a></li>
+<li><a class="reference internal" href="#reserved-classes-of-identifiers">2.3.3. 保留的标识符类</a></li>
+<li><a class="reference internal" href="#non-ascii-characters-in-names">2.3.4. 名称中的非 ASCII 字符</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#literals">2.4. 字面量</a></li>
+<li><a class="reference internal" href="#string-and-bytes-literals">2.5. 字符串与字节串字面量</a><ul>
+<li><a class="reference internal" href="#triple-quoted-strings">2.5.1. 三引号字符串</a></li>
+<li><a class="reference internal" href="#string-prefixes">2.5.2. 字符串前缀</a></li>
+<li><a class="reference internal" href="#formal-grammar">2.5.3. 正式语法</a></li>
+<li><a class="reference internal" href="#escape-sequences">2.5.4. 转义序列</a><ul>
+<li><a class="reference internal" href="#ignored-end-of-line">2.5.4.1. 忽略行尾</a></li>
+<li><a class="reference internal" href="#escaped-characters">2.5.4.2. 转义字符</a></li>
+<li><a class="reference internal" href="#octal-character">2.5.4.3. 八进制字符</a></li>
+<li><a class="reference internal" href="#hexadecimal-character">2.5.4.4. 十六进制字符</a></li>
+<li><a class="reference internal" href="#named-unicode-character">2.5.4.5. 命名Unicode字符</a></li>
+<li><a class="reference internal" href="#hexadecimal-unicode-characters">2.5.4.6. 十六进制Unicode字符</a></li>
+<li><a class="reference internal" href="#unrecognized-escape-sequences">2.5.4.7. 未识别的转义序列</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bytes-literals">2.5.5. 字节串字面量</a></li>
+<li><a class="reference internal" href="#raw-string-literals">2.5.6. 原始字符串字面量</a></li>
+<li><a class="reference internal" href="#formatted-string-literals">2.5.7. f-字符串</a></li>
+<li><a class="reference internal" href="#template-string-literals">2.5.8. t-strings</a></li>
+<li><a class="reference internal" href="#formal-grammar-for-f-strings">2.5.9. f-字符串的正式语法</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#numeric-literals">2.6. 数值字面量</a><ul>
+<li><a class="reference internal" href="#integer-literals">2.6.1. 整数字面量</a></li>
+<li><a class="reference internal" href="#floating-point-literals">2.6.2. 浮点数字面量</a></li>
+<li><a class="reference internal" href="#imaginary-literals">2.6.3. 虚数字面量</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#operators-and-delimiters">2.7. 运算符与定界符</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="introduction.html"
+                          title="上一章"><span class="section-number">1. </span>概述</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="datamodel.html"
+                          title="下一章"><span class="section-number">3. </span>数据模型</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "reference/lexical_analysis.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/reference/lexical_analysis.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/reference/lexical_analysis.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="datamodel.html" title="3. 数据模型"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="1. 概述"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 语言参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">2. </span>词法分析</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="lexical-analysis">
+<span id="lexical"></span><h1 class="translated"><span class="section-number">2. </span>词法分析<a class="headerlink" href="#lexical-analysis" title="Link to this heading">¶</a></h1>
+<p class="translated" id="index-0">Python 程序将由一个 <em>解析器</em> 来读取。 输入解析器的是 <a class="reference internal" href="../glossary.html#term-token"><span class="xref std std-term">词元</span></a> 的流，由 <em>词法分析器</em> (或称 <em>分词器</em>) 生成。 本章将介绍词法分析器是如何产生词元的。</p>
+<p class="translated">词法分析器会确定程序文本的 <a class="reference internal" href="#encodings"><span class="std std-ref">编码格式</span></a> (默认为 UTF-8)，并将文本解码为 <a class="reference internal" href="#lexical-source-character"><span class="std std-ref">源字符</span></a>。 如果文本无法解码，将会引发 <a class="reference internal" href="../library/exceptions.html#SyntaxError" title="SyntaxError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>。</p>
+<p class="translated">接下来，词法分析器将使用源字符生成词元流。 所生成的词元类型取决于下一个要处理的源字符。 类似地，分析器的其他特殊行为取决于尚未被处理的第一个源字符。 下面的表格给出了这些源字符的概要，并带有包含更多信息的章节链接。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">字符</p></th>
+<th class="head"><p class="translated">下一词元（或其他相关文档）</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><ul class="simple">
+<li><p class="translated">space</p></li>
+<li><p class="translated">tab</p></li>
+<li><p class="translated">formfeed</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#whitespace"><span class="std std-ref">空格</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p class="translated">CR, LF</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#line-structure"><span class="std std-ref">换行</span></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#indentation"><span class="std std-ref">缩进</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><ul class="simple">
+<li><p class="translated">反斜杠 (<code class="docutils literal notranslate"><span class="pre">\</span></code>)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#explicit-joining"><span class="std std-ref">显式行合并</span></a></p></li>
+<li><p class="translated">(也用于 <a class="reference internal" href="#escape-sequences"><span class="std std-ref">字符串转义序列</span></a>)</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p class="translated">井号 (<code class="docutils literal notranslate"><span class="pre">#</span></code>)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#comments"><span class="std std-ref">注释</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><ul class="simple">
+<li><p class="translated">引号 (<code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;</span></code>)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#strings"><span class="std std-ref">字符串字面值</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p class="translated">ASCII 字母 (<code class="docutils literal notranslate"><span class="pre">a</span></code>-<code class="docutils literal notranslate"><span class="pre">z</span></code>, <code class="docutils literal notranslate"><span class="pre">A</span></code>-<code class="docutils literal notranslate"><span class="pre">Z</span></code>)</p></li>
+<li><p class="translated">非 ASCII 字符</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#identifiers"><span class="std std-ref">名称</span></a></p></li>
+<li><p class="translated">带前缀的 <a class="reference internal" href="#strings"><span class="std std-ref">字符串或字节串字面值</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><ul class="simple">
+<li><p class="translated">下划线 (<code class="docutils literal notranslate"><span class="pre">_</span></code>)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#identifiers"><span class="std std-ref">名称</span></a></p></li>
+<li><p class="translated">(也可作为 <a class="reference internal" href="#numbers"><span class="std std-ref">数字字面值</span></a> 的组成部分)</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p class="translated">数字 (<code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">9</span></code>)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#numbers"><span class="std std-ref">数字字面值</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><ul class="simple">
+<li><p class="translated">点号 (<code class="docutils literal notranslate"><span class="pre">.</span></code>)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#numbers"><span class="std std-ref">数字字面值</span></a></p></li>
+<li><p class="translated"><a class="reference internal" href="#operators"><span class="std std-ref">运算符</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p class="translated">问号 (<code class="docutils literal notranslate"><span class="pre">?</span></code>)</p></li>
+<li><p class="translated">货币符 (<code class="docutils literal notranslate"><span class="pre">$</span></code>)</p></li>
+<li><p class="translated">反引号 (<code class="docutils literal notranslate"><span class="pre">​`​</span></code>)</p>
+</li>
+<li><p class="translated">控制字符</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated">错误（在字符串字面值和注释之外）</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><ul class="simple">
+<li><p class="translated">其他可打印字符</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#operators"><span class="std std-ref">运算符或分隔符</span></a></p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p class="translated">文件结束</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p class="translated"><a class="reference internal" href="#endmarker-token"><span class="std std-ref">结束标记</span></a></p></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<section id="line-structure">
+<span id="id1"></span><h2 class="translated"><span class="section-number">2.1. </span>行结构<a class="headerlink" href="#line-structure" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-1">Python 程序可以拆分为多个 <em>逻辑行</em>。</p>
+<section id="logical-lines">
+<span id="id2"></span><h3 class="translated"><span class="section-number">2.1.1. </span>逻辑行<a class="headerlink" href="#logical-lines" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-2">逻辑行的结束由词元 <a class="reference internal" href="../library/token.html#token.NEWLINE" title="token.NEWLINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NEWLINE</span></code></a> 表示。 除非语法允许 <code class="xref py py-data docutils literal notranslate"><span class="pre">NEWLINE</span></code> (举例来说，在复合语句中的多个语句之前) 否则语句不能跨越逻辑行边界。 逻辑行由一条或多条 <em>物理行</em> 根据 <a class="reference internal" href="#explicit-joining"><span class="std std-ref">显式</span></a> 或 <a class="reference internal" href="#implicit-joining"><span class="std std-ref">隐式</span></a> 的 <em>行连接</em> 规则构造而成。</p>
+</section>
+<section id="physical-lines">
+<span id="id3"></span><h3 class="translated"><span class="section-number">2.1.2. </span>物理行<a class="headerlink" href="#physical-lines" title="Link to this heading">¶</a></h3>
+<p class="translated">物理行是由使用下列行结束符序列中的一个作为终结的字符序列：</p>
+<ul class="simple">
+<li><p class="translated">使用 ASCII LF (linefeed) 的 Unix 形式，</p></li>
+<li><p class="translated">使用 ASCII 序列 CR LF (return 加 linefeed) 的 Windows 形式，</p></li>
+<li><p class="translated">使用 ASCII CR (return) 字符的 '<a class="reference external" href="https://en.wikipedia.org/wiki/Classic_Mac_OS">Classic Mac OS</a>' 形式。</p>
+</li>
+</ul>
+<p class="translated">无论平台如何，这些序列中的每一个都会被替换为单个ASCII LF（换行）字符。（即使在 <a class="reference internal" href="#strings"><span class="std std-ref">字符串字面量</span></a> 中也是如此。）每一行可以使用这些序列中的任何一个；它们在文件内部不需要保持一致。</p>
+<p class="translated">输入的结束也作为最后一个物理行的隐式终止符。</p>
+<p class="translated">形式上：</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-newline">newline</strong>: &lt;ASCII LF&gt; | &lt;ASCII CR&gt; &lt;ASCII LF&gt; | &lt;ASCII CR&gt;
+</pre>
+</section>
+<section id="comments">
+<span id="id5"></span><h3 class="translated"><span class="section-number">2.1.3. </span>注释<a class="headerlink" href="#comments" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-3">注释以井号  (<code class="docutils literal notranslate"><span class="pre">#</span></code>)  开头，在物理行末尾截止。 注意，井号不是字符串字面量。除非应用隐式行拼接规则，否则，注释代表逻辑行结束。句法不解析注释。</p>
+</section>
+<section id="encoding-declarations">
+<span id="encodings"></span><h3 class="translated"><span class="section-number">2.1.4. </span>编码声明<a class="headerlink" href="#encoding-declarations" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-4">Python 脚本第一或第二行的注释匹配正则表达式 <code class="docutils literal notranslate"><span class="pre">coding[=:]\s*([-\w.]+)</span></code> 时，该注释会被当作编码声明；这个表达式的第一组指定了源码文件的编码。编码声明必须独占一行，在第二行时，则第一行必须也是注释。编码表达式的形式如下：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding: &lt;encoding-name&gt; -*-</span>
+</pre></div>
+</div>
+<p class="translated">这也是 GNU Emacs 认可的形式，此外，还支持如下形式：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># vim:fileencoding=&lt;encoding-name&gt;</span>
+</pre></div>
+</div>
+<p class="translated">这是 Bram Moolenaar 的 VIM 认可的形式。</p>
+<p class="translated">如果没有找到编码格式声明，则默认编码格式为 UTF-8。 如果文件的隐式或显式编码格式为 UTF-8，则初始的 UTF-8 字节顺序标记 (<code class="docutils literal notranslate"><span class="pre">b'\xef\xbb\xbf'</span></code>) 会被忽略，而不是成为语法错误。</p>
+<p class="translated">如果声明了编码格式，该编码格式的名称必须是 Python 可识别的 (参见 <a class="reference internal" href="../library/codecs.html#standard-encodings"><span class="std std-ref">标准编码</span></a>)。 编码格式会被用于所有的词法分析，包括字符串字面量、注释和标识符等。</p>
+<p class="translated" id="lexical-source-character">所有词法分析，包括字符串字面量、注释和标识符，都作用于使用源编码解码的Unicode文本。除了 NUL 控制字符以外的任何Unicode码点都可以出现在Python源代码中。</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-source_character">source_character</strong>:  &lt;any Unicode code point, except NUL&gt;
+</pre>
+</section>
+<section id="explicit-line-joining">
+<span id="explicit-joining"></span><h3 class="translated"><span class="section-number">2.1.5. </span>显式拼接行<a class="headerlink" href="#explicit-line-joining" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-5">两个及两个以上的物理行可用反斜杠 (<code class="docutils literal notranslate"><span class="pre">\</span></code>) 拼接为一个逻辑行，规则如下：以不在字符串或注释内的反斜杠结尾时，物理行将与下一行拼接成一个逻辑行，并删除反斜杠及其后的换行符。例如：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="mi">1900</span> <span class="o">&lt;</span> <span class="n">year</span> <span class="o">&lt;</span> <span class="mi">2100</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">month</span> <span class="o">&lt;=</span> <span class="mi">12</span> \
+   <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">31</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">hour</span> <span class="o">&lt;</span> <span class="mi">24</span> \
+   <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">minute</span> <span class="o">&lt;</span> <span class="mi">60</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">second</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>   <span class="c1"># 看来是个有效的日期</span>
+        <span class="k">return</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p class="translated">以反斜杠结尾的行不能包含注释。反斜杠不能用于延续注释内容。除字符串字面量之外，反斜杠不能用于延续标记（即非字符串字面量的标记不能通过反斜杠拆分到物理行的下一行）。在字符串字面量之外的行中，反斜杠出现在其他位置是非法的。</p>
+</section>
+<section id="implicit-line-joining">
+<span id="implicit-joining"></span><h3 class="translated"><span class="section-number">2.1.6. </span>隐式拼接行<a class="headerlink" href="#implicit-line-joining" title="Link to this heading">¶</a></h3>
+<p class="translated">圆括号、方括号、花括号内的表达式可以分成多个物理行，不必使用反斜杠。例如：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">month_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Januari&#39;</span><span class="p">,</span> <span class="s1">&#39;Februari&#39;</span><span class="p">,</span> <span class="s1">&#39;Maart&#39;</span><span class="p">,</span>      <span class="c1"># 这些是</span>
+               <span class="s1">&#39;April&#39;</span><span class="p">,</span>   <span class="s1">&#39;Mei&#39;</span><span class="p">,</span>      <span class="s1">&#39;Juni&#39;</span><span class="p">,</span>       <span class="c1"># 一年之中</span>
+               <span class="s1">&#39;Juli&#39;</span><span class="p">,</span>    <span class="s1">&#39;Augustus&#39;</span><span class="p">,</span> <span class="s1">&#39;September&#39;</span><span class="p">,</span>  <span class="c1"># 各个月份的</span>
+               <span class="s1">&#39;Oktober&#39;</span><span class="p">,</span> <span class="s1">&#39;November&#39;</span><span class="p">,</span> <span class="s1">&#39;December&#39;</span><span class="p">]</span>   <span class="c1"># 荷兰语名称</span>
+</pre></div>
+</div>
+<p class="translated">隐式行拼接可含注释；后续行的缩进并不重要；还支持空的后续行。隐式拼接行之间没有 NEWLINE 标记。三引号字符串支持隐式拼接行（见下文），但不支持注释。</p>
+</section>
+<section id="blank-lines">
+<span id="id6"></span><h3 class="translated"><span class="section-number">2.1.7. </span>空白行<a class="headerlink" href="#blank-lines" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-6">仅包含空格、制表符、换页符以及可能的注释的逻辑行将被忽略（即不会生成 <a class="reference internal" href="../library/token.html#token.NEWLINE" title="token.NEWLINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NEWLINE</span></code></a> 标记）。在交互式输入语句时，空行的处理方式可能因读取-求值-打印循环的实现而异。在标准交互式解释器中，完全空白的逻辑行（即不包含任何空白符或注释）会终止多行语句。</p>
+</section>
+<section id="indentation">
+<span id="id7"></span><h3 class="translated"><span class="section-number">2.1.8. </span>缩进<a class="headerlink" href="#indentation" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-7">逻辑行开头的空白符（空格符和制表符）用于计算该行的缩进层级，决定语句组块。</p>
+<p class="translated">制表符（从左至右）被替换为一至八个空格，缩进空格的总数是八的倍数（与 Unix 的规则保持一致）。首个非空字符前的空格数决定了该行的缩进层次。缩进不能用反斜杠进行多行拼接；首个反斜杠之前的空白符决定了缩进的层次。</p>
+<p class="translated">源文件混用制表符和空格符缩进时，因空格数量与制表符相关，由此产生的不一致将导致不能正常识别缩进层次，从而触发 <a class="reference internal" href="../library/exceptions.html#TabError" title="TabError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TabError</span></code></a>。</p>
+<p class="translated"><strong>跨平台兼容性说明：</strong> 鉴于非 UNIX 平台文本编辑器本身的特性，请勿在源文件中混用制表符和空格符。另外也请注意，不同平台有可能会显式限制最大缩进层级。</p>
+<p class="translated">行首含换页符时，缩进计算将忽略该换页符。换页符在行首空白符内其他位置的效果未定义（例如，可能导致空格计数重置为零）。</p>
+<p class="translated" id="index-8">连续行的缩进级别使用一个栈来生成 <a class="reference internal" href="../library/token.html#token.INDENT" title="token.INDENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">INDENT</span></code></a> 和 <a class="reference internal" href="../library/token.html#token.DEDENT" title="token.DEDENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEDENT</span></code></a> 标记，规则如下。</p>
+<p class="untranslated">Before the first line of the file is read, a single zero is pushed on the stack;
+this will never be popped off again.  The numbers pushed on the stack will
+always be strictly increasing from bottom to top.  At the beginning of each
+logical line, the line's indentation level is compared to the top of the stack.
+If it is equal, nothing happens. If it is larger, it is pushed on the stack, and
+one <code class="xref py py-data docutils literal notranslate"><span class="pre">INDENT</span></code> token is generated.  If it is smaller, it <em>must</em> be one of the
+numbers occurring on the stack; all numbers on the stack that are larger are
+popped off, and for each number popped off a <code class="xref py py-data docutils literal notranslate"><span class="pre">DEDENT</span></code> token is generated.
+At the end of the file, a <code class="xref py py-data docutils literal notranslate"><span class="pre">DEDENT</span></code> token is generated for each number
+remaining on the stack that is larger than zero.</p>
+<p class="translated">下面的 Python 代码缩进示例虽然正确，但含混不清：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">perm</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+        <span class="c1"># 计算由 l 的所有排列组成的列表</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                  <span class="k">return</span> <span class="p">[</span><span class="n">l</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)):</span>
+             <span class="n">s</span> <span class="o">=</span> <span class="n">l</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+             <span class="n">p</span> <span class="o">=</span> <span class="n">perm</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+              <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span>
+</pre></div>
+</div>
+<p class="translated">下例展示了多种缩进错误：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span> <span class="k">def</span><span class="w"> </span><span class="nf">perm</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>                       <span class="c1"># 错误：第一行有缩进</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)):</span>             <span class="c1"># 错误：没有缩进</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">l</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">perm</span><span class="p">(</span><span class="n">l</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>   <span class="c1"># 错误：非预期的缩进</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span>                <span class="c1"># 错误：不一致的缩进</span>
+</pre></div>
+</div>
+<p class="translated">（实际上，解析器可以识别前三个错误；只有最后一个错误由词法分析器识别  --- <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">r</span></code> 的缩进无法匹配从栈里移除的缩进层级。）</p>
+</section>
+<section id="whitespace-between-tokens">
+<span id="whitespace"></span><h3 class="translated"><span class="section-number">2.1.9. </span>标记间的空白字符<a class="headerlink" href="#whitespace-between-tokens" title="Link to this heading">¶</a></h3>
+<p class="translated">除非是在逻辑行的开头或字符串字面值中，空格符、制表符和换页符可以交替使用来分隔词元：</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-whitespace">whitespace</strong>:  <span class="sx">' '</span> | tab | formfeed
+</pre>
+<p class="translated">两个词元之间仅在它们的拼接可能被解读为另一个不同的标记时才需要使用空白符。 例如，<code class="docutils literal notranslate"><span class="pre">ab</span></code> 是一个词元，而 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">b</span></code> 是两个词元。 不过，<code class="docutils literal notranslate"><span class="pre">+a</span></code> 和 <code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">a</span></code> 都将产生两个词元，<code class="docutils literal notranslate"><span class="pre">+</span></code> 和 <code class="docutils literal notranslate"><span class="pre">a</span></code>，因为 <code class="docutils literal notranslate"><span class="pre">+a</span></code> 不是一个有效的词元。</p>
+</section>
+<section id="end-marker">
+<span id="endmarker-token"></span><h3 class="translated"><span class="section-number">2.1.10. </span>结束标记<a class="headerlink" href="#end-marker" title="Link to this heading">¶</a></h3>
+<p class="translated">在非交互输入结束时，词法分析器将生成一个 <a class="reference internal" href="../library/token.html#token.ENDMARKER" title="token.ENDMARKER"><code class="xref py py-data docutils literal notranslate"><span class="pre">ENDMARKER</span></code></a> 词元。</p>
+</section>
+</section>
+<section id="other-tokens">
+<span id="id8"></span><h2 class="translated"><span class="section-number">2.2. </span>其他标记<a class="headerlink" href="#other-tokens" title="Link to this heading">¶</a></h2>
+<p class="translated">除了 <a class="reference internal" href="../library/token.html#token.NEWLINE" title="token.NEWLINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NEWLINE</span></code></a>、<a class="reference internal" href="../library/token.html#token.INDENT" title="token.INDENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">INDENT</span></code></a> 和 <a class="reference internal" href="../library/token.html#token.DEDENT" title="token.DEDENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEDENT</span></code></a> 之外，还存在以下几类词元: <em>标识符</em> 和 <em>关键字</em> (<a class="reference internal" href="../library/token.html#token.NAME" title="token.NAME"><code class="xref py py-data docutils literal notranslate"><span class="pre">NAME</span></code></a>)、<em>字面量</em> (如 <a class="reference internal" href="../library/token.html#token.NUMBER" title="token.NUMBER"><code class="xref py py-data docutils literal notranslate"><span class="pre">NUMBER</span></code></a> 和 <a class="reference internal" href="../library/token.html#token.STRING" title="token.STRING"><code class="xref py py-data docutils literal notranslate"><span class="pre">STRING</span></code></a>)，以及其他符号 (<em>运算符</em> 和 <em>分隔符</em>, <a class="reference internal" href="../library/token.html#token.OP" title="token.OP"><code class="xref py py-data docutils literal notranslate"><span class="pre">OP</span></code></a>)。 空白字符（除了前面讨论的逻辑行终止符）不是词元，而是用于分隔词元。 在有歧义的情况下，词元由从左到右读取时能形成合法词元的最长可能字符串组成。</p>
+</section>
+<section id="names-identifiers-and-keywords">
+<span id="identifiers"></span><h2 class="translated"><span class="section-number">2.3. </span>名称（标识符和关键字）<a class="headerlink" href="#names-identifiers-and-keywords" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-9"><a class="reference internal" href="../library/token.html#token.NAME" title="token.NAME"><code class="xref py py-data docutils literal notranslate"><span class="pre">NAME</span></code></a> 标记表示 <em>标识符</em>、<em>关键字</em> 和 <em>软关键字</em>。</p>
+<p class="translated">名称是由以下字符组成的：</p>
+<ul class="simple">
+<li><p class="translated">大写和小写字母 (<code class="docutils literal notranslate"><span class="pre">A-Z</span></code> 和 <code class="docutils literal notranslate"><span class="pre">a-z</span></code>)。</p></li>
+<li><p class="translated">下划线 (<code class="docutils literal notranslate"><span class="pre">_</span></code>)。</p></li>
+<li><p class="translated">数字 (<code class="docutils literal notranslate"><span class="pre">0</span></code> 至 <code class="docutils literal notranslate"><span class="pre">9</span></code>)，但不能作为第一个字符，以及</p></li>
+<li><p class="translated">非 ASCII 字符。 合法的名称只能包含“字母型”和“数字型”字符；请参阅 <a class="reference internal" href="#lexical-names-nonascii"><span class="std std-ref">名称中的非 ASCII 字符</span></a> 了解详情。</p></li>
+</ul>
+<p class="translated">名称必须至少包含一个字符，但没有长度上限。大小写敏感。</p>
+<p class="translated">形式上，名称由以下词法定义描述：</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-NAME">NAME</strong>:          <a class="reference internal" href="#grammar-token-python-grammar-name_start"><code class="xref docutils literal notranslate"><span class="pre">name_start</span></code></a> <a class="reference internal" href="#grammar-token-python-grammar-name_continue"><code class="xref docutils literal notranslate"><span class="pre">name_continue</span></code></a>*
+<strong id="grammar-token-python-grammar-name_start">name_start</strong>:    <span class="sx">&quot;a&quot;</span>...<span class="sx">&quot;z&quot;</span> | <span class="sx">&quot;A&quot;</span>...<span class="sx">&quot;Z&quot;</span> | <span class="sx">&quot;_&quot;</span> | &lt;non-ASCII character&gt;
+<strong id="grammar-token-python-grammar-name_continue">name_continue</strong>: name_start | <span class="sx">&quot;0&quot;</span>...<span class="sx">&quot;9&quot;</span>
+<strong id="grammar-token-python-grammar-identifier">identifier</strong>:    &lt;<a class="reference internal" href="#grammar-token-python-grammar-NAME"><code class="xref docutils literal notranslate"><span class="pre">NAME</span></code></a>, except keywords&gt;
+</pre>
+<p class="translated">请注意并非所有匹配此语法的名称都是合法的；请参阅 <a class="reference internal" href="#lexical-names-nonascii"><span class="std std-ref">名称中的非 ASCII 字符</span></a> 了解详情。</p>
+<section id="keywords">
+<span id="id9"></span><h3 class="translated"><span class="section-number">2.3.1. </span>关键字<a class="headerlink" href="#keywords" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-10">以下名称被用作该语言的保留字或 <em>关键字</em>，不能用作普通标识符。它们的拼写必须与此处完全一致：</p>
+<div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>False      await      else       import     pass
+None       break      except     in         raise
+True       class      finally    is         return
+and        continue   for        lambda     try
+as         def        from       nonlocal   while
+assert     del        global     not        with
+async      elif       if         or         yield
+</pre></div>
+</div>
+</section>
+<section id="soft-keywords">
+<span id="id10"></span><h3 class="translated"><span class="section-number">2.3.2. </span>软关键字<a class="headerlink" href="#soft-keywords" title="Link to this heading">¶</a></h3>
+<div class="versionadded" id="index-11">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+<p class="translated">某些名称仅在特定上下文中保留。这些被称为 <em>软关键字</em>：</p>
+<ul class="simple">
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">match</span></code>、<code class="docutils literal notranslate"><span class="pre">case</span></code> 和 <code class="docutils literal notranslate"><span class="pre">_</span></code> 在 <a class="reference internal" href="compound_stmts.html#match"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">match</span></code></a> 语句中使用时属于软关键字。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">type</span></code> 在 <a class="reference internal" href="simple_stmts.html#type"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">type</span></code></a> 语句中使用时属于软关键字。</p></li>
+</ul>
+<p class="translated">这些标识符在特定上下文中语法上作为关键字使用，但这种区分是在解析器层面完成的，而非词法分析（分词）阶段。</p>
+<p class="translated">作为软关键字，它们能够在用于相应语法的同时仍然保持与用作标识符名称的现有代码的兼容性。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">type</span></code> 现在是一个软关键字。</p>
+</div>
+</section>
+<section id="reserved-classes-of-identifiers">
+<span id="id-classes"></span><span id="index-12"></span><h3 class="translated"><span class="section-number">2.3.3. </span>保留的标识符类<a class="headerlink" href="#reserved-classes-of-identifiers" title="Link to this heading">¶</a></h3>
+<p class="translated">某些标识符类（除了关键字）具有特殊含义。这些类的命名模式以下划线字符开头，并以下划线结尾：</p>
+<dl>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">_*</span></code></dt><dd><p class="translated">不会被 <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">module</span> <span class="pre">import</span> <span class="pre">*</span></code> 所导入。</p>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">_</span></code></dt><dd><p class="translated">在 <a class="reference internal" href="compound_stmts.html#match"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">match</span></code></a> 语句内部的 <code class="docutils literal notranslate"><span class="pre">case</span></code> 模式中，<code class="docutils literal notranslate"><span class="pre">_</span></code> 是一个 <a class="reference internal" href="#soft-keywords"><span class="std std-ref">软关键字</span></a>，它表示 <a class="reference internal" href="compound_stmts.html#wildcard-patterns"><span class="std std-ref">通配符</span></a>。</p>
+<p class="translated">在此之外，交互式解释器会将最后一次求值的结果放到变量 <code class="docutils literal notranslate"><span class="pre">_</span></code> 中。 （它与 <code class="docutils literal notranslate"><span class="pre">print</span></code> 等内置函数一起被存储于 <a class="reference internal" href="../library/builtins.html#module-builtins" title="builtins: The module that provides the built-in namespace."><code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code></a> 模块。）</p>
+<p class="translated">在其他地方，<code class="docutils literal notranslate"><span class="pre">_</span></code> 是一个常规标识符。 它常常被用来命名 &quot;特殊&quot; 条目，但对 Python 本身来说毫无特殊之处。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">_</span></code> 常用于连接国际化文本；详见 <a class="reference internal" href="../library/gettext.html#module-gettext" title="gettext: Multilingual internationalization services."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gettext</span></code></a> 模块文档。</p>
+<p class="translated">它还经常被用来命名无需使用的变量。</p>
+</div>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">__*__</span></code></dt><dd><p class="translated">系统定义的名称，通常简称为 &quot;dunder&quot; 。这些名称由解释器及其实现（包括标准库）定义。现有系统定义名称相关的论述详见 <a class="reference internal" href="datamodel.html#specialnames"><span class="std std-ref">特殊方法名称</span></a> 等章节。Python 未来版本中还将定义更多此类名称。任何情况下，<em>任何</em> 不显式遵从 <code class="docutils literal notranslate"><span class="pre">__*__</span></code> 名称的文档用法，都可能导致无警告提示的错误。</p>
+</dd>
+<dt class="translated"><code class="docutils literal notranslate"><span class="pre">__*</span></code></dt><dd><p class="translated">类的私有名称。类定义时，此类名称以一种混合形式重写，以避免基类及派生类的 &quot;私有&quot; 属性之间产生名称冲突。详见 <a class="reference internal" href="expressions.html#atom-identifiers"><span class="std std-ref">标识符（名称）</span></a>。</p>
+</dd>
+</dl>
+</section>
+<section id="non-ascii-characters-in-names">
+<span id="lexical-names-nonascii"></span><h3 class="translated"><span class="section-number">2.3.4. </span>名称中的非 ASCII 字符<a class="headerlink" href="#non-ascii-characters-in-names" title="Link to this heading">¶</a></h3>
+<p class="translated">包含非 ASCII 字符的名称在 <a class="reference internal" href="#identifiers"><span class="std std-ref">上文</span></a> 所述规则和语法说明之上还需要额外的规范化和验证。 例如，<code class="docutils literal notranslate"><span class="pre">ř_1</span></code>, <code class="docutils literal notranslate"><span class="pre">蛇</span></code> 或 <code class="docutils literal notranslate"><span class="pre">साँप</span></code>  是合法的名称，但 <code class="docutils literal notranslate"><span class="pre">r〰2</span></code>, <code class="docutils literal notranslate"><span class="pre">€</span></code> 或 <code class="docutils literal notranslate"><span class="pre">🐍</span></code> 则不是。</p>
+<p class="translated">本节介绍具体的规则。</p>
+<p class="translated">在解析时所有名称都会被转换为 <a class="reference external" href="https://www.unicode.org/reports/tr15/#Norm_Forms">normalization form</a> NFKC。 例如，这意味着某些字符的排印形式将被转换为其“基本”形式。 举例来说，<code class="docutils literal notranslate"><span class="pre">ﬁⁿₐˡᵢᶻₐᵗᵢᵒₙ</span></code> 将被正规化为 <code class="docutils literal notranslate"><span class="pre">finalization</span></code>，因此 Python 会将它们视为相同的名称:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ﬁⁿₐˡᵢᶻₐᵗᵢᵒₙ</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">finalization</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">正规化仅会在词法层级上进行。 接受 <em>字符串</em> 形式名称的运行时函数通常不会正规化其参数。 例如，在运行时上面定义的变量在 <a class="reference internal" href="../library/functions.html#globals" title="globals"><code class="xref py py-func docutils literal notranslate"><span class="pre">globals()</span></code></a> 字典中可通过 <code class="docutils literal notranslate"><span class="pre">globals()[&quot;finalization&quot;]</span></code> 访问但不可通过 <code class="docutils literal notranslate"><span class="pre">globals()[&quot;ﬁⁿₐˡᵢᶻₐᵗᵢᵒₙ&quot;]</span></code> 访问。</p>
+</div>
+<p class="translated">与纯 ASCII 的名称仅能包含字母、数字和下划线，且不能以数字打头类似，合法的名称必须以“字母型”集合 <code class="docutils literal notranslate"><span class="pre">xid_start</span></code> 中的字符打头，且其余的字符必须属于“字母数字型”集合 <code class="docutils literal notranslate"><span class="pre">xid_continue</span></code>。</p>
+<p class="translated">这些集合是基于由 Unicode 标准附件 <a class="reference external" href="https://www.unicode.org/reports/tr31/">UAX-31</a> 所定义的 <em>XID_Start</em> 和 <em>XID_Continue</em> 集合的。 Python 的 <code class="docutils literal notranslate"><span class="pre">xid_start</span></code> 还额外包括了下划线 (<code class="docutils literal notranslate"><span class="pre">_</span></code>)。 请注意 Python 并不一定遵循 <a class="reference external" href="https://www.unicode.org/reports/tr31/">UAX-31</a>。</p>
+<p class="translated">Unicode 字符数据库中的 <a class="reference external" href="https://www.unicode.org/Public/16.0.0/ucd/DerivedCoreProperties.txt">DerivedCoreProperties.txt</a> 文件提供了由 Unicode 定义的 <em>XID_Start</em> 和 <em>XID_Continue</em> 集内字符的非规范性列表。 作为参考，<code class="docutils literal notranslate"><span class="pre">xid_*</span></code> 集合的构造规则如下。</p>
+<p class="translated">集合 <code class="docutils literal notranslate"><span class="pre">id_start</span></code> 被定义为以下内容的并集：</p>
+<ul class="simple">
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Lu&gt;</span></code> - 大写字母 (包括 <code class="docutils literal notranslate"><span class="pre">A</span></code> 到 <code class="docutils literal notranslate"><span class="pre">Z</span></code>)</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Ll&gt;</span></code> - 小写字母 (包括 <code class="docutils literal notranslate"><span class="pre">a</span></code> 到 <code class="docutils literal notranslate"><span class="pre">z</span></code>)</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Lt&gt;</span></code> - 标题大小写字母</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Lm&gt;</span></code> - 修饰字母</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Lo&gt;</span></code> - 其他字母</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Nl&gt;</span></code> - 数字字母</p></li>
+<li><p class="translated">{<code class="docutils literal notranslate"><span class="pre">&quot;_&quot;</span></code>} - 下划线</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">&lt;Other_ID_Start&gt;</span></code> - 在 <a class="reference external" href="https://www.unicode.org/Public/16.0.0/ucd/PropList.txt">PropList.txt</a> 中显式定义的用于支持向下兼容的字符集合</p></li>
+</ul>
+<p class="translated">集合 <code class="docutils literal notranslate"><span class="pre">xid_start</span></code> 随后以 NFKC 规范化关闭此集合，将移除规范化形式不是 <code class="docutils literal notranslate"><span class="pre">id_start</span> <span class="pre">id_continue*</span></code> 的所有字符。</p>
+<p class="translated">集合 <code class="docutils literal notranslate"><span class="pre">id_continue</span></code> 被定义为以下内容的并集：</p>
+<ul class="simple">
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">id_start</span></code> (见上文)</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Nd&gt;</span></code> - 十进制数字 (包括 <code class="docutils literal notranslate"><span class="pre">0</span></code> 到 <code class="docutils literal notranslate"><span class="pre">9</span></code>)</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Pc&gt;</span></code> - 连接标点符号</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Mn&gt;</span></code> - 非间距标记</p></li>
+<li><p class="translated">Unicode 类别 <code class="docutils literal notranslate"><span class="pre">&lt;Mc&gt;</span></code> - 间距组合标记</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">&lt;Other_ID_Continue&gt;</span></code> - 为支持向下兼容性在 <a class="reference external" href="https://www.unicode.org/Public/16.0.0/ucd/PropList.txt">PropList.txt</a> 中另一组显式列出的字符集合</p></li>
+</ul>
+<p class="translated">同样地，<code class="docutils literal notranslate"><span class="pre">xid_continue</span></code> 以 NFKC 规范化关闭此集合。</p>
+<p class="translated">Unicode 类别使用的是 <a class="reference internal" href="../library/unicodedata.html#module-unicodedata" title="unicodedata: Access the Unicode Database."><code class="xref py py-mod docutils literal notranslate"><span class="pre">unicodedata</span></code></a> 模块中所包含的 Unicode 字符数据库版本。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<ul class="simple">
+<li><p class="translated"><span class="target" id="index-37"></span><a class="pep reference external" href="https://peps.python.org/pep-3131/"><strong>PEP 3131</strong></a> -- 支持非 ASCII 标识符</p></li>
+<li><p class="translated"><span class="target" id="index-38"></span><a class="pep reference external" href="https://peps.python.org/pep-0672/"><strong>PEP 672</strong></a> -- 针对 Python 的 Unicode 相关安全考量</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="literals">
+<span id="id11"></span><h2 class="translated"><span class="section-number">2.4. </span>字面量<a class="headerlink" href="#literals" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-15">字面量是内置类型常量值的表示法。</p>
+<p class="translated">在词法分析方面，Python有 <a class="reference internal" href="#strings"><span class="std std-ref">字符串、字节</span></a> 和 <a class="reference internal" href="#numbers"><span class="std std-ref">数值</span></a> 字面量。</p>
+<p class="translated">其他“字面量”通过 <a class="reference internal" href="#keywords"><span class="std std-ref">关键字</span></a> (<code class="docutils literal notranslate"><span class="pre">None</span></code>、<code class="docutils literal notranslate"><span class="pre">True</span></code>、<code class="docutils literal notranslate"><span class="pre">False</span></code>) 和特殊的 <a class="reference internal" href="#lexical-ellipsis"><span class="std std-ref">省略号标记</span></a> (<code class="docutils literal notranslate"><span class="pre">...</span></code>) 进行词法表示。</p>
+</section>
+<section id="string-and-bytes-literals">
+<span id="strings"></span><span id="index-16"></span><h2 class="translated"><span class="section-number">2.5. </span>字符串与字节串字面量<a class="headerlink" href="#string-and-bytes-literals" title="Link to this heading">¶</a></h2>
+<p class="translated">字符串字面量是用单引号 (<code class="docutils literal notranslate"><span class="pre">'</span></code>) 或双引号 (<code class="docutils literal notranslate"><span class="pre">&quot;</span></code>) 括起来的文本。 例如：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;spam&quot;</span>
+<span class="s1">&#39;eggs&#39;</span>
+</pre></div>
+</div>
+<p class="translated">用于开始字面量的引号也用于终止它，因此字符串字面量只能包含另一个引号（除非使用转义序列，见下文）。例如：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Say &quot;Hello&quot;, please.&#39;</span>
+<span class="s2">&quot;Don&#39;t do that!&quot;</span>
+</pre></div>
+</div>
+<p class="translated">除了这个限制外，引号字符 (<code class="docutils literal notranslate"><span class="pre">'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">&quot;</span></code>) 的选择不影响字面量的解析方式。</p>
+<p class="translated">在字符串字面量内部，反斜杠 (<code class="docutils literal notranslate"><span class="pre">\</span></code>) 字符引入了一个 <em class="dfn">转义序列</em>，其特殊含义取决于反斜杠后面的字符。例如，<code class="docutils literal notranslate"><span class="pre">\&quot;</span></code> 表示双引号字符，并且 <em>不</em> 结束字符串：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Say </span><span class="se">\&quot;</span><span class="s2">Hello</span><span class="se">\&quot;</span><span class="s2"> to everyone!&quot;</span><span class="p">)</span>
+<span class="go">Say &quot;Hello&quot; to everyone!</span>
+</pre></div>
+</div>
+<p class="translated">有关此类序列的完整列表和更多详细信息，请参见下文的 <a class="reference internal" href="#escape-sequences"><span class="std std-ref">转义序列</span></a>。</p>
+<section id="triple-quoted-strings">
+<span id="index-17"></span><h3 class="translated"><span class="section-number">2.5.1. </span>三引号字符串<a class="headerlink" href="#triple-quoted-strings" title="Link to this heading">¶</a></h3>
+<p class="translated">字符串也可以用三组匹配的单引号或双引号括起来。这些通常被称为 <em class="dfn">三引号字符串</em>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;这是一个三引号字符串。&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p class="translated">在三引号字面量中，允许使用未转义的引号（并且会保留），但与起始引号相同的三个连续未转义引号 (<code class="docutils literal notranslate"><span class="pre">'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">&quot;</span></code>) 会终止字面量:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;这个字符串内有 &quot;引号&quot;。&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p class="translated">也允许使用未转义的新行，并且会保留:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;这个三引号字符串</span>
+<span class="sd">在下一行继续。&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="string-prefixes">
+<span id="index-18"></span><h3 class="translated"><span class="section-number">2.5.2. </span>字符串前缀<a class="headerlink" href="#string-prefixes" title="Link to this heading">¶</a></h3>
+<p class="translated">字符串字面量可以有一个可选的 <em class="dfn">前缀</em>，该前缀会影响字面量内容的解析方式，例如:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sa">b</span><span class="s2">&quot;data&quot;</span>
+<span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">result</span><span class="si">=}</span><span class="s1">&#39;</span>
+</pre></div>
+</div>
+<p class="translated">允许的前缀有:</p>
+<ul class="simple">
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">b</span></code>: <a class="reference internal" href="#bytes-literal"><span class="std std-ref">字节串字面量</span></a></p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">r</span></code>: <a class="reference internal" href="#raw-strings"><span class="std std-ref">原始字符串</span></a></p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">f</span></code>: <a class="reference internal" href="#f-strings"><span class="std std-ref">格式字符串字面量</span></a> (&quot;f-string&quot;)</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">t</span></code>: <a class="reference internal" href="#t-strings"><span class="std std-ref">模板字符串字面量</span></a> (&quot;t-string&quot;)</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">u</span></code>: 无效果（为向后兼容而允许）</p></li>
+</ul>
+<p class="translated">详细信息请参见链接部分。</p>
+<p class="translated">前缀不区分大小写（例如，'<code class="docutils literal notranslate"><span class="pre">B</span></code>' 与 '<code class="docutils literal notranslate"><span class="pre">b</span></code>' 效果相同）。 '<code class="docutils literal notranslate"><span class="pre">r</span></code>' 前缀可以与 '<code class="docutils literal notranslate"><span class="pre">f</span></code>', '<code class="docutils literal notranslate"><span class="pre">t</span></code>' 或 '<code class="docutils literal notranslate"><span class="pre">b</span></code>' 组合使用，因此 '<code class="docutils literal notranslate"><span class="pre">fr</span></code>', '<code class="docutils literal notranslate"><span class="pre">rf</span></code>', '<code class="docutils literal notranslate"><span class="pre">tr</span></code>', '<code class="docutils literal notranslate"><span class="pre">rt</span></code>', '<code class="docutils literal notranslate"><span class="pre">br</span></code>' 和 '<code class="docutils literal notranslate"><span class="pre">rb</span></code>' 也是有效的前缀。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3: </span>新增原始字节串 <code class="docutils literal notranslate"><span class="pre">'rb'</span></code> 前缀，是 <code class="docutils literal notranslate"><span class="pre">'br'</span></code> 的同义词。</p>
+<p class="translated">为简化 Python 2.x 和 3.x 双版本代码库的维护工作，重新引入了对 Unicode 传统字面量 (<code class="docutils literal notranslate"><span class="pre">u'value'</span></code>) 的支持。更多信息请参阅 <span class="target" id="index-39"></span><a class="pep reference external" href="https://peps.python.org/pep-0414/"><strong>PEP 414</strong></a>。</p>
+</div>
+</section>
+<section id="formal-grammar">
+<h3 class="translated"><span class="section-number">2.5.3. </span>正式语法<a class="headerlink" href="#formal-grammar" title="Link to this heading">¶</a></h3>
+<p class="translated">除了 <a class="reference internal" href="#f-strings"><span class="std std-ref">&quot;f-字符串&quot;</span></a> 和 <a class="reference internal" href="#t-strings"><span class="std std-ref">&quot;t-字符串&quot;</span></a> 之外，字符串字面量由以下词法定义描述。</p>
+<p class="translated">这些定义使用 <a class="reference internal" href="introduction.html#lexical-lookaheads"><span class="std std-ref">负向否定前瞻</span></a> (<code class="docutils literal notranslate"><span class="pre">!</span></code>) 来指示结束引号会终止字面量。</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-STRING">STRING</strong>:          [<a class="reference internal" href="#grammar-token-python-grammar-stringprefix"><code class="xref docutils literal notranslate"><span class="pre">stringprefix</span></code></a>] (<a class="reference internal" href="#grammar-token-python-grammar-stringcontent"><code class="xref docutils literal notranslate"><span class="pre">stringcontent</span></code></a>)
+<strong id="grammar-token-python-grammar-stringprefix">stringprefix</strong>:    &lt;(<span class="sx">&quot;r&quot;</span> | <span class="sx">&quot;u&quot;</span> | <span class="sx">&quot;b&quot;</span> | <span class="sx">&quot;br&quot;</span> | <span class="sx">&quot;rb&quot;</span>), case-insensitive&gt;
+<strong id="grammar-token-python-grammar-stringcontent">stringcontent</strong>:
+   | <span class="sx">&quot;'''&quot;</span> ( !<span class="sx">&quot;'''&quot;</span> <a class="reference internal" href="#grammar-token-python-grammar-longstringitem"><code class="xref docutils literal notranslate"><span class="pre">longstringitem</span></code></a>)* <span class="sx">&quot;'''&quot;</span>
+   | <span class="sx">'&quot;&quot;&quot;'</span> ( !<span class="sx">'&quot;&quot;&quot;'</span> <a class="reference internal" href="#grammar-token-python-grammar-longstringitem"><code class="xref docutils literal notranslate"><span class="pre">longstringitem</span></code></a>)* <span class="sx">'&quot;&quot;&quot;'</span>
+   | <span class="sx">&quot;'&quot;</span> ( !<span class="sx">&quot;'&quot;</span> <a class="reference internal" href="#grammar-token-python-grammar-stringitem"><code class="xref docutils literal notranslate"><span class="pre">stringitem</span></code></a>)* <span class="sx">&quot;'&quot;</span>
+   | <span class="sx">'&quot;'</span> ( !<span class="sx">'&quot;'</span> <a class="reference internal" href="#grammar-token-python-grammar-stringitem"><code class="xref docutils literal notranslate"><span class="pre">stringitem</span></code></a>)* <span class="sx">'&quot;'</span>
+<strong id="grammar-token-python-grammar-stringitem">stringitem</strong>:      <a class="reference internal" href="#grammar-token-python-grammar-stringchar"><code class="xref docutils literal notranslate"><span class="pre">stringchar</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-stringescapeseq"><code class="xref docutils literal notranslate"><span class="pre">stringescapeseq</span></code></a>
+<strong id="grammar-token-python-grammar-stringchar">stringchar</strong>:      &lt;any <a class="reference internal" href="#grammar-token-python-grammar-source_character"><code class="xref docutils literal notranslate"><span class="pre">source_character</span></code></a>, except backslash and newline&gt;
+<strong id="grammar-token-python-grammar-longstringitem">longstringitem</strong>:  <a class="reference internal" href="#grammar-token-python-grammar-stringitem"><code class="xref docutils literal notranslate"><span class="pre">stringitem</span></code></a> | newline
+<strong id="grammar-token-python-grammar-stringescapeseq">stringescapeseq</strong>: <span class="sx">&quot;\&quot;</span> &lt;any <a class="reference internal" href="#grammar-token-python-grammar-source_character"><code class="xref docutils literal notranslate"><span class="pre">source_character</span></code></a>&gt;
+</pre>
+<p class="translated">请注意，与所有词法定义一样，空白符是重要的。特别是，前缀（如果有）必须紧接起始引号。</p>
+</section>
+<section id="escape-sequences">
+<span id="index-20"></span><span id="id12"></span><h3 class="translated"><span class="section-number">2.5.4. </span>转义序列<a class="headerlink" href="#escape-sequences" title="Link to this heading">¶</a></h3>
+<p class="translated">除非存在 '<code class="docutils literal notranslate"><span class="pre">r</span></code>' 或 '<code class="docutils literal notranslate"><span class="pre">R</span></code>' 前缀，在字符串和字节串字面值中的转义序列将按照类似于标准 C 所使用的规则进行解读。 可用的转义序列有：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">转义序列</p></th>
+<th class="head"><p class="translated">含意</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\</span></code>&lt;newline&gt;</p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-ignore"><span class="std std-ref">字符串转义 - 忽略模式</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\\</span></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-escaped-char"><span class="std std-ref">反斜杠</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\'</span></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-escaped-char"><span class="std std-ref">单引号</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\&quot;</span></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-escaped-char"><span class="std std-ref">双引号</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\a</span></code></p></td>
+<td><p class="translated">ASCII 响铃（BEL）</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\b</span></code></p></td>
+<td><p class="translated">ASCII 退格符（BS）</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\f</span></code></p></td>
+<td><p class="translated">ASCII 换页符（FF）</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\n</span></code></p></td>
+<td><p class="translated">ASCII 换行符（LF）</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\r</span></code></p></td>
+<td><p class="translated">ASCII 回车符（CR）</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\t</span></code></p></td>
+<td><p class="translated">ASCII 水平制表符（TAB）</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">\v</span></code></p></td>
+<td><p class="translated">ASCII 垂直制表符（VT）</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="samp docutils literal notranslate"><span class="pre">\</span><em><span class="pre">ooo</span></em></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-oct"><span class="std std-ref">字符串转义 - 八进制</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="samp docutils literal notranslate"><span class="pre">\x</span><em><span class="pre">hh</span></em></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-hex"><span class="std std-ref">字符串转义 - 十六进制</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="samp docutils literal notranslate"><span class="pre">\N{</span><em><span class="pre">name</span></em><span class="pre">}</span></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-named"><span class="std std-ref">字符串转义 - 命名字符</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="samp docutils literal notranslate"><span class="pre">\u</span><em><span class="pre">xxxx</span></em></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-long-hex"><span class="std std-ref">十六进制 Unicode 字符</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="samp docutils literal notranslate"><span class="pre">\U</span><em><span class="pre">xxxxxxxx</span></em></code></p></td>
+<td><p class="translated"><a class="reference internal" href="#string-escape-long-hex"><span class="std std-ref">十六进制 Unicode 字符</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<section id="ignored-end-of-line">
+<span id="string-escape-ignore"></span><h4 class="translated"><span class="section-number">2.5.4.1. </span>忽略行尾<a class="headerlink" href="#ignored-end-of-line" title="Link to this heading">¶</a></h4>
+<p class="translated">可以在行尾添加一个反斜杠来忽略换行符:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;This string will not include </span><span class="se">\</span>
+<span class="gp">... </span><span class="s1">backslashes or newline characters.&#39;</span>
+<span class="go">&#39;This string will not include backslashes or newline characters.&#39;</span>
+</pre></div>
+</div>
+<p class="translated">同样的效果也可以使用 <a class="reference internal" href="#strings"><span class="std std-ref">三重引号字符串</span></a>，或者圆括号和 <a class="reference internal" href="expressions.html#string-concatenation"><span class="std std-ref">字符串字面量拼接</span></a> 来达成。</p>
+</section>
+<section id="escaped-characters">
+<span id="string-escape-escaped-char"></span><h4 class="translated"><span class="section-number">2.5.4.2. </span>转义字符<a class="headerlink" href="#escaped-characters" title="Link to this heading">¶</a></h4>
+<p class="translated">要在非 <a class="reference internal" href="#raw-strings"><span class="std std-ref">原始</span></a> Python 字符串字面量中包含反斜杠，必须将其加倍。<code class="docutils literal notranslate"><span class="pre">\\</span></code> 转义序列表示单个反斜杠字符:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">Program Files&#39;</span><span class="p">)</span>
+<span class="go">C:\Program Files</span>
+</pre></div>
+</div>
+<p class="translated">同样，序列 <code class="docutils literal notranslate"><span class="pre">\'</span></code> 和 <code class="docutils literal notranslate"><span class="pre">\&quot;</span></code> 分别表示单引号和双引号字符:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1"> and </span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">&#39; and &quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="octal-character">
+<span id="string-escape-oct"></span><h4 class="translated"><span class="section-number">2.5.4.3. </span>八进制字符<a class="headerlink" href="#octal-character" title="Link to this heading">¶</a></h4>
+<p class="translated">序列 <code class="samp docutils literal notranslate"><span class="pre">\</span><em><span class="pre">ooo</span></em></code> 表示一个八进制（基数为8）值为 <em>ooo</em> 的*字符*:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="se">\120</span><span class="s1">&#39;</span>
+<span class="go">&#39;P&#39;</span>
+</pre></div>
+</div>
+<p class="translated">最多接受三个八进制数字（0到7）。</p>
+<p class="translated">在字节串字面量中，<em>字符</em> 表示具有给定值的 <em>字节</em>。在字符串字面量中，它表示具有给定值的Unicode字符。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>值大于 <code class="docutils literal notranslate"><span class="pre">0o377</span></code> (255) 的八进制转义会产生一个 <a class="reference internal" href="../library/exceptions.html#DeprecationWarning" title="DeprecationWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>值大于 <code class="docutils literal notranslate"><span class="pre">0o377</span></code> (255) 的八进制转义会产生一个 <a class="reference internal" href="../library/exceptions.html#SyntaxWarning" title="SyntaxWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxWarning</span></code></a>。在未来的Python版本中，它们将引发一个 <a class="reference internal" href="../library/exceptions.html#SyntaxError" title="SyntaxError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>。</p>
+</div>
+</section>
+<section id="hexadecimal-character">
+<span id="string-escape-hex"></span><h4 class="translated"><span class="section-number">2.5.4.4. </span>十六进制字符<a class="headerlink" href="#hexadecimal-character" title="Link to this heading">¶</a></h4>
+<p class="translated">序列 <code class="samp docutils literal notranslate"><span class="pre">\x</span><em><span class="pre">hh</span></em></code> 表示一个十六进制（基数为16）值为 <em>hh</em> 的*字符*:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="se">\x50</span><span class="s1">&#39;</span>
+<span class="go">&#39;P&#39;</span>
+</pre></div>
+</div>
+<p class="translated">与 C 标准不同，必须为两个十六进制数字。</p>
+<p class="translated">在字节串字面量中，<em>字符</em> 表示具有给定值的 <em>字节</em>。在字符串字面量中，它表示具有给定值的Unicode字符。</p>
+</section>
+<section id="named-unicode-character">
+<span id="string-escape-named"></span><h4 class="translated"><span class="section-number">2.5.4.5. </span>命名Unicode字符<a class="headerlink" href="#named-unicode-character" title="Link to this heading">¶</a></h4>
+<p class="translated">序列 <code class="samp docutils literal notranslate"><span class="pre">\N{</span><em><span class="pre">name</span></em><span class="pre">}</span></code> 表示具有给定 <em>name</em> 的Unicode字符:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="se">\N{LATIN CAPITAL LETTER P}</span><span class="s1">&#39;</span>
+<span class="go">&#39;P&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="se">\N{SNAKE}</span><span class="s1">&#39;</span>
+<span class="go">&#39;🐍&#39;</span>
+</pre></div>
+</div>
+<p class="translated">此序列不能出现在 <a class="reference internal" href="#bytes-literal"><span class="std std-ref">字节串字面量</span></a> 中。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>Support for <a class="reference external" href="https://www.unicode.org/Public/16.0.0/ucd/NameAliases.txt">name aliases</a>
+has been added.</p>
+</div>
+</section>
+<section id="hexadecimal-unicode-characters">
+<span id="string-escape-long-hex"></span><h4 class="translated"><span class="section-number">2.5.4.6. </span>十六进制Unicode字符<a class="headerlink" href="#hexadecimal-unicode-characters" title="Link to this heading">¶</a></h4>
+<p class="translated">这些序列 <code class="samp docutils literal notranslate"><span class="pre">\u</span><em><span class="pre">xxxx</span></em></code> 和 <code class="samp docutils literal notranslate"><span class="pre">\U</span><em><span class="pre">xxxxxxxx</span></em></code> 表示具有给定十六进制（基数为16）值的Unicode字符。<code class="docutils literal notranslate"><span class="pre">\u</span></code> 需要正好四个数字；<code class="docutils literal notranslate"><span class="pre">\U</span></code> 需要正好八个数字。后者可以编码任何Unicode字符。</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="se">\u1234</span><span class="s1">&#39;</span>
+<span class="go">&#39;ሴ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="se">\U0001f40d</span><span class="s1">&#39;</span>
+<span class="go">&#39;🐍&#39;</span>
+</pre></div>
+</div>
+<p class="translated">这些序列不能出现在 <a class="reference internal" href="#bytes-literal"><span class="std std-ref">字节串字面量</span></a> 中。</p>
+</section>
+<section id="unrecognized-escape-sequences">
+<span id="index-21"></span><h4 class="translated"><span class="section-number">2.5.4.7. </span>未识别的转义序列<a class="headerlink" href="#unrecognized-escape-sequences" title="Link to this heading">¶</a></h4>
+<p class="translated">与标准C不同，所有未识别的转义序列在字符串中保持不变，即 <em>反斜杠保留在结果中</em>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;\q&#39;</span><span class="p">)</span>
+<span class="go">\q</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="s1">&#39;\q&#39;</span><span class="p">)</span>
+<span class="go">[&#39;\\&#39;, &#39;q&#39;]</span>
+</pre></div>
+</div>
+<p class="translated">请注意，对于字节串字面量，仅在字符串字面量中识别的转义序列 (<code class="docutils literal notranslate"><span class="pre">\N...</span></code>，<code class="docutils literal notranslate"><span class="pre">\u...</span></code>，<code class="docutils literal notranslate"><span class="pre">\U...</span></code>) 属于未识别的转义类别。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>未识别的转义序列会产生 <a class="reference internal" href="../library/exceptions.html#DeprecationWarning" title="DeprecationWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>未识别的转义序列会产生一个 <a class="reference internal" href="../library/exceptions.html#SyntaxWarning" title="SyntaxWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxWarning</span></code></a>。在未来的Python版本中，它们将引发一个 <a class="reference internal" href="../library/exceptions.html#SyntaxError" title="SyntaxError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>。</p>
+</div>
+</section>
+</section>
+<section id="bytes-literals">
+<span id="bytes-literal"></span><span id="index-22"></span><h3 class="translated"><span class="section-number">2.5.5. </span>字节串字面量<a class="headerlink" href="#bytes-literals" title="Link to this heading">¶</a></h3>
+<p class="translated"><em class="dfn">字节串字面值</em> 总是带有 '<code class="docutils literal notranslate"><span class="pre">b</span></code>' 或 '<code class="docutils literal notranslate"><span class="pre">B</span></code>' 前缀；它们会产生 <a class="reference internal" href="../library/stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 类型而不是 <a class="reference internal" href="../library/stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 类型的实例。 它们只能包含 ASCII 字符；数值为 128 或以上的字节必须使用转义序列来表示 (通常为 <a class="reference internal" href="#string-escape-hex"><span class="std std-ref">十六进制字符</span></a> 或 <a class="reference internal" href="#string-escape-oct"><span class="std std-ref">八进制字符</span></a>)：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x89</span><span class="s1">PNG</span><span class="se">\r\n\x1a\n</span><span class="s1">&#39;</span>
+<span class="go">b&#39;\x89PNG\r\n\x1a\n&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x89</span><span class="s1">PNG</span><span class="se">\r\n\x1a\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">[137, 80, 78, 71, 13, 10, 26, 10]</span>
+</pre></div>
+</div>
+<p class="translated">同样，零字节必须使用转义序列表示 (通常是 <code class="docutils literal notranslate"><span class="pre">\0</span></code> 或 <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)。</p>
+</section>
+<section id="raw-string-literals">
+<span id="raw-strings"></span><span id="index-23"></span><h3 class="translated"><span class="section-number">2.5.6. </span>原始字符串字面量<a class="headerlink" href="#raw-string-literals" title="Link to this heading">¶</a></h3>
+<p class="translated">字符串和字节串字面值都可以选择带有字符 '<code class="docutils literal notranslate"><span class="pre">r</span></code>' 或 '<code class="docutils literal notranslate"><span class="pre">R</span></code>' 作为前缀；这样的构造分别称为 <em class="dfn">原始字符串字面值</em> 和 <em class="dfn">原始字节串字面值</em> 并会将反斜杠视为字面字符。 因此，在原始字符串字面值中，<a class="reference internal" href="#escape-sequences"><span class="std std-ref">转义序列</span></a> 不会被特殊对待：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{4}</span><span class="s1">-\d</span><span class="si">{2}</span><span class="s1">-\d</span><span class="si">{2}</span><span class="s1">&#39;</span>
+<span class="go">&#39;\\d{4}-\\d{2}-\\d{2}&#39;</span>
+</pre></div>
+</div>
+<p class="translated">即使在原始字面量中，引号也可以用反斜杠转义，但反斜杠会保留在输出结果里；例如 <code class="docutils literal notranslate"><span class="pre">r&quot;\&quot;&quot;</span></code> 是由两个字符组成的有效字符串字面量：反斜杠和双引号；<code class="docutils literal notranslate"><span class="pre">r&quot;\&quot;</span></code> 则不是有效字符串字面量（原始字符串也不能以奇数个反斜杠结尾）。尤其是，<em>原始字面量不能以单个反斜杠结尾</em> （反斜杠会转义其后的引号)。还要注意，反斜杠加换行在字面量中被解释为两个字符，而 <em>不是</em> 连续行。</p>
+</section>
+<section id="formatted-string-literals">
+<span id="f-strings"></span><span id="index-24"></span><span id="id13"></span><h3 class="translated"><span class="section-number">2.5.7. </span>f-字符串<a class="headerlink" href="#formatted-string-literals" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span><a class="reference internal" href="expressions.html#await"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">await</span></code></a> 和 <a class="reference internal" href="compound_stmts.html#async-for"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">async</span> <span class="pre">for</span></code></a> 可在 f-字符串内部的表达式中使用。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>增加了调试说明符 (<code class="docutils literal notranslate"><span class="pre">=</span></code>)</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>许多针对 f-字符串内部的表达式的限制已被移除。 例如，嵌套字符串、注释和反斜杠现在都是允许的。</p>
+</div>
+<p class="translated"><em class="dfn">格式化字符串字面值</em> 或称 <em class="dfn">f-字符串</em> 是带有 '<code class="docutils literal notranslate"><span class="pre">f</span></code>' 或 '<code class="docutils literal notranslate"><span class="pre">F</span></code>' 前缀的字符串字面值。 不同于其他字符串字面值，f-字符串的值不是固定的。 它们可能包含由花括号 <code class="docutils literal notranslate"><span class="pre">{}</span></code> 标记的 <em>替换字段</em>。 替换字段包含要在运行时被求值的表达式。 例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">who</span> <span class="o">=</span> <span class="s1">&#39;nobody&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nationality</span> <span class="o">=</span> <span class="s1">&#39;Spanish&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">who</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s1"> expects the </span><span class="si">{</span><span class="n">nationality</span><span class="si">}</span><span class="s1"> Inquisition!&#39;</span>
+<span class="go">&#39;Nobody expects the Spanish Inquisition!&#39;</span>
+</pre></div>
+</div>
+<p class="translated">任何在替换字段之外的双花括号 (<code class="docutils literal notranslate"><span class="pre">{{</span></code> 或 <code class="docutils literal notranslate"><span class="pre">}}</span></code>) 都将以相应的单花括号替换:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">...</span><span class="se">}}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">{...}</span>
+</pre></div>
+</div>
+<p class="translated">替换字段之外的其他字符将被当作是普通的字符串字面值。 这意味着转义序列会被解码（除非该字面值还被标记为原始字符串），在三重引号 f-字符串中还可以换行:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Galahad&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">favorite_color</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">:</span><span class="se">\t</span><span class="si">{</span><span class="n">favorite_color</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">Galahad:       blue</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;C:\Users\</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">C:\Users\Galahad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;Three shall be the number of the counting</span>
+<span class="gp">... </span><span class="s1">and the number of the counting shall be three.&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="go">Three shall be the number of the counting</span>
+<span class="go">and the number of the counting shall be three.</span>
+</pre></div>
+</div>
+<p class="translated">格式化字符串字面值中的表达式将被当作是常规的 Python 表达式。 每个表达式都将在格式化字符串字面值所在的上下文中以从左至右的顺序被求值。 空表达式不被允许，而 <a class="reference internal" href="expressions.html#lambda"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">lambda</span></code></a> 和赋值表达式 <code class="docutils literal notranslate"><span class="pre">:=</span></code> 必须显式地以圆括号标记:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="p">(</span><span class="n">half</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">half</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">42</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="go">&#39;0.5, 21.0&#39;</span>
+</pre></div>
+</div>
+<p class="translated">允许在替换字段中重用外层 f-字符串的引号类型:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s2">&quot;abc </span><span class="si">{</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="si">}</span><span class="s2"> def&quot;</span>
+<span class="go">&#39;abc 2 def&#39;</span>
+</pre></div>
+</div>
+<p class="translated">替换字段中也允许使用反斜杠并会以与在其他场景下相同的方式求值:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;List a contains:</span><span class="se">\n</span><span class="si">{</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">List a contains:</span>
+<span class="go">a</span>
+<span class="go">b</span>
+<span class="go">c</span>
+</pre></div>
+</div>
+<p class="translated">也可以嵌套 f-字符串:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;world&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;Repeated:</span><span class="si">{</span><span class="sa">f</span><span class="s1">&#39; hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="go">&#39;Repeated: hello world hello world hello world&#39;</span>
+</pre></div>
+</div>
+<p class="translated">可移植的 Python 程序不应使用超过 5 层的嵌套。</p>
+<div class="impl-detail compound">
+<p class="translated">CPython 不限制 f-字符串的嵌套层级。</p>
+</div>
+<p class="translated">在单个引号和三重引号 f-字符串中的替换表达式都可包含换行并可包含注释。 替换字段内部在 <code class="docutils literal notranslate"><span class="pre">#</span></code> 之后的任何内容都属于注释（包括花括号和引号）。 这意味着带有注释的替换字段必须另起一行来结束：</p>
+<div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; a = 2
+&gt;&gt;&gt; f&quot;abc{a  # 在此行结束前此注释  }&quot;  将保持有效
+...       + 3}&quot;
+&#39;abc5&#39;
+</pre></div>
+</div>
+<p class="translated">在表达式之后，替换字段还可以包含：</p>
+<ul class="simple">
+<li><p class="translated"><em>调试说明符</em> -- 一个等号 (<code class="docutils literal notranslate"><span class="pre">=</span></code>)，可以在一侧或两侧加空格；</p></li>
+<li><p class="translated">一个 <em>转换说明符</em> -- <code class="docutils literal notranslate"><span class="pre">!s</span></code>, <code class="docutils literal notranslate"><span class="pre">!r</span></code> 或 <code class="docutils literal notranslate"><span class="pre">!a</span></code>；和/或</p></li>
+<li><p class="translated">一个以冒号 (<code class="docutils literal notranslate"><span class="pre">:</span></code>) 作为前缀的 <em>格式说明符</em>。</p></li>
+</ul>
+<p class="translated">请参阅 <a class="reference internal" href="../library/stdtypes.html#stdtypes-fstrings"><span class="std std-ref">标准库中的 f-字符串一节</span></a> 了解这些字段如何被求值的详情。</p>
+<p class="translated">如该小节所说的，<em>格式说明符</em> 将作为传给 <a class="reference internal" href="../library/functions.html#format" title="format"><code class="xref py py-func docutils literal notranslate"><span class="pre">format()</span></code></a> 函数的第二个参数用来格式化替换字段值。 例如，它们可通过使用 <a class="reference internal" href="../library/string.html#formatspec"><span class="std std-ref">格式说明微语言</span></a> 来指明字段宽度和填充字符:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">number</span> <span class="o">=</span> <span class="mf">14.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">number</span><span class="si">:</span><span class="s1">20.7f</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="go">&#39;          14.3000000&#39;</span>
+</pre></div>
+</div>
+<p class="translated">顶层的格式说明符可以包括嵌套的替换字段:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">field_size</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">precision</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">number</span><span class="si">:{</span><span class="n">field_size</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">precision</span><span class="si">}</span><span class="s1">f</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="go">&#39;          14.3000000&#39;</span>
+</pre></div>
+</div>
+<p class="translated">这些嵌套的字段还可以包括它们自己的转换字段和 <a class="reference internal" href="../library/string.html#formatspec"><span class="std std-ref">格式说明符</span></a>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">number</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">number</span><span class="si">:{</span><span class="n">field_size</span><span class="si">}}</span><span class="s1">&#39;</span>
+<span class="go">&#39;                   3&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">number</span><span class="si">:{</span><span class="n">field_size</span><span class="si">:</span><span class="s1">05</span><span class="se">}}</span><span class="s1">&#39;</span>
+<span class="go">&#39;00000000000000000003&#39;</span>
+</pre></div>
+</div>
+<p class="translated">不过，这些嵌套的字段不可以包括更深一级的嵌套替换字段。</p>
+<p class="translated">格式字符串字面值不能被用作 <a class="reference internal" href="../glossary.html#term-docstring"><span class="xref std std-term">文档字符串</span></a>，即使其中未包括表达式:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">foo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="sa">f</span><span class="s2">&quot;Not a docstring&quot;</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="go">None</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<ul class="simple">
+<li><p class="translated"><span class="target" id="index-40"></span><a class="pep reference external" href="https://peps.python.org/pep-0498/"><strong>PEP 498</strong></a> -- 字符串字面值插值</p></li>
+<li><p class="translated"><span class="target" id="index-41"></span><a class="pep reference external" href="https://peps.python.org/pep-0701/"><strong>PEP 701</strong></a> -- f-字符串的语法形式化</p></li>
+<li><p class="translated"><a class="reference internal" href="../library/stdtypes.html#str.format" title="str.format"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.format()</span></code></a>，它使用了关联的格式字符串机制。</p></li>
+</ul>
+</div>
+</section>
+<section id="template-string-literals">
+<span id="t-strings"></span><span id="id14"></span><h3 class="translated"><span class="section-number">2.5.8. </span>t-strings<a class="headerlink" href="#template-string-literals" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+<p class="translated"><em class="dfn">模板字符串字面值</em> 或称 <em class="dfn">t-字符串</em> 是以 '<code class="docutils literal notranslate"><span class="pre">t</span></code>' 或 '<code class="docutils literal notranslate"><span class="pre">T</span></code>' 作为前缀的字符串字面值。 这些字符串遵循与 <a class="reference internal" href="#f-strings"><span class="std std-ref">格式化字符串字面值</span></a> 相同的语法规则。 有关求值规则的差异，请参见 <a class="reference internal" href="../library/stdtypes.html#stdtypes-tstrings"><span class="std std-ref">标准库的 t-字符串章节</span></a></p>
+</section>
+<section id="formal-grammar-for-f-strings">
+<h3 class="translated"><span class="section-number">2.5.9. </span>f-字符串的正式语法<a class="headerlink" href="#formal-grammar-for-f-strings" title="Link to this heading">¶</a></h3>
+<p class="translated">对 f-字符串处理一部分由 <a class="reference internal" href="../glossary.html#term-lexical-analyzer"><span class="xref std std-term">lexical analyzer</span></a> 进行，它会产生 <a class="reference internal" href="../library/token.html#token.FSTRING_START" title="token.FSTRING_START"><code class="xref py py-data docutils literal notranslate"><span class="pre">FSTRING_START</span></code></a>, <a class="reference internal" href="../library/token.html#token.FSTRING_MIDDLE" title="token.FSTRING_MIDDLE"><code class="xref py py-data docutils literal notranslate"><span class="pre">FSTRING_MIDDLE</span></code></a> 和 <a class="reference internal" href="../library/token.html#token.FSTRING_END" title="token.FSTRING_END"><code class="xref py py-data docutils literal notranslate"><span class="pre">FSTRING_END</span></code></a> 等词元，另一部分由解析器进行，它将处理替换字段中的表达式。 具体的工作划分方式属于 CPython 实现细节。</p>
+<p class="translated">相应地，f-字符串语法是 <a class="reference internal" href="introduction.html#notation-lexical-vs-syntactic"><span class="std std-ref">词法和语法定义</span></a> 的混合体。</p>
+<p class="translated">空格在这些场合中是有意义的：</p>
+<ul>
+<li><p class="translated">在 <a class="reference internal" href="../library/token.html#token.FSTRING_START" title="token.FSTRING_START"><code class="xref py py-data docutils literal notranslate"><span class="pre">FSTRING_START</span></code></a> 中不能有空格（即前缀和引号之间）。</p></li>
+<li><p class="translated">在 <a class="reference internal" href="../library/token.html#token.FSTRING_MIDDLE" title="token.FSTRING_MIDDLE"><code class="xref py py-data docutils literal notranslate"><span class="pre">FSTRING_MIDDLE</span></code></a> 中的空格是字符串字面值内容的一部分。</p></li>
+<li><p class="translated">在 <code class="docutils literal notranslate"><span class="pre">fstring_replacement_field</span></code> 中，如果存在 <code class="docutils literal notranslate"><span class="pre">f_debug_specifier</span></code>，则左花括号之后直到 <code class="docutils literal notranslate"><span class="pre">f_debug_specifier</span></code> 的所有空格，以及 <code class="docutils literal notranslate"><span class="pre">f_debug_specifier</span></code> 后面紧随的空格，将作为表达式的一部分被保留。</p>
+<div class="impl-detail compound">
+<p class="translated">表达式不会在分词阶段被处理；它将根据 <code class="docutils literal notranslate"><span class="pre">{</span></code> 词元和 <code class="docutils literal notranslate"><span class="pre">=</span></code> 之后的词元位置从源代码中提取。</p>
+</div>
+</li>
+</ul>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">FSTRING_MIDDLE</span></code> 定义使用 <a class="reference internal" href="introduction.html#lexical-lookaheads"><span class="std std-ref">负向否定前瞻</span></a> (<code class="docutils literal notranslate"><span class="pre">!</span></code>) 来指明特殊字符 (反斜杠, 换行符, <code class="docutils literal notranslate"><span class="pre">{</span></code>, <code class="docutils literal notranslate"><span class="pre">}</span></code>)  以及序列 (<code class="docutils literal notranslate"><span class="pre">f_quote</span></code>)。</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-fstring">fstring</strong>:    <a class="reference internal" href="#grammar-token-python-grammar-FSTRING_START"><code class="xref docutils literal notranslate"><span class="pre">FSTRING_START</span></code></a> <a class="reference internal" href="#grammar-token-python-grammar-fstring_middle"><code class="xref docutils literal notranslate"><span class="pre">fstring_middle</span></code></a>* <a class="reference internal" href="#grammar-token-python-grammar-FSTRING_END"><code class="xref docutils literal notranslate"><span class="pre">FSTRING_END</span></code></a>
+
+<strong id="grammar-token-python-grammar-FSTRING_START">FSTRING_START</strong>:      <a class="reference internal" href="#grammar-token-python-grammar-fstringprefix"><code class="xref docutils literal notranslate"><span class="pre">fstringprefix</span></code></a> (<span class="sx">&quot;'&quot;</span> | <span class="sx">'&quot;'</span> | <span class="sx">&quot;'''&quot;</span> | <span class="sx">'&quot;&quot;&quot;'</span>)
+<strong id="grammar-token-python-grammar-FSTRING_END">FSTRING_END</strong>:        <a class="reference internal" href="#grammar-token-python-grammar-f_quote"><code class="xref docutils literal notranslate"><span class="pre">f_quote</span></code></a>
+<strong id="grammar-token-python-grammar-fstringprefix">fstringprefix</strong>:      &lt;(<span class="sx">&quot;f&quot;</span> | <span class="sx">&quot;fr&quot;</span> | <span class="sx">&quot;rf&quot;</span>), case-insensitive&gt;
+<strong id="grammar-token-python-grammar-f_debug_specifier">f_debug_specifier</strong>:  <span class="sx">'='</span>
+<strong id="grammar-token-python-grammar-f_quote">f_quote</strong>:            &lt;the quote character(s) used in FSTRING_START&gt;
+
+<strong id="grammar-token-python-grammar-fstring_middle">fstring_middle</strong>:
+   | <a class="reference internal" href="#grammar-token-python-grammar-fstring_replacement_field"><code class="xref docutils literal notranslate"><span class="pre">fstring_replacement_field</span></code></a>
+   | <a class="reference internal" href="#grammar-token-python-grammar-FSTRING_MIDDLE"><code class="xref docutils literal notranslate"><span class="pre">FSTRING_MIDDLE</span></code></a>
+<strong id="grammar-token-python-grammar-FSTRING_MIDDLE">FSTRING_MIDDLE</strong>:
+   | (!<span class="sx">&quot;\&quot;</span> !<a class="reference internal" href="#grammar-token-python-grammar-newline"><code class="xref docutils literal notranslate"><span class="pre">newline</span></code></a> !<span class="sx">'{'</span> !<span class="sx">'}'</span> !<a class="reference internal" href="#grammar-token-python-grammar-f_quote"><code class="xref docutils literal notranslate"><span class="pre">f_quote</span></code></a>) <a class="reference internal" href="#grammar-token-python-grammar-source_character"><code class="xref docutils literal notranslate"><span class="pre">source_character</span></code></a>
+   | <a class="reference internal" href="#grammar-token-python-grammar-stringescapeseq"><code class="xref docutils literal notranslate"><span class="pre">stringescapeseq</span></code></a>
+   | <span class="sx">&quot;{{&quot;</span>
+   | <span class="sx">&quot;}}&quot;</span>
+   | &lt;newline, in triple-quoted f-strings only&gt;
+<strong id="grammar-token-python-grammar-fstring_replacement_field">fstring_replacement_field</strong>:
+   | <span class="sx">'{'</span> <a class="reference internal" href="#grammar-token-python-grammar-f_expression"><code class="xref docutils literal notranslate"><span class="pre">f_expression</span></code></a> [<a class="reference internal" href="#grammar-token-python-grammar-f_debug_specifier"><code class="xref docutils literal notranslate"><span class="pre">f_debug_specifier</span></code></a>] [<a class="reference internal" href="#grammar-token-python-grammar-fstring_conversion"><code class="xref docutils literal notranslate"><span class="pre">fstring_conversion</span></code></a>]
+         [<a class="reference internal" href="#grammar-token-python-grammar-fstring_full_format_spec"><code class="xref docutils literal notranslate"><span class="pre">fstring_full_format_spec</span></code></a>] <span class="sx">'}'</span>
+<strong id="grammar-token-python-grammar-fstring_conversion">fstring_conversion</strong>:
+   | <span class="sx">&quot;!&quot;</span> (<span class="sx">&quot;s&quot;</span> | <span class="sx">&quot;r&quot;</span> | <span class="sx">&quot;a&quot;</span>)
+<strong id="grammar-token-python-grammar-fstring_full_format_spec">fstring_full_format_spec</strong>:
+   | <span class="sx">':'</span> <a class="reference internal" href="#grammar-token-python-grammar-fstring_format_spec"><code class="xref docutils literal notranslate"><span class="pre">fstring_format_spec</span></code></a>*
+<strong id="grammar-token-python-grammar-fstring_format_spec">fstring_format_spec</strong>:
+   | <a class="reference internal" href="#grammar-token-python-grammar-FSTRING_MIDDLE"><code class="xref docutils literal notranslate"><span class="pre">FSTRING_MIDDLE</span></code></a>
+   | <a class="reference internal" href="#grammar-token-python-grammar-fstring_replacement_field"><code class="xref docutils literal notranslate"><span class="pre">fstring_replacement_field</span></code></a>
+<strong id="grammar-token-python-grammar-f_expression">f_expression</strong>:
+   | <span class="sx">','</span>.(<a class="reference internal" href="expressions.html#grammar-token-python-grammar-conditional_expression"><code class="xref docutils literal notranslate"><span class="pre">conditional_expression</span></code></a> | <span class="sx">&quot;*&quot;</span> <a class="reference internal" href="expressions.html#grammar-token-python-grammar-or_expr"><code class="xref docutils literal notranslate"><span class="pre">or_expr</span></code></a>)+ [<span class="sx">&quot;,&quot;</span>]
+   | <a class="reference internal" href="expressions.html#grammar-token-python-grammar-yield_expression"><code class="xref docutils literal notranslate"><span class="pre">yield_expression</span></code></a>
+</pre>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">在上面的语法片段中， <code class="docutils literal notranslate"><span class="pre">f_quote</span></code> 和 <code class="docutils literal notranslate"><span class="pre">FSTRING_MIDDLE</span></code> 规则是对上下文敏感的 -- 它们依赖于最近的外层 <code class="docutils literal notranslate"><span class="pre">fstring</span></code> 的 <code class="docutils literal notranslate"><span class="pre">FSTRING_START</span></code> 的内容。</p>
+<p class="translated">根据此模板构造更传统的正式语法将作为留给读者的练习。</p>
+</div>
+<p class="translated">针对 t-字符串的语法与 f-字符串的语法类似，只是以 <em>t</em> 而不是 <em>f</em> 作为规则和词元名称和前缀的开头。</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-tstring">tstring</strong>:    TSTRING_START tstring_middle* TSTRING_END
+
+&lt;rest of the t-string grammar is omitted; see above&gt;
+</pre>
+</section>
+</section>
+<section id="numeric-literals">
+<span id="numbers"></span><h2 class="translated"><span class="section-number">2.6. </span>数值字面量<a class="headerlink" href="#numeric-literals" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-27"><a class="reference internal" href="../library/token.html#token.NUMBER" title="token.NUMBER"><code class="xref py py-data docutils literal notranslate"><span class="pre">NUMBER</span></code></a> 标记表示数字字面量，共有三种类型：整数、浮点数和虚数。</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-NUMBER">NUMBER</strong>: <a class="reference internal" href="#grammar-token-python-grammar-integer"><code class="xref docutils literal notranslate"><span class="pre">integer</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-floatnumber"><code class="xref docutils literal notranslate"><span class="pre">floatnumber</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-imagnumber"><code class="xref docutils literal notranslate"><span class="pre">imagnumber</span></code></a>
+</pre>
+<p class="translated">数字字面量的数值等价于将其作为字符串传递给 <a class="reference internal" href="../library/functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>、<a class="reference internal" href="../library/functions.html#float" title="float"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> 或 <a class="reference internal" href="../library/functions.html#complex" title="complex"><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></a> 类构造函数时的值。注意，这些构造函数的有效输入并不都属于合法的字面量格式。</p>
+<p class="translated">数字字面量不包含符号；像 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 这样的短语实际上是由一元运算符 '<code class="docutils literal notranslate"><span class="pre">-</span></code>' 和字面量 <code class="docutils literal notranslate"><span class="pre">1</span></code> 组成的表达式。</p>
+<section id="integer-literals">
+<span id="integers"></span><span id="index-28"></span><h3 class="translated"><span class="section-number">2.6.1. </span>整数字面量<a class="headerlink" href="#integer-literals" title="Link to this heading">¶</a></h3>
+<p class="translated">整数字面量表示整数。例如：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">7</span>
+<span class="mi">3</span>
+<span class="mi">2147483647</span>
+</pre></div>
+</div>
+<p class="translated">整数字面量的长度没有限制，仅受可用内存的存储能力限制：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">7922816251426433759354395033679228162514264337593543950336</span>
+</pre></div>
+</div>
+<p class="translated">下划线可用于对数字进行分组以增强可读性，且在确定字面量的数值时会被忽略。例如，以下字面量是等价的：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">100_000_000_000</span>
+<span class="mi">100000000000</span>
+<span class="mi">1_00_00_00_00_000</span>
+</pre></div>
+</div>
+<p class="translated">下划线只能出现在数字之间。例如，<code class="docutils literal notranslate"><span class="pre">_123</span></code>、<code class="docutils literal notranslate"><span class="pre">321_</span></code> 和 <code class="docutils literal notranslate"><span class="pre">123__321</span></code> 均 <em>不是</em> 有效的字面量。</p>
+<p class="translated">整数可以分别使用前缀 <code class="docutils literal notranslate"><span class="pre">0b</span></code>、<code class="docutils literal notranslate"><span class="pre">0o</span></code> 和 <code class="docutils literal notranslate"><span class="pre">0x</span></code> 指定为二进制（基数 2）、八进制（基数 8）或十六进制（基数 16）。十六进制数字 10 到 15 用字母 <code class="docutils literal notranslate"><span class="pre">A</span></code>-<code class="docutils literal notranslate"><span class="pre">F</span></code> 表示，大小写不敏感。例如：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mb">0b100110111</span>
+<span class="mb">0b_1110_0101</span>
+<span class="mo">0o177</span>
+<span class="mo">0o377</span>
+<span class="mh">0xdeadbeef</span>
+<span class="mh">0xDead_Beef</span>
+</pre></div>
+</div>
+<p class="translated">下划线可以紧跟在进制前缀之后。例如，<code class="docutils literal notranslate"><span class="pre">0x_1f</span></code> 是有效的字面量，但 <code class="docutils literal notranslate"><span class="pre">0_x1f</span></code> 和 <code class="docutils literal notranslate"><span class="pre">0x__1f</span></code> 不是。</p>
+<p class="translated">非零十进制数中不允许有前导零。例如，<code class="docutils literal notranslate"><span class="pre">0123</span></code> 不是有效的字面量。这是为了与 C 风格的八进制字面量区分开，Python 在 3.0 版本之前曾使用这种风格。</p>
+<p class="translated">形式上，整数字面量由以下词法定义描述：</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-integer">integer</strong>:      <a class="reference internal" href="#grammar-token-python-grammar-decinteger"><code class="xref docutils literal notranslate"><span class="pre">decinteger</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-bininteger"><code class="xref docutils literal notranslate"><span class="pre">bininteger</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-octinteger"><code class="xref docutils literal notranslate"><span class="pre">octinteger</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-hexinteger"><code class="xref docutils literal notranslate"><span class="pre">hexinteger</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-zerointeger"><code class="xref docutils literal notranslate"><span class="pre">zerointeger</span></code></a>
+<strong id="grammar-token-python-grammar-decinteger">decinteger</strong>:   <a class="reference internal" href="#grammar-token-python-grammar-nonzerodigit"><code class="xref docutils literal notranslate"><span class="pre">nonzerodigit</span></code></a> ([<span class="sx">&quot;_&quot;</span>] <a class="reference internal" href="#grammar-token-python-grammar-digit"><code class="xref docutils literal notranslate"><span class="pre">digit</span></code></a>)*
+<strong id="grammar-token-python-grammar-bininteger">bininteger</strong>:   <span class="sx">&quot;0&quot;</span> (<span class="sx">&quot;b&quot;</span> | <span class="sx">&quot;B&quot;</span>) ([<span class="sx">&quot;_&quot;</span>] <a class="reference internal" href="#grammar-token-python-grammar-bindigit"><code class="xref docutils literal notranslate"><span class="pre">bindigit</span></code></a>)+
+<strong id="grammar-token-python-grammar-octinteger">octinteger</strong>:   <span class="sx">&quot;0&quot;</span> (<span class="sx">&quot;o&quot;</span> | <span class="sx">&quot;O&quot;</span>) ([<span class="sx">&quot;_&quot;</span>] <a class="reference internal" href="#grammar-token-python-grammar-octdigit"><code class="xref docutils literal notranslate"><span class="pre">octdigit</span></code></a>)+
+<strong id="grammar-token-python-grammar-hexinteger">hexinteger</strong>:   <span class="sx">&quot;0&quot;</span> (<span class="sx">&quot;x&quot;</span> | <span class="sx">&quot;X&quot;</span>) ([<span class="sx">&quot;_&quot;</span>] <a class="reference internal" href="#grammar-token-python-grammar-hexdigit"><code class="xref docutils literal notranslate"><span class="pre">hexdigit</span></code></a>)+
+<strong id="grammar-token-python-grammar-zerointeger">zerointeger</strong>:  <span class="sx">&quot;0&quot;</span>+ ([<span class="sx">&quot;_&quot;</span>] <span class="sx">&quot;0&quot;</span>)*
+<strong id="grammar-token-python-grammar-nonzerodigit">nonzerodigit</strong>: <span class="sx">&quot;1&quot;</span>...<span class="sx">&quot;9&quot;</span>
+<strong id="grammar-token-python-grammar-digit">digit</strong>:        <span class="sx">&quot;0&quot;</span>...<span class="sx">&quot;9&quot;</span>
+<strong id="grammar-token-python-grammar-bindigit">bindigit</strong>:     <span class="sx">&quot;0&quot;</span> | <span class="sx">&quot;1&quot;</span>
+<strong id="grammar-token-python-grammar-octdigit">octdigit</strong>:     <span class="sx">&quot;0&quot;</span>...<span class="sx">&quot;7&quot;</span>
+<strong id="grammar-token-python-grammar-hexdigit">hexdigit</strong>:     <a class="reference internal" href="#grammar-token-python-grammar-digit"><code class="xref docutils literal notranslate"><span class="pre">digit</span></code></a> | <span class="sx">&quot;a&quot;</span>...<span class="sx">&quot;f&quot;</span> | <span class="sx">&quot;A&quot;</span>...<span class="sx">&quot;F&quot;</span>
+</pre>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>现已支持在字面量中，用下划线分组数字。</p>
+</div>
+</section>
+<section id="floating-point-literals">
+<span id="floating"></span><span id="index-29"></span><h3 class="translated"><span class="section-number">2.6.2. </span>浮点数字面量<a class="headerlink" href="#floating-point-literals" title="Link to this heading">¶</a></h3>
+<p class="translated">浮点（float）字面量，例如 <code class="docutils literal notranslate"><span class="pre">3.14</span></code> 或 <code class="docutils literal notranslate"><span class="pre">1.5</span></code>，表示 <a class="reference internal" href="datamodel.html#datamodel-float"><span class="std std-ref">实数的近似值</span></a>。</p>
+<p class="translated">它们由 <em>整数</em> 部分和 <em>小数</em> 部分组成，每个部分均由十进制数字构成。两部分由小数点 <code class="docutils literal notranslate"><span class="pre">.</span></code> 分隔。:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">2.71828</span>
+<span class="mf">4.0</span>
+</pre></div>
+</div>
+<p class="translated">不同于整数字面值，允许带前导零。 例如，<code class="docutils literal notranslate"><span class="pre">077.010</span></code> 是合法的，并表示与 <code class="docutils literal notranslate"><span class="pre">77.01</span></code> 相同的数值。</p>
+<p class="translated">与整数字面量一样，浮点字面量中的数字之间可以使用单个下划线来提高可读性。:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">96_485.332_123</span>
+<span class="mf">3.14_15_93</span>
+</pre></div>
+</div>
+<p class="translated">整数部分或小数部分可以为空，但不能同时为空。例如：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">10.</span>  <span class="c1"># (等同于 10.0)</span>
+<span class="mf">.001</span>  <span class="c1"># (等同于 0.001)</span>
+</pre></div>
+</div>
+<p class="translated">整数部分和小数部分之后可以选择性地跟随一个 <em>指数部分</em>：字母 <code class="docutils literal notranslate"><span class="pre">e</span></code> 或 <code class="docutils literal notranslate"><span class="pre">E</span></code>，后面跟一个可选的符号 <code class="docutils literal notranslate"><span class="pre">+</span></code> 或 <code class="docutils literal notranslate"><span class="pre">-</span></code>，以及一个格式与整数和小数部分相同的数字。这里的 <code class="docutils literal notranslate"><span class="pre">e</span></code> 或 <code class="docutils literal notranslate"><span class="pre">E</span></code> 表示&quot;乘以10的...次幂&quot;:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">1.0e3</span>  <span class="c1"># (代表 1.0×10³, or 1000.0)</span>
+<span class="mf">1.166e-5</span>  <span class="c1"># (代表 1.166×10⁻⁵, or 0.00001166)</span>
+<span class="mf">6.02214076e+23</span>  <span class="c1"># (代表 6.02214076×10²³ 或 602214076000000000000000)</span>
+</pre></div>
+</div>
+<p class="translated">对于仅包含整数部分和指数部分的浮点字面量，小数点可以省略:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">1e3</span>  <span class="c1"># (等同于 1.e3 和 1.0e3)</span>
+<span class="mf">0e0</span>  <span class="c1"># (等同于 0)</span>
+</pre></div>
+</div>
+<p class="translated">形式上，浮点字面量由以下词法定义描述：</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-floatnumber">floatnumber</strong>:
+   | <a class="reference internal" href="#grammar-token-python-grammar-digitpart"><code class="xref docutils literal notranslate"><span class="pre">digitpart</span></code></a> <span class="sx">&quot;.&quot;</span> [<a class="reference internal" href="#grammar-token-python-grammar-digitpart"><code class="xref docutils literal notranslate"><span class="pre">digitpart</span></code></a>] [<a class="reference internal" href="#grammar-token-python-grammar-exponent"><code class="xref docutils literal notranslate"><span class="pre">exponent</span></code></a>]
+   | <span class="sx">&quot;.&quot;</span> <a class="reference internal" href="#grammar-token-python-grammar-digitpart"><code class="xref docutils literal notranslate"><span class="pre">digitpart</span></code></a> [<a class="reference internal" href="#grammar-token-python-grammar-exponent"><code class="xref docutils literal notranslate"><span class="pre">exponent</span></code></a>]
+   | <a class="reference internal" href="#grammar-token-python-grammar-digitpart"><code class="xref docutils literal notranslate"><span class="pre">digitpart</span></code></a> <a class="reference internal" href="#grammar-token-python-grammar-exponent"><code class="xref docutils literal notranslate"><span class="pre">exponent</span></code></a>
+<strong id="grammar-token-python-grammar-digitpart">digitpart</strong>: <a class="reference internal" href="#grammar-token-python-grammar-digit"><code class="xref docutils literal notranslate"><span class="pre">digit</span></code></a> ([<span class="sx">&quot;_&quot;</span>] <a class="reference internal" href="#grammar-token-python-grammar-digit"><code class="xref docutils literal notranslate"><span class="pre">digit</span></code></a>)*
+<strong id="grammar-token-python-grammar-exponent">exponent</strong>:  (<span class="sx">&quot;e&quot;</span> | <span class="sx">&quot;E&quot;</span>) [<span class="sx">&quot;+&quot;</span> | <span class="sx">&quot;-&quot;</span>] <a class="reference internal" href="#grammar-token-python-grammar-digitpart"><code class="xref docutils literal notranslate"><span class="pre">digitpart</span></code></a>
+</pre>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>现已支持在字面量中，用下划线分组数字。</p>
+</div>
+</section>
+<section id="imaginary-literals">
+<span id="imaginary"></span><span id="index-30"></span><h3 class="translated"><span class="section-number">2.6.3. </span>虚数字面量<a class="headerlink" href="#imaginary-literals" title="Link to this heading">¶</a></h3>
+<p class="translated">Python 拥有 <a class="reference internal" href="../library/stdtypes.html#typesnumeric"><span class="std std-ref">复数</span></a> 对象，但没有直接的复数字面量。相反，<em>虚数字面量</em> 表示实部为零的复数。</p>
+<p class="translated">例如，在数学中，复数 3+4.2<em>i</em> 被写作实数 3 加上虚数 4.2<em>i</em>。Python 使用类似的语法，只是虚数单位写作 <code class="docutils literal notranslate"><span class="pre">j</span></code> 而非 <em>i</em>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="o">+</span><span class="mf">4.2</span><span class="n">j</span>
+</pre></div>
+</div>
+<p class="translated">这是一个由 <a class="reference internal" href="#integers"><span class="std std-ref">整数字面量</span></a> <code class="docutils literal notranslate"><span class="pre">3</span></code>、 <a class="reference internal" href="#operators"><span class="std std-ref">运算符</span></a> '<code class="docutils literal notranslate"><span class="pre">+</span></code>' 和 <a class="reference internal" href="#imaginary"><span class="std std-ref">虚数字面量</span></a> <code class="docutils literal notranslate"><span class="pre">4.2j</span></code> 组成的表达式。由于这是三个独立的词法单元，它们之间允许存在空白符:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span> <span class="o">+</span> <span class="mf">4.2</span><span class="n">j</span>
+</pre></div>
+</div>
+<p class="translated">每个词法单元内部不允许有空白符。特别地，<code class="docutils literal notranslate"><span class="pre">j</span></code> 后缀不能与其前面的数字分隔开。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">j</span></code> 前面的数字部分与浮点字面量的语法规则相同。因此，以下是有效的虚数字面量：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">4.2</span><span class="n">j</span>
+<span class="mf">3.14</span><span class="n">j</span>
+<span class="mf">10.</span><span class="n">j</span>
+<span class="mf">.001</span><span class="n">j</span>
+<span class="mf">1e100j</span>
+<span class="mf">3.14e-10</span><span class="n">j</span>
+<span class="mf">3.14_15_93</span><span class="n">j</span>
+</pre></div>
+</div>
+<p class="translated">与浮点字面量不同，如果虚数部分仅包含整数部分，则小数点可以省略。该数值仍会被计算为浮点数，而非整数:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">10</span><span class="n">j</span>
+<span class="mi">0</span><span class="n">j</span>
+<span class="mi">1000000000000000000000000</span><span class="n">j</span>   <span class="c1"># 等同于 1e+24j</span>
+</pre></div>
+</div>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">j</span></code> 后缀在语法上是大小写不敏感的。这意味着你可以使用 <code class="docutils literal notranslate"><span class="pre">J</span></code> 替代:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mf">3.14</span><span class="n">J</span>   <span class="c1"># 等同于 3.14j</span>
+</pre></div>
+</div>
+<p class="translated">形式上，虚数字面量由以下词法定义描述：</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-imagnumber">imagnumber</strong>: (<a class="reference internal" href="#grammar-token-python-grammar-floatnumber"><code class="xref docutils literal notranslate"><span class="pre">floatnumber</span></code></a> | <a class="reference internal" href="#grammar-token-python-grammar-digitpart"><code class="xref docutils literal notranslate"><span class="pre">digitpart</span></code></a>) (<span class="sx">&quot;j&quot;</span> | <span class="sx">&quot;J&quot;</span>)
+</pre>
+</section>
+</section>
+<section id="operators-and-delimiters">
+<span id="lexical-ellipsis"></span><span id="operators"></span><span id="delimiters"></span><h2 class="translated"><span class="section-number">2.7. </span>运算符与定界符<a class="headerlink" href="#operators-and-delimiters" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-31">以下语法定义了 <em class="dfn">运算符</em> 和 <em class="dfn">定界符</em> 标记，即通用的 <a class="reference internal" href="../library/token.html#token.OP" title="token.OP"><code class="xref py py-data docutils literal notranslate"><span class="pre">OP</span></code></a> 标记类型。 <a class="reference internal" href="../library/token.html#token-operators-delimiters"><span class="std std-ref">这些标记及其名称的列表</span></a> 也可在 <code class="xref py py-mod docutils literal notranslate"><span class="pre">token</span></code> 模块文档中找到。</p>
+<pre class="highlight">
+<strong id="grammar-token-python-grammar-OP">OP</strong>:
+   | assignment_operator
+   | bitwise_operator
+   | comparison_operator
+   | enclosing_delimiter
+   | other_delimiter
+   | arithmetic_operator
+   | <span class="sx">&quot;...&quot;</span>
+   | other_op
+
+<strong id="grammar-token-python-grammar-assignment_operator">assignment_operator</strong>:   <span class="sx">&quot;+=&quot;</span> | <span class="sx">&quot;-=&quot;</span> | <span class="sx">&quot;*=&quot;</span> | <span class="sx">&quot;**=&quot;</span> | <span class="sx">&quot;/=&quot;</span>  | <span class="sx">&quot;//=&quot;</span> | <span class="sx">&quot;%=&quot;</span> |
+                       <span class="sx">&quot;&amp;=&quot;</span> | <span class="sx">&quot;|=&quot;</span> | <span class="sx">&quot;^=&quot;</span> | <span class="sx">&quot;&lt;&lt;=&quot;</span> | <span class="sx">&quot;&gt;&gt;=&quot;</span> | <span class="sx">&quot;&#64;=&quot;</span>  | <span class="sx">&quot;:=&quot;</span>
+<strong id="grammar-token-python-grammar-bitwise_operator">bitwise_operator</strong>:      <span class="sx">&quot;&amp;&quot;</span>  | <span class="sx">&quot;|&quot;</span>  | <span class="sx">&quot;^&quot;</span>  | <span class="sx">&quot;~&quot;</span>   | <span class="sx">&quot;&lt;&lt;&quot;</span>  | <span class="sx">&quot;&gt;&gt;&quot;</span>
+<strong id="grammar-token-python-grammar-comparison_operator">comparison_operator</strong>:   <span class="sx">&quot;&lt;=&quot;</span> | <span class="sx">&quot;&gt;=&quot;</span> | <span class="sx">&quot;&lt;&quot;</span>  | <span class="sx">&quot;&gt;&quot;</span>   | <span class="sx">&quot;==&quot;</span>  | <span class="sx">&quot;!=&quot;</span>
+<strong id="grammar-token-python-grammar-enclosing_delimiter">enclosing_delimiter</strong>:   <span class="sx">&quot;(&quot;</span>  | <span class="sx">&quot;)&quot;</span>  | <span class="sx">&quot;[&quot;</span>  | <span class="sx">&quot;]&quot;</span>   | <span class="sx">&quot;{&quot;</span>   | <span class="sx">&quot;}&quot;</span>
+<strong id="grammar-token-python-grammar-other_delimiter">other_delimiter</strong>:       <span class="sx">&quot;,&quot;</span>  | <span class="sx">&quot;:&quot;</span>  | <span class="sx">&quot;!&quot;</span>  | <span class="sx">&quot;;&quot;</span>   | <span class="sx">&quot;=&quot;</span>   | <span class="sx">&quot;-&gt;&quot;</span>
+<strong id="grammar-token-python-grammar-arithmetic_operator">arithmetic_operator</strong>:   <span class="sx">&quot;+&quot;</span>  | <span class="sx">&quot;-&quot;</span>  | <span class="sx">&quot;**&quot;</span> | <span class="sx">&quot;*&quot;</span>   | <span class="sx">&quot;//&quot;</span>  | <span class="sx">&quot;/&quot;</span>   | <span class="sx">&quot;%&quot;</span>
+<strong id="grammar-token-python-grammar-other_op">other_op</strong>:              <span class="sx">&quot;.&quot;</span>  | <span class="sx">&quot;&#64;&quot;</span>
+</pre>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">通常，<em>运算符</em> 用于组合 <a class="reference internal" href="expressions.html#expressions"><span class="std std-ref">表达式</span></a>，而 <em>定界符</em> 则用于其他用途。然而，这两类标记之间并没有明确、正式的区分标准。</p>
+<p class="translated">某些记号既可用作运算符也可用作定界符，具体取决于使用场景。例如，<code class="docutils literal notranslate"><span class="pre">*</span></code> 既是乘法运算符，也是用于序列解包的定界符；而 <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> 既是矩阵乘法运算符，也是引入装饰器的定界符。</p>
+<p class="translated">对于某些记号而言，其分类界限并不明确。例如，有些人认为 <code class="docutils literal notranslate"><span class="pre">.</span></code>、<code class="docutils literal notranslate"><span class="pre">(</span></code> 和 <code class="docutils literal notranslate"><span class="pre">)</span></code> 是定界符，而另一些人则将其视为 <a class="reference internal" href="../library/functions.html#getattr" title="getattr"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> 运算符和函数调用运算符。</p>
+<p class="translated">Python 中的部分运算符 (如 <code class="docutils literal notranslate"><span class="pre">and</span></code>、<code class="docutils literal notranslate"><span class="pre">or</span></code> 和 <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">in</span></code>) 是使用 <a class="reference internal" href="#keywords"><span class="std std-ref">关键字</span></a> 词元而非&quot;符号&quot;（运算符词元）。</p>
+</div>
+<p class="translated">连续三个点号的序列 (<code class="docutils literal notranslate"><span class="pre">...</span></code>) 具有表示一个 <a class="reference internal" href="../library/constants.html#Ellipsis" title="Ellipsis"><code class="xref py py-data docutils literal notranslate"><span class="pre">Ellipsis</span></code></a> 字面值的特殊含义。</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">2. 词法分析</a><ul>
+<li><a class="reference internal" href="#line-structure">2.1. 行结构</a><ul>
+<li><a class="reference internal" href="#logical-lines">2.1.1. 逻辑行</a></li>
+<li><a class="reference internal" href="#physical-lines">2.1.2. 物理行</a></li>
+<li><a class="reference internal" href="#comments">2.1.3. 注释</a></li>
+<li><a class="reference internal" href="#encoding-declarations">2.1.4. 编码声明</a></li>
+<li><a class="reference internal" href="#explicit-line-joining">2.1.5. 显式拼接行</a></li>
+<li><a class="reference internal" href="#implicit-line-joining">2.1.6. 隐式拼接行</a></li>
+<li><a class="reference internal" href="#blank-lines">2.1.7. 空白行</a></li>
+<li><a class="reference internal" href="#indentation">2.1.8. 缩进</a></li>
+<li><a class="reference internal" href="#whitespace-between-tokens">2.1.9. 标记间的空白字符</a></li>
+<li><a class="reference internal" href="#end-marker">2.1.10. 结束标记</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-tokens">2.2. 其他标记</a></li>
+<li><a class="reference internal" href="#names-identifiers-and-keywords">2.3. 名称（标识符和关键字）</a><ul>
+<li><a class="reference internal" href="#keywords">2.3.1. 关键字</a></li>
+<li><a class="reference internal" href="#soft-keywords">2.3.2. 软关键字</a></li>
+<li><a class="reference internal" href="#reserved-classes-of-identifiers">2.3.3. 保留的标识符类</a></li>
+<li><a class="reference internal" href="#non-ascii-characters-in-names">2.3.4. 名称中的非 ASCII 字符</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#literals">2.4. 字面量</a></li>
+<li><a class="reference internal" href="#string-and-bytes-literals">2.5. 字符串与字节串字面量</a><ul>
+<li><a class="reference internal" href="#triple-quoted-strings">2.5.1. 三引号字符串</a></li>
+<li><a class="reference internal" href="#string-prefixes">2.5.2. 字符串前缀</a></li>
+<li><a class="reference internal" href="#formal-grammar">2.5.3. 正式语法</a></li>
+<li><a class="reference internal" href="#escape-sequences">2.5.4. 转义序列</a><ul>
+<li><a class="reference internal" href="#ignored-end-of-line">2.5.4.1. 忽略行尾</a></li>
+<li><a class="reference internal" href="#escaped-characters">2.5.4.2. 转义字符</a></li>
+<li><a class="reference internal" href="#octal-character">2.5.4.3. 八进制字符</a></li>
+<li><a class="reference internal" href="#hexadecimal-character">2.5.4.4. 十六进制字符</a></li>
+<li><a class="reference internal" href="#named-unicode-character">2.5.4.5. 命名Unicode字符</a></li>
+<li><a class="reference internal" href="#hexadecimal-unicode-characters">2.5.4.6. 十六进制Unicode字符</a></li>
+<li><a class="reference internal" href="#unrecognized-escape-sequences">2.5.4.7. 未识别的转义序列</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bytes-literals">2.5.5. 字节串字面量</a></li>
+<li><a class="reference internal" href="#raw-string-literals">2.5.6. 原始字符串字面量</a></li>
+<li><a class="reference internal" href="#formatted-string-literals">2.5.7. f-字符串</a></li>
+<li><a class="reference internal" href="#template-string-literals">2.5.8. t-strings</a></li>
+<li><a class="reference internal" href="#formal-grammar-for-f-strings">2.5.9. f-字符串的正式语法</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#numeric-literals">2.6. 数值字面量</a><ul>
+<li><a class="reference internal" href="#integer-literals">2.6.1. 整数字面量</a></li>
+<li><a class="reference internal" href="#floating-point-literals">2.6.2. 浮点数字面量</a></li>
+<li><a class="reference internal" href="#imaginary-literals">2.6.3. 虚数字面量</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#operators-and-delimiters">2.7. 运算符与定界符</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="introduction.html"
+                          title="上一章"><span class="section-number">1. </span>概述</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="datamodel.html"
+                          title="下一章"><span class="section-number">3. </span>数据模型</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "reference/lexical_analysis.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/reference/lexical_analysis.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/reference/lexical_analysis.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="datamodel.html" title="3. 数据模型"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="1. 概述"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 语言参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">2. </span>词法分析</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

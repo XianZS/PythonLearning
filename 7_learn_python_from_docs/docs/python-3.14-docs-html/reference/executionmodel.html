@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="4. 执行模型" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/reference/executionmodel.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="程序的结构: Python 程序是由代码块构成的。 代码块 是被作为一个单元来执行的一段 Python 程序文本。 以下几个都属于代码块：模块、函数体和类定义。 交互式输入的每条命令都是代码块。 一个脚本文件（作为标准输入发送给解释器或是作为命令行参数发送给解释器的文件）也是代码块。 一条脚本命令（通过-c 选项在解释器命令行中指定的命令）也是代码块。 通过在命令行中使用-m 参数作为最高层..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_reference_executionmodel_7f78b880.png" />
+<meta property="og:image:alt" content="程序的结构: Python 程序是由代码块构成的。 代码块 是被作为一个单元来执行的一段 Python 程序文本。 以下几个都属于代码块：模块、函数体和类定义。 交互式输入的每条命令都是代码块。 一个脚本文件（作为标准输入发送给解释器或是作为命令行参数发送给解释器的文件）也是代码块。 一条脚本命令（通过-c 选项在解释器命令行中指定的命令）也是代码块。 通过在命令行中使用-m 参数作为最高层..." />
+<meta name="description" content="程序的结构: Python 程序是由代码块构成的。 代码块 是被作为一个单元来执行的一段 Python 程序文本。 以下几个都属于代码块：模块、函数体和类定义。 交互式输入的每条命令都是代码块。 一个脚本文件（作为标准输入发送给解释器或是作为命令行参数发送给解释器的文件）也是代码块。 一条脚本命令（通过-c 选项在解释器命令行中指定的命令）也是代码块。 通过在命令行中使用-m 参数作为最高层..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>4. 执行模型 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="5. 导入系统" href="import.html" />
+    <link rel="prev" title="3. 数据模型" href="datamodel.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/reference/executionmodel.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">4. 执行模型</a><ul>
+<li><a class="reference internal" href="#structure-of-a-program">4.1. 程序的结构</a></li>
+<li><a class="reference internal" href="#naming-and-binding">4.2. 命名与绑定</a><ul>
+<li><a class="reference internal" href="#binding-of-names">4.2.1. 名称的绑定</a></li>
+<li><a class="reference internal" href="#resolution-of-names">4.2.2. 名称的解析</a></li>
+<li><a class="reference internal" href="#annotation-scopes">4.2.3. 标注作用域</a></li>
+<li><a class="reference internal" href="#lazy-evaluation">4.2.4. 惰性求值</a></li>
+<li><a class="reference internal" href="#builtins-and-restricted-execution">4.2.5. 内置命名空间和受限的执行</a></li>
+<li><a class="reference internal" href="#interaction-with-dynamic-features">4.2.6. 与动态特性的交互</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exceptions">4.3. 异常</a></li>
+<li><a class="reference internal" href="#runtime-components">4.4. 运行时组件</a><ul>
+<li><a class="reference internal" href="#general-computing-model">4.4.1. 通用计算模型</a></li>
+<li><a class="reference internal" href="#python-runtime-model">4.4.2. Python 运行时模型</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="datamodel.html"
+                          title="上一章"><span class="section-number">3. </span>数据模型</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="import.html"
+                          title="下一章"><span class="section-number">5. </span>导入系统</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "reference/executionmodel.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/reference/executionmodel.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/reference/executionmodel.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="import.html" title="5. 导入系统"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="datamodel.html" title="3. 数据模型"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 语言参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">4. </span>执行模型</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="execution-model">
+<span id="execmodel"></span><h1 class="translated"><span class="section-number">4. </span>执行模型<a class="headerlink" href="#execution-model" title="Link to this heading">¶</a></h1>
+<section id="structure-of-a-program">
+<span id="prog-structure"></span><span id="index-0"></span><h2 class="translated"><span class="section-number">4.1. </span>程序的结构<a class="headerlink" href="#structure-of-a-program" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-1">Python 程序是由代码块构成的。 <em class="dfn">代码块</em> 是被作为一个单元来执行的一段 Python 程序文本。 以下几个都属于代码块：模块、函数体和类定义。 交互式输入的每条命令都是代码块。 一个脚本文件（作为标准输入发送给解释器或是作为命令行参数发送给解释器的文件）也是代码块。 一条脚本命令（通过 <a class="reference internal" href="../using/cmdline.html#cmdoption-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c</span></code></a> 选项在解释器命令行中指定的命令）也是代码块。 通过在命令行中使用 <a class="reference internal" href="../using/cmdline.html#cmdoption-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m</span></code></a> 参数作为最高层级脚本（即 <code class="docutils literal notranslate"><span class="pre">__main__</span></code> 模块）运行的模块也是代码块。 传递给内置函数 <a class="reference internal" href="../library/functions.html#eval" title="eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> 和 <a class="reference internal" href="../library/functions.html#exec" title="exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">exec()</span></code></a> 的字符串参数也是代码块。</p>
+<p class="translated" id="index-2">代码块在 <em class="dfn">执行帧</em> 中被执行。 一个帧会包含某些管理信息（用于调试）并决定代码块执行完成后应前往何处以及如何继续执行。</p>
+</section>
+<section id="naming-and-binding">
+<span id="naming"></span><h2 class="translated"><span class="section-number">4.2. </span>命名与绑定<a class="headerlink" href="#naming-and-binding" title="Link to this heading">¶</a></h2>
+<section id="binding-of-names">
+<span id="bind-names"></span><span id="index-3"></span><h3 class="translated"><span class="section-number">4.2.1. </span>名称的绑定<a class="headerlink" href="#binding-of-names" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-4"><em class="dfn">名称</em> 用于指代对象。 名称是通过名称绑定操作来引入的。</p>
+<p class="translated" id="index-5">下面的结构将名字绑定:</p>
+<ul class="simple">
+<li><p class="translated">函数的正式参数，</p></li>
+<li><p class="translated">类定义，</p></li>
+<li><p class="translated">函数定义，</p></li>
+<li><p class="translated">赋值表达式,</p></li>
+<li><p class="translated">如果在一个赋值中出现，则为标识符的 <a class="reference internal" href="simple_stmts.html#assignment"><span class="std std-ref">目标</span></a>  :</p>
+<ul>
+<li><p class="translated"><a class="reference internal" href="compound_stmts.html#for"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">for</span></code></a> 循环头,</p></li>
+<li><p class="translated">在 <a class="reference internal" href="compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句, <a class="reference internal" href="compound_stmts.html#except"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">except</span></code></a> 子句, <a class="reference internal" href="compound_stmts.html#except-star"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">except*</span></code></a> 子句，或结构化模式匹配的 as 模式的 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">as</span></code> 之后，</p></li>
+<li><p class="translated">在结构模式匹配中的捕获模式</p></li>
+</ul>
+</li>
+<li><p class="translated"><a class="reference internal" href="simple_stmts.html#import"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">import</span></code></a> 语句。</p></li>
+<li><p class="translated"><a class="reference internal" href="simple_stmts.html#type"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">type</span></code></a> 语句。</p></li>
+<li><p class="translated"><a class="reference internal" href="compound_stmts.html#type-params"><span class="std std-ref">类型形参列表</span></a>。</p></li>
+</ul>
+<p class="translated">形式为 <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">...</span> <span class="pre">import</span> <span class="pre">*</span></code> 的 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">import</span></code> 语句绑定所有在导入的模块中定义的名字，除了那些以下划线开头的名字。这种形式只能在模块级别上使用。</p>
+<p class="translated"><a class="reference internal" href="simple_stmts.html#del"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">del</span></code></a> 语句的目标也被视作一种绑定（虽然其实际语义为解除名称绑定）。</p>
+<p class="translated">每条赋值或导入语句均发生于类或函数内部定义的代码块中，或是发生于模块层级（即最高层级的代码块）。</p>
+<p class="translated" id="index-6">如果某个名称绑定在一个代码块中，则它就是该代码块的局部变量，除非声明为 <a class="reference internal" href="simple_stmts.html#nonlocal"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">nonlocal</span></code></a> 或 <a class="reference internal" href="simple_stmts.html#global"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">global</span></code></a>。 如果某个名称绑定在模块层级，则它就是全局变量。 （模块代码块的变量既是局部变量又是全局变量。） 如果某个变量在一个代码块中被使用但不是在其中定义的，则它是 <a class="reference internal" href="../glossary.html#term-free-variable"><span class="xref std std-term">自由变量</span></a>。</p>
+<p class="translated">每个在程序文本中出现的名称是指由以下名称解析规则所建立的对该名称的 <em class="dfn">绑定</em>。</p>
+</section>
+<section id="resolution-of-names">
+<span id="resolve-names"></span><h3 class="translated"><span class="section-number">4.2.2. </span>名称的解析<a class="headerlink" href="#resolution-of-names" title="Link to this heading">¶</a></h3>
+<p class="translated" id="index-7"><em class="dfn">作用域</em> 定义了一个代码块中名称的可见性。 如果代码块中定义了一个局部变量，则其作用域包含该代码块。 如果定义发生于函数代码块中，则其作用域会扩展到该函数所包含的任何代码块，除非有某个被包含代码块引入了对该名称的不同绑定。</p>
+<p class="translated" id="index-8">当一个名称在代码块中被使用时，会由包含它的最近作用域来解析。 对一个代码块可见的所有这种作用域的集合称为该代码块的 <em class="dfn">环境</em>。</p>
+<p class="translated" id="index-9">当一个名称完全找不到时，将会引发 <a class="reference internal" href="../library/exceptions.html#NameError" title="NameError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NameError</span></code></a> 异常。 如果当前作用域为函数作用域，且该名称指向一个局部变量，而此变量在该名称被使用的时候尚未绑定到特定值，将会引发 <a class="reference internal" href="../library/exceptions.html#UnboundLocalError" title="UnboundLocalError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnboundLocalError</span></code></a> 异常。 <code class="xref py py-exc docutils literal notranslate"><span class="pre">UnboundLocalError</span></code> 为 <code class="xref py py-exc docutils literal notranslate"><span class="pre">NameError</span></code> 的一个子类。</p>
+<p class="translated">如果一个代码块内的任何位置发生名称绑定操作，则代码块内所有对该名称的使用都会被视为对当前代码块的引用。 当一个名称在其被绑定前就在代码块内被使用时将会导致错误。 这个规则是很微妙的。 Python 缺少声明语法并且允许名称绑定操作发生于代码块内的任何位置。 一个代码块的局部变量可通过在整个代码块文本中扫描名称绑定操作来确定。 请参阅 <a class="reference internal" href="../faq/programming.html#faq-unboundlocalerror"><span class="std std-ref">UnboundLocalError 的 FAQ 条目</span></a> 来获取示例。</p>
+<p class="translated">如果 <a class="reference internal" href="simple_stmts.html#global"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">global</span></code></a> 语句出现在一个代码块中，则所有对该语句所指定名称的使用都是在最高层级命名空间内对该名称绑定的引用。 名称在最高层级命名空间内的解析是通过搜索全局命名空间，也就是包含该代码块的模块的命名空间，以及内置命名空间即 <a class="reference internal" href="../library/builtins.html#module-builtins" title="builtins: The module that provides the built-in namespace."><code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code></a> 模块的命名空间。 全局命名空间会先被搜索。 如果未在其中找到相应名称，将再搜索内置命名空间。 如果未在内置命名空间中找到相应名称，将在全局命名空间中创建新变量。 global 语句必须位于所有对其所列名称的使用之前。</p>
+<p class="translated"><a class="reference internal" href="simple_stmts.html#global"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">global</span></code></a> 语句与同一代码块中名称绑定具有相同的作用域。 如果一个自由变量的最近包含作用域中有一条 global 语句，则该自由变量也会被当作是全局变量。</p>
+<p class="translated"><a class="reference internal" href="simple_stmts.html#nonlocal"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">nonlocal</span></code></a> 语句会使得相应的名称指向之前在最近包含函数作用域中绑定的变量。 如果指定的名称不存在于任何包含函数作用域中则将在编译时引发 <a class="reference internal" href="../library/exceptions.html#SyntaxError" title="SyntaxError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>。 <a class="reference internal" href="compound_stmts.html#type-params"><span class="std std-ref">类型形参</span></a> 不能使用 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">nonlocal</span></code> 语句来重新绑定。</p>
+<p class="translated" id="index-10">模块的命名空间会在模块第一次被导入时自动创建。 一个脚本的主模块总是被命名为 <a class="reference internal" href="../library/__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a>。</p>
+<p class="translated">类定义代码块以及传给 <a class="reference internal" href="../library/functions.html#exec" title="exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">exec()</span></code></a> 和 <a class="reference internal" href="../library/functions.html#eval" title="eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> 的参数是名称解析的上下文中的特殊情况。 类定义是可能使用并定义名称的可执行语句。 这些引用遵循正常的名称解析规则，例外之处在于未绑定的局部变量会在全局命名空间中查找。 类定义的命名空间会成为该类的属性字典。 在类代码块中定义的名称的作用域会被限制在类代码块中；它不会扩展到方法的代码块中。 这包括推导式和生成器表达式，但不包括 <a class="reference internal" href="#annotation-scopes"><span class="std std-ref">标注作用域</span></a>，因为它可以访问所包含的类作用域。 这意味着以下代码将会失败:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="translated">但是，下面的代码将会成功:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="nb">type</span> <span class="n">Alias</span> <span class="o">=</span> <span class="n">Nested</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Nested</span><span class="p">:</span> <span class="k">pass</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">Alias</span><span class="o">.</span><span class="n">__value__</span><span class="p">)</span>  <span class="c1"># &lt;type &#39;A.Nested&#39;&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="annotation-scopes">
+<span id="id1"></span><h3 class="translated"><span class="section-number">4.2.3. </span>标注作用域<a class="headerlink" href="#annotation-scopes" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="../glossary.html#term-annotation"><span class="xref std std-term">标注</span></a>, <a class="reference internal" href="compound_stmts.html#type-params"><span class="std std-ref">类型形参列表</span></a> 和 <a class="reference internal" href="simple_stmts.html#type"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">type</span></code></a> 语句引入了 <em>标注作用域</em>，其行为基本类似于函数作用域，但具有下文讨论的一些差异。</p>
+<p class="translated">标注作用域将在下列情况中使用:</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="../glossary.html#term-function-annotation"><span class="xref std std-term">函数标注</span></a>。</p></li>
+<li><p class="translated"><a class="reference internal" href="../glossary.html#term-variable-annotation"><span class="xref std std-term">变量标注</span></a>。</p></li>
+<li><p class="translated">针对 <a class="reference internal" href="compound_stmts.html#generic-type-aliases"><span class="std std-ref">泛型类型别名</span></a> 的类型形参列表。</p></li>
+<li><p class="translated">针对 <a class="reference internal" href="compound_stmts.html#generic-functions"><span class="std std-ref">泛型函数</span></a> 的类型形参列表。 泛型函数的标注会在标注作用域内执行，但其默认值和装饰器则不会。</p></li>
+<li><p class="translated">针对 <a class="reference internal" href="compound_stmts.html#generic-classes"><span class="std std-ref">泛型类</span></a> 的类型形参列表。 泛型类的基类和关键字参数会在标注作用域内执行，但其装饰器则不会。</p></li>
+<li><p class="translated">针对类型形参的绑定、约束和默认值 (<a class="reference internal" href="#lazy-evaluation"><span class="std std-ref">惰性求值</span></a>)。</p></li>
+<li><p class="translated">类型别名的值 (<a class="reference internal" href="#lazy-evaluation"><span class="std std-ref">惰性求值</span></a>)。</p></li>
+</ul>
+<p class="translated">标注作用域在以下几个方面不同于函数作用域:</p>
+<ul class="simple">
+<li><p class="translated">标注作用域能够访问其所包含的类命名空间。 如果某个标注作用域紧接在一个类作用域之内，或是位于紧接一个类作用域的另一个标注作用域之内，则该标注作用域中的代码将能使用在该类作用域中定义的名称，就像它是在该类内部直接执行一样。 这不同于在类中定义的常规函数，后者无法访问在类作用域中定义的名称。</p></li>
+<li><p class="translated">标注作用域中的表达式不能包含 <a class="reference internal" href="simple_stmts.html#yield"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">yield</span></code></a>, <code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">from</span></code>, <a class="reference internal" href="expressions.html#await"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">await</span></code></a> 或 <a class="reference internal" href="expressions.html#grammar-token-python-grammar-assignment_expression"><code class="xref std std-token docutils literal notranslate"><span class="pre">:=</span></code></a> 表达式。 （这些表达式在包含于标注作用域之内的其他作用域中则是允许的。）</p></li>
+<li><p class="translated">在标注作用域中定义的名称不能在内部作用域中通过 <a class="reference internal" href="simple_stmts.html#nonlocal"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">nonlocal</span></code></a> 语句来重新绑定。 这只包括类型形参，因为没有其他可以在标注作用域内部出现的语法元素能够引入新的名称。</p></li>
+<li><p class="translated">虽然标注作用域具有一个内部名称，但该名称不会反映在作用域内定义的对象的 <a class="reference internal" href="../glossary.html#term-qualified-name"><span class="xref std std-term">qualified name</span></a> 中。 相反，这些对象的 <a class="reference internal" href="../library/stdtypes.html#definition.__qualname__" title="definition.__qualname__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__qualname__</span></code></a> 就像它们是定义在包含作用域中的对象一样。</p></li>
+</ul>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12: </span>标注作用域是在 Python 3.12 中作为 <span class="target" id="index-24"></span><a class="pep reference external" href="https://peps.python.org/pep-0695/"><strong>PEP 695</strong></a> 的一部分引入的。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>标注作用域也被用于类型形参默认值，这是由 <span class="target" id="index-25"></span><a class="pep reference external" href="https://peps.python.org/pep-0696/"><strong>PEP 696</strong></a> 引入的。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>标注作用域现在也被用于标注，如 <span class="target" id="index-26"></span><a class="pep reference external" href="https://peps.python.org/pep-0649/"><strong>PEP 649</strong></a> 和 <span class="target" id="index-27"></span><a class="pep reference external" href="https://peps.python.org/pep-0749/"><strong>PEP 749</strong></a> 所说明的。</p>
+</div>
+</section>
+<section id="lazy-evaluation">
+<span id="id2"></span><h3 class="translated"><span class="section-number">4.2.4. </span>惰性求值<a class="headerlink" href="#lazy-evaluation" title="Link to this heading">¶</a></h3>
+<p class="translated">大多数标注作用域采用 <em>惰性求值</em>。 这包括标注、通过 <a class="reference internal" href="simple_stmts.html#type"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">type</span></code></a> 语句创建的类型别名的值，以及通过 <a class="reference internal" href="compound_stmts.html#type-params"><span class="std std-ref">类型形参语法</span></a> 创建的类型变量的绑定、约束和默认值。 这意味着它们在类型别名或类型变量被创建时、或带有标注的对象被创建时不会被求值。 作为替代行为，它们只有在需要时才会被求值，例如在一个类型别名上的 <code class="docutils literal notranslate"><span class="pre">__value__</span></code> 属性被访问的时候。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span> <span class="n">Alias</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Alias</span><span class="o">.</span><span class="n">__value__</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">  </span><span class="c">...</span>
+<span class="gr">ZeroDivisionError</span>: <span class="n">division by zero</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">]():</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__type_params__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">__bound__</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">  </span><span class="c">...</span>
+<span class="gr">ZeroDivisionError</span>: <span class="n">division by zero</span>
+</pre></div>
+</div>
+<p class="translated">此处的异常只有在类型别名的 <code class="docutils literal notranslate"><span class="pre">__value__</span></code> 属性或类型变量的 <code class="docutils literal notranslate"><span class="pre">__bound__</span></code> 属性被访问时才会被引发。</p>
+<p class="translated">此行为主要适用于当创建类型别名或类型变量时对尚未被定义的类型进行引用。 例如，惰性求值将允许创建相互递归的类型别名:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="nb">type</span> <span class="n">SimpleExpr</span> <span class="o">=</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Parenthesized</span>
+<span class="nb">type</span> <span class="n">Parenthesized</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;(&quot;</span><span class="p">],</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;)&quot;</span><span class="p">]]</span>
+<span class="nb">type</span> <span class="n">Expr</span> <span class="o">=</span> <span class="n">SimpleExpr</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SimpleExpr</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">],</span> <span class="n">Expr</span><span class="p">]</span>
+</pre></div>
+</div>
+<p class="translated">被惰性求值的值是在 <a class="reference internal" href="#annotation-scopes"><span class="std std-ref">标注作用域</span></a> 内进行求值的，这意味着出现在被惰性求值的值内部的名称的查找范围就相当于它们是在紧邻的作用域中被使用。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</section>
+<section id="builtins-and-restricted-execution">
+<span id="restrict-exec"></span><h3 class="translated"><span class="section-number">4.2.5. </span>内置命名空间和受限的执行<a class="headerlink" href="#builtins-and-restricted-execution" title="Link to this heading">¶</a></h3>
+<div class="impl-detail compound" id="index-15">
+<p class="translated">用户不应该接触 <code class="docutils literal notranslate"><span class="pre">__builtins__</span></code>，严格说来它属于实现细节。 用户如果要重载内置命名空间中的值则应该 <a class="reference internal" href="simple_stmts.html#import"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">import</span></code></a> <a class="reference internal" href="../library/builtins.html#module-builtins" title="builtins: The module that provides the built-in namespace."><code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code></a> 并相应地修改该模块中的属性。</p>
+</div>
+<p class="translated">与一个代码块的执行相关联的内置命名空间实际上是通过在其全局命名空间中搜索名称 <code class="docutils literal notranslate"><span class="pre">__builtins__</span></code> 来找到的；这应该是一个字典或一个模块（在后一种情况下会使用该模块的字典）。 默认情况下，当在 <a class="reference internal" href="../library/__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a> 模块中时，<code class="docutils literal notranslate"><span class="pre">__builtins__</span></code> 就是内置模块 <a class="reference internal" href="../library/builtins.html#module-builtins" title="builtins: The module that provides the built-in namespace."><code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code></a>；当在任何其他模块中时，<code class="docutils literal notranslate"><span class="pre">__builtins__</span></code> 则是 <code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code> 模块自身的字典的一个别名。</p>
+</section>
+<section id="interaction-with-dynamic-features">
+<span id="dynamic-features"></span><h3 class="translated"><span class="section-number">4.2.6. </span>与动态特性的交互<a class="headerlink" href="#interaction-with-dynamic-features" title="Link to this heading">¶</a></h3>
+<p class="translated">自由变量的名称解析发生于运行时而不是编译时。 这意味着以下代码将打印出 42:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">f</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../library/functions.html#eval" title="eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> 和 <a class="reference internal" href="../library/functions.html#exec" title="exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">exec()</span></code></a> 函数没有对完整环境的访问权限来解析名称。 名称可以在调用者的局部和全局命名空间中被解析。 自由变量的解析不是在最近包含命名空间中，而是在全局命名空间中。 <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> <code class="xref py py-func docutils literal notranslate"><span class="pre">exec()</span></code> 和 <code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code> 函数有可选参数用来重载全局和局部命名空间。 如果只指定一个命名空间，则它会同时作用于两者。</p>
+</section>
+</section>
+<section id="exceptions">
+<span id="id4"></span><h2 class="translated"><span class="section-number">4.3. </span>异常<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-17"><span id="index-16"></span>异常是中断代码块的正常控制流程以便处理错误或其他异常条件的一种方式。 异常会在错误被检测到的位置 <em>引发</em>，它可以被当前包围代码块或是任何直接或间接唤起发生错误的代码块的其他代码块所 <em>处理</em>。</p>
+<p class="translated">Python 解释器会在检测到运行时错误（例如零作为被除数）的时候引发异常。 Python 程序也可以通过 <a class="reference internal" href="simple_stmts.html#raise"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">raise</span></code></a> 语句显式地引发异常。 异常处理是通过 <a class="reference internal" href="compound_stmts.html#try"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">try</span></code></a> ... <a class="reference internal" href="compound_stmts.html#except"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">except</span></code></a> 语句来指定的。 该语句的 <a class="reference internal" href="compound_stmts.html#finally"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">finally</span></code></a> 子句可被用来指定清理代码，它并不处理异常，而是无论之前的代码是否发生异常都会被执行。</p>
+<p class="translated" id="index-18">Python 的错误处理采用的是“终止”模型：异常处理器可以找出发生了什么问题，并在外层继续执行，但它不能修复错误的根源并重试失败的操作（除非通过从顶层重新进入出错的代码片段）。</p>
+<p class="translated" id="index-19">当一个异常完全未被处理时，解释器会终止程序的执行，或者返回交互模式的主循环。 无论是哪种情况，它都会打印栈回溯信息，除非是当异常为 <a class="reference internal" href="../library/exceptions.html#SystemExit" title="SystemExit"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemExit</span></code></a> 的时候。</p>
+<p class="translated">异常是通过类实例来标识的。 <a class="reference internal" href="compound_stmts.html#except"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">except</span></code></a> 子句会依据实例的类来选择：它必须引用实例的类或是其所属的 <a class="reference internal" href="../glossary.html#term-abstract-base-class"><span class="xref std std-term">非虚基类</span></a> 。 实例可通过处理器被接收，并可携带有关异常条件的附加信息。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">异常消息不是 Python API 的组成部分。 其内容可能在 Python 升级到新版本时不经警告地发生改变，不应该被需要在多版本解释器中运行的代码所依赖。</p>
+</div>
+<p class="translated">另请参看  <a class="reference internal" href="compound_stmts.html#try"><span class="std std-ref">try 语句</span></a> 小节中对 <a class="reference internal" href="compound_stmts.html#try"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">try</span></code></a> 语句的描述以及 <a class="reference internal" href="simple_stmts.html#raise"><span class="std std-ref">raise 语句</span></a> 小节中对 <a class="reference internal" href="simple_stmts.html#raise"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">raise</span></code></a> 语句的描述。</p>
+</section>
+<section id="runtime-components">
+<span id="execcomponents"></span><h2 class="translated"><span class="section-number">4.4. </span>运行时组件<a class="headerlink" href="#runtime-components" title="Link to this heading">¶</a></h2>
+<section id="general-computing-model">
+<h3 class="translated"><span class="section-number">4.4.1. </span>通用计算模型<a class="headerlink" href="#general-computing-model" title="Link to this heading">¶</a></h3>
+<p class="translated">Python 的执行模型并非是在真空中运作的。 它存在于一台主机并通过该主机的运行时环境运行，包括其中的操作系统 (OS)，如果有具体操作系统的话。 当一个程序运行时，决定它如何在主机上运行的各个概念层大致是这样的：</p>
+<blockquote>
+<div><div class="line-block">
+<div class="translated line"><strong>主机</strong></div>
+<div class="line-block">
+<div class="translated line"><strong>进程</strong> (全局资源)</div>
+<div class="line-block">
+<div class="translated line"><strong>线程</strong> (运行机器码)</div>
+</div>
+</div>
+</div>
+</div></blockquote>
+<p class="translated">每个进程代表一个在主机上运行的程序。 可以将每个进程本身视作其程序的数据部分。 可以将进程的各个线程视为程序的执行部分。 这一区别对于理解  Python 运行时的概念是很重要的。</p>
+<p class="translated">进程作为数据部分，是程序运行所在的执行上下文。 它主要由主机分配给程序的资源集合组成，包括内存、信号、文件句柄、套接字以及环境变量等。</p>
+<p class="translated">进程之间是相互隔离与独立的。 （对于主机来说也是如此。） 主机管理进程对其所分配资源的访问，并在进程之间进行协调。</p>
+<p class="translated">每个线程代表程序的机器码的实际执行，它们相对于分配给程序的进程的资源来运行。 实际执行是如何以及何时发生完全取决于具体主机。</p>
+<p class="translated">从 Python 的角度来看，程序开始时总是只有一个线程。 但是，程序可能会发展为在多个线程中同时运行。 并非所有主机都支持在每个进程中有多个线程，但多数确实如此。 与进程不同，进程中的线程并非相互隔离和独立的。 具体来说，一个进程中的所有线程都共享进程的所有资源。</p>
+<p class="translated">线程的基本要点是每一个线程都独立 <em>运行</em>，并与其他线程同时运行。 这种同时可能只是概念上的（“并发”）也可能是物理上的（“并行”）。 无论哪种方式，线程实际上都是以非同步的速率运行的。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">所谓非同步的速率意味着进程的任何内存都不保证对在任何给定线程中运行的代码是固定的。 因此多线程的程序必须小心协调对有意共享的资源的访问。 类似地，它们也必须非常小心注意不要访问多线程中的任何 <em>其它</em> 资源；否则同时运行的两个线程可能会意外地干涉彼此对某些共享数据的使用。 这一点对于 Python 程序和 Python 运行时来说都是如此。</p>
+<p class="translated">这种宽泛、非结构化要求的代价就是对线程所提供的初级并发特性的权衡。 违反所要求的纪律通常就意味着需要处理非确定性的程序错误和数据损坏。</p>
+</div>
+</section>
+<section id="python-runtime-model">
+<h3 class="translated"><span class="section-number">4.4.2. </span>Python 运行时模型<a class="headerlink" href="#python-runtime-model" title="Link to this heading">¶</a></h3>
+<p class="translated">相同的概念层级将应用于每个 Python 程序，并带有一些 Python 专属的数据层级：</p>
+<blockquote>
+<div><div class="line-block">
+<div class="translated line"><strong>主机</strong></div>
+<div class="line-block">
+<div class="translated line"><strong>进程</strong> (全局资源)</div>
+<div class="line-block">
+<div class="translated line">Python 全局运行时 (<em>状态</em>)</div>
+<div class="line-block">
+<div class="translated line">Python 解释器 (<em>状态</em>)</div>
+<div class="line-block">
+<div class="translated line"><strong>线程</strong> (运行 Python 字节码和 &quot;C-API&quot;)</div>
+<div class="line-block">
+<div class="translated line">Python 线程 <em>状态</em></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></blockquote>
+<p class="translated">在概念层级上：当一个 Python 程序启动时，它会完全符合上图的样子，每层各有一个。 运行时可能发展为包括多个解释器，而每个解释器可能发展为包括多个线程状态。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">一个 Python 具体实现不一定需要实现单独甚至实体的层级。 唯一的例外是将单独的层级直接指明或暴露给用户，例如通过 <a class="reference internal" href="../library/threading.html#module-threading" title="threading: Thread-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">threading</span></code></a> 模块的情况。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">初始的解释器通常称为“主”解释器。 某些 Python 实现，像是 CPython，会给主解释器分配特殊角色。</p>
+<p class="translated">类似地，运行时初始化所在的主机线程被称为“主”线程。 它可能不同于进程的初始线程，不过往往是同一个。 在某些情况下“主线程”概念甚至可能更严格地限定为初始线程状态。 Python 运行时可能会赋予主线程一些专属任务，例如处理信号等。</p>
+</div>
+<p class="translated">作为一个整体，Python 运行时是由全局运行时状态、解释器和线程状态组成的。 运行时会确保所有状态在其生命期内保持一致，特别是在使用多个主机线程的情况下。</p>
+<p class="translated">在概念层级上，全局运行时只是多个解释器的集合。 虽然这些解释器基本上是相互隔离彼此独立的，但它们可能会共享某些数据或其他资源。 运行时要负责安全地管理这些资源。  这些资源的实际性质和管理方式取决于具体实现。 最终，全局运行时的对外功能仅限于管理解释器。</p>
+<p class="translated">作为对比，“解释器”在概念层级上就是我们通常认为是（具备完整功能的）“Python 运行时”。 当在一个主机线程中执行的机器码与 Python 运行时交互时，它将在特定的解释器上下文中对 Python 发起调用。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">这里使用的“解释器”一词不同于“字节码解释器”，后者通常运行于线程之中，执行已编译的 Python 代码。</p>
+<p class="translated">在一个理想世界中，“Python 运行时”应该是指现在我们称为“解释器”的东西。 但是，它至少从 1997 年被引入开始就一直称为“解释器”了 (<a class="reference external" href="https://github.com/python/cpython/commit/a027efa5b">CPython:a027efa5b</a>)。</p>
+</div>
+<p class="translated">每个解释器都完整地包裹了 Python 运行时工作所需的所有非进程全局、非线程专属的状态。 值得注意的是，解释器的状态在多次使用之间是持久的。 它包括一些基础数据如 <a class="reference internal" href="../library/sys.html#sys.modules" title="sys.modules"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a>。 运行时会确保使用同一解释器的多个线程在它们之间安全地共享这些数据。</p>
+<p class="translated">Python 的具体实现可能会支持在同一进程中同时使用多个解释器。 它们是彼此独立并且相互隔离的。 例如，每个解释器都有自己的 <a class="reference internal" href="../library/sys.html#sys.modules" title="sys.modules"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a>。</p>
+<p class="translated">对于线程专属的运行时状态，每个解释器都具有一组线程状态，由它进行管理，其方式与全局运行时包含一组解释器的方式相同。 它可以根据需要包含任意多个主机线程的线程状态。 它甚至可以包含同一主机线程的多个线程状态，不过这种情况并不常见。</p>
+<p class="translated">在概念层级上，每个线程状态都拥有解释器在一个主机线程中动作所需的所有线程专属运行时数据。 线程状态包括当前引发的异常和线程的 Python 调用栈。 它还可能包括其他线程专属的资源。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">“Python 线程”一词有时是指一个线程状态，但通常它都表示使用 <a class="reference internal" href="../library/threading.html#module-threading" title="threading: Thread-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">threading</span></code></a> 模块创建的线程。</p>
+</div>
+<p class="translated">在其生命期内，每个线程状态总是关联到一个特定的解释器和一个特定的主机线程。 它将仅在这个线程的这个解释器中被使用。</p>
+<p class="translated">多个线程状态可以关联到同一个主机线程，无论它们是属于不同的解释器还是相同的解释器。 不过，对于任意给定的主机线程，同一时刻只有一个与其关联的线程状态可以被该线程使用。</p>
+<p class="translated">线程状态是彼此隔离并相互独立且不会共享任何数据，除了可能会共享一个解释器以及归属于该解释器的对象或其他资源。</p>
+<p class="translated">在一个程序运行的时候，可以（在支持线程的平台和 Python 实现上）使用 <a class="reference internal" href="../library/threading.html#module-threading" title="threading: Thread-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">threading</span></code></a> 模块创建新的 Python 线程。 额外的进程可以使用 <a class="reference internal" href="../library/os.html#module-os" title="os: Miscellaneous operating system interfaces."><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a>, <a class="reference internal" href="../library/subprocess.html#module-subprocess" title="subprocess: Subprocess management."><code class="xref py py-mod docutils literal notranslate"><span class="pre">subprocess</span></code></a> 和 <a class="reference internal" href="../library/multiprocessing.html#module-multiprocessing" title="multiprocessing: Process-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> 模块来创建。 解释器可以通过 <a class="reference internal" href="../library/concurrent.interpreters.html#module-concurrent.interpreters" title="concurrent.interpreters: Multiple interpreters in the same process"><code class="xref py py-mod docutils literal notranslate"><span class="pre">interpreters</span></code></a> 模块来创建和使用。 （异步）协程可以在每个解释器中使用 <a class="reference internal" href="../library/asyncio.html#module-asyncio" title="asyncio: Asynchronous I/O."><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code></a> 来运行，通常仅限于单个线程（往往是主线程）之中。</p>
+<p class="translated rubric">脚注</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p class="translated">出现这样的限制是由于通过这些操作执行的代码在模块被编译的时候并不可用。</p>
+</aside>
+</aside>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">4. 执行模型</a><ul>
+<li><a class="reference internal" href="#structure-of-a-program">4.1. 程序的结构</a></li>
+<li><a class="reference internal" href="#naming-and-binding">4.2. 命名与绑定</a><ul>
+<li><a class="reference internal" href="#binding-of-names">4.2.1. 名称的绑定</a></li>
+<li><a class="reference internal" href="#resolution-of-names">4.2.2. 名称的解析</a></li>
+<li><a class="reference internal" href="#annotation-scopes">4.2.3. 标注作用域</a></li>
+<li><a class="reference internal" href="#lazy-evaluation">4.2.4. 惰性求值</a></li>
+<li><a class="reference internal" href="#builtins-and-restricted-execution">4.2.5. 内置命名空间和受限的执行</a></li>
+<li><a class="reference internal" href="#interaction-with-dynamic-features">4.2.6. 与动态特性的交互</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exceptions">4.3. 异常</a></li>
+<li><a class="reference internal" href="#runtime-components">4.4. 运行时组件</a><ul>
+<li><a class="reference internal" href="#general-computing-model">4.4.1. 通用计算模型</a></li>
+<li><a class="reference internal" href="#python-runtime-model">4.4.2. Python 运行时模型</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="datamodel.html"
+                          title="上一章"><span class="section-number">3. </span>数据模型</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="import.html"
+                          title="下一章"><span class="section-number">5. </span>导入系统</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "reference/executionmodel.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/reference/executionmodel.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/reference/executionmodel.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="import.html" title="5. 导入系统"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="datamodel.html" title="3. 数据模型"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 语言参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">4. </span>执行模型</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="asyncio 的概念概述" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="这篇 指南 旨在帮助您充分理解 asyncio 的基本运作原理，并使您理解推荐模式背后的原理和原因。 你可能会对某些关键的 asyncio 概念感到好奇。读完本文后，你将能够轻松地回答这些问题： 当一个对象被等待时，幕后发生了什么？, asyncio 如何区分不需要 CPU 时间的任务（如网络请求或文件读取）和与之相反的任务（如计算 n 的阶乘）？, 如何编写一个操作的异步变体，例如异步的休..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_a-conceptual-overview-of-asyncio_26943c35.png" />
+<meta property="og:image:alt" content="这篇 指南 旨在帮助您充分理解 asyncio 的基本运作原理，并使您理解推荐模式背后的原理和原因。 你可能会对某些关键的 asyncio 概念感到好奇。读完本文后，你将能够轻松地回答这些问题： 当一个对象被等待时，幕后发生了什么？, asyncio 如何区分不需要 CPU 时间的任务（如网络请求或文件读取）和与之相反的任务（如计算 n 的阶乘）？, 如何编写一个操作的异步变体，例如异步的休..." />
+<meta name="description" content="这篇 指南 旨在帮助您充分理解 asyncio 的基本运作原理，并使您理解推荐模式背后的原理和原因。 你可能会对某些关键的 asyncio 概念感到好奇。读完本文后，你将能够轻松地回答这些问题： 当一个对象被等待时，幕后发生了什么？, asyncio 如何区分不需要 CPU 时间的任务（如网络请求或文件读取）和与之相反的任务（如计算 n 的阶乘）？, 如何编写一个操作的异步变体，例如异步的休..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>asyncio 的概念概述 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="将扩展模块移植到 Python 3" href="cporting.html" />
+    <link rel="prev" title="Python 指南" href="index.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 的概念概述</a><ul>
+<li><a class="reference internal" href="#a-conceptual-overview-part-1-the-high-level">概念概述第 1 部分：高层次</a><ul>
+<li><a class="reference internal" href="#event-loop">事件循环</a></li>
+<li><a class="reference internal" href="#asynchronous-functions-and-coroutines">异步函数和协程</a></li>
+<li><a class="reference internal" href="#tasks">任务</a></li>
+<li><a class="reference internal" href="#await">await</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-conceptual-overview-part-2-the-nuts-and-bolts">概念概述第 2 部分：核心细节与运作机制</a><ul>
+<li><a class="reference internal" href="#the-inner-workings-of-coroutines">协程的内部工作原理</a></li>
+<li><a class="reference internal" href="#futures">Future</a></li>
+<li><a class="reference internal" href="#a-homemade-asyncio-sleep">自制 asyncio.sleep</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="index.html"
+                          title="上一章">Python 指南</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="cporting.html"
+                          title="下一章">将扩展模块移植到 Python 3</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/a-conceptual-overview-of-asyncio.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/a-conceptual-overview-of-asyncio.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/a-conceptual-overview-of-asyncio.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="cporting.html" title="将扩展模块移植到 Python 3"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Python 指南"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 的概念概述</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="a-conceptual-overview-of-asyncio">
+<span id="id1"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 的概念概述<a class="headerlink" href="#a-conceptual-overview-of-asyncio" title="Link to this heading">¶</a></h1>
+<p class="translated">这篇 <a class="reference internal" href="index.html#how-tos"><span class="std std-ref">指南</span></a> 旨在帮助您充分理解 <a class="reference internal" href="../library/asyncio.html#module-asyncio" title="asyncio: Asynchronous I/O."><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code></a> 的基本运作原理，并使您理解推荐模式背后的原理和原因。</p>
+<p class="translated">你可能会对某些关键的 <code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 概念感到好奇。读完本文后，你将能够轻松地回答这些问题：</p>
+<ul class="simple">
+<li><p class="translated">当一个对象被等待时，幕后发生了什么？</p></li>
+<li><p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 如何区分不需要 CPU 时间的任务（如网络请求或文件读取）和与之相反的任务（如计算 n 的阶乘）？</p></li>
+<li><p class="translated">如何编写一个操作的异步变体，例如异步的休眠或数据库请求。</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<ul class="simple">
+<li><p class="translated">启发这篇指南文章的 <a class="reference external" href="https://github.com/anordin95/a-conceptual-overview-of-asyncio/tree/main">指南</a>，作者是 Alexander Nordin。</p></li>
+<li><p class="translated">这套深入讲解 <code class="docutils literal notranslate"><span class="pre">asyncio</span></code> 的 <a class="reference external" href="https://www.youtube.com/watch?v=Xbl7XjFYsN4&amp;list=PLhNSoGM2ik6SIkVGXWBwerucXjgP1rHmB">YouTube 教程系列</a>，由 Python 核心团队成员 Łukasz Langa 制作。</p></li>
+<li><p class="translated"><a class="reference external" href="https://aosabook.org/en/500L/a-web-crawler-with-asyncio-coroutines.html">500 Lines or Less: A Web Crawler With asyncio Coroutines</a>，作者是 A. Jesse Jiryu Davis 和 Guido van Rossum。</p></li>
+</ul>
+</div>
+<section id="a-conceptual-overview-part-1-the-high-level">
+<h2 class="translated">概念概述第 1 部分：高层次<a class="headerlink" href="#a-conceptual-overview-part-1-the-high-level" title="Link to this heading">¶</a></h2>
+<p class="translated">在第 1 部分中，我们将介绍主要的、高层级的 <code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 构成部分：事件循环、协程函数、协程对象、任务和 <code class="docutils literal notranslate"><span class="pre">await</span></code>。</p>
+<section id="event-loop">
+<h3 class="translated">事件循环<a class="headerlink" href="#event-loop" title="Link to this heading">¶</a></h3>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 中的一切都与事件循环相关。它是演出的主角。它就像一名乐队指挥一样在幕后管理资源。它掌握着一些权力，但它完成工作的能力很大程度上来自于它的工蜂们的尊重与合作。</p>
+<p class="translated">用更专业的术语来说，事件循环包含一组待运行的作业。有些作业是由你直接添加的，有些则是由 <code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 间接添加的。 事件循环会从其待处理事项中取出一个作业并唤起它（或称“给予其控制权”），类似于调用一个函数，然后该作业就会运行。 一旦它暂停或完成，它会将控制权返回给事件循环。然后事件循环会从作业池中选择另一个作业并唤起它。你可以 <em>粗略地</em> 将这组作业视为一个队列：作业被添加然后被逐个处理，通常（但不总是）按顺序进行。此过程将无限地重复，事件循环也不停地循环下去。 如果没有待执行的作业，事件循环会足够智能地转入休息状态以避免浪费 CPU 周期，并在有更多工作需完成时恢复运行。</p>
+<p class="translated">有效的执行依赖于作业的良好共享和合作；一个贪婪的作业可能会霸占控制权，让其他作业陷入饥饿，从而使整个事件循环机制变得毫无用处。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="c1"># 这会创建一个事件循环并无限循环地执行其作业集合。</span>
+<span class="n">event_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
+<span class="n">event_loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="asynchronous-functions-and-coroutines">
+<h3 class="translated">异步函数和协程<a class="headerlink" href="#asynchronous-functions-and-coroutines" title="Link to this heading">¶</a></h3>
+<p class="translated">这是一个基本的、无趣的 Python 函数:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">hello_printer</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;Hi, I am a lowly, simple printer, though I have all I &quot;</span>
+        <span class="s2">&quot;need in life -- </span><span class="se">\n</span><span class="s2">fresh paper and my dearly beloved octopus &quot;</span>
+        <span class="s2">&quot;partner in crime.&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">调用一个普通函数会执行它的逻辑或函数体:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">hello_printer</span><span class="p">()</span>
+<span class="go">Hi, I am a lowly, simple printer, though I have all I need in life --</span>
+<span class="go">fresh paper and my dearly beloved octopus partner in crime.</span>
+</pre></div>
+</div>
+<p class="translated">与普通的 <code class="docutils literal notranslate"><span class="pre">def</span></code> 不同，<a class="reference internal" href="../reference/compound_stmts.html#async-def"><span class="std std-ref">async def</span></a> 使它成为一个异步函数（或“协程函数”）。调用它会创建并返回一个 <a class="reference internal" href="../library/asyncio-task.html#coroutine"><span class="std std-ref">协程</span></a> 对象。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">loudmouth_penguin</span><span class="p">(</span><span class="n">magic_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span>
+     <span class="s2">&quot;I am a super special talking penguin. Far cooler than that printer. &quot;</span>
+     <span class="sa">f</span><span class="s2">&quot;By the way, my lucky number is: </span><span class="si">{</span><span class="n">magic_number</span><span class="si">}</span><span class="s2">.&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">调用异步函数 <code class="docutils literal notranslate"><span class="pre">loudmouth_penguin</span></code> 不会执行打印语句；相反，它会创建一个协程对象:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">loudmouth_penguin</span><span class="p">(</span><span class="n">magic_number</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">&lt;coroutine object loudmouth_penguin at 0x104ed2740&gt;</span>
+</pre></div>
+</div>
+<p class="untranslated">The terms &quot;coroutine function&quot; and &quot;coroutine object&quot; are often conflated
+as coroutine.
+That can be confusing!
+In this article, coroutine specifically refers to a coroutine object, or more
+precisely, an instance of <a class="reference internal" href="../library/types.html#types.CoroutineType" title="types.CoroutineType"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.CoroutineType</span></code></a> (native coroutine).
+Note that coroutines can also exist as instances of
+<a class="reference internal" href="../library/collections.abc.html#collections.abc.Coroutine" title="collections.abc.Coroutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Coroutine</span></code></a> -- a distinction that matters for type
+checking.</p>
+<p class="translated">协程代表函数体或逻辑。协程必须显式启动；再次强调，仅仅创建协程并不能启动它。值得注意的是，协程可以在函数体的不同位置暂停和恢复。这种暂停和恢复能力使得异步行为成为可能！</p>
+<p class="translated">协程和协程函数是利用 <a class="reference internal" href="../glossary.html#term-generator-iterator"><span class="xref std std-term">生成器</span></a> 和 <a class="reference internal" href="../glossary.html#term-generator"><span class="xref std std-term">生成器函数</span></a> 构建的。回想一下，生成器函数是一个会 <a class="reference internal" href="../reference/simple_stmts.html#yield"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">yield</span></code></a> 的函数，就像这样:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_random_number</span><span class="p">():</span>
+    <span class="c1"># 这是一个糟糕的随机数生成器！</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hi&quot;</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="mi">7</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Howdy&quot;</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="mi">4</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p class="translated">与协程函数类似，调用生成器函数并不会运行该函数，而是创建一个生成器对象:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_random_number</span><span class="p">()</span>
+<span class="go">&lt;generator object get_random_number at 0x1048671c0&gt;</span>
+</pre></div>
+</div>
+<p class="translated">你可以通过内置函数 <a class="reference internal" href="../library/functions.html#next" title="next"><code class="xref py py-func docutils literal notranslate"><span class="pre">next()</span></code></a> 执行生成器到下一个 <code class="docutils literal notranslate"><span class="pre">yield</span></code>。换句话说，生成器运行，然后暂停。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">get_random_number</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+<span class="go">Hi</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+<span class="go">Hello</span>
+<span class="go">7</span>
+</pre></div>
+</div>
+</section>
+<section id="tasks">
+<h3 class="translated">任务<a class="headerlink" href="#tasks" title="Link to this heading">¶</a></h3>
+<p class="translated">粗略地说，<a class="reference internal" href="../library/asyncio-task.html#asyncio-task-obj"><span class="std std-ref">任务</span></a> 是绑定到事件循环的协程（而非协程函数）。任务还维护一个回调函数列表，这些回调函数的重要性在稍后讨论 <a class="reference internal" href="../reference/expressions.html#await"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">await</span></code></a> 时会更加清晰。推荐使用 <a class="reference internal" href="../library/asyncio-task.html#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 创建任务。</p>
+<p class="translated">创建任务会自动安排它的执行（通过在事件循环的待办事项列表（即作业集合）中添加回调函数来运行它）。</p>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 会为你自动将任务与事件循环进行关联。这种自动关联是出于简便的考虑有意设计在 <code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 中的。 如果不是这样，你将需要手动将事件循环传给任何想要创建任务的协程函数，给你的代码增加大量冗余内容。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">coroutine</span> <span class="o">=</span> <span class="n">loudmouth_penguin</span><span class="p">(</span><span class="n">magic_number</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="c1"># 这将创建一个 Task 对象并通过事件循环安排其执行。</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">coroutine</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">之前，我们手动创建了事件循环并将其设置为永久运行。实际上，推荐（且常见）的做法是使用 <a class="reference internal" href="../library/asyncio-runner.html#asyncio.run" title="asyncio.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.run()</span></code></a>，它负责管理事件循环并确保提供的协程在继续执行之前结束。例如，许多异步程序都遵循以下设置:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 执行各种稀奇古怪、天马行空的异步操作……</span>
+    <span class="o">...</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+    <span class="c1"># 直到协程 main() 结束，程序才会到达下面的打印语句。</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;coroutine main() is done!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">需要注意的是，任务本身不会被添加到事件循环中，只有任务的回调函数才会被添加到事件循环中。如果你创建的任务对象在被事件循环调用之前就被垃圾回收了，这就会产生问题。例如，考虑这个程序：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">hello</span><span class="p">():</span>
+<span class="linenos">2</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hello!&quot;</span><span class="p">)</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="linenos">5</span>    <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">hello</span><span class="p">())</span>
+<span class="linenos">6</span>    <span class="c1"># 其他异步指令运行一段时间并将控制权交还给事件循环......</span>
+<span class="linenos">7</span>    <span class="o">...</span>
+<span class="linenos">8</span>
+<span class="linenos">9</span><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">由于没有对第 5 行创建的任务对象的引用，它 <em>可能</em> 在事件循环调用它之前就被垃圾回收了。协程 <code class="docutils literal notranslate"><span class="pre">main()</span></code> 中的后续指令将控制权交还给事件循环，以便它可以调用其他作业。当事件循环最终尝试运行该任务时，它可能会失败并发现任务对象不存在！即使协程持有对某个任务的引用，但如果协程在该任务结束之前就完成了，也可能发生这种情况。当协程退出时，局部变量超出范围，可能被垃圾回收。实际上，<code class="docutils literal notranslate"><span class="pre">asyncio</span></code> 和 Python 的垃圾回收器会非常努力地确保此类事情不会发生。但这并不是鲁莽行事的理由！</p>
+</section>
+<section id="await">
+<h3 class="translated">await<a class="headerlink" href="#await" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="../reference/expressions.html#await"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">await</span></code></a> 是一个 Python 关键字，通常以两种不同的方式使用:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">await</span> <span class="n">task</span>
+<span class="k">await</span> <span class="n">coroutine</span>
+</pre></div>
+</div>
+<p class="translated">从关键方面来说，<code class="docutils literal notranslate"><span class="pre">await</span></code> 的行为取决于所等待对象的类型。</p>
+<p class="translated">等待任务会将控制权从当前任务或协程交还给事件循环。在交还控制权的过程中，会发生一些重要的事情。我们将使用以下代码示例来说明:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">plant_a_tree</span><span class="p">():</span>
+    <span class="n">dig_the_hole_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">dig_the_hole</span><span class="p">())</span>
+    <span class="k">await</span> <span class="n">dig_the_hole_task</span>
+
+    <span class="c1"># 与植树相关的其他指令。</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p class="translated">在这个例子中，假设事件循环已经将控制权交给了协程 <code class="docutils literal notranslate"><span class="pre">plant_a_tree()</span></code> 的开始部分。如上所示，协程创建了一个任务，然后对其执行了 await。<code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">dig_the_hole_task</span></code> 这条指令会将一个回调函数（用于恢复 <code class="docutils literal notranslate"><span class="pre">plant_a_tree()</span></code> 的执行）添加到 <code class="docutils literal notranslate"><span class="pre">dig_the_hole_task</span></code> 对象的回调函数列表中。随后，这条指令将控制权交还给事件循环。过一段时间后，事件循环会将控制权传递给 <code class="docutils literal notranslate"><span class="pre">dig_the_hole_task</span></code>，该任务会完成它需要做的工作。一旦任务结束，它会将它的各种回调函数添加到事件循环中，在这里是恢复 <code class="docutils literal notranslate"><span class="pre">plant_a_tree()</span></code> 的执行。</p>
+<p class="translated">一般来说，当等待的任务完成时 (<code class="docutils literal notranslate"><span class="pre">dig_the_hole_task</span></code>)，原先的任务或协程 (<code class="docutils literal notranslate"><span class="pre">plant_a_tree()</span></code>) 将被添加回事件循环的待办列表以便恢复运行。</p>
+<p class="translated">这是一个基础但可靠的思维模型。实际操作中，控制权交接会稍微复杂一些，但不会复杂太多。在第 2 部分中，我们将逐步讲解实现这一目标的细节。</p>
+<p class="translated"><strong>与任务不同，等待协程并不会将控制权交还给事件循环！</strong> 先将协程包装到任务中，然后再等待，会导致控制权交还。<code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">coroutine</span></code> 的行为实际上与调用常规的同步 Python 函数相同。考虑以下程序:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">coro_a</span><span class="p">():</span>
+   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I am coro_a(). Hi!&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">coro_b</span><span class="p">():</span>
+   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I am coro_b(). I sure hope no one hogs the event loop...&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+   <span class="n">task_b</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">coro_b</span><span class="p">())</span>
+   <span class="n">num_repeats</span> <span class="o">=</span> <span class="mi">3</span>
+   <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_repeats</span><span class="p">):</span>
+      <span class="k">await</span> <span class="n">coro_a</span><span class="p">()</span>
+   <span class="k">await</span> <span class="n">task_b</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">协程 <code class="docutils literal notranslate"><span class="pre">main()</span></code> 中的第一条语句创建了 <code class="docutils literal notranslate"><span class="pre">task_b</span></code> 并调度它通过事件循环运行。然后，将重复地等待 <code class="docutils literal notranslate"><span class="pre">coro_a()</span></code>。 控制权从未被交还给事件循环，这就是为什么在 <code class="docutils literal notranslate"><span class="pre">coro_b()</span></code> 的输出之前我们会看到所有三次唤起 <code class="docutils literal notranslate"><span class="pre">coro_a()</span></code> 的输出：</p>
+<div class="translated highlight-none notranslate"><div class="highlight"><pre><span></span>I am coro_a(). Hi!
+I am coro_a(). Hi!
+I am coro_a(). Hi!
+I am coro_b(). I sure hope no one hogs the event loop...
+</pre></div>
+</div>
+<p class="translated">如果我们将 <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">coro_a()</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">asyncio.create_task(coro_a())</span></code>，行为就会发生变化。协程 <code class="docutils literal notranslate"><span class="pre">main()</span></code> 会通过该语句将控制权交还给事件循环。然后，事件循环会继续处理其积压的工作，先调用 <code class="docutils literal notranslate"><span class="pre">task_b</span></code>，然后调用包装 <code class="docutils literal notranslate"><span class="pre">coro_a()</span></code> 的任务，最后恢复协程 <code class="docutils literal notranslate"><span class="pre">main()</span></code>。</p>
+<div class="translated highlight-none notranslate"><div class="highlight"><pre><span></span>I am coro_b(). I sure hope no one hogs the event loop...
+I am coro_a(). Hi!
+I am coro_a(). Hi!
+I am coro_a(). Hi!
+</pre></div>
+</div>
+<p class="translated">这种 <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">coroutine</span></code> 的行为可能会困扰很多人！这个例子强调了仅使用 <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">coroutine</span></code> 可能会无意中霸占其他任务的控制权并在实际上阻滞事件循环。 <a class="reference internal" href="../library/asyncio-runner.html#asyncio.run" title="asyncio.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.run()</span></code></a> 可以通过 <code class="docutils literal notranslate"><span class="pre">debug=True</span></code> 旗标来检测这种情况，它将会启用 <a class="reference internal" href="../library/asyncio-dev.html#asyncio-debug-mode"><span class="std std-ref">调试模式</span></a>。此外，它还会记录任何独占执行时间 100 毫秒以上的协程。</p>
+<p class="translated">该设计有意牺牲了 <code class="docutils literal notranslate"><span class="pre">await</span></code> 用法的某些概念明晰度以提升性能。每当有任务被等待时，控制权都需要沿着调用栈一路向上传递到事件循环。 这听起来可能微不足道，但在一个具有大量 <code class="docutils literal notranslate"><span class="pre">await</span></code> 语句和深度调用栈的大型程序中，这种开销可能会累积到明显拖累性能。</p>
+</section>
+</section>
+<section id="a-conceptual-overview-part-2-the-nuts-and-bolts">
+<h2 class="translated">概念概述第 2 部分：核心细节与运作机制<a class="headerlink" href="#a-conceptual-overview-part-2-the-nuts-and-bolts" title="Link to this heading">¶</a></h2>
+<p class="translated">第 2 部分将详细介绍 <code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 用于管理控制流的机制。这正是魔法发生的地方。读完本节后，您将了解 <code class="docutils literal notranslate"><span class="pre">await</span></code> 在幕后做了什么，以及如何创建您自己的异步运算符。</p>
+<section id="the-inner-workings-of-coroutines">
+<h3 class="translated">协程的内部工作原理<a class="headerlink" href="#the-inner-workings-of-coroutines" title="Link to this heading">¶</a></h3>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 利用四个组件来传递控制权。</p>
+<p class="translated"><a class="reference internal" href="../reference/expressions.html#generator.send" title="generator.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coroutine.send(arg)</span></code></a> 是用于启动或恢复协程的方法。 如果协程已暂停并正在被恢复，则参数 <code class="docutils literal notranslate"><span class="pre">arg</span></code> 将作为原先暂停它的 <code class="docutils literal notranslate"><span class="pre">yield</span></code> 语句的返回值被发送。 如果协程是首次被使用（而不是被恢复），则 <code class="docutils literal notranslate"><span class="pre">arg</span></code> 必须为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">class</span><span class="w"> </span><span class="nc">Rock</span><span class="p">:</span>
+<span class="linenos"> 2</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__await__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 3</span>        <span class="n">value_sent_in</span> <span class="o">=</span> <span class="k">yield</span> <span class="mi">7</span>
+<span class="linenos"> 4</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rock.__await__ resuming with value: </span><span class="si">{</span><span class="n">value_sent_in</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<span class="linenos"> 5</span>        <span class="k">return</span> <span class="n">value_sent_in</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="linenos"> 8</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Beginning coroutine main().&quot;</span><span class="p">)</span>
+<span class="linenos"> 9</span>    <span class="n">rock</span> <span class="o">=</span> <span class="n">Rock</span><span class="p">()</span>
+<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Awaiting rock...&quot;</span><span class="p">)</span>
+<span class="linenos">11</span>    <span class="n">value_from_rock</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rock</span>
+<span class="linenos">12</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coroutine received value: </span><span class="si">{</span><span class="n">value_from_rock</span><span class="si">}</span><span class="s2"> from rock.&quot;</span><span class="p">)</span>
+<span class="linenos">13</span>    <span class="k">return</span> <span class="mi">23</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="n">coroutine</span> <span class="o">=</span> <span class="n">main</span><span class="p">()</span>
+<span class="linenos">16</span><span class="n">intermediate_result</span> <span class="o">=</span> <span class="n">coroutine</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos">17</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coroutine paused and returned intermediate value: </span><span class="si">{</span><span class="n">intermediate_result</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resuming coroutine and sending in value: 42.&quot;</span><span class="p">)</span>
+<span class="linenos">20</span><span class="k">try</span><span class="p">:</span>
+<span class="linenos">21</span>    <span class="n">coroutine</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos">22</span><span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos">23</span>    <span class="n">returned_value</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">value</span>
+<span class="linenos">24</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coroutine main() finished and provided value: </span><span class="si">{</span><span class="n">returned_value</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../reference/expressions.html#yieldexpr"><span class="std std-ref">yield</span></a> 像往常一样暂停执行并将控制权返回给调用者。在上面的例子中，第 3 行的 <code class="docutils literal notranslate"><span class="pre">yield</span></code> 被第 11 行的 <code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">=</span> <span class="pre">await</span> <span class="pre">rock</span></code> 调用。更宽泛地说，<code class="docutils literal notranslate"><span class="pre">await</span></code> 会调用给定对象的 <a class="reference internal" href="../reference/datamodel.html#object.__await__" title="object.__await__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__await__()</span></code></a> 方法。<code class="docutils literal notranslate"><span class="pre">await</span></code> 还会做一件非常特别的事情：它会将接收到的任何 <code class="docutils literal notranslate"><span class="pre">yield</span></code> 沿着调用链向上传播（或称“传递”）。在本例中，这将回到第 16 行的 <code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">=</span> <span class="pre">coroutine.send(None)</span></code>。</p>
+<p class="translated">协程通过第 21 行的 <code class="docutils literal notranslate"><span class="pre">coroutine.send(42)</span></code> 调用恢复。协程从第 3 行 <code class="docutils literal notranslate"><span class="pre">yield</span></code> (或暂停) 的位置继续执行，并执行其主体中的剩余语句。协程完成后，它会引发一个 <a class="reference internal" href="../library/exceptions.html#StopIteration" title="StopIteration"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StopIteration</span></code></a> 异常，并将返回值附加在 <a class="reference internal" href="../library/exceptions.html#StopIteration.value" title="StopIteration.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a> 属性中。</p>
+<p class="translated">该代码片段产生以下输出：</p>
+<div class="translated highlight-none notranslate"><div class="highlight"><pre><span></span>Beginning coroutine main().
+Awaiting rock...
+Coroutine paused and returned intermediate value: 7.
+Resuming coroutine and sending in value: 42.
+Rock.__await__ resuming with value: 42.
+Coroutine received value: 42 from rock.
+Coroutine main() finished and provided value: 23.
+</pre></div>
+</div>
+<p class="translated">这里值得暂停一下，确保您已经理解了控制流和值传递的各种方式。我们涵盖了很多重要的概念，确保您理解得足够牢固。</p>
+<p class="translated">从协程中“yield”（或有效地放弃控制权）的唯一方法是 <code class="docutils literal notranslate"><span class="pre">await</span></code> 一个在其 <code class="docutils literal notranslate"><span class="pre">__await__</span></code> 方法中 <code class="docutils literal notranslate"><span class="pre">yield</span></code> 的对象。这听起来可能有点奇怪。你可能会想：</p>
+<blockquote>
+<div><p class="untranslated">1. What about a <code class="docutils literal notranslate"><span class="pre">yield</span></code> directly within the coroutine function? The
+coroutine function becomes an
+<a class="reference internal" href="../reference/expressions.html#asynchronous-generator-functions"><span class="std std-ref">async generator function</span></a>, a
+different beast entirely.</p>
+<p class="untranslated">2. What about a <a class="reference internal" href="../reference/expressions.html#yieldexpr"><span class="std std-ref">yield from</span></a> within the coroutine function to a (plain)
+generator?
+That causes the error: <code class="docutils literal notranslate"><span class="pre">SyntaxError:</span> <span class="pre">yield</span> <span class="pre">from</span> <span class="pre">not</span> <span class="pre">allowed</span> <span class="pre">in</span> <span class="pre">a</span> <span class="pre">coroutine.</span></code>
+This was intentionally designed for the sake of simplicity -- mandating only
+one way of using coroutines.
+Initially <code class="docutils literal notranslate"><span class="pre">yield</span></code> was barred as well, but was re-accepted to allow for
+async generators.
+Despite that, <code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">from</span></code> and <code class="docutils literal notranslate"><span class="pre">await</span></code> effectively do the same thing.</p>
+</div></blockquote>
+</section>
+<section id="futures">
+<h3 class="translated">Future<a class="headerlink" href="#futures" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="../library/asyncio-future.html#asyncio-future-obj"><span class="std std-ref">Future</span></a> 是一个用来表示计算状态和结果的对象。该术语指的是尚未发生的事情，而 Future 对象则是一种用来关注这些事情的方式。</p>
+<p class="translated">Future 对象有几个重要的属性。其一是它的状态，可以是“待处理”、“已取消”或“已完成”。其二是它的结果，当状态转换为已完成时它就会被设定。 与协程不同，Future 并不代表要执行的实际计算；相反，它代表该计算的状态和结果，有点像一个状态灯（红色、黄色或绿色）或指示器。</p>
+<p class="translated">为了获得这些功能，<a class="reference internal" href="../library/asyncio-task.html#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Task</span></code></a> 继承了 <a class="reference internal" href="../library/asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Future</span></code></a> 类。上一节提到任务存储了一个回调函数列表，这并不完全准确。实际上，实现这些逻辑的是 <code class="docutils literal notranslate"><span class="pre">Future</span></code> 类，而 <code class="docutils literal notranslate"><span class="pre">Task</span></code> 继承了它。</p>
+<p class="translated">Future 也可以被直接使用（无需通过任务）。任务会在协程完成后将自身标记为已完成。而 Future 的功能更加多样，由你来指定它何时标记为已完成。因此，Future 是一个灵活的接口，你可以自定义等待和恢复的条件。</p>
+</section>
+<section id="a-homemade-asyncio-sleep">
+<h3 class="translated">自制 asyncio.sleep<a class="headerlink" href="#a-homemade-asyncio-sleep" title="Link to this heading">¶</a></h3>
+<p class="translated">我们将通过一个例子来说明如何利用 Future 来创建自己的异步睡眠变体 (<code class="docutils literal notranslate"><span class="pre">async_sleep</span></code>)，模仿了 <a class="reference internal" href="../library/asyncio-task.html#asyncio.sleep" title="asyncio.sleep"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.sleep()</span></code></a>。</p>
+<p class="translated">这个代码段为事件循环注册了一些任务，然后等待由 <code class="docutils literal notranslate"><span class="pre">asyncio.create_task</span></code> 创建的任务，该任务包装了 <code class="docutils literal notranslate"><span class="pre">async_sleep(3)</span></code> 协程。我们希望该任务在三秒之后才结束，但不会阻止其他任务的运行。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">other_work</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I like work. Work work.&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 向事件循环添加一些其他任务，这样在异步休眠时就可以做一些事情。</span>
+    <span class="n">work_tasks</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">other_work</span><span class="p">()),</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">other_work</span><span class="p">()),</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">other_work</span><span class="p">())</span>
+    <span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;Beginning asynchronous sleep at time: &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">async_sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;Done asynchronous sleep at time: &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># asyncio.gather 有效地等待集合中的每个任务。</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">work_tasks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">下面，我们使用 Future 来自定义控制何时将任务标记为已完成。 如果 <a class="reference internal" href="../library/asyncio-future.html#asyncio.Future.set_result" title="asyncio.Future.set_result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">future.set_result()</span></code></a> (负责将该 Future 标记为已完成的方法) 从未被调用，那么该任务将永远不会结束。 我们还借助了另一个任务，稍后将会介绍，它将监视已过去的时间，并相应地调用 <code class="docutils literal notranslate"><span class="pre">future.set_result()</span></code>。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">async_sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Future</span><span class="p">()</span>
+    <span class="n">time_to_wake</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">seconds</span>
+    <span class="c1"># 将监视任务添加到事件循环。</span>
+    <span class="n">watcher_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">_sleep_watcher</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="n">time_to_wake</span><span class="p">))</span>
+    <span class="c1"># 阻塞直到 future 被标记为已完成。</span>
+    <span class="k">await</span> <span class="n">future</span>
+</pre></div>
+</div>
+<p class="translated">下面，我们将使用一个相当简单的 <code class="docutils literal notranslate"><span class="pre">YieldToEventLoop()</span></code> 对象从其 <code class="docutils literal notranslate"><span class="pre">__await__</span></code> 方法中 <code class="docutils literal notranslate"><span class="pre">yield</span></code>，将控制权交还给事件循环。这实际上与调用 <code class="docutils literal notranslate"><span class="pre">asyncio.sleep(0)</span></code> 相同，但这种方式更为明晰，更不用说在展示如何实现 <code class="docutils literal notranslate"><span class="pre">asyncio.sleep</span></code> 时直接使用它有点作弊！</p>
+<p class="translated">与往常一样，事件循环会轮番处理其任务，给予它们控制权并在它们暂停或完成时收回控制权。运行 <code class="docutils literal notranslate"><span class="pre">_sleep_watcher(...)</span></code> 协程的 <code class="docutils literal notranslate"><span class="pre">watcher_task</span></code> 将在事件循环的每个完整周期中被唤起一次。 在每次恢复时，它将检查时间，如果经过的时间不够，则会再次暂停并将控制权交还给事件循环。 一旦经过了足够的时间，<code class="docutils literal notranslate"><span class="pre">_sleep_watcher(...)</span></code> 会将该 Future 标记为已完成并通过退出无限的 <code class="docutils literal notranslate"><span class="pre">while</span></code> 循环来结束执行。鉴于这个辅助任务在事件循环的每个周期中只会被唤起一次，因此你应该注意到这个异步休眠将 <em>至少</em> 休眠三秒，而不是恰好三秒。请注意 <code class="docutils literal notranslate"><span class="pre">asyncio.sleep</span></code> 也同样如此。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">YieldToEventLoop</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__await__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_sleep_watcher</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="n">time_to_wake</span><span class="p">):</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">time_to_wake</span><span class="p">:</span>
+            <span class="c1"># 这标记 future 为已完成。</span>
+            <span class="n">future</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">YieldToEventLoop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">以下是程序的完整输出：</p>
+<div class="translated highlight-none notranslate"><div class="highlight"><pre><span></span>$ python custom-async-sleep.py
+Beginning asynchronous sleep at time: 14:52:22.
+I like work. Work work.
+I like work. Work work.
+I like work. Work work.
+Done asynchronous sleep at time: 14:52:25.
+</pre></div>
+</div>
+<p class="translated">你可能会觉得这种异步睡眠的实现过于复杂。确实如此。这个例子旨在通过一个简单的示例来展示 Future 的多功能性，以便可以模仿更复杂的需求。作为参考，你可以不使用 Future 来实现它，如下所示:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">simpler_async_sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+    <span class="n">time_to_wake</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">seconds</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">time_to_wake</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">YieldToEventLoop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">目前就说这些了。希望你已准备好更自信地深入探索异步编程或是查看 <a class="reference internal" href="../library/asyncio.html#module-asyncio" title="asyncio: Asynchronous I/O."><code class="xref py py-mod docutils literal notranslate"><span class="pre">文档其余部分</span></code></a> 中的进阶主题。</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 的概念概述</a><ul>
+<li><a class="reference internal" href="#a-conceptual-overview-part-1-the-high-level">概念概述第 1 部分：高层次</a><ul>
+<li><a class="reference internal" href="#event-loop">事件循环</a></li>
+<li><a class="reference internal" href="#asynchronous-functions-and-coroutines">异步函数和协程</a></li>
+<li><a class="reference internal" href="#tasks">任务</a></li>
+<li><a class="reference internal" href="#await">await</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-conceptual-overview-part-2-the-nuts-and-bolts">概念概述第 2 部分：核心细节与运作机制</a><ul>
+<li><a class="reference internal" href="#the-inner-workings-of-coroutines">协程的内部工作原理</a></li>
+<li><a class="reference internal" href="#futures">Future</a></li>
+<li><a class="reference internal" href="#a-homemade-asyncio-sleep">自制 asyncio.sleep</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="index.html"
+                          title="上一章">Python 指南</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="cporting.html"
+                          title="下一章">将扩展模块移植到 Python 3</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/a-conceptual-overview-of-asyncio.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/a-conceptual-overview-of-asyncio.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/a-conceptual-overview-of-asyncio.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="cporting.html" title="将扩展模块移植到 Python 3"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Python 指南"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> 的概念概述</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="字符串转换与格式化" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/conversion.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="用于数字转换和格式化字符串输出的函数 PyOS_snprintf() 和 PyOS_vsnprintf() 包装 C 标准库函数 snprintf() 和 vsnprintf() 。它们的目的是保证在极端情况下的一致行为，而标准 C 的函数则不然。 此包装器会确保 str[size-1] 在返回时始终为&#x27;\0&#x27; 。它们从不写入超过 size 字节 (包括末尾的&#x27;..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_conversion_82fa68c9.png" />
+<meta property="og:image:alt" content="用于数字转换和格式化字符串输出的函数 PyOS_snprintf() 和 PyOS_vsnprintf() 包装 C 标准库函数 snprintf() 和 vsnprintf() 。它们的目的是保证在极端情况下的一致行为，而标准 C 的函数则不然。 此包装器会确保 str[size-1] 在返回时始终为&#x27;\0&#x27; 。它们从不写入超过 size 字节 (包括末尾的&#x27;..." />
+<meta name="description" content="用于数字转换和格式化字符串输出的函数 PyOS_snprintf() 和 PyOS_vsnprintf() 包装 C 标准库函数 snprintf() 和 vsnprintf() 。它们的目的是保证在极端情况下的一致行为，而标准 C 的函数则不然。 此包装器会确保 str[size-1] 在返回时始终为&#x27;\0&#x27; 。它们从不写入超过 size 字节 (包括末尾的&#x27;..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>字符串转换与格式化 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="PyHash API" href="hash.html" />
+    <link rel="prev" title="解析参数并构建值变量" href="arg.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/conversion.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">字符串转换与格式化</a></li>
+<li><a class="reference internal" href="#character-classification-and-conversion">字符分类与转换</a></li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="arg.html"
+                          title="上一章">解析参数并构建值变量</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="hash.html"
+                          title="下一章">PyHash API</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/conversion.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/conversion.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/conversion.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="hash.html" title="PyHash API"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="arg.html" title="解析参数并构建值变量"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="utilities.html" accesskey="U">工具</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">字符串转换与格式化</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="string-conversion-and-formatting">
+<span id="string-conversion"></span><h1 class="translated">字符串转换与格式化<a class="headerlink" href="#string-conversion-and-formatting" title="Link to this heading">¶</a></h1>
+<p class="translated">用于数字转换和格式化字符串输出的函数</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_snprintf">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_snprintf</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">size</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">format</span></span>, <span class="p"><span class="pre">...</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_snprintf" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">根据格式字符串 <em>format</em> 和额外参数，输出不超过 <em>size</em> 个字节到 <em>str</em>。参见 Unix 手册页面 <em class="manpage"><a class="manpage reference external" href="https://manpages.debian.org/snprintf(3)">snprintf(3)</a></em> 了解更多。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_vsnprintf">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_vsnprintf</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">size</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">format</span></span>, <span class="n"><span class="pre">va_list</span></span><span class="w"> </span><span class="n"><span class="pre">va</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_vsnprintf" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">根据格式字符串 <em>format</em> 和变量参数列表 <em>va</em>，输出不超过 <em>size</em> 个字节到 <em>str</em>。参见 Unix 手册页面 <em class="manpage"><a class="manpage reference external" href="https://manpages.debian.org/vsnprintf(3)">vsnprintf(3)</a></em> 了解更多。</p>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#c.PyOS_snprintf" title="PyOS_snprintf"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_snprintf()</span></code></a> 和 <a class="reference internal" href="#c.PyOS_vsnprintf" title="PyOS_vsnprintf"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_vsnprintf()</span></code></a> 包装 C 标准库函数 <code class="xref c c-func docutils literal notranslate"><span class="pre">snprintf()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">vsnprintf()</span></code>。它们的目的是保证在极端情况下的一致行为，而标准 C 的函数则不然。</p>
+<p class="translated">此包装器会确保 <code class="docutils literal notranslate"><span class="pre">str[size-1]</span></code> 在返回时始终为 <code class="docutils literal notranslate"><span class="pre">'\0'</span></code>。它们从不写入超过 <em>size</em> 字节 (包括末尾的 <code class="docutils literal notranslate"><span class="pre">'\0'</span></code>) 到 str。两个函数都要求 <code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">!=</span> <span class="pre">NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">size</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span> <span class="pre">!=</span> <span class="pre">NULL</span></code> 且 <code class="docutils literal notranslate"><span class="pre">size</span> <span class="pre">&lt;</span> <span class="pre">INT_MAX</span></code>。请注意这意味着不存在可确定所需缓冲区大小的 C99 <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">snprintf(NULL,</span> <span class="pre">0,</span> <span class="pre">...)</span></code> 的等价物。</p>
+<p class="translated">这些函数的返回值（ <em>rv</em> ）应按照以下规则被解释：</p>
+<ul class="simple">
+<li><p class="translated">当 <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">rv</span> <span class="pre">&lt;</span> <span class="pre">size</span></code> 时，输出转换即成功并将 <em>rv</em> 个字符写入到 <em>str</em> (不包括末尾 <code class="docutils literal notranslate"><span class="pre">str[rv]</span></code> 位置的 <code class="docutils literal notranslate"><span class="pre">'\0'</span></code> 字节)。</p></li>
+<li><p class="translated">当 <code class="docutils literal notranslate"><span class="pre">rv</span> <span class="pre">&gt;=</span> <span class="pre">size</span></code> 时，输出转换会被截断并且需要一个具有 <code class="docutils literal notranslate"><span class="pre">rv</span> <span class="pre">+</span> <span class="pre">1</span></code> 字节的缓冲区才能成功执行。在此情况下 <code class="docutils literal notranslate"><span class="pre">str[size-1]</span></code> 为 <code class="docutils literal notranslate"><span class="pre">'\0'</span></code>。</p></li>
+<li><p class="translated">当 <code class="docutils literal notranslate"><span class="pre">rv</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> 时，在此场景下输出转换将失败并且 <code class="docutils literal notranslate"><span class="pre">str[size-1]</span></code> 为 <code class="docutils literal notranslate"><span class="pre">'\0'</span></code>，但 <em>str</em> 的其余部分是未定义的。错误的确切原因取决于底层平台。</p></li>
+</ul>
+<p class="translated">以下函数提供与语言环境无关的字符串到数字转换。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_strtoul">
+<span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_strtoul</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ptr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">base</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_strtoul" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">根据给定的 <code class="docutils literal notranslate"><span class="pre">base</span></code> 将 <code class="docutils literal notranslate"><span class="pre">str</span></code> 中字符串的初始部分转换为 <span class="c-expr sig sig-inline c"><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span></span> 值，基数必须在 <code class="docutils literal notranslate"><span class="pre">2</span></code> 至 <code class="docutils literal notranslate"><span class="pre">36</span></code> 之间（包括边界值），或者为特殊值 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<p class="translated">空白前缀和字符大小写将被忽略。如果 <code class="docutils literal notranslate"><span class="pre">base</span></code> 为零则会查找 <code class="docutils literal notranslate"><span class="pre">0b</span></code>、<code class="docutils literal notranslate"><span class="pre">0o</span></code> 或 <code class="docutils literal notranslate"><span class="pre">0x</span></code> 前缀以确定基数。如果没有则默认基数为 <code class="docutils literal notranslate"><span class="pre">10</span></code>。基数必须为 0 或在 2 和 36 之间（包括边界值）。如果 <code class="docutils literal notranslate"><span class="pre">ptr</span></code> 不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 则它将包含一个指向扫描结束位置的指针。</p>
+<p class="translated">如果转换后的值不在对应返回类型的取值范围之内，则会发生取值范围错误 (<code class="xref c c-data docutils literal notranslate"><span class="pre">errno</span></code> 被设为 <code class="xref c c-macro docutils literal notranslate"><span class="pre">ERANGE</span></code>) 并返回 <code class="xref c c-macro docutils literal notranslate"><span class="pre">ULONG_MAX</span></code>。如果无法执行转换，则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<p class="translated">另请参阅 Unix 手册页 <em class="manpage"><a class="manpage reference external" href="https://manpages.debian.org/strtoul(3)">strtoul(3)</a></em>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_strtol">
+<span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_strtol</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ptr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">base</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_strtol" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">根据给定的 <code class="docutils literal notranslate"><span class="pre">base</span></code> 将 <code class="docutils literal notranslate"><span class="pre">str</span></code> 中字符串的初始部分转换为 <span class="c-expr sig sig-inline c"><span class="kt">long</span></span> 值，基数必须在 <code class="docutils literal notranslate"><span class="pre">2</span></code> 至 <code class="docutils literal notranslate"><span class="pre">36</span></code> 之间（包括边界值），或者为特殊值 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<p class="translated">类似于 <a class="reference internal" href="#c.PyOS_strtoul" title="PyOS_strtoul"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_strtoul()</span></code></a>，但改为返回 <span class="c-expr sig sig-inline c"><span class="kt">long</span></span> 值，溢出时返回 <code class="xref c c-macro docutils literal notranslate"><span class="pre">LONG_MAX</span></code>。</p>
+<p class="translated">另请参阅 Unix 手册页 <em class="manpage"><a class="manpage reference external" href="https://manpages.debian.org/strtol(3)">strtol(3)</a></em>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_string_to_double">
+<span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_string_to_double</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">endptr</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">overflow_exception</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_string_to_double" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">将字符串 <code class="docutils literal notranslate"><span class="pre">s</span></code> 转换为 <span class="c-expr sig sig-inline c"><span class="kt">double</span></span> 类型，失败时会引发 Python 异常。接受的字符串集合对应于可被 Python 的 <a class="reference internal" href="../library/functions.html#float" title="float"><code class="xref py py-func docutils literal notranslate"><span class="pre">float()</span></code></a> 构造器所接受的字符串集合，除了 <code class="docutils literal notranslate"><span class="pre">s</span></code> 必须没有前导或尾随空格。转换独立于当前的语言区域。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">endptr</span></code> 是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则转换整个字符串。如果字符串不是浮点数的有效表示，则引发 <a class="reference internal" href="../library/exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 并返回 <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">endptr</span></code> 不是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，尽可能多的转换字符串并将 <code class="docutils literal notranslate"><span class="pre">*endptr</span></code> 设置为指向第一个未转换的字符。如果字符串的初始段不是浮点数的有效的表达方式，将 <code class="docutils literal notranslate"><span class="pre">*endptr</span></code> 设置为指向字符串的开头，引发 ValueError 异常，并且返回 <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>。</p>
+<p class="untranslated">If <code class="docutils literal notranslate"><span class="pre">s</span></code> represents a value that is too large to store in a float
+(for example, <code class="docutils literal notranslate"><span class="pre">&quot;1e500&quot;</span></code> is such a string on many platforms) then
+if <code class="docutils literal notranslate"><span class="pre">overflow_exception</span></code> is <code class="docutils literal notranslate"><span class="pre">NULL</span></code> return <code class="docutils literal notranslate"><span class="pre">Py_INFINITY</span></code> (with
+an appropriate sign) and don't set any exception.  Otherwise,
+<code class="docutils literal notranslate"><span class="pre">overflow_exception</span></code> must point to a Python exception object;
+raise that exception and return <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>.  In both cases, set
+<code class="docutils literal notranslate"><span class="pre">*endptr</span></code> to point to the first character after the converted value.</p>
+<p class="translated">如果在转换期间发生任何其他错误（比如一个内存不足的错误），设置适当的 Python 异常并且返回 <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_double_to_string">
+<span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_double_to_string</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">val</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">format_code</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">precision</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">flags</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ptype</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_double_to_string" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">将 <span class="c-expr sig sig-inline c"><span class="kt">double</span></span> <em>val</em> 转换为一个使用给定的 <em>format_code</em>, <em>precision</em> 和 <em>flags</em> 的字符串。</p>
+<p class="translated"><em>format_code</em> 必须是以下其中之一: <code class="docutils literal notranslate"><span class="pre">'e'</span></code>, <code class="docutils literal notranslate"><span class="pre">'E'</span></code>, <code class="docutils literal notranslate"><span class="pre">'f'</span></code>, <code class="docutils literal notranslate"><span class="pre">'F'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>, <code class="docutils literal notranslate"><span class="pre">'G'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'r'</span></code>。 对于 <code class="docutils literal notranslate"><span class="pre">'r'</span></code>，提供的 <em>precision</em> 必须为 0 且会被忽略。 <code class="docutils literal notranslate"><span class="pre">'r'</span></code> 格式码指定了标准 <a class="reference internal" href="../library/functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 格式。</p>
+<p class="translated"><em>flags</em> 可以为零或多个下列值进行或运算的结果：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTSF_SIGN">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTSF_SIGN</span></span></span><a class="headerlink" href="#c.Py_DTSF_SIGN" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">总是在返回的字符串前加一个正负号字符，即使 <em>val</em> 为非负数。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTSF_ADD_DOT_0">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTSF_ADD_DOT_0</span></span></span><a class="headerlink" href="#c.Py_DTSF_ADD_DOT_0" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">确保返回的字符串看起来不像是一个整数。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTSF_ALT">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTSF_ALT</span></span></span><a class="headerlink" href="#c.Py_DTSF_ALT" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">应用“替代”格式化规则。请参阅 <a class="reference internal" href="#c.PyOS_snprintf" title="PyOS_snprintf"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_snprintf()</span></code></a> <code class="docutils literal notranslate"><span class="pre">'#'</span></code> 格式符的文档了解详情。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTSF_NO_NEG_0">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTSF_NO_NEG_0</span></span></span><a class="headerlink" href="#c.Py_DTSF_NO_NEG_0" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">负零将被转换为正零。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<p class="translated">如果 <em>ptype</em> 不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则它指向的值将根据 <em>val</em> 的类型被设为以下常量之一：</p>
+<table class="docutils align-left">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated"><em>*ptype</em></p></th>
+<th class="head"><p class="translated"><em>val</em> 的类型</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTST_FINITE">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTST_FINITE</span></span></span><a class="headerlink" href="#c.Py_DTST_FINITE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">有限数字</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTST_INFINITE">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTST_INFINITE</span></span></span><a class="headerlink" href="#c.Py_DTST_INFINITE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">无穷大数字</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_DTST_NAN">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_DTST_NAN</span></span></span><a class="headerlink" href="#c.Py_DTST_NAN" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">非数字</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated">返回值是一个指向包含转换后字符串的 <em>buffer</em> 的指针，如果转换失败则为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。调用方要负责调用 <a class="reference internal" href="memory.html#c.PyMem_Free" title="PyMem_Free"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Free()</span></code></a> 来释放返回的字符串。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_mystricmp">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_mystricmp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_mystricmp" title="Link to this definition">¶</a><br /></dt>
+<dt class="sig sig-object c" id="c.PyOS_mystrnicmp">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_mystrnicmp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str2</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_mystrnicmp" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">不区分大小写的字符串比较。这些函数的工作方式（分别）与 <code class="xref c c-func docutils literal notranslate"><span class="pre">strcmp()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">strncmp()</span></code> 几乎一样，只是它们会忽略 ASCII 字符的大小写。</p>
+<p class="translated">如果字符串相等则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>，如果 <em>str1</em> 的词典排序在 <em>str2</em> 之前则返回负值，或者如果排序在其后则返回正值。</p>
+<p class="translated">在 <em>str1</em> 或 <em>str2</em> 参数中，NUL 字符表示字符串结束。对于 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_mystrnicmp()</span></code>，<em>size</em> 参数给出了字符串的最大长度，就像 NUL 出现在由 <em>size</em> 给出的索引位置。</p>
+<p class="translated">这些函数不使用语言区域设置。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyOS_stricmp">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_stricmp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_stricmp" title="Link to this definition">¶</a><br /></dt>
+<dt class="sig sig-object c" id="c.PyOS_strnicmp">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyOS_strnicmp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str2</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyOS_strnicmp" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">忽略大小写的字符串比较。</p>
+<p class="translated">在 Windows 上，它们分别是 <code class="xref c c-func docutils literal notranslate"><span class="pre">stricmp()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">strnicmp()</span></code> 的别名。</p>
+<p class="translated">在其他平台上，它们分别是 <a class="reference internal" href="#c.PyOS_mystricmp" title="PyOS_mystricmp"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_mystricmp()</span></code></a> 和 <a class="reference internal" href="#c.PyOS_mystrnicmp" title="PyOS_mystrnicmp"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyOS_mystrnicmp()</span></code></a> 的别名。</p>
+</dd></dl>
+
+</section>
+<section id="character-classification-and-conversion">
+<h1 class="translated">字符分类与转换<a class="headerlink" href="#character-classification-and-conversion" title="Link to this heading">¶</a></h1>
+<p class="translated">下列宏提供了独立于语言区域 (不同于 C 标准库 <code class="docutils literal notranslate"><span class="pre">ctype.h</span></code>) 的字符分类与转换。其参数必须是一个有符号或无符号的 <span class="c-expr sig sig-inline c"><span class="kt">char</span></span> 值。</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISALNUM">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISALNUM</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISALNUM" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 为字母数字类字符则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISALPHA">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISALPHA</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISALPHA" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 为字母类字符 (<code class="docutils literal notranslate"><span class="pre">a-z</span></code> 和 <code class="docutils literal notranslate"><span class="pre">A-Z</span></code>) 则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISDIGIT">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISDIGIT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISDIGIT" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 为十进制数码 (<code class="docutils literal notranslate"><span class="pre">0-9</span></code>) 则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISLOWER">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISLOWER</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISLOWER" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 为小写 ASCII 字母 (<code class="docutils literal notranslate"><span class="pre">a-z</span></code>) 则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISUPPER">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISUPPER</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISUPPER" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 是一个大写 ASCII 字母 (<code class="docutils literal notranslate"><span class="pre">A-Z</span></code>) 则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISSPACE">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISSPACE</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISSPACE" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 是一个空白字符 (空格符，制表符，回车符，换行符，垂直制表符或换页符) 则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_ISXDIGIT">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_ISXDIGIT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_ISXDIGIT" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果字符 <em>c</em> 是一个十六进制数码 (<code class="docutils literal notranslate"><span class="pre">0-9</span></code>, <code class="docutils literal notranslate"><span class="pre">a-f</span></code> 和 <code class="docutils literal notranslate"><span class="pre">A-F</span></code>) 则返回真值。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_TOLOWER">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_TOLOWER</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_TOLOWER" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">返回字符 <em>c</em> 的小写形式。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_TOUPPER">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_TOUPPER</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_TOUPPER" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">返回字符 <em>c</em> 的大写形式。</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">字符串转换与格式化</a></li>
+<li><a class="reference internal" href="#character-classification-and-conversion">字符分类与转换</a></li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="arg.html"
+                          title="上一章">解析参数并构建值变量</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="hash.html"
+                          title="下一章">PyHash API</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/conversion.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/conversion.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/conversion.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="hash.html" title="PyHash API"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="arg.html" title="解析参数并构建值变量"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="utilities.html" >工具</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">字符串转换与格式化</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

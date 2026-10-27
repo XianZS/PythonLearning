@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="socketserver --- 用于网络服务器的框架" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/socketserver.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/socketserver.py socketserver 模块简化了编写网络服务器的任务。 适用范围: not WASI. 此模块在 WebAssembly 平台上无效或不可用。请参阅 WebAssembly 平台 了解详情。 该模块具有四个基础实体服务器类： 这四个类会 同步地 处理请求；每个请求必须完成才能开始下一个请求。 这就不适用于每个请求要耗费很长时间来完成的情况..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_socketserver_9557563a.png" />
+<meta property="og:image:alt" content="源代码: Lib/socketserver.py socketserver 模块简化了编写网络服务器的任务。 适用范围: not WASI. 此模块在 WebAssembly 平台上无效或不可用。请参阅 WebAssembly 平台 了解详情。 该模块具有四个基础实体服务器类： 这四个类会 同步地 处理请求；每个请求必须完成才能开始下一个请求。 这就不适用于每个请求要耗费很长时间来完成的情况..." />
+<meta name="description" content="源代码: Lib/socketserver.py socketserver 模块简化了编写网络服务器的任务。 适用范围: not WASI. 此模块在 WebAssembly 平台上无效或不可用。请参阅 WebAssembly 平台 了解详情。 该模块具有四个基础实体服务器类： 这四个类会 同步地 处理请求；每个请求必须完成才能开始下一个请求。 这就不适用于每个请求要耗费很长时间来完成的情况..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>socketserver --- 用于网络服务器的框架 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="http.server --- HTTP 服务器" href="http.server.html" />
+    <link rel="prev" title="uuid --- 根据 RFC 9562 定义的 UUID 对象" href="uuid.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/socketserver.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">socketserver</span></code> --- 用于网络服务器的框架</a><ul>
+<li><a class="reference internal" href="#server-creation-notes">服务器创建的说明</a></li>
+<li><a class="reference internal" href="#server-objects">Server 对象</a></li>
+<li><a class="reference internal" href="#request-handler-objects">请求处理器对象</a></li>
+<li><a class="reference internal" href="#examples">例子</a><ul>
+<li><a class="reference internal" href="#socketserver-tcpserver-example"><code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.TCPServer</span></code> 示例</a></li>
+<li><a class="reference internal" href="#socketserver-udpserver-example"><code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.UDPServer</span></code> 示例</a></li>
+<li><a class="reference internal" href="#asynchronous-mixins">异步混合类</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="uuid.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">uuid</span></code> --- 根据 <strong>RFC 9562</strong> 定义的 UUID 对象</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="http.server.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">http.server</span></code> --- HTTP 服务器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/socketserver.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/socketserver.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/socketserver.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="http.server.html" title="http.server --- HTTP 服务器"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="uuid.html" title="uuid --- 根据 RFC 9562 定义的 UUID 对象"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="internet.html" accesskey="U">互联网协议和支持</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">socketserver</span></code> --- 用于网络服务器的框架</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-socketserver">
+<span id="socketserver-a-framework-for-network-servers"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">socketserver</span></code> --- 用于网络服务器的框架<a class="headerlink" href="#module-socketserver" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/socketserver.py">Lib/socketserver.py</a></p>
+<hr class="docutils" />
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">socketserver</span></code> 模块简化了编写网络服务器的任务。</p>
+<div class="availability docutils container">
+<p class="untranslated"><a class="reference internal" href="intro.html#availability"><span class="std std-ref">适用范围</span></a>: not WASI.</p>
+<p class="translated">此模块在 WebAssembly 平台上无效或不可用。请参阅 <a class="reference internal" href="intro.html#wasm-availability"><span class="std std-ref">WebAssembly 平台</span></a> 了解详情。</p>
+</div>
+<p class="translated">该模块具有四个基础实体服务器类：</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.TCPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">TCPServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RequestHandlerClass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_and_activate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.TCPServer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">该类使用互联网 TCP 协议，它可以提供客户端与服务器之间的连续数据流。如果 <em>bind_and_activate</em> 为真值，该类的构造器会自动尝试调用 <a class="reference internal" href="#socketserver.BaseServer.server_bind" title="socketserver.BaseServer.server_bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">server_bind()</span></code></a> 和 <a class="reference internal" href="#socketserver.BaseServer.server_activate" title="socketserver.BaseServer.server_activate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">server_activate()</span></code></a>。其他形参会被传递给 <a class="reference internal" href="#socketserver.BaseServer" title="socketserver.BaseServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseServer</span></code></a> 基类。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.UDPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">UDPServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RequestHandlerClass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_and_activate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.UDPServer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">该类使用数据包，即一系列离散的信息分包，它们可能会无序地到达或在传输中丢失。该类的形参与 <a class="reference internal" href="#socketserver.TCPServer" title="socketserver.TCPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCPServer</span></code></a> 的相同。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.UnixStreamServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">UnixStreamServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RequestHandlerClass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_and_activate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.UnixStreamServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.UnixDatagramServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">UnixDatagramServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RequestHandlerClass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_and_activate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.UnixDatagramServer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这两个不太常用的类与 TCP 和 UDP 类相似，但使用 Unix 域套接字；它们在非 Unix 系统平台上不可用。它们的形参与 <a class="reference internal" href="#socketserver.TCPServer" title="socketserver.TCPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCPServer</span></code></a> 的相同。</p>
+</dd></dl>
+
+<p class="translated">这四个类会 <em class="dfn">同步地</em> 处理请求；每个请求必须完成才能开始下一个请求。 这就不适用于每个请求要耗费很长时间来完成的情况，或者因为它需要大量的计算，又或者它返回了大量的数据而客户端处理起来很缓慢。 解决方案是创建单独的进程或线程来处理每个请求；<a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 和 <a class="reference internal" href="#socketserver.ThreadingMixIn" title="socketserver.ThreadingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code></a> 混合类可以被用于支持异步行为。</p>
+<p class="translated">创建一个服务器需要分几个步骤进行。首先，你必须通过子类化 <a class="reference internal" href="#socketserver.BaseRequestHandler" title="socketserver.BaseRequestHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRequestHandler</span></code></a> 类并重载其 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法来创建一个请求处理器类；这个方法将处理传入的请求。 其次，你必须实例化某个服务器类，将服务器地址和请求处理器类传给它。建议在 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中使用该服务器。然后再调用服务器对象的 <a class="reference internal" href="#socketserver.BaseServer.handle_request" title="socketserver.BaseServer.handle_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_request()</span></code></a> 或 <a class="reference internal" href="#socketserver.BaseServer.serve_forever" title="socketserver.BaseServer.serve_forever"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serve_forever()</span></code></a> 方法来处理一个或多个请求。最后，调用 <a class="reference internal" href="#socketserver.BaseServer.server_close" title="socketserver.BaseServer.server_close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">server_close()</span></code></a> 来关闭套接字（除非你使用了 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句）。</p>
+<p class="translated">当从 <a class="reference internal" href="#socketserver.ThreadingMixIn" title="socketserver.ThreadingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code></a> 继承线程连接行为时，你应当显式地声明你希望在突然关机时你的线程采取何种行为。 <code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code> 类定义了一个属性 <em>daemon_threads</em>，它指明服务器是否应当等待线程终止。 如果你希望线程能自主行动你应当显式地设置这个旗标；默认值为 <a class="reference internal" href="constants.html#False" title="False"><code class="xref py py-const docutils literal notranslate"><span class="pre">False</span></code></a>，表示 Python 将不会在 <code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code> 所创建的所有线程都退出之前退出。</p>
+<p class="translated">服务器类具有同样的外部方法和属性，无论它们使用哪种网络协议。</p>
+<section id="server-creation-notes">
+<h2 class="translated">服务器创建的说明<a class="headerlink" href="#server-creation-notes" title="Link to this heading">¶</a></h2>
+<p class="translated">在继承图中有五个类，其中四个代表四种类型的同步服务器:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="o">+------------+</span>
+<span class="o">|</span> <span class="n">BaseServer</span> <span class="o">|</span>
+<span class="o">+------------+</span>
+      <span class="o">|</span>
+      <span class="n">v</span>
+<span class="o">+-----------+</span>        <span class="o">+------------------+</span>
+<span class="o">|</span> <span class="n">TCPServer</span> <span class="o">|-------&gt;|</span> <span class="n">UnixStreamServer</span> <span class="o">|</span>
+<span class="o">+-----------+</span>        <span class="o">+------------------+</span>
+      <span class="o">|</span>
+      <span class="n">v</span>
+<span class="o">+-----------+</span>        <span class="o">+--------------------+</span>
+<span class="o">|</span> <span class="n">UDPServer</span> <span class="o">|-------&gt;|</span> <span class="n">UnixDatagramServer</span> <span class="o">|</span>
+<span class="o">+-----------+</span>        <span class="o">+--------------------+</span>
+</pre></div>
+</div>
+<p class="translated">请注意 <a class="reference internal" href="#socketserver.UnixDatagramServer" title="socketserver.UnixDatagramServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnixDatagramServer</span></code></a> 是派生自 <a class="reference internal" href="#socketserver.UDPServer" title="socketserver.UDPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDPServer</span></code></a>，而不是派生自 <a class="reference internal" href="#socketserver.UnixStreamServer" title="socketserver.UnixStreamServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnixStreamServer</span></code></a> --- IP 和 Unix 服务器的唯一区别是地址族。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.ForkingMixIn">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ForkingMixIn</span></span><a class="headerlink" href="#socketserver.ForkingMixIn" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ThreadingMixIn">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ThreadingMixIn</span></span><a class="headerlink" href="#socketserver.ThreadingMixIn" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">每种服务器类型的分叉和线程版本都可以使用这些混合类来创建。例如，<a class="reference internal" href="#socketserver.ThreadingUDPServer" title="socketserver.ThreadingUDPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingUDPServer</span></code></a> 的创建方式如下:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ThreadingUDPServer</span><span class="p">(</span><span class="n">ThreadingMixIn</span><span class="p">,</span> <span class="n">UDPServer</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">混合类先出现，因为它重载了 <a class="reference internal" href="#socketserver.UDPServer" title="socketserver.UDPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDPServer</span></code></a> 中定义的一个方法。设置各种属性也会改变下层服务器机制的行为。</p>
+<p class="translated"><a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 和下文提及的分叉类仅在支持 <a class="reference internal" href="os.html#os.fork" title="os.fork"><code class="xref py py-func docutils literal notranslate"><span class="pre">fork()</span></code></a> 的 POSIX 系统平台上可用。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.ThreadingMixIn.block_on_close">
+<span class="sig-name descname"><span class="pre">block_on_close</span></span><a class="headerlink" href="#socketserver.ThreadingMixIn.block_on_close" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#socketserver.BaseServer.server_close" title="socketserver.BaseServer.server_close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ForkingMixIn.server_close</span></code></a> 会等待直到所有子进程完成，除非 <a class="reference internal" href="#socketserver.ThreadingMixIn.block_on_close" title="socketserver.ThreadingMixIn.block_on_close"><code class="xref py py-attr docutils literal notranslate"><span class="pre">block_on_close</span></code></a> 属性为 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+<p class="translated"><a class="reference internal" href="#socketserver.BaseServer.server_close" title="socketserver.BaseServer.server_close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ThreadingMixIn.server_close</span></code></a> 会等待直到所有非守护线程完成，除非 <a class="reference internal" href="#socketserver.ThreadingMixIn.block_on_close" title="socketserver.ThreadingMixIn.block_on_close"><code class="xref py py-attr docutils literal notranslate"><span class="pre">block_on_close</span></code></a> 属性为 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.ThreadingMixIn.max_children">
+<span class="sig-name descname"><span class="pre">max_children</span></span><a class="headerlink" href="#socketserver.ThreadingMixIn.max_children" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">指定将有多少子进程为 <a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 同时处理请求。如果达到此限制，新请求将等待直到某个子进程结束。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.ThreadingMixIn.daemon_threads">
+<span class="sig-name descname"><span class="pre">daemon_threads</span></span><a class="headerlink" href="#socketserver.ThreadingMixIn.daemon_threads" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对于 <a class="reference internal" href="#socketserver.ThreadingMixIn" title="socketserver.ThreadingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code></a> 可通过将 <a class="reference internal" href="#socketserver.ThreadingMixIn.daemon_threads" title="socketserver.ThreadingMixIn.daemon_threads"><code class="xref py py-data docutils literal notranslate"><span class="pre">ThreadingMixIn.daemon_threads</span></code></a> 设为 <code class="docutils literal notranslate"><span class="pre">True</span></code> 来使用守护线程从而无需等待线程完成。</p>
+</dd></dl>
+
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span><a class="reference internal" href="#socketserver.BaseServer.server_close" title="socketserver.BaseServer.server_close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ForkingMixIn.server_close</span></code></a> 和 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ThreadingMixIn.server_close</span></code> 现在会等待直到所有子进程和非守护线程完成。新增了一个 <a class="reference internal" href="#socketserver.ThreadingMixIn.block_on_close" title="socketserver.ThreadingMixIn.block_on_close"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ForkingMixIn.block_on_close</span></code></a> 类属性用来选择 3.7 版之前的行为。</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.ForkingTCPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ForkingTCPServer</span></span><a class="headerlink" href="#socketserver.ForkingTCPServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ForkingUDPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ForkingUDPServer</span></span><a class="headerlink" href="#socketserver.ForkingUDPServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ThreadingTCPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ThreadingTCPServer</span></span><a class="headerlink" href="#socketserver.ThreadingTCPServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ThreadingUDPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ThreadingUDPServer</span></span><a class="headerlink" href="#socketserver.ThreadingUDPServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ForkingUnixStreamServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ForkingUnixStreamServer</span></span><a class="headerlink" href="#socketserver.ForkingUnixStreamServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ForkingUnixDatagramServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ForkingUnixDatagramServer</span></span><a class="headerlink" href="#socketserver.ForkingUnixDatagramServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ThreadingUnixStreamServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ThreadingUnixStreamServer</span></span><a class="headerlink" href="#socketserver.ThreadingUnixStreamServer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.ThreadingUnixDatagramServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">ThreadingUnixDatagramServer</span></span><a class="headerlink" href="#socketserver.ThreadingUnixDatagramServer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这些类都是使用混合类来预定义的。</p>
+</dd></dl>
+
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12: </span>增加了 <code class="docutils literal notranslate"><span class="pre">ForkingUnixStreamServer</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ForkingUnixDatagramServer</span></code> 类。</p>
+</div>
+<p class="translated">要实现一个服务，你必须从 <a class="reference internal" href="#socketserver.BaseRequestHandler" title="socketserver.BaseRequestHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRequestHandler</span></code></a> 派生一个类并重定义其 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法。然后你可以通过组合某种服务器类型与你的请求处理器类来运行各种版本的服务。 请求处理器类对于数据报和流服务必须是不相同的。这可以通过使用处理器子类 <a class="reference internal" href="#socketserver.StreamRequestHandler" title="socketserver.StreamRequestHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamRequestHandler</span></code></a> 或 <a class="reference internal" href="#socketserver.DatagramRequestHandler" title="socketserver.DatagramRequestHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatagramRequestHandler</span></code></a> 来隐藏。</p>
+<p class="translated">当然，你仍然需要动点脑筋！ 举例来说，如果服务包含可能被不同请求所修改的内存状态则使用分叉服务器是没有意义的，因为在子进程中的修改将永远不会触及保存在父进程中的初始状态并传递到各个子进程。 在这种情况下，你可以使用线程服务器，但你可能必须使用锁来保护共享数据的一致性。</p>
+<p class="translated">另一方面，如果你是在编写一个所有数据保存在外部（例如文件系统）的 HTTP 服务器，同步类实际上将在正在处理某个请求的时候“失聪” -- 如果某个客户端在接收它所请求的所有数据时很缓慢这可能会是非常长的时间。这时线程或分叉服务器会更为适用。</p>
+<p class="translated">在某些情况下，合适的做法是同步地处理请求的一部分，但根据请求数据在分叉的子进程中完成处理。这可以通过使用一个同步服务器并在请求处理器类 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 中进行显式分叉来实现。</p>
+<p class="translated">另一种可以在既不支持线程也不支持 <a class="reference internal" href="os.html#os.fork" title="os.fork"><code class="xref py py-func docutils literal notranslate"><span class="pre">fork()</span></code></a> 的环境（或者对于本服务来说这两者开销过大或不适用）中处理多个同时请求的方式是维护一个显式的部分完成的请求表并使用 <a class="reference internal" href="selectors.html#module-selectors" title="selectors: High-level I/O multiplexing."><code class="xref py py-mod docutils literal notranslate"><span class="pre">selectors</span></code></a> 来决定接下来要处理哪个请求（或者是否要处理一个新传入的请求）。 这对于流式服务来说特别重要，因为每个客户端可能会连接很长的时间（如果不能使用线程或子进程）。</p>
+</section>
+<section id="server-objects">
+<h2 class="translated">Server 对象<a class="headerlink" href="#server-objects" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.BaseServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">BaseServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RequestHandlerClass</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是本模块中所有 Server 对象的超类。它定义了下文给出的接口，但没有实现大部分的方法，它们应在子类中实现。两个形参存储在对应的 <a class="reference internal" href="#socketserver.BaseServer.server_address" title="socketserver.BaseServer.server_address"><code class="xref py py-attr docutils literal notranslate"><span class="pre">server_address</span></code></a> 和 <a class="reference internal" href="#socketserver.BaseServer.RequestHandlerClass" title="socketserver.BaseServer.RequestHandlerClass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RequestHandlerClass</span></code></a> 属性中。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.fileno">
+<span class="sig-name descname"><span class="pre">fileno</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.fileno" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回服务器正在监听的套接字的以整数表示的文件描述符。此函数最常被传递给 <a class="reference internal" href="selectors.html#module-selectors" title="selectors: High-level I/O multiplexing."><code class="xref py py-mod docutils literal notranslate"><span class="pre">selectors</span></code></a>，以允许在同一进程中监控多个服务器。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.handle_request">
+<span class="sig-name descname"><span class="pre">handle_request</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.handle_request" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">处理单个请求。此函数会依次调用下列方法：<a class="reference internal" href="#socketserver.BaseServer.get_request" title="socketserver.BaseServer.get_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_request()</span></code></a>, <a class="reference internal" href="#socketserver.BaseServer.verify_request" title="socketserver.BaseServer.verify_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">verify_request()</span></code></a> 和 <a class="reference internal" href="#socketserver.BaseServer.process_request" title="socketserver.BaseServer.process_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_request()</span></code></a>。如果用户提供的处理器类的 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法引发了异常，则将调用服务器的 <a class="reference internal" href="#socketserver.BaseServer.handle_error" title="socketserver.BaseServer.handle_error"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_error()</span></code></a> 方法。如果在 <a class="reference internal" href="#socketserver.BaseServer.timeout" title="socketserver.BaseServer.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code></a> 秒内未接收到请求，将会调用 <a class="reference internal" href="#socketserver.BaseServer.handle_timeout" title="socketserver.BaseServer.handle_timeout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_timeout()</span></code></a> 且 <a class="reference internal" href="#socketserver.BaseServer.handle_request" title="socketserver.BaseServer.handle_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_request()</span></code></a> 将返回。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.serve_forever">
+<span class="sig-name descname"><span class="pre">serve_forever</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poll_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.serve_forever" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对请求进行处理直至收到显式的 <a class="reference internal" href="#socketserver.BaseServer.shutdown" title="socketserver.BaseServer.shutdown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shutdown()</span></code></a> 请求。每隔 <em>poll_interval</em> 秒对 shutdown 进行轮询。忽略 <a class="reference internal" href="#socketserver.BaseServer.timeout" title="socketserver.BaseServer.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code></a> 属性。它还会调用 <a class="reference internal" href="#socketserver.BaseServer.service_actions" title="socketserver.BaseServer.service_actions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">service_actions()</span></code></a>，这可被子类或混合类用来提供某个给定服务的专属操作。 例如，<a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 类使用 <code class="xref py py-meth docutils literal notranslate"><span class="pre">service_actions()</span></code> 来清理僵尸子进程。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>将 <code class="docutils literal notranslate"><span class="pre">service_actions</span></code> 调用添加到 <code class="docutils literal notranslate"><span class="pre">serve_forever</span></code> 方法。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.service_actions">
+<span class="sig-name descname"><span class="pre">service_actions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.service_actions" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此方法会在 <a class="reference internal" href="#socketserver.BaseServer.serve_forever" title="socketserver.BaseServer.serve_forever"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serve_forever()</span></code></a> 循环中被调用。此方法可被子类或混合类所重载以执行某个给定服务的专属操作，例如清理操作。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.shutdown" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">通知 <a class="reference internal" href="#socketserver.BaseServer.serve_forever" title="socketserver.BaseServer.serve_forever"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serve_forever()</span></code></a> 循环停止并等待它完成。 <a class="reference internal" href="#socketserver.BaseServer.shutdown" title="socketserver.BaseServer.shutdown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shutdown()</span></code></a> 必须在 <code class="xref py py-meth docutils literal notranslate"><span class="pre">serve_forever()</span></code> 运行于不同线程时被调用否则它将发生死锁。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.server_close">
+<span class="sig-name descname"><span class="pre">server_close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.server_close" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">清理服务器。此方法可被重载。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.address_family">
+<span class="sig-name descname"><span class="pre">address_family</span></span><a class="headerlink" href="#socketserver.BaseServer.address_family" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">服务器套接字所属的协议族。常见的例子有 <a class="reference internal" href="socket.html#socket.AF_INET" title="socket.AF_INET"><code class="xref py py-const docutils literal notranslate"><span class="pre">socket.AF_INET</span></code></a>, <a class="reference internal" href="socket.html#socket.AF_INET6" title="socket.AF_INET6"><code class="xref py py-const docutils literal notranslate"><span class="pre">socket.AF_INET6</span></code></a> 和 <a class="reference internal" href="socket.html#socket.AF_UNIX" title="socket.AF_UNIX"><code class="xref py py-const docutils literal notranslate"><span class="pre">socket.AF_UNIX</span></code></a> 等。如果你想要 IPv6 服务器类请子类化此模块中的 TCP 或 UDP 服务器类并设置类属性 <code class="docutils literal notranslate"><span class="pre">address_family</span> <span class="pre">=</span> <span class="pre">AF_INET6</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.RequestHandlerClass">
+<span class="sig-name descname"><span class="pre">RequestHandlerClass</span></span><a class="headerlink" href="#socketserver.BaseServer.RequestHandlerClass" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用户提供的请求处理器类；将为每个请求创建该类的实例。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.server_address">
+<span class="sig-name descname"><span class="pre">server_address</span></span><a class="headerlink" href="#socketserver.BaseServer.server_address" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">服务器所监听的地址。地址的格式因具体协议族而不同；请参阅 <a class="reference internal" href="socket.html#module-socket" title="socket: Low-level networking interface."><code class="xref py py-mod docutils literal notranslate"><span class="pre">socket</span></code></a> 模块的文档了解详情。 对于互联网协议，这将是一个元组，其中包含一个表示地址的字符串，和一个表示端口号的整数，例如: <code class="docutils literal notranslate"><span class="pre">('127.0.0.1',</span> <span class="pre">80)</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.socket">
+<span class="sig-name descname"><span class="pre">socket</span></span><a class="headerlink" href="#socketserver.BaseServer.socket" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将由服务器用于监听入站请求的套接字对象。</p>
+</dd></dl>
+
+<p class="translated">服务器类支持下列类变量：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.allow_reuse_address">
+<span class="sig-name descname"><span class="pre">allow_reuse_address</span></span><a class="headerlink" href="#socketserver.BaseServer.allow_reuse_address" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">服务器是否要允许地址的重用。默认值为 <a class="reference internal" href="constants.html#False" title="False"><code class="xref py py-const docutils literal notranslate"><span class="pre">False</span></code></a>，并可在子类中设置以改变策略。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.request_queue_size">
+<span class="sig-name descname"><span class="pre">request_queue_size</span></span><a class="headerlink" href="#socketserver.BaseServer.request_queue_size" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">请求队列的长度。如果处理单个请求要花费很长的时间，则当服务器正忙时到达的任何请求都会被加入队列，最多加入 <a class="reference internal" href="#socketserver.BaseServer.request_queue_size" title="socketserver.BaseServer.request_queue_size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">request_queue_size</span></code></a> 个请求。一旦队列被加满，来自客户端的更多请求将收到 错误。默认值为 5，但可在子类中重载。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.socket_type">
+<span class="sig-name descname"><span class="pre">socket_type</span></span><a class="headerlink" href="#socketserver.BaseServer.socket_type" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">服务器使用的套接字类型；常见的有 <a class="reference internal" href="socket.html#socket.SOCK_STREAM" title="socket.SOCK_STREAM"><code class="xref py py-const docutils literal notranslate"><span class="pre">socket.SOCK_STREAM</span></code></a> 和 <a class="reference internal" href="socket.html#socket.SOCK_DGRAM" title="socket.SOCK_DGRAM"><code class="xref py py-const docutils literal notranslate"><span class="pre">socket.SOCK_DGRAM</span></code></a> 这两个值。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseServer.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><a class="headerlink" href="#socketserver.BaseServer.timeout" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">超时限制，以秒数表示，或者如果不限制超时则为 <a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code></a>。如果 <a class="reference internal" href="#socketserver.BaseServer.handle_request" title="socketserver.BaseServer.handle_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_request()</span></code></a> 在超时限制期间没有收到传入请求，则会调用 <a class="reference internal" href="#socketserver.BaseServer.handle_timeout" title="socketserver.BaseServer.handle_timeout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_timeout()</span></code></a> 方法。</p>
+</dd></dl>
+
+<p class="translated">有多个服务器方法可被服务器基类的子类例如 <a class="reference internal" href="#socketserver.TCPServer" title="socketserver.TCPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCPServer</span></code></a> 所重载；这些方法对服务器对象的外部用户来说并无用处。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.finish_request">
+<span class="sig-name descname"><span class="pre">finish_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.finish_request" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">通过实例化 <a class="reference internal" href="#socketserver.BaseServer.RequestHandlerClass" title="socketserver.BaseServer.RequestHandlerClass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RequestHandlerClass</span></code></a> 并调用其 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法来实际处理请求。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.get_request">
+<span class="sig-name descname"><span class="pre">get_request</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.get_request" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">必须接受来自套接字的请求，并返回一个 2 元组，其中包含用来与客户端通信的 <em>新的</em> 套接字对象，以及客户端的地址。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.handle_error">
+<span class="sig-name descname"><span class="pre">handle_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.handle_error" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此函数会在 <a class="reference internal" href="#socketserver.BaseServer.RequestHandlerClass" title="socketserver.BaseServer.RequestHandlerClass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RequestHandlerClass</span></code></a> 实例的 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法引发异常时被调用。默认行为是将回溯信息打印到标准错误并继续处理其他请求。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>现在只针对派生自 <a class="reference internal" href="exceptions.html#Exception" title="Exception"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> 类的异常调用此方法。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.handle_timeout">
+<span class="sig-name descname"><span class="pre">handle_timeout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.handle_timeout" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此函数会在 <a class="reference internal" href="#socketserver.BaseServer.timeout" title="socketserver.BaseServer.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code></a> 属性被设为 <a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code></a> 以外的值并且在超出时限之后仍未收到请求时被调用。 分叉服务器的默认行为是收集任何已退出的子进程状态，而在线程服务器中此方法则不做任何操作。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.process_request">
+<span class="sig-name descname"><span class="pre">process_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.process_request" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">调用 <a class="reference internal" href="#socketserver.BaseServer.finish_request" title="socketserver.BaseServer.finish_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish_request()</span></code></a> 来创建 <a class="reference internal" href="#socketserver.BaseServer.RequestHandlerClass" title="socketserver.BaseServer.RequestHandlerClass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RequestHandlerClass</span></code></a> 的实例。 如果需要，此函数可创建一个新的进程或线程来处理请求；<a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 和 <a class="reference internal" href="#socketserver.ThreadingMixIn" title="socketserver.ThreadingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code></a> 类能完成此任务。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.server_activate">
+<span class="sig-name descname"><span class="pre">server_activate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.server_activate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">由服务器的构造器调用以激活服务器。TCP 服务器的默认行为只是在服务器的套接字上调用 <a class="reference internal" href="socket.html#socket.socket.listen" title="socket.socket.listen"><code class="xref py py-meth docutils literal notranslate"><span class="pre">listen()</span></code></a>。 可以被重载。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.server_bind">
+<span class="sig-name descname"><span class="pre">server_bind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.server_bind" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">由服务器的构造器调用以将套接字绑定到所需的地址。可以被重载。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseServer.verify_request">
+<span class="sig-name descname"><span class="pre">verify_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseServer.verify_request" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">必须返回一个布尔值；如果值为 <a class="reference internal" href="constants.html#True" title="True"><code class="xref py py-const docutils literal notranslate"><span class="pre">True</span></code></a>，请求将被处理。而如果值为 <a class="reference internal" href="constants.html#False" title="False"><code class="xref py py-const docutils literal notranslate"><span class="pre">False</span></code></a>，请求将被拒绝。 此函数可被重载以实现服务器的访问控制。默认实现总是返回 <code class="xref py py-const docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd></dl>
+
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>添加了对 <a class="reference internal" href="../glossary.html#term-context-manager"><span class="xref std std-term">context manager</span></a> 协议的支持。退出上下文管理器与调用 <a class="reference internal" href="#socketserver.BaseServer.server_close" title="socketserver.BaseServer.server_close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">server_close()</span></code></a> 等效。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="request-handler-objects">
+<h2 class="translated">请求处理器对象<a class="headerlink" href="#request-handler-objects" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">BaseRequestHandler</span></span><a class="headerlink" href="#socketserver.BaseRequestHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是所有请求处理器对象的超类。它定义了下文列出的接口。一个实体请求处理器子类必须定义新的 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法，并可重载任何其他方法。 对于每个请求都会创建一个新的子类的实例。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseRequestHandler.setup" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">会在 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法之前被调用以执行任何必要的初始化操作。默认实现不执行任何操作。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseRequestHandler.handle" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此函数必须执行为请求提供服务所需的全部操作。默认实现不执行任何操作。它有几个可用的实例属性；请求为 <a class="reference internal" href="#socketserver.BaseRequestHandler.request" title="socketserver.BaseRequestHandler.request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">request</span></code></a>；客户端地址为 <a class="reference internal" href="#socketserver.BaseRequestHandler.client_address" title="socketserver.BaseRequestHandler.client_address"><code class="xref py py-attr docutils literal notranslate"><span class="pre">client_address</span></code></a>；服务器实例为 <a class="reference internal" href="#socketserver.BaseRequestHandler.server" title="socketserver.BaseRequestHandler.server"><code class="xref py py-attr docutils literal notranslate"><span class="pre">server</span></code></a>，如果它需要访问特定服务器信息的话。</p>
+<p class="translated">针对数据报或流服务的 <a class="reference internal" href="#socketserver.BaseRequestHandler.request" title="socketserver.BaseRequestHandler.request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">request</span></code></a> 类型是不同的。对于流服务，<code class="xref py py-attr docutils literal notranslate"><span class="pre">request</span></code> 是一个套接字对象；对于数据报服务，<code class="xref py py-attr docutils literal notranslate"><span class="pre">request</span></code> 是一对字符串与套接字。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#socketserver.BaseRequestHandler.finish" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <a class="reference internal" href="#socketserver.BaseRequestHandler.handle" title="socketserver.BaseRequestHandler.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> 方法之后调用以执行任何需要的清理操作。默认实现不执行任何操作。如果 <a class="reference internal" href="#socketserver.BaseRequestHandler.setup" title="socketserver.BaseRequestHandler.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a> 引发了异常，此函数将不会被调用。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler.request">
+<span class="sig-name descname"><span class="pre">request</span></span><a class="headerlink" href="#socketserver.BaseRequestHandler.request" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将被用于同客户端通信的 <em>新</em> <a class="reference internal" href="socket.html#socket.socket" title="socket.socket"><code class="xref py py-class docutils literal notranslate"><span class="pre">socket.socket</span></code></a> 对象。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler.client_address">
+<span class="sig-name descname"><span class="pre">client_address</span></span><a class="headerlink" href="#socketserver.BaseRequestHandler.client_address" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#socketserver.BaseServer.get_request" title="socketserver.BaseServer.get_request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">BaseServer.get_request()</span></code></a> 所返回的客户端地址。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.BaseRequestHandler.server">
+<span class="sig-name descname"><span class="pre">server</span></span><a class="headerlink" href="#socketserver.BaseRequestHandler.server" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于处理请求的 <a class="reference internal" href="#socketserver.BaseServer" title="socketserver.BaseServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseServer</span></code></a> 对象。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="socketserver.StreamRequestHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">StreamRequestHandler</span></span><a class="headerlink" href="#socketserver.StreamRequestHandler" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="socketserver.DatagramRequestHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">socketserver.</span></span><span class="sig-name descname"><span class="pre">DatagramRequestHandler</span></span><a class="headerlink" href="#socketserver.DatagramRequestHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这些 <a class="reference internal" href="#socketserver.BaseRequestHandler" title="socketserver.BaseRequestHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRequestHandler</span></code></a> 子类重载了 <a class="reference internal" href="#socketserver.BaseRequestHandler.setup" title="socketserver.BaseRequestHandler.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a> 和 <a class="reference internal" href="#socketserver.BaseRequestHandler.finish" title="socketserver.BaseRequestHandler.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> 方法，并提供了 <a class="reference internal" href="#socketserver.DatagramRequestHandler.rfile" title="socketserver.DatagramRequestHandler.rfile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rfile</span></code></a> 和 <a class="reference internal" href="#socketserver.DatagramRequestHandler.wfile" title="socketserver.DatagramRequestHandler.wfile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">wfile</span></code></a> 属性。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.DatagramRequestHandler.rfile">
+<span class="sig-name descname"><span class="pre">rfile</span></span><a class="headerlink" href="#socketserver.DatagramRequestHandler.rfile" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于读取所接受请求的文件对象。支持 <a class="reference internal" href="io.html#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> 可读接口。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="socketserver.DatagramRequestHandler.wfile">
+<span class="sig-name descname"><span class="pre">wfile</span></span><a class="headerlink" href="#socketserver.DatagramRequestHandler.wfile" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于写入所回复内容的文件对象。支持 <a class="reference internal" href="io.html#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> 可写接口。</p>
+</dd></dl>
+
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span><a class="reference internal" href="#socketserver.DatagramRequestHandler.wfile" title="socketserver.DatagramRequestHandler.wfile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">wfile</span></code></a> 也支持 <a class="reference internal" href="io.html#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> 可写接口。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="examples">
+<h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="socketserver-tcpserver-example">
+<h3 class="translated"><a class="reference internal" href="#socketserver.TCPServer" title="socketserver.TCPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.TCPServer</span></code></a> 示例<a class="headerlink" href="#socketserver-tcpserver-example" title="Link to this heading">¶</a></h3>
+<p class="translated">以下是服务端:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">socketserver</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyTCPHandler</span><span class="p">(</span><span class="n">socketserver</span><span class="o">.</span><span class="n">BaseRequestHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The request handler class for our server.</span>
+
+<span class="sd">    It is instantiated once per connection to the server, and must</span>
+<span class="sd">    override the handle() method to implement communication to the</span>
+<span class="sd">    client.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># self.request 是连接到客户端的 TCP 套接字</span>
+        <span class="n">pieces</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">total</span> <span class="o">&lt;</span> <span class="mi">10_000</span><span class="p">:</span>
+            <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">2000</span><span class="p">))</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">client_address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="c1"># 发回同样的数据，但转为大写形式</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+        <span class="c1"># 在我们返回后，套接字将被关闭。</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">9999</span>
+
+    <span class="c1"># 创建服务器，绑定到 localhost 的 9999 端口</span>
+    <span class="k">with</span> <span class="n">socketserver</span><span class="o">.</span><span class="n">TCPServer</span><span class="p">((</span><span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span><span class="p">),</span> <span class="n">MyTCPHandler</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+        <span class="c1"># 激活服务器；它将持续运行直到你</span>
+        <span class="c1"># 使用 Ctrl-C 中断程序</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">一个使用流（通过提供标准文件接口来简化通信的文件型对象）的替代请求处理器类:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyTCPHandler</span><span class="p">(</span><span class="n">socketserver</span><span class="o">.</span><span class="n">StreamRequestHandler</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># self.rfile 是由该处理器创建的文件型对象。</span>
+        <span class="c1"># 我们现在可以使用 readline() 代替原始 recv() 调用</span>
+        <span class="c1"># 我们自己限制为 10000 字节以避免被发送方滥用。</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rfile</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">client_address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> wrote:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="c1"># 类似地，self.wfile 是用于写回到客户端的</span>
+        <span class="c1"># 文件型对象</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">不同之处在于第二个处理器中的 <code class="docutils literal notranslate"><span class="pre">readline()</span></code> 调用将多次调用 <code class="docutils literal notranslate"><span class="pre">recv()</span></code> 直至遇到一个换行符，而第一个处理器必须使用一个 <code class="docutils literal notranslate"><span class="pre">recv()</span></code> 循环来累积数据直至遇到一个换行符。如果它只使用一个 <code class="docutils literal notranslate"><span class="pre">recv()</span></code> 而不带循环则将只返回当前已从客户端接收的内容。TCP 是基于流的：数据将按其发送顺序到达，但在客户端 <code class="docutils literal notranslate"><span class="pre">send()</span></code> 或 <code class="docutils literal notranslate"><span class="pre">sendall()</span></code> 调用和服务端需要接收它的 <code class="docutils literal notranslate"><span class="pre">recv()</span></code> 调用次数之间并没有关联。</p>
+<p class="translated">以下是客户端:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">9999</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+<span class="c1"># 创建一个套接字 (SOCK_STREAM 表示一个 TCP 套接字)</span>
+<span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock</span><span class="p">:</span>
+    <span class="c1"># 连接到服务器并发送数据</span>
+    <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span><span class="p">))</span>
+    <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+    <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 从服务器接收数据并关闭</span>
+    <span class="n">received</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sock</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sent:    &quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received:&quot;</span><span class="p">,</span> <span class="n">received</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">这个示例程序的输出应该是像这样的：</p>
+<p class="translated">服务器：</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>TCPServer.py
+<span class="go">127.0.0.1 wrote:</span>
+<span class="go">b&#39;hello world with TCP&#39;</span>
+<span class="go">127.0.0.1 wrote:</span>
+<span class="go">b&#39;python is nice&#39;</span>
+</pre></div>
+</div>
+<p class="translated">客户端：</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>TCPClient.py<span class="w"> </span>hello<span class="w"> </span>world<span class="w"> </span>with<span class="w"> </span>TCP
+<span class="go">Sent:     hello world with TCP</span>
+<span class="go">Received: HELLO WORLD WITH TCP</span>
+<span class="gp">$ </span>python<span class="w"> </span>TCPClient.py<span class="w"> </span>python<span class="w"> </span>is<span class="w"> </span>nice
+<span class="go">Sent:     python is nice</span>
+<span class="go">Received: PYTHON IS NICE</span>
+</pre></div>
+</div>
+</section>
+<section id="socketserver-udpserver-example">
+<h3 class="translated"><a class="reference internal" href="#socketserver.UDPServer" title="socketserver.UDPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.UDPServer</span></code></a> 示例<a class="headerlink" href="#socketserver-udpserver-example" title="Link to this heading">¶</a></h3>
+<p class="translated">以下是服务端:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">socketserver</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyUDPHandler</span><span class="p">(</span><span class="n">socketserver</span><span class="o">.</span><span class="n">BaseRequestHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class works similar to the TCP handler class, except that</span>
+<span class="sd">    self.request consists of a pair of data and client socket, and since</span>
+<span class="sd">    there is no connection the client address must be given explicitly</span>
+<span class="sd">    when sending data back via sendto().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">socket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">client_address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> wrote:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">socket</span><span class="o">.</span><span class="n">sendto</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_address</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">9999</span>
+    <span class="k">with</span> <span class="n">socketserver</span><span class="o">.</span><span class="n">UDPServer</span><span class="p">((</span><span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span><span class="p">),</span> <span class="n">MyUDPHandler</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">以下是客户端:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">9999</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+<span class="c1"># SOCK_DGRAM 是用于 UDP 套接字的套接字类型</span>
+<span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
+
+<span class="c1"># 如你所见，没有 connect() 调用；UDP 没有连接。</span>
+<span class="c1"># 数据是通过 sendto() 直接发给接收方的。</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">sendto</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">data</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span><span class="p">))</span>
+<span class="n">received</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sock</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sent:    &quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received:&quot;</span><span class="p">,</span> <span class="n">received</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">这个示例程序的输出应该是与 TCP 服务器示例相一致的。</p>
+</section>
+<section id="asynchronous-mixins">
+<h3 class="translated">异步混合类<a class="headerlink" href="#asynchronous-mixins" title="Link to this heading">¶</a></h3>
+<p class="translated">要构建异步处理器，请使用 <a class="reference internal" href="#socketserver.ThreadingMixIn" title="socketserver.ThreadingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code></a> 和 <a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 类。</p>
+<p class="translated"><a class="reference internal" href="#socketserver.ThreadingMixIn" title="socketserver.ThreadingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadingMixIn</span></code></a> 类的示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socketserver</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ThreadedTCPRequestHandler</span><span class="p">(</span><span class="n">socketserver</span><span class="o">.</span><span class="n">BaseRequestHandler</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="n">cur_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cur_thread</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ThreadedTCPServer</span><span class="p">(</span><span class="n">socketserver</span><span class="o">.</span><span class="n">ThreadingMixIn</span><span class="p">,</span> <span class="n">socketserver</span><span class="o">.</span><span class="n">TCPServer</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">client</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock</span><span class="p">:</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sock</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># 端口 0 表示选择任意一个未使用的端口</span>
+    <span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="n">server</span> <span class="o">=</span> <span class="n">ThreadedTCPServer</span><span class="p">((</span><span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span><span class="p">),</span> <span class="n">ThreadedTCPRequestHandler</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">server</span><span class="p">:</span>
+        <span class="n">ip</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">server_address</span>
+
+        <span class="c1"># 启动一个服务器线程 -- 该线程将在此后</span>
+        <span class="c1"># 为每个请求再启动一个线程</span>
+        <span class="n">server_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">)</span>
+        <span class="c1"># 在主线程终结时退出服务器线程</span>
+        <span class="n">server_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">server_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Server loop running in thread:&quot;</span><span class="p">,</span> <span class="n">server_thread</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">client</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s2">&quot;Hello World 1&quot;</span><span class="p">)</span>
+        <span class="n">client</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s2">&quot;Hello World 2&quot;</span><span class="p">)</span>
+        <span class="n">client</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s2">&quot;Hello World 3&quot;</span><span class="p">)</span>
+
+        <span class="n">server</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">这个示例程序的输出应该是像这样的：</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>ThreadedTCPServer.py
+<span class="go">Server loop running in thread: Thread-1</span>
+<span class="go">Received: Thread-2: Hello World 1</span>
+<span class="go">Received: Thread-3: Hello World 2</span>
+<span class="go">Received: Thread-4: Hello World 3</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#socketserver.ForkingMixIn" title="socketserver.ForkingMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForkingMixIn</span></code></a> 类的使用方式是相同的，区别在于服务器将为每个请求产生一个新的进程。仅在支持 <a class="reference internal" href="os.html#os.fork" title="os.fork"><code class="xref py py-func docutils literal notranslate"><span class="pre">fork()</span></code></a> 的 POSIX 系统平台上可用。</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">socketserver</span></code> --- 用于网络服务器的框架</a><ul>
+<li><a class="reference internal" href="#server-creation-notes">服务器创建的说明</a></li>
+<li><a class="reference internal" href="#server-objects">Server 对象</a></li>
+<li><a class="reference internal" href="#request-handler-objects">请求处理器对象</a></li>
+<li><a class="reference internal" href="#examples">例子</a><ul>
+<li><a class="reference internal" href="#socketserver-tcpserver-example"><code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.TCPServer</span></code> 示例</a></li>
+<li><a class="reference internal" href="#socketserver-udpserver-example"><code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.UDPServer</span></code> 示例</a></li>
+<li><a class="reference internal" href="#asynchronous-mixins">异步混合类</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="uuid.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">uuid</span></code> --- 根据 <strong>RFC 9562</strong> 定义的 UUID 对象</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="http.server.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">http.server</span></code> --- HTTP 服务器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/socketserver.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/socketserver.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/socketserver.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="http.server.html" title="http.server --- HTTP 服务器"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="uuid.html" title="uuid --- 根据 RFC 9562 定义的 UUID 对象"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="internet.html" >互联网协议和支持</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">socketserver</span></code> --- 用于网络服务器的框架</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

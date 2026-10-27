@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="同步原语" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/synchronization.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="C-API 提供了一个基本的互斥锁。 Python 关键节 API: 此关键节 API 为 自由线程 CPython 的每对象锁之上提供了一个死锁避免层。它们旨在替代对 global interpreter lock 的依赖，而在具有全局解释器锁的 Python 版本上将不做任何操作。 关键节被设计用于在 C-API 扩展中实现的自定义类型。它们通常不应当被用于内置类型如 list 和 di..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_synchronization_e072411f.png" />
+<meta property="og:image:alt" content="C-API 提供了一个基本的互斥锁。 Python 关键节 API: 此关键节 API 为 自由线程 CPython 的每对象锁之上提供了一个死锁避免层。它们旨在替代对 global interpreter lock 的依赖，而在具有全局解释器锁的 Python 版本上将不做任何操作。 关键节被设计用于在 C-API 扩展中实现的自定义类型。它们通常不应当被用于内置类型如 list 和 di..." />
+<meta name="description" content="C-API 提供了一个基本的互斥锁。 Python 关键节 API: 此关键节 API 为 自由线程 CPython 的每对象锁之上提供了一个死锁避免层。它们旨在替代对 global interpreter lock 的依赖，而在具有全局解释器锁的 Python 版本上将不做任何操作。 关键节被设计用于在 C-API 扩展中实现的自定义类型。它们通常不应当被用于内置类型如 list 和 di..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>同步原语 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="线程本地存储支持" href="tls.html" />
+    <link rel="prev" title="线程状态和全局解释器锁" href="threads.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/synchronization.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">同步原语</a><ul>
+<li><a class="reference internal" href="#python-critical-section-api">Python 关键节 API</a></li>
+<li><a class="reference internal" href="#legacy-locking-apis">旧式加锁 API</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="threads.html"
+                          title="上一章">线程状态和全局解释器锁</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="tls.html"
+                          title="下一章">线程本地存储支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/synchronization.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/synchronization.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/synchronization.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="tls.html" title="线程本地存储支持"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="threads.html" title="线程状态和全局解释器锁"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">同步原语</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="synchronization-primitives">
+<span id="synchronization"></span><h1 class="translated">同步原语<a class="headerlink" href="#synchronization-primitives" title="Link to this heading">¶</a></h1>
+<p class="translated">C-API 提供了一个基本的互斥锁。</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyMutex">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMutex</span></span></span><a class="headerlink" href="#c.PyMutex" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">一个互斥锁。 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code> 应当被初始化为零以代表未加锁状态。例如:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyMutex</span><span class="w"> </span><span class="n">mutex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</pre></div>
+</div>
+<p class="translated"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code> 的实例不应被拷贝或移动。 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code> 的内容和地址都是有意义的，它必须在内存中保持一个固定的、可写的位置。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code> 目前占用一个字节，但这个大小应当被视为是不稳定的。这个大小可能在未来的 Python 发布版中发生改变而不会设置弃用期。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMutex_Lock">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMutex_Lock</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMutex" title="PyMutex"><span class="n"><span class="pre">PyMutex</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">m</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMutex_Lock" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="threadsafety threadsafety-atomic"> Thread safety: <a class="reference internal" href="../library/threadsafety.html#threadsafety-level-atomic"><span class="std std-ref">Atomic</span></a>.</em><p class="translated">锁定互斥锁 <em>m</em>。如果另一个线程已经锁定了它，调用方线程将会阻塞直到互斥锁被解锁。在阻塞期间，如果线程存在 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">线程状态</span></a> 则会临时释放它。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMutex_Unlock">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMutex_Unlock</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMutex" title="PyMutex"><span class="n"><span class="pre">PyMutex</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">m</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMutex_Unlock" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="threadsafety threadsafety-atomic"> Thread safety: <a class="reference internal" href="../library/threadsafety.html#threadsafety-level-atomic"><span class="std std-ref">Atomic</span></a>.</em><p class="translated">解锁互斥锁 <em>m</em>。该互斥锁必须已被锁定 --- 否则，此函数将发生致命错误。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMutex_IsLocked">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMutex_IsLocked</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMutex" title="PyMutex"><span class="n"><span class="pre">PyMutex</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">m</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMutex_IsLocked" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="threadsafety threadsafety-atomic"> Thread safety: <a class="reference internal" href="../library/threadsafety.html#threadsafety-level-atomic"><span class="std std-ref">Atomic</span></a>.</em><p class="translated">若互斥锁 <em>m</em> 当前处于锁定状态，则返回非零值；否则返回零。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">此函数仅适用于断言和调试场景，请勿将其用于并发控制决策，因为锁状态可能在检查后立即发生变化。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<section id="python-critical-section-api">
+<span id="id1"></span><h2 class="translated">Python 关键节 API<a class="headerlink" href="#python-critical-section-api" title="Link to this heading">¶</a></h2>
+<p class="translated">此关键节 API 为 <a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">自由线程</span></a> CPython 的每对象锁之上提供了一个死锁避免层。它们旨在替代对 <a class="reference internal" href="../glossary.html#term-global-interpreter-lock"><span class="xref std std-term">global interpreter lock</span></a> 的依赖，而在具有全局解释器锁的 Python 版本上将不做任何操作。</p>
+<p class="translated">关键节被设计用于在 C-API 扩展中实现的自定义类型。它们通常不应当被用于内置类型如 <a class="reference internal" href="../library/stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> 和 <a class="reference internal" href="../library/stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 因为它们的公有 C-API 已经在内部使用了关键节，一个显著的例外是 <a class="reference internal" href="dict.html#c.PyDict_Next" title="PyDict_Next"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_Next()</span></code></a>，它需要在外部获取关键节。</p>
+<p class="translated">关键节是通过隐式地挂起活动关键节来避免死锁的，因此，它们并不提供传统锁如 <a class="reference internal" href="#c.PyMutex" title="PyMutex"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code></a> 所提供的那种独占访问。 当一个关键节启动时，将会获取对象的每对象锁。如果关键节内部执行的代码调用了 C-API 函数那么它可以挂起关键节从而释放这个每对象锁，这样其他线程就可以获取同一个对象的每对象锁。</p>
+<p class="translated">此外，还提供了接受 <a class="reference internal" href="#c.PyMutex" title="PyMutex"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code></a> 指针（而非 Python 对象）的函数变体。当你处于没有 <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyObject</span></code></a> 的场景中时（例如，处理一个既未继承也未封装 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyObject</span></code> 的 C 类型，但仍需以可能导致死锁的方式调用 C API），请使用这些变体来启动临界区。</p>
+<p class="translated">宏所使用的函数和结构体是针对 C 宏不可用的场景而公开的。它们应当仅被用于给定的宏扩展中。请注意这些结构体的大小和内容在未来的 Python 版本中可能发生改变。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">需要同时锁定两个对象的操作必须使用 <a class="reference internal" href="#c.Py_BEGIN_CRITICAL_SECTION2" title="Py_BEGIN_CRITICAL_SECTION2"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION2</span></code></a>。你 <em>不可</em> 使用嵌套的关键节来同时锁定一个以上的对象，因为内层的关键节可能会挂起外层的关键节。这个 API 没有提供同时锁定两个以上对象的办法。</p>
+</div>
+<p class="translated">用法示例:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">set_field</span><span class="p">(</span><span class="n">MyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="n">Py_BEGIN_CRITICAL_SECTION</span><span class="p">(</span><span class="n">self</span><span class="p">);</span>
+<span class="w">   </span><span class="n">Py_SETREF</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">field</span><span class="p">,</span><span class="w"> </span><span class="n">Py_XNewRef</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+<span class="w">   </span><span class="n">Py_END_CRITICAL_SECTION</span><span class="p">();</span>
+<span class="w">   </span><span class="n">Py_RETURN_NONE</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">在上面的例子中，<a class="reference internal" href="refcounting.html#c.Py_SETREF" title="Py_SETREF"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_SETREF</span></code></a> 调用了 <a class="reference internal" href="refcounting.html#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_DECREF</span></code></a>，它可以通过一个对象的取消分配函数来调用任意代码。当由最终化器触发的代码发生阻塞并调用 <a class="reference internal" href="threads.html#c.PyEval_SaveThread" title="PyEval_SaveThread"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyEval_SaveThread()</span></code></a> 时关键节 API 将通过允许运行临时挂起关键节来避免由于重入和锁顺序导致的潜在死锁。</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_BEGIN_CRITICAL_SECTION">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_BEGIN_CRITICAL_SECTION</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_BEGIN_CRITICAL_SECTION" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">为对象 <em>op</em> 获取每对象锁并开始一个关键节。</p>
+<p class="translated">在自由线程构建版中，该宏将扩展为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="n">PyCriticalSection</span><span class="w"> </span><span class="n">_py_cs</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PyCriticalSection_Begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_py_cs</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">PyObject</span><span class="o">*</span><span class="p">)(</span><span class="n">op</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="translated">在默认构建版中，该宏将扩展为 <code class="docutils literal notranslate"><span class="pre">{</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_BEGIN_CRITICAL_SECTION_MUTEX">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_BEGIN_CRITICAL_SECTION_MUTEX</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">m</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_BEGIN_CRITICAL_SECTION_MUTEX" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">锁定互斥锁 <em>m</em> 并开始一个临界区。</p>
+<p class="translated">在自由线程构建版中，该宏将扩展为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">     </span><span class="n">PyCriticalSection</span><span class="w"> </span><span class="n">_py_cs</span><span class="p">;</span>
+<span class="w">     </span><span class="n">PyCriticalSection_BeginMutex</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_py_cs</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">需要注意的是，与 <a class="reference internal" href="#c.Py_BEGIN_CRITICAL_SECTION" title="Py_BEGIN_CRITICAL_SECTION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION</span></code></a> 不同，此宏的参数无需类型转换——它必须是一个 <a class="reference internal" href="#c.PyMutex" title="PyMutex"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code></a> 指针。</p>
+<p class="translated">在默认构建版中，该宏将扩展为 <code class="docutils literal notranslate"><span class="pre">{</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_END_CRITICAL_SECTION">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_END_CRITICAL_SECTION</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_END_CRITICAL_SECTION" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">结束关键节并释放每对象锁。</p>
+<p class="translated">在自由线程构建版中，该宏将扩展为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">PyCriticalSection_End</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_py_cs</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">在默认构建版中，该宏将扩展为 <code class="docutils literal notranslate"><span class="pre">}</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_BEGIN_CRITICAL_SECTION2">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_BEGIN_CRITICAL_SECTION2</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">a</span></span>, <span class="n"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_BEGIN_CRITICAL_SECTION2" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">为对象 <em>a</em> 和 <em>b</em> 获取每对象锁并开始一个关键节。 这些锁将按一致的顺序获取（最低的地址在最前）以避免锁排序死锁。</p>
+<p class="translated">在自由线程构建版中，该宏将扩展为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="n">PyCriticalSection2</span><span class="w"> </span><span class="n">_py_cs2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PyCriticalSection2_Begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_py_cs2</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">PyObject</span><span class="o">*</span><span class="p">)(</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="n">PyObject</span><span class="o">*</span><span class="p">)(</span><span class="n">b</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="translated">在默认构建版中，该宏将扩展为 <code class="docutils literal notranslate"><span class="pre">{</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_BEGIN_CRITICAL_SECTION2_MUTEX">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_BEGIN_CRITICAL_SECTION2_MUTEX</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">m1</span></span>, <span class="n"><span class="pre">m2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_BEGIN_CRITICAL_SECTION2_MUTEX" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">锁定互斥锁 <em>m1</em> 和 <em>m2</em> 并开始一个临界区。</p>
+<p class="translated">在自由线程构建版中，该宏将扩展为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">     </span><span class="n">PyCriticalSection2</span><span class="w"> </span><span class="n">_py_cs2</span><span class="p">;</span>
+<span class="w">     </span><span class="n">PyCriticalSection2_BeginMutex</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_py_cs2</span><span class="p">,</span><span class="w"> </span><span class="n">m1</span><span class="p">,</span><span class="w"> </span><span class="n">m2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">需要注意的是，与 <a class="reference internal" href="#c.Py_BEGIN_CRITICAL_SECTION2" title="Py_BEGIN_CRITICAL_SECTION2"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION2</span></code></a> 不同，此宏的参数无需类型转换——它们必须是 <a class="reference internal" href="#c.PyMutex" title="PyMutex"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code></a> 指针。</p>
+<p class="translated">在默认构建版中，该宏将扩展为 <code class="docutils literal notranslate"><span class="pre">{</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_END_CRITICAL_SECTION2">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_END_CRITICAL_SECTION2</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_END_CRITICAL_SECTION2" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">结束关键节并释放每对象锁。</p>
+<p class="translated">在自由线程构建版中，该宏将扩展为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">PyCriticalSection2_End</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_py_cs2</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">在默认构建版中，该宏将扩展为 <code class="docutils literal notranslate"><span class="pre">}</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="legacy-locking-apis">
+<h2 class="translated">旧式加锁 API<a class="headerlink" href="#legacy-locking-apis" title="Link to this heading">¶</a></h2>
+<p class="translated">这些 API 自 Python 3.13 起已随 <a class="reference internal" href="#c.PyMutex" title="PyMutex"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code></a> 的引入而过时。</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyThread_type_lock">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyThread_type_lock</span></span></span><a class="headerlink" href="#c.PyThread_type_lock" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">一个指向互斥锁的指针。</p>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyLockStatus">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyLockStatus</span></span></span><a class="headerlink" href="#c.PyLockStatus" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">附带超时获取锁操作的结果。</p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.PY_LOCK_FAILURE">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PY_LOCK_FAILURE</span></span></span><a class="headerlink" href="#c.PY_LOCK_FAILURE" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">获取锁失败。</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.PY_LOCK_ACQUIRED">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PY_LOCK_ACQUIRED</span></span></span><a class="headerlink" href="#c.PY_LOCK_ACQUIRED" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">锁已被成功获取。</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.PY_LOCK_INTR">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PY_LOCK_INTR</span></span></span><a class="headerlink" href="#c.PY_LOCK_INTR" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">锁被一个信号中断。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyThread_allocate_lock">
+<a class="reference internal" href="#c.PyThread_type_lock" title="PyThread_type_lock"><span class="n"><span class="pre">PyThread_type_lock</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyThread_allocate_lock</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyThread_allocate_lock" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">分配一个新锁。</p>
+<p class="translated">成功时，此函数将返回一个锁；失败时，此函数将返回 <code class="docutils literal notranslate"><span class="pre">0</span></code> 且不设置异常。</p>
+<p class="translated">调用方不需要持有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyThread_free_lock">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyThread_free_lock</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyThread_type_lock" title="PyThread_type_lock"><span class="n"><span class="pre">PyThread_type_lock</span></span></a><span class="w"> </span><span class="n"><span class="pre">lock</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyThread_free_lock" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">销毁 <em>lock</em>。在调用此函数时该锁不应被任何线程持有。</p>
+<p class="translated">调用方不需要持有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyThread_acquire_lock_timed">
+<a class="reference internal" href="#c.PyLockStatus" title="PyLockStatus"><span class="n"><span class="pre">PyLockStatus</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyThread_acquire_lock_timed</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyThread_type_lock" title="PyThread_type_lock"><span class="n"><span class="pre">PyThread_type_lock</span></span></a><span class="w"> </span><span class="n"><span class="pre">lock</span></span>, <span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="n"><span class="pre">microseconds</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">intr_flag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyThread_acquire_lock_timed" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">获取 <em>lock</em> 并附带超时控制。</p>
+<p class="translated">此函数将等待 <em>microseconds</em> 微秒以获取锁。如果达到超时限制，此函数将返回 <a class="reference internal" href="#c.PY_LOCK_FAILURE" title="PY_LOCK_FAILURE"><code class="xref c c-enumerator docutils literal notranslate"><span class="pre">PY_LOCK_FAILURE</span></code></a>。如果 <em>microseconds</em> 为 <code class="docutils literal notranslate"><span class="pre">-1</span></code>，它将无限等待直到锁被释放。</p>
+<p class="translated">如果 <em>intr_flag</em> 为 <code class="docutils literal notranslate"><span class="pre">1</span></code>，获取锁可能会被信号中断，在这种情况下此函数将返回 <a class="reference internal" href="#c.PY_LOCK_INTR" title="PY_LOCK_INTR"><code class="xref c c-enumerator docutils literal notranslate"><span class="pre">PY_LOCK_INTR</span></code></a>。当被中断时，通常会预期调用方将执行对 <a class="reference internal" href="threads.html#c.Py_MakePendingCalls" title="Py_MakePendingCalls"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_MakePendingCalls()</span></code></a> 的调用以将一个异常传播给 Python 代码。</p>
+<p class="translated">如果锁被成功获取，此函数将返回 <a class="reference internal" href="#c.PY_LOCK_ACQUIRED" title="PY_LOCK_ACQUIRED"><code class="xref c c-enumerator docutils literal notranslate"><span class="pre">PY_LOCK_ACQUIRED</span></code></a>。</p>
+<p class="translated">调用方不需要持有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyThread_acquire_lock">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyThread_acquire_lock</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyThread_type_lock" title="PyThread_type_lock"><span class="n"><span class="pre">PyThread_type_lock</span></span></a><span class="w"> </span><span class="n"><span class="pre">lock</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">waitflag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyThread_acquire_lock" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">获取 <em>lock</em>。</p>
+<p class="translated">如果 <em>waitflag</em> 为 <code class="docutils literal notranslate"><span class="pre">1</span></code> 且另一个线程目前持有锁，此函数将等待直到锁可被获取并将始终返回 <code class="docutils literal notranslate"><span class="pre">1</span></code>。</p>
+<p class="translated">如果 <em>waitflag</em> 为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 且另一个线程持有锁，此函数将不会等待而是返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。如果锁未被另一个线程持有，则此函数将获取它并返回 <code class="docutils literal notranslate"><span class="pre">1</span></code>。</p>
+<p class="translated">不同于 <a class="reference internal" href="#c.PyThread_acquire_lock_timed" title="PyThread_acquire_lock_timed"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyThread_acquire_lock_timed()</span></code></a>，获取锁不会被信号中断。</p>
+<p class="translated">调用方不需要持有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyThread_release_lock">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyThread_release_lock</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyThread_type_lock" title="PyThread_type_lock"><span class="n"><span class="pre">PyThread_type_lock</span></span></a><span class="w"> </span><span class="n"><span class="pre">lock</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyThread_release_lock" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">释放 <em>lock</em>。如果 <em>lock</em> 未被持有，则此函数将引发致命错误。</p>
+<p class="translated">调用方不需要持有 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">同步原语</a><ul>
+<li><a class="reference internal" href="#python-critical-section-api">Python 关键节 API</a></li>
+<li><a class="reference internal" href="#legacy-locking-apis">旧式加锁 API</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="threads.html"
+                          title="上一章">线程状态和全局解释器锁</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="tls.html"
+                          title="下一章">线程本地存储支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/synchronization.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/synchronization.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/synchronization.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="tls.html" title="线程本地存储支持"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="threads.html" title="线程状态和全局解释器锁"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">同步原语</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

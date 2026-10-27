@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="fnmatch --- Unix 文件名模式匹配" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/fnmatch.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/fnmatch.py 此模块提供了 Unix shell 风格的通配符，它们 并不 等同于正则表达式（关于后者的文档参见 re 模块）。shell 风格通配符所使用的特殊字符如下：,, 模式, 含义,,,*, 匹配所有,,?, 匹配任何单个字符,,[seq], 匹配 seq 中的任何字符,,[!seq], 匹配任何不在 seq 中的字符,,,, 对于字面值匹配，请将原字符用..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_fnmatch_0cb398ed.png" />
+<meta property="og:image:alt" content="源代码: Lib/fnmatch.py 此模块提供了 Unix shell 风格的通配符，它们 并不 等同于正则表达式（关于后者的文档参见 re 模块）。shell 风格通配符所使用的特殊字符如下：,, 模式, 含义,,,*, 匹配所有,,?, 匹配任何单个字符,,[seq], 匹配 seq 中的任何字符,,[!seq], 匹配任何不在 seq 中的字符,,,, 对于字面值匹配，请将原字符用..." />
+<meta name="description" content="源代码: Lib/fnmatch.py 此模块提供了 Unix shell 风格的通配符，它们 并不 等同于正则表达式（关于后者的文档参见 re 模块）。shell 风格通配符所使用的特殊字符如下：,, 模式, 含义,,,*, 匹配所有,,?, 匹配任何单个字符,,[seq], 匹配 seq 中的任何字符,,[!seq], 匹配任何不在 seq 中的字符,,,, 对于字面值匹配，请将原字符用..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>fnmatch --- Unix 文件名模式匹配 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="linecache --- 随机访问文本行" href="linecache.html" />
+    <link rel="prev" title="glob --- Unix 风格的路径名模式扩展" href="glob.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/fnmatch.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="glob.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">glob</span></code> --- Unix 风格的路径名模式扩展</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="linecache.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">linecache</span></code> --- 随机访问文本行</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/fnmatch.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/fnmatch.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/fnmatch.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="linecache.html" title="linecache --- 随机访问文本行"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="glob.html" title="glob --- Unix 风格的路径名模式扩展"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="filesys.html" accesskey="U">文件和目录访问</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">fnmatch</span></code> --- Unix 文件名模式匹配</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-fnmatch">
+<span id="fnmatch-unix-filename-pattern-matching"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fnmatch</span></code> --- Unix 文件名模式匹配<a class="headerlink" href="#module-fnmatch" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/fnmatch.py">Lib/fnmatch.py</a></p>
+<span id="index-0"></span><hr class="docutils" id="index-1" />
+<p class="translated">此模块提供了 Unix shell 风格的通配符，它们 <em>并不</em> 等同于正则表达式（关于后者的文档参见 <a class="reference internal" href="re.html#module-re" title="re: Regular expression operations."><code class="xref py py-mod docutils literal notranslate"><span class="pre">re</span></code></a> 模块）。shell 风格通配符所使用的特殊字符如下：</p>
+<table class="docutils align-default" id="index-2">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">模式</p></th>
+<th class="head"><p class="translated">含义</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">*</span></code></p></td>
+<td><p class="translated">匹配所有</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">?</span></code></p></td>
+<td><p class="translated">匹配任何单个字符</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">[seq]</span></code></p></td>
+<td><p class="translated">匹配 <em>seq</em> 中的任何字符</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">[!seq]</span></code></p></td>
+<td><p class="translated">匹配任何不在 <em>seq</em> 中的字符</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated">对于字面值匹配，请将原字符用方括号括起来。例如，<code class="docutils literal notranslate"><span class="pre">'[?]'</span></code> 将匹配字符 <code class="docutils literal notranslate"><span class="pre">'?'</span></code>。</p>
+<p class="translated" id="index-3">注意文件名分隔符 (Unix 上为 <code class="docutils literal notranslate"><span class="pre">'/'</span></code>) <em>不会</em> 被此模块特别对待。请参见 <a class="reference internal" href="glob.html#module-glob" title="glob: Unix shell style pathname pattern expansion."><code class="xref py py-mod docutils literal notranslate"><span class="pre">glob</span></code></a> 模块了解文件名扩展 (<code class="xref py py-mod docutils literal notranslate"><span class="pre">glob</span></code> 使用 <a class="reference internal" href="#fnmatch.filter" title="fnmatch.filter"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter()</span></code></a> 来匹配文件名的各个部分)。 类似地，以一个句点打头的文件名也不会被此模块特别对待，可以通过 <code class="docutils literal notranslate"><span class="pre">*</span></code> 和 <code class="docutils literal notranslate"><span class="pre">?</span></code> 模式来匹配。</p>
+<p class="translated">除非另有说明，&quot;文件名字符串&quot; 和 &quot;模式字符串&quot; 是指使用 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 或 <code class="docutils literal notranslate"><span class="pre">ISO-8859-1</span></code> 编码的 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象。请注意下面记录的函数不允许将 <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> 模式与 <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> 文件名混用，反之亦然。</p>
+<p class="untranslated">Finally, note that <a class="reference internal" href="functools.html#functools.lru_cache" title="functools.lru_cache"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;functools.lru_cache</span></code></a> with a <em>maxsize</em> of 32768
+is used to cache the (typed) compiled regex patterns in the following
+functions: <a class="reference internal" href="#module-fnmatch" title="fnmatch: Unix shell style filename pattern matching."><code class="xref py py-func docutils literal notranslate"><span class="pre">fnmatch()</span></code></a>, <a class="reference internal" href="#fnmatch.fnmatchcase" title="fnmatch.fnmatchcase"><code class="xref py py-func docutils literal notranslate"><span class="pre">fnmatchcase()</span></code></a>, <a class="reference internal" href="#fnmatch.filter" title="fnmatch.filter"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter()</span></code></a>, <a class="reference internal" href="#fnmatch.filterfalse" title="fnmatch.filterfalse"><code class="xref py py-func docutils literal notranslate"><span class="pre">filterfalse()</span></code></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fnmatch.fnmatch">
+<span class="sig-prename descclassname"><span class="pre">fnmatch.</span></span><span class="sig-name descname"><span class="pre">fnmatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fnmatch.fnmatch" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">检测文件名字符串 <em>name</em> 是否匹配模式字符串 <em>pat</em>，返回 <code class="docutils literal notranslate"><span class="pre">True</span></code> 或 <code class="docutils literal notranslate"><span class="pre">False</span></code>。两个形参都会使用 <a class="reference internal" href="os.path.html#os.path.normcase" title="os.path.normcase"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.path.normcase()</span></code></a> 进行大小写正规化。 <a class="reference internal" href="#fnmatch.fnmatchcase" title="fnmatch.fnmatchcase"><code class="xref py py-func docutils literal notranslate"><span class="pre">fnmatchcase()</span></code></a> 可被用于执行大小写敏感的比较，无论这是否为所在操作系统的标准。</p>
+<p class="translated">这个例子将打印当前目录下带有扩展名 <code class="docutils literal notranslate"><span class="pre">.txt</span></code> 的所有文件名:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;*.txt&#39;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fnmatch.fnmatchcase">
+<span class="sig-prename descclassname"><span class="pre">fnmatch.</span></span><span class="sig-name descname"><span class="pre">fnmatchcase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fnmatch.fnmatchcase" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">检测文件名字符串 <em>name</em> 是否匹配模式字符串 <em>pat</em>，返回 <code class="docutils literal notranslate"><span class="pre">True</span></code> 或 <code class="docutils literal notranslate"><span class="pre">False</span></code>；此比较是大小写敏感的并且不会应用 <a class="reference internal" href="os.path.html#os.path.normcase" title="os.path.normcase"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.path.normcase()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fnmatch.filter">
+<span class="sig-prename descclassname"><span class="pre">fnmatch.</span></span><span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fnmatch.filter" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">基于包含匹配模式字符串 <em>pat</em> 的文件名字符串 <em>names</em> 的 <a class="reference internal" href="../glossary.html#term-iterable"><span class="xref std std-term">iterable</span></a> 构造一个列表。它等价于 <code class="docutils literal notranslate"><span class="pre">[n</span> <span class="pre">for</span> <span class="pre">n</span> <span class="pre">in</span> <span class="pre">names</span> <span class="pre">if</span> <span class="pre">fnmatch(n,</span> <span class="pre">pat)]</span></code>，但实现得更为高效。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fnmatch.filterfalse">
+<span class="sig-prename descclassname"><span class="pre">fnmatch.</span></span><span class="sig-name descname"><span class="pre">filterfalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fnmatch.filterfalse" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">根据不能匹配模式字符串 <em>pat</em> 的文件名字符串 <em>names</em> 的 <a class="reference internal" href="../glossary.html#term-iterable"><span class="xref std std-term">iterable</span></a> 中的元素构造一个列表。它相当于 <code class="docutils literal notranslate"><span class="pre">[n</span> <span class="pre">for</span> <span class="pre">n</span> <span class="pre">in</span> <span class="pre">names</span> <span class="pre">if</span> <span class="pre">not</span> <span class="pre">fnmatch(n,</span> <span class="pre">pat)]</span></code>，但实现得更为高效。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fnmatch.translate">
+<span class="sig-prename descclassname"><span class="pre">fnmatch.</span></span><span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fnmatch.translate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回由 shell 风格的模式 <em>pat</em> 转换成的正则表达式以配合 <a class="reference internal" href="re.html#re.match" title="re.match"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.match()</span></code></a> 使用。此模式预期为一个 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
+<p class="translated">示例：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">regex</span> <span class="o">=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s1">&#39;*.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">regex</span>
+<span class="go">&#39;(?s:.*\\.txt)\\z&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reobj</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reobj</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;foobar.txt&#39;</span><span class="p">)</span>
+<span class="go">&lt;re.Match object; span=(0, 10), match=&#39;foobar.txt&#39;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated">模块 <a class="reference internal" href="glob.html#module-glob" title="glob: Unix shell style pathname pattern expansion."><code class="xref py py-mod docutils literal notranslate"><span class="pre">glob</span></code></a></dt><dd><p class="translated">Unix shell 风格路径扩展。</p>
+</dd>
+</dl>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="glob.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">glob</span></code> --- Unix 风格的路径名模式扩展</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="linecache.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">linecache</span></code> --- 随机访问文本行</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/fnmatch.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/fnmatch.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/fnmatch.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="linecache.html" title="linecache --- 随机访问文本行"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="glob.html" title="glob --- Unix 风格的路径名模式扩展"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="filesys.html" >文件和目录访问</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">fnmatch</span></code> --- Unix 文件名模式匹配</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

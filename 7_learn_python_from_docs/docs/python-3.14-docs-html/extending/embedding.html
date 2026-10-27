@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="1. 在其它应用程序中嵌入 Python" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/extending/embedding.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="前几章讨论了如何对 Python 进行扩展，也就是如何用 C 函数库 扩展 Python 的功能。反过来也是可以的：将 Python 嵌入到 C/C++ 应用程序中丰富其功能。这种嵌入可以让应用程序用 Python 来实现某些功能，而不是用 C 或 C++ 。用途会有很多；比如允许用户用 Python 编写一些脚本，以便定制应用程序满足需求。如果某些功能用 Python 编写起来更为容易，那..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_extending_embedding_9906eea5.png" />
+<meta property="og:image:alt" content="前几章讨论了如何对 Python 进行扩展，也就是如何用 C 函数库 扩展 Python 的功能。反过来也是可以的：将 Python 嵌入到 C/C++ 应用程序中丰富其功能。这种嵌入可以让应用程序用 Python 来实现某些功能，而不是用 C 或 C++ 。用途会有很多；比如允许用户用 Python 编写一些脚本，以便定制应用程序满足需求。如果某些功能用 Python 编写起来更为容易，那..." />
+<meta name="description" content="前几章讨论了如何对 Python 进行扩展，也就是如何用 C 函数库 扩展 Python 的功能。反过来也是可以的：将 Python 嵌入到 C/C++ 应用程序中丰富其功能。这种嵌入可以让应用程序用 Python 来实现某些功能，而不是用 C 或 C++ 。用途会有很多；比如允许用户用 Python 编写一些脚本，以便定制应用程序满足需求。如果某些功能用 Python 编写起来更为容易，那..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>1. 在其它应用程序中嵌入 Python &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="Python/C API 参考手册" href="../c-api/index.html" />
+    <link rel="prev" title="5. 在 Windows 上构建 C 和 C++ 扩展" href="windows.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/extending/embedding.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">1. 在其它应用程序中嵌入 Python</a><ul>
+<li><a class="reference internal" href="#very-high-level-embedding">1.1. 高层次的嵌入</a></li>
+<li><a class="reference internal" href="#beyond-very-high-level-embedding-an-overview">1.2. 突破高层次嵌入的限制：概述</a></li>
+<li><a class="reference internal" href="#pure-embedding">1.3. 只做嵌入</a></li>
+<li><a class="reference internal" href="#extending-embedded-python">1.4. 对嵌入 Python 功能进行扩展</a></li>
+<li><a class="reference internal" href="#embedding-python-in-c">1.5. 在 C++ 中嵌入 Python</a></li>
+<li><a class="reference internal" href="#compiling-and-linking-under-unix-like-systems">1.6. 在类 Unix 系统中编译和链接</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="windows.html"
+                          title="上一章"><span class="section-number">5. </span>在 Windows 上构建 C 和 C++ 扩展</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="../c-api/index.html"
+                          title="下一章">Python/C API 参考手册</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "extending/embedding.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/extending/embedding.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/extending/embedding.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="../c-api/index.html" title="Python/C API 参考手册"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="windows.html" title="5. 在 Windows 上构建 C 和 C++ 扩展"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">扩展和嵌入 Python 解释器</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">1. </span>在其它应用程序中嵌入 Python</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="embedding-python-in-another-application">
+<span id="embedding"></span><h1 class="translated"><span class="section-number">1. </span>在其它应用程序中嵌入 Python<a class="headerlink" href="#embedding-python-in-another-application" title="Link to this heading">¶</a></h1>
+<p class="translated">前几章讨论了如何对 Python 进行扩展，也就是如何用 C 函数库 扩展 Python 的功能。反过来也是可以的：将 Python 嵌入到 C/C++ 应用程序中丰富其功能。这种嵌入可以让应用程序用 Python 来实现某些功能，而不是用 C 或 C++ 。用途会有很多；比如允许用户用 Python 编写一些脚本，以便定制应用程序满足需求。如果某些功能用 Python 编写起来更为容易，那么开发人员自己也能这么干。</p>
+<p class="translated">Python 的嵌入类似于扩展，但不完全相同。不同之处在于，扩展 Python 时应用程序的主程序仍然是 Python 解释器，而嵌入 Python 时的主程序可能与 Python 完全无关——而是应用程序的某些部分偶尔会调用 Python 解释器来运行一些 Python 代码。</p>
+<p class="translated">因此，若要嵌入 Python，就要提供自己的主程序。此主程序要做的事情之一就是初始化 Python 解释器。至少得调用函数 <a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a>。还有些可选的调用可向 Python 传递命令行参数。之后即可从应用程序的任何地方调用解释器了。</p>
+<p class="translated">调用解释器的方式有好几种：可向 <a class="reference internal" href="../c-api/veryhigh.html#c.PyRun_SimpleString" title="PyRun_SimpleString"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyRun_SimpleString()</span></code></a> 传入一个包含 Python 语句的字符串，也可向 <a class="reference internal" href="../c-api/veryhigh.html#c.PyRun_SimpleFile" title="PyRun_SimpleFile"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyRun_SimpleFile()</span></code></a> 传入一个 stdio 文件指针和一个文件名（仅在错误信息中起到识别作用）。还可以调用前面介绍过的底层操作来构造并使用 Python 对象。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><a class="reference internal" href="../c-api/index.html#c-api-index"><span class="std std-ref">Python/C API 参考手册</span></a></dt><dd><p class="translated">本文详细介绍了 Python 的 C 接口。这里有大量必要的信息。</p>
+</dd>
+</dl>
+</div>
+<section id="very-high-level-embedding">
+<span id="high-level-embedding"></span><h2 class="translated"><span class="section-number">1.1. </span>高层次的嵌入<a class="headerlink" href="#very-high-level-embedding" title="Link to this heading">¶</a></h2>
+<p class="translated">最简单的 Python 嵌入形式就是采用非常高层的接口。该接口的目标是只执行一段 Python 脚本，而无需与应用程序直接交互。比如以下代码可以用来对某个文件进行一些操作。</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PY_SSIZE_T_CLEAN</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Python.h&gt;</span>
+
+<span class="kt">int</span>
+<span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyStatus</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PyConfig</span><span class="w"> </span><span class="n">config</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PyConfig_InitPythonConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* 以下是可选的但推荐使用 */</span>
+<span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyConfig_SetBytesString</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">config</span><span class="p">.</span><span class="n">program_name</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">PyStatus_Exception</span><span class="p">(</span><span class="n">status</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">exception</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Py_InitializeFromConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">PyStatus_Exception</span><span class="p">(</span><span class="n">status</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">exception</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">PyConfig_Clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">PyRun_SimpleString</span><span class="p">(</span><span class="s">&quot;from time import time,ctime</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                       </span><span class="s">&quot;print(&#39;Today is&#39;, ctime(time()))</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Py_FinalizeEx</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">exit</span><span class="p">(</span><span class="mi">120</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="nl">exception</span><span class="p">:</span>
+<span class="w">     </span><span class="n">PyConfig_Clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+<span class="w">     </span><span class="n">Py_ExitStatusException</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">#define</span> <span class="pre">PY_SSIZE_T_CLEAN</span></code> 被用来指明 <code class="docutils literal notranslate"><span class="pre">Py_ssize_t</span></code> 应当在某些 API 中代替 <code class="docutils literal notranslate"><span class="pre">int</span></code> 使用。 它从 Python 3.13 起已不再需要，但我们保留它用于向下兼容。请参阅 <a class="reference internal" href="../c-api/arg.html#arg-parsing-string-and-buffers"><span class="std std-ref">字符串和缓冲区</span></a> 获取该宏的描述。</p>
+</div>
+<p class="translated">设置 <a class="reference internal" href="../c-api/init_config.html#c.PyConfig.program_name" title="PyConfig.program_name"><code class="xref c c-member docutils literal notranslate"><span class="pre">PyConfig.program_name</span></code></a> 应当在 <a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_InitializeFromConfig" title="Py_InitializeFromConfig"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_InitializeFromConfig()</span></code></a> 之前被调用以便告知解释器 Python 运行时库的路径。接下来，Python 解释器将使用 <a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a> 来初始化，然后执行硬编码的 Python 脚本打印出日期和时间。在此之后，<a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_FinalizeEx" title="Py_FinalizeEx"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_FinalizeEx()</span></code></a> 调用将关闭解释器，随即结束程序。在真实的程序中，你可能需要从其他源获取 Python 脚本，或许是从文本编辑器例程、文件或者数据库等等。使用 <a class="reference internal" href="../c-api/veryhigh.html#c.PyRun_SimpleFile" title="PyRun_SimpleFile"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyRun_SimpleFile()</span></code></a> 函数可以更好地从文件获取 Python 代码，这将为你省去分配内存空间和加载文件内容的麻烦。</p>
+</section>
+<section id="beyond-very-high-level-embedding-an-overview">
+<span id="lower-level-embedding"></span><h2 class="translated"><span class="section-number">1.2. </span>突破高层次嵌入的限制：概述<a class="headerlink" href="#beyond-very-high-level-embedding-an-overview" title="Link to this heading">¶</a></h2>
+<p class="translated">高级接口能从应用程序中执行任何 Python 代码，但至少交换数据可说是相当麻烦的。如若需要交换数据，应使用较低级别的调用。几乎可以实现任何功能，代价是得写更多的 C 代码。</p>
+<p class="translated">应该注意，尽管意图不同，但扩展 Python 和嵌入 Python 的过程相当类似。前几章中讨论的大多数主题依然有效。为了说明这一点，不妨来看一下从  Python 到 C 的扩展代码到底做了什么：</p>
+<ol class="arabic simple">
+<li><p class="translated">将 Python 的数据转换为 C 格式，</p></li>
+<li><p class="translated">用转换后的数据执行 C 程序的函数调用，</p></li>
+<li><p class="translated">将调用返回的数据从 C 转换为 Python 格式。</p></li>
+</ol>
+<p class="translated">嵌入 Python 时，接口代码会这样做：</p>
+<ol class="arabic simple">
+<li><p class="translated">将 C 数据转换为 Python 格式，</p></li>
+<li><p class="translated">用转换后的数据执行对 Python 接口的函数调用，</p></li>
+<li><p class="translated">将调用返回的数据从 Python 转换为 C 格式。</p></li>
+</ol>
+<p class="translated">可见只是数据转换的步骤交换了一下顺序，以顺应跨语言的传输方向。唯一的区别是在两次数据转换之间调用的函数不同。在执行扩展时，调用一个 C 函数，而执行嵌入时调用的是个 Python 函数。</p>
+<p class="translated">本文不会讨论如何将数据从 Python 转换到 C 去，反之亦然。另外还假定读者能够正确使用引用并处理错误。由于这些地方与解释器的扩展没有区别，请参考前面的章节以获得所需的信息。</p>
+</section>
+<section id="pure-embedding">
+<span id="id1"></span><h2 class="translated"><span class="section-number">1.3. </span>只做嵌入<a class="headerlink" href="#pure-embedding" title="Link to this heading">¶</a></h2>
+<p class="translated">第一个程序的目标是执行 Python 脚本中的某个函数。就像高层次接口那样，Python 解释器并不会直接与应用程序进行交互（但下一节将改变这一点）。</p>
+<p class="translated">要运行 Python 脚本中定义的函数，代码如下：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PY_SSIZE_T_CLEAN</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Python.h&gt;</span>
+
+<span class="kt">int</span>
+<span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">pName</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">pModule</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">pFunc</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">pArgs</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">pValue</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="s">&quot;Usage: call pythonfile funcname [args]</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">Py_Initialize</span><span class="p">();</span>
+<span class="w">    </span><span class="n">pName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyUnicode_DecodeFSDefault</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">    </span><span class="cm">/* 略去 pName 的错误检测 */</span>
+
+<span class="w">    </span><span class="n">pModule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyImport_Import</span><span class="p">(</span><span class="n">pName</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pName</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pModule</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">pFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyObject_GetAttrString</span><span class="p">(</span><span class="n">pModule</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="w">        </span><span class="cm">/* pFunc 是一个新引用 */</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pFunc</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">PyCallable_Check</span><span class="p">(</span><span class="n">pFunc</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">pArgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyTuple_New</span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">argc</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">pValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyLong_FromLong</span><span class="p">(</span><span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="p">]));</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pArgs</span><span class="p">);</span>
+<span class="w">                    </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pModule</span><span class="p">);</span>
+<span class="w">                    </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Cannot convert argument</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="cm">/* 这里偷取了 pValue 引用：*/</span>
+<span class="w">                </span><span class="n">PyTuple_SetItem</span><span class="p">(</span><span class="n">pArgs</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">pValue</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">pValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyObject_CallObject</span><span class="p">(</span><span class="n">pFunc</span><span class="p">,</span><span class="w"> </span><span class="n">pArgs</span><span class="p">);</span>
+<span class="w">            </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pArgs</span><span class="p">);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pValue</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Result of call: %ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PyLong_AsLong</span><span class="p">(</span><span class="n">pValue</span><span class="p">));</span>
+<span class="w">                </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pValue</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pFunc</span><span class="p">);</span>
+<span class="w">                </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pModule</span><span class="p">);</span>
+<span class="w">                </span><span class="n">PyErr_Print</span><span class="p">();</span>
+<span class="w">                </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="s">&quot;Call failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">PyErr_Occurred</span><span class="p">())</span>
+<span class="w">                </span><span class="n">PyErr_Print</span><span class="p">();</span>
+<span class="w">            </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Cannot find function </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">Py_XDECREF</span><span class="p">(</span><span class="n">pFunc</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">pModule</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PyErr_Print</span><span class="p">();</span>
+<span class="w">        </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to load </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Py_FinalizeEx</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">120</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">上述代码先利用 <code class="docutils literal notranslate"><span class="pre">argv[1]</span></code> 加载 Python 脚本，再调用 <code class="docutils literal notranslate"><span class="pre">argv[2]</span></code> 指定的函数。函数的整数参数是 <code class="docutils literal notranslate"><span class="pre">argv</span></code> 数组中的其余值。如果 <a class="reference internal" href="#compiling"><span class="std std-ref">编译并链接</span></a> 该程序 (此处将最终的可执行程序称作 <strong class="program">call</strong>), 并用它执行一个 Python 脚本，例如：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Will compute&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;times&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">c</span>
+</pre></div>
+</div>
+<p class="translated">然后结果应该是：</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>call<span class="w"> </span>multiply<span class="w"> </span>multiply<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">2</span>
+<span class="go">Will compute 3 times 2</span>
+<span class="go">Result of call: 6</span>
+</pre></div>
+</div>
+<p class="translated">尽管相对其功能而言，该程序体积相当庞大，但大部分代码是用于 Python 和 C 之间的数据转换，以及报告错误。嵌入 Python 的有趣部分从此开始：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">Py_Initialize</span><span class="p">();</span>
+<span class="n">pName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyUnicode_DecodeFSDefault</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="cm">/* 略去 pName 的错误检测 */</span>
+<span class="n">pModule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyImport_Import</span><span class="p">(</span><span class="n">pName</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">在初始化解释器之后，再使用 <a class="reference internal" href="../c-api/import.html#c.PyImport_Import" title="PyImport_Import"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyImport_Import()</span></code></a> 加载脚本。此例程需要一个 Python 字符串作为其参数，它是使用 <a class="reference internal" href="../c-api/unicode.html#c.PyUnicode_DecodeFSDefault" title="PyUnicode_DecodeFSDefault"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnicode_DecodeFSDefault()</span></code></a> 数据转换例程来构造的。</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">pFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyObject_GetAttrString</span><span class="p">(</span><span class="n">pModule</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="cm">/* pFunc 是一个新引用 */</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pFunc</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">PyCallable_Check</span><span class="p">(</span><span class="n">pFunc</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+<span class="n">Py_XDECREF</span><span class="p">(</span><span class="n">pFunc</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">脚本一旦加载完毕，就会用 <a class="reference internal" href="../c-api/object.html#c.PyObject_GetAttrString" title="PyObject_GetAttrString"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetAttrString()</span></code></a> 查找属性名称。如果名称存在，并且返回的是可调用对象，即可安全地视其为函数。然后程序继续执行，照常构建由参数组成的元组。然后用以下方式调用 Python 函数：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">pValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyObject_CallObject</span><span class="p">(</span><span class="n">pFunc</span><span class="p">,</span><span class="w"> </span><span class="n">pArgs</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">当函数返回时，<code class="docutils literal notranslate"><span class="pre">pValue</span></code> 要么为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，要么包含对函数返回值的引用。请确保用完后释放该引用。</p>
+</section>
+<section id="extending-embedded-python">
+<span id="extending-with-embedding"></span><h2 class="translated"><span class="section-number">1.4. </span>对嵌入 Python 功能进行扩展<a class="headerlink" href="#extending-embedded-python" title="Link to this heading">¶</a></h2>
+<p class="translated">到目前为止，嵌入的 Python 解释器还不能访问应用程序本身的功能。Python API 通过扩展嵌入解释器实现了这一点。 也就是说，用应用程序提供的函数对嵌入的解释器进行扩展。虽然听起来有些复杂，但也没那么糟糕。只要暂时忘记是应用程序启动了 Python 解释器。而把应用程序看作是一堆子程序，然后写一些胶水代码让 Python 访问这些子程序，就像编写普通的 Python 扩展程序一样。例如：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">numargs</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+
+<span class="cm">/* 返回应用程序命令行的参数数量 */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">PyObject</span><span class="o">*</span>
+<span class="nf">emb_numargs</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">PyArg_ParseTuple</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;:numargs&quot;</span><span class="p">))</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">PyLong_FromLong</span><span class="p">(</span><span class="n">numargs</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">PyMethodDef</span><span class="w"> </span><span class="n">emb_module_methods</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="s">&quot;numargs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">emb_numargs</span><span class="p">,</span><span class="w"> </span><span class="n">METH_VARARGS</span><span class="p">,</span>
+<span class="w">     </span><span class="s">&quot;Return the number of arguments received by the process.&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">PyModuleDef</span><span class="w"> </span><span class="n">emb_module</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">.</span><span class="n">m_base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyModuleDef_HEAD_INIT</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">m_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;emb&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">m_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">m_methods</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">emb_module_methods</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">PyObject</span><span class="o">*</span>
+<span class="nf">PyInit_emb</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">PyModuleDef_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emb_module</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">在 <code class="xref c c-func docutils literal notranslate"><span class="pre">main()</span></code> 函数之前插入上述代码。并在调用 <a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a> 之前插入以下两条语句：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">numargs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">argc</span><span class="p">;</span>
+<span class="n">PyImport_AppendInittab</span><span class="p">(</span><span class="s">&quot;emb&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">PyInit_emb</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">这两行代码初始化了 <code class="docutils literal notranslate"><span class="pre">numargs</span></code> 变量，并使嵌入式 Python 解释器可以访问 <code class="xref py py-func docutils literal notranslate"><span class="pre">emb.numargs()</span></code> 函数。通过这些扩展，Python 脚本可以执行以下操作</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">emb</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of arguments&quot;</span><span class="p">,</span> <span class="n">emb</span><span class="o">.</span><span class="n">numargs</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">在真实的应用程序中，这种方法将把应用的 API 暴露给 Python 使用。</p>
+</section>
+<section id="embedding-python-in-c">
+<span id="embeddingincplusplus"></span><h2 class="translated"><span class="section-number">1.5. </span>在 C++ 中嵌入 Python<a class="headerlink" href="#embedding-python-in-c" title="Link to this heading">¶</a></h2>
+<p class="translated">还可以将 Python 嵌入到 C++ 程序中去；确切地说，实现方式将取决于 C++ 系统的实现细节；一般需用 C++ 编写主程序，并用 C++ 编译器来编译和链接程序。不需要用 C++ 重新编译 Python 本身。</p>
+</section>
+<section id="compiling-and-linking-under-unix-like-systems">
+<span id="compiling"></span><h2 class="translated"><span class="section-number">1.6. </span>在类 Unix 系统中编译和链接<a class="headerlink" href="#compiling-and-linking-under-unix-like-systems" title="Link to this heading">¶</a></h2>
+<p class="translated">为了将 Python 解释器嵌入应用程序，找到正确的编译参数传给编译器 (和链接器) 并非易事，特别是因为 Python 加载的库模块是以 C 动态扩展（<code class="file docutils literal notranslate"><span class="pre">.so</span></code> 文件）的形式实现的。</p>
+<p class="translated">为了得到所需的编译器和链接器参数，可执行 <code class="file docutils literal notranslate"><span class="pre">python</span><em><span class="pre">X.Y</span></em><span class="pre">-config</span></code> 脚本，它是在安装 Python 时生成的（也可能存在 <code class="file docutils literal notranslate"><span class="pre">python3-config</span></code> 脚本）。该脚本有几个参数，其中以下几个参数会直接有用：</p>
+<ul>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">pythonX.Y-config</span> <span class="pre">--cflags</span></code> 将给出建议的编译参数。</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>/opt/bin/python3.11-config<span class="w"> </span>--cflags
+<span class="go">-I/opt/include/python3.11 -I/opt/include/python3.11 -Wsign-compare  -DNDEBUG -g -fwrapv -O3 -Wall</span>
+</pre></div>
+</div>
+</li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">pythonX.Y-config</span> <span class="pre">--ldflags</span> <span class="pre">--embed</span></code> 将给出在链接时建议的参数：</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>/opt/bin/python3.11-config<span class="w"> </span>--ldflags<span class="w"> </span>--embed
+<span class="go">-L/opt/lib/python3.11/config-3.11-x86_64-linux-gnu -L/opt/lib -lpython3.11 -lpthread -ldl  -lutil -lm</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">为了避免多个 Python 安装版本引发混乱（特别是在系统安装版本和自己编译版本之间），建议用 <code class="file docutils literal notranslate"><span class="pre">python</span><em><span class="pre">X.Y</span></em><span class="pre">-config</span></code> 的绝对路径，如上例所述。</p>
+</div>
+<p class="translated">如果上述方案不起作用 (不能保证对所有 Unix 类平台都生效；欢迎提出 <a class="reference internal" href="../bugs.html#reporting-bugs"><span class="std std-ref">bug 报告</span></a>)，就得阅读系统关于动态链接的文档，并检查 Python 的 <code class="file docutils literal notranslate"><span class="pre">Makefile</span></code> (用 <a class="reference internal" href="../library/sysconfig.html#sysconfig.get_makefile_filename" title="sysconfig.get_makefile_filename"><code class="xref py py-func docutils literal notranslate"><span class="pre">sysconfig.get_makefile_filename()</span></code></a> 找到所在位置) 和编译参数。这时 <a class="reference internal" href="../library/sysconfig.html#module-sysconfig" title="sysconfig: Python's configuration information"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sysconfig</span></code></a> 模块会是个有用的工具，可用编程方式提取需组合在一起的配置值。 比如：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">sysconfig</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sysconfig</span><span class="o">.</span><span class="n">get_config_var</span><span class="p">(</span><span class="s1">&#39;LIBS&#39;</span><span class="p">)</span>
+<span class="go">&#39;-lpthread -ldl  -lutil&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sysconfig</span><span class="o">.</span><span class="n">get_config_var</span><span class="p">(</span><span class="s1">&#39;LINKFORSHARED&#39;</span><span class="p">)</span>
+<span class="go">&#39;-Xlinker -export-dynamic&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">1. 在其它应用程序中嵌入 Python</a><ul>
+<li><a class="reference internal" href="#very-high-level-embedding">1.1. 高层次的嵌入</a></li>
+<li><a class="reference internal" href="#beyond-very-high-level-embedding-an-overview">1.2. 突破高层次嵌入的限制：概述</a></li>
+<li><a class="reference internal" href="#pure-embedding">1.3. 只做嵌入</a></li>
+<li><a class="reference internal" href="#extending-embedded-python">1.4. 对嵌入 Python 功能进行扩展</a></li>
+<li><a class="reference internal" href="#embedding-python-in-c">1.5. 在 C++ 中嵌入 Python</a></li>
+<li><a class="reference internal" href="#compiling-and-linking-under-unix-like-systems">1.6. 在类 Unix 系统中编译和链接</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="windows.html"
+                          title="上一章"><span class="section-number">5. </span>在 Windows 上构建 C 和 C++ 扩展</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="../c-api/index.html"
+                          title="下一章">Python/C API 参考手册</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "extending/embedding.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/extending/embedding.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/extending/embedding.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="../c-api/index.html" title="Python/C API 参考手册"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="windows.html" title="5. 在 Windows 上构建 C 和 C++ 扩展"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >扩展和嵌入 Python 解释器</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">1. </span>在其它应用程序中嵌入 Python</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

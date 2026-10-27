@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="队列" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/asyncio-queue.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/asyncio/queues.py asyncio 队列被设计成与 queue 模块类似。尽管 asyncio 队列不是线程安全的，但它们是被设计专用于 async/await 代码的。 注意 asyncio 的队列没有 timeout 形参；请使用 asyncio.wait_for() 函数为队列添加超时操作。 参见下面的 Examples 部分。 Queue: 优先级队..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_asyncio-queue_9a8e9385.png" />
+<meta property="og:image:alt" content="源代码: Lib/asyncio/queues.py asyncio 队列被设计成与 queue 模块类似。尽管 asyncio 队列不是线程安全的，但它们是被设计专用于 async/await 代码的。 注意 asyncio 的队列没有 timeout 形参；请使用 asyncio.wait_for() 函数为队列添加超时操作。 参见下面的 Examples 部分。 Queue: 优先级队..." />
+<meta name="description" content="源代码: Lib/asyncio/queues.py asyncio 队列被设计成与 queue 模块类似。尽管 asyncio 队列不是线程安全的，但它们是被设计专用于 async/await 代码的。 注意 asyncio 的队列没有 timeout 形参；请使用 asyncio.wait_for() 函数为队列添加超时操作。 参见下面的 Examples 部分。 Queue: 优先级队..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>队列 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="异常" href="asyncio-exceptions.html" />
+    <link rel="prev" title="子进程" href="asyncio-subprocess.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/asyncio-queue.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">队列</a><ul>
+<li><a class="reference internal" href="#queue">Queue</a></li>
+<li><a class="reference internal" href="#priority-queue">优先级队列</a></li>
+<li><a class="reference internal" href="#lifo-queue">后进先出队列</a></li>
+<li><a class="reference internal" href="#exceptions">异常</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-subprocess.html"
+                          title="上一章">子进程</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-exceptions.html"
+                          title="下一章">异常</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-queue.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-queue.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-queue.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-exceptions.html" title="异常"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-subprocess.html" title="子进程"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">队列</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="queues">
+<span id="asyncio-queues"></span><h1 class="translated">队列<a class="headerlink" href="#queues" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/asyncio/queues.py">Lib/asyncio/queues.py</a></p>
+<hr class="docutils" />
+<p class="translated">asyncio 队列被设计成与 <a class="reference internal" href="queue.html#module-queue" title="queue: A synchronized queue class."><code class="xref py py-mod docutils literal notranslate"><span class="pre">queue</span></code></a> 模块类似。尽管 asyncio 队列不是线程安全的，但它们是被设计专用于 async/await 代码的。</p>
+<p class="translated">注意 asyncio 的队列没有 <em>timeout</em> 形参；请使用 <a class="reference internal" href="asyncio-task.html#asyncio.wait_for" title="asyncio.wait_for"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.wait_for()</span></code></a> 函数为队列添加超时操作。</p>
+<p class="translated">参见下面的 <a class="reference internal" href="#examples">Examples</a> 部分。</p>
+<section id="queue">
+<h2 class="translated">Queue<a class="headerlink" href="#queue" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.Queue">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">Queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">先进，先出（FIFO）队列</p>
+<p class="translated">如果 <em>maxsize</em> 小于等于零，则队列尺寸是无限的。如果是大于 <code class="docutils literal notranslate"><span class="pre">0</span></code> 的整数，则当队列达到 <em>maxsize</em> 时，<code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">put()</span></code> 将阻塞至某个元素被 <a class="reference internal" href="#asyncio.Queue.get" title="asyncio.Queue.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> 取出。</p>
+<p class="translated">不像标准库中的线程型 <a class="reference internal" href="queue.html#module-queue" title="queue: A synchronized queue class."><code class="xref py py-mod docutils literal notranslate"><span class="pre">queue</span></code></a>，队列的大小一直是已知的，可以通过调用 <a class="reference internal" href="#asyncio.Queue.qsize" title="asyncio.Queue.qsize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qsize()</span></code></a> 方法返回。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<p class="translated">这个类 <a class="reference internal" href="asyncio-dev.html#asyncio-multithreading"><span class="std std-ref">不是线程安全的</span></a>。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="asyncio.Queue.maxsize">
+<span class="sig-name descname"><span class="pre">maxsize</span></span><a class="headerlink" href="#asyncio.Queue.maxsize" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">队列中可存放的元素数量。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.empty">
+<span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.empty" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果队列为空返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>，否则返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.full">
+<span class="sig-name descname"><span class="pre">full</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.full" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果有 <a class="reference internal" href="#asyncio.Queue.maxsize" title="asyncio.Queue.maxsize"><code class="xref py py-attr docutils literal notranslate"><span class="pre">maxsize</span></code></a> 个条目在队列中，则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code> 。</p>
+<p class="translated">如果队列用 <code class="docutils literal notranslate"><span class="pre">maxsize=0</span></code> (默认值) 初始化，则 <a class="reference internal" href="#asyncio.Queue.full" title="asyncio.Queue.full"><code class="xref py py-meth docutils literal notranslate"><span class="pre">full()</span></code></a> 永远不会返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.get">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.get" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从队列中删除并返回一个元素。如果队列为空，则等待，直到队列中有元素。</p>
+<p class="translated">如果队列已被关闭并且为空，或者如果队列已被立即关闭则会引发 <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.get_nowait">
+<span class="sig-name descname"><span class="pre">get_nowait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.get_nowait" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果有元素立即可用则返回一个元素，否则引发 <a class="reference internal" href="#asyncio.QueueEmpty" title="asyncio.QueueEmpty"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueEmpty</span></code></a>。</p>
+<p class="untranslated">Raises <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a> if the queue has been shut down and is empty.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.join">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.join" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">阻塞至队列中所有的元素都被接收和处理完毕。</p>
+<p class="translated">当条目添加到队列的时候，未完成任务的计数就会增加。每当消费协程调用 <a class="reference internal" href="#asyncio.Queue.task_done" title="asyncio.Queue.task_done"><code class="xref py py-meth docutils literal notranslate"><span class="pre">task_done()</span></code></a> 表示这个条目已经被回收，该条目所有工作已经完成，未完成计数就会减少。当未完成计数降到零的时候， <a class="reference internal" href="#asyncio.Queue.join" title="asyncio.Queue.join"><code class="xref py py-meth docutils literal notranslate"><span class="pre">join()</span></code></a> 阻塞被解除。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.put">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.put" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">添加一个元素进队列。如果队列满了，在添加元素之前，会一直等待空闲插槽可用。</p>
+<p class="translated">如果队列已被关闭则会引发 <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.put_nowait">
+<span class="sig-name descname"><span class="pre">put_nowait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.put_nowait" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">不阻塞地放一个元素入队列。</p>
+<p class="translated">如果没有立即可用的空闲槽，引发 <a class="reference internal" href="#asyncio.QueueFull" title="asyncio.QueueFull"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueFull</span></code></a> 异常。</p>
+<p class="translated">如果队列已被关闭则会引发 <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.qsize">
+<span class="sig-name descname"><span class="pre">qsize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.qsize" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回队列中的元素数量。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">immediate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.shutdown" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将一个 <a class="reference internal" href="#asyncio.Queue" title="asyncio.Queue"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a> 实例置为关闭模式。</p>
+<p class="translated">该队列将不可再增长。未来对 <a class="reference internal" href="#asyncio.Queue.put" title="asyncio.Queue.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code></a> 的调用将引发 <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a>。当前被阻塞的 <code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code> 的调用方将被取消阻塞并会在之前等待的任务中引发 <code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code>。</p>
+<p class="translated">如果 <em>immediate</em> 为假值（默认），则队列可通过 <a class="reference internal" href="#asyncio.Queue.get" title="asyncio.Queue.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> 调用正常缩减以提取已被加载的任务。</p>
+<p class="translated">而如果 <a class="reference internal" href="#asyncio.Queue.task_done" title="asyncio.Queue.task_done"><code class="xref py py-meth docutils literal notranslate"><span class="pre">task_done()</span></code></a> 针对每个剩余的任务被调用，则挂起的 <a class="reference internal" href="#asyncio.Queue.join" title="asyncio.Queue.join"><code class="xref py py-meth docutils literal notranslate"><span class="pre">join()</span></code></a> 将被正常取消阻塞。</p>
+<p class="translated">一旦队列为空，未来对 <a class="reference internal" href="#asyncio.Queue.get" title="asyncio.Queue.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> 的调用将会引发 <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a>。</p>
+<p class="translated">如果 <em>immediate</em> 为真值，则队列会被立即终结。队列将缩减至完全为空而未完成任务的计数将去除已缩减的任务数。如果未完成任务数为零，则 <a class="reference internal" href="#asyncio.Queue.join" title="asyncio.Queue.join"><code class="xref py py-meth docutils literal notranslate"><span class="pre">join()</span></code></a> 的调用方将被取消阻塞。此外，被阻塞的 <a class="reference internal" href="#asyncio.Queue.get" title="asyncio.Queue.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> 调用方也将被取消阻塞并将引发 <a class="reference internal" href="#asyncio.QueueShutDown" title="asyncio.QueueShutDown"><code class="xref py py-exc docutils literal notranslate"><span class="pre">QueueShutDown</span></code></a> 因为队列已为空。</p>
+<p class="translated">在 <em>immediate</em> 设为真值的情况下使用 <a class="reference internal" href="#asyncio.Queue.join" title="asyncio.Queue.join"><code class="xref py py-meth docutils literal notranslate"><span class="pre">join()</span></code></a> 需要小心谨慎。 这会取消对已加入任务的阻塞即使任务尚未被执行，从而破坏通常的加入队列任务的不变性。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Queue.task_done">
+<span class="sig-name descname"><span class="pre">task_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Queue.task_done" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">表明之前加入队列的工作条目已经完成。</p>
+<p class="translated">由队列的消费者使用。对于每个被用于获取工作条目的 <a class="reference internal" href="#asyncio.Queue.get" title="asyncio.Queue.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>，将有一个对 <a class="reference internal" href="#asyncio.Queue.task_done" title="asyncio.Queue.task_done"><code class="xref py py-meth docutils literal notranslate"><span class="pre">task_done()</span></code></a> 的后续调用来告诉队列工作条目的操作已完成。</p>
+<p class="translated">如果 <a class="reference internal" href="#asyncio.Queue.join" title="asyncio.Queue.join"><code class="xref py py-meth docutils literal notranslate"><span class="pre">join()</span></code></a> 当前正在阻塞，在所有条目都被处理后，将解除阻塞 (意味着每个 <a class="reference internal" href="#asyncio.Queue.put" title="asyncio.Queue.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code></a> 进队列的条目的 <a class="reference internal" href="#asyncio.Queue.task_done" title="asyncio.Queue.task_done"><code class="xref py py-meth docutils literal notranslate"><span class="pre">task_done()</span></code></a> 都被收到)。</p>
+<p class="translated">如果被调用的次数多于放入队列中的项目数量，将引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="priority-queue">
+<h2 class="translated">优先级队列<a class="headerlink" href="#priority-queue" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.PriorityQueue">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">PriorityQueue</span></span><a class="headerlink" href="#asyncio.PriorityQueue" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#asyncio.Queue" title="asyncio.Queue"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a> 的变体；按优先级顺序取出条目 (最小的先取出)。</p>
+<p class="translated">条目通常是 <code class="docutils literal notranslate"><span class="pre">(priority_number,</span> <span class="pre">data)</span></code> 形式的元组。</p>
+</dd></dl>
+
+</section>
+<section id="lifo-queue">
+<h2 class="translated">后进先出队列<a class="headerlink" href="#lifo-queue" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.LifoQueue">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">LifoQueue</span></span><a class="headerlink" href="#asyncio.LifoQueue" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#asyncio.Queue" title="asyncio.Queue"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a> 的变体，先取出最近添加的条目（后进，先出）。</p>
+</dd></dl>
+
+</section>
+<section id="exceptions">
+<h2 class="translated">异常<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="asyncio.QueueEmpty">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">QueueEmpty</span></span><a class="headerlink" href="#asyncio.QueueEmpty" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当队列为空的时候，调用 <a class="reference internal" href="#asyncio.Queue.get_nowait" title="asyncio.Queue.get_nowait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_nowait()</span></code></a> 方法而引发这个异常。</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="asyncio.QueueFull">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">QueueFull</span></span><a class="headerlink" href="#asyncio.QueueFull" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当队列中条目数量已经达到它的 <em>maxsize</em> 的时候，调用 <a class="reference internal" href="#asyncio.Queue.put_nowait" title="asyncio.Queue.put_nowait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put_nowait()</span></code></a> 方法而引发的异常。</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="asyncio.QueueShutDown">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">QueueShutDown</span></span><a class="headerlink" href="#asyncio.QueueShutDown" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">Exception raised when <a class="reference internal" href="#asyncio.Queue.put" title="asyncio.Queue.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code></a>, <a class="reference internal" href="#asyncio.Queue.put_nowait" title="asyncio.Queue.put_nowait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put_nowait()</span></code></a>,
+<a class="reference internal" href="#asyncio.Queue.get" title="asyncio.Queue.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> or <a class="reference internal" href="#asyncio.Queue.get_nowait" title="asyncio.Queue.get_nowait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_nowait()</span></code></a> is called
+on a queue which has been shut down.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="examples">
+<h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p class="translated" id="asyncio-example-queue-dist">队列能被用于多个并发任务的工作量分配:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">worker</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># 从队列获取一个“工作项”。</span>
+        <span class="n">sleep_for</span> <span class="o">=</span> <span class="k">await</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="c1"># 休眠 &quot;sleep_for&quot; 秒。</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+
+        <span class="c1"># 通知队列“工作项”已被处理。</span>
+        <span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> has slept for </span><span class="si">{</span><span class="n">sleep_for</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 创建一个用于存储我们的“工作项”的队列。</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+    <span class="c1"># 生成随机时段并将它们放入队列。</span>
+    <span class="n">total_sleep_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+        <span class="n">sleep_for</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">total_sleep_time</span> <span class="o">+=</span> <span class="n">sleep_for</span>
+        <span class="n">queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+
+    <span class="c1"># 创建三个工作任务来并发地处理队列。</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">worker</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;worker-</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">queue</span><span class="p">))</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+    <span class="c1"># 等待直到队列处理完毕。</span>
+    <span class="n">started_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="n">total_slept_for</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">started_at</span>
+
+    <span class="c1"># 取消我们的工作任务。</span>
+    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+    <span class="c1"># 等待直到所有工作任务都被取消。</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;====&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;3 workers slept in parallel for </span><span class="si">{</span><span class="n">total_slept_for</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;total expected sleep time: </span><span class="si">{</span><span class="n">total_sleep_time</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">队列</a><ul>
+<li><a class="reference internal" href="#queue">Queue</a></li>
+<li><a class="reference internal" href="#priority-queue">优先级队列</a></li>
+<li><a class="reference internal" href="#lifo-queue">后进先出队列</a></li>
+<li><a class="reference internal" href="#exceptions">异常</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-subprocess.html"
+                          title="上一章">子进程</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-exceptions.html"
+                          title="下一章">异常</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-queue.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-queue.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-queue.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-exceptions.html" title="异常"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-subprocess.html" title="子进程"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">队列</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="email.contentmanager: 管理 MIME 内容" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/email.contentmanager.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/email/contentmanager.py 内容管理器实例: 目前 email 包只提供了一个具体内容管理器 raw_data_manager ，不过在未来可能会添加更多。 raw_data_manager 是由 EmailPolicy 及其派生类所提供的 content_manager. 脚注 1, 最初在 3.4 中作为 暂定模块 添加" />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_email.contentmanager_e0c0c594.png" />
+<meta property="og:image:alt" content="源代码: Lib/email/contentmanager.py 内容管理器实例: 目前 email 包只提供了一个具体内容管理器 raw_data_manager ，不过在未来可能会添加更多。 raw_data_manager 是由 EmailPolicy 及其派生类所提供的 content_manager. 脚注 1, 最初在 3.4 中作为 暂定模块 添加" />
+<meta name="description" content="源代码: Lib/email/contentmanager.py 内容管理器实例: 目前 email 包只提供了一个具体内容管理器 raw_data_manager ，不过在未来可能会添加更多。 raw_data_manager 是由 EmailPolicy 及其派生类所提供的 content_manager. 脚注 1, 最初在 3.4 中作为 暂定模块 添加" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>email.contentmanager: 管理 MIME 内容 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="email: 示例" href="email.examples.html" />
+    <link rel="prev" title="email.headerregistry: 自定义标头对象" href="email.headerregistry.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/email.contentmanager.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容</a><ul>
+<li><a class="reference internal" href="#content-manager-instances">内容管理器实例</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="email.headerregistry.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.headerregistry</span></code>: 自定义标头对象</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="email.examples.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email</span></code>: 示例</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/email.contentmanager.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/email.contentmanager.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/email.contentmanager.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="email.examples.html" title="email: 示例"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="email.headerregistry.html" title="email.headerregistry: 自定义标头对象"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="netdata.html" >互联网数据处理</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="email.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email</span></code> --- 电子邮件与 MIME 处理包</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-email.contentmanager">
+<span id="email-contentmanager-managing-mime-content"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容<a class="headerlink" href="#module-email.contentmanager" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/email/contentmanager.py">Lib/email/contentmanager.py</a></p>
+<hr class="docutils" />
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6: </span><a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="email.contentmanager.ContentManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">email.contentmanager.</span></span><span class="sig-name descname"><span class="pre">ContentManager</span></span><a class="headerlink" href="#email.contentmanager.ContentManager" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">内容管理器的基类。提供注册 MIME 内容和其他表示形式间转换器的标准注册机制，以及 <code class="docutils literal notranslate"><span class="pre">get_content</span></code> 和 <code class="docutils literal notranslate"><span class="pre">set_content</span></code> 分派方法。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="email.contentmanager.ContentManager.get_content">
+<span class="sig-name descname"><span class="pre">get_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.contentmanager.ContentManager.get_content" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">基于 <em>msg</em> 的 <code class="docutils literal notranslate"><span class="pre">mimetype</span></code> 查找处理函数（参见下一段），调用该函数，传递所有参数，并返回调用的结果。预期的效果是处理程序将从 <em>msg</em> 中提取有效载荷并返回编码了有关被提取数据信息的对象。</p>
+<p class="translated">要找到处理程序，将在注册表中查找以下键，找到第一个键即停止：</p>
+<ul class="simple">
+<li><p class="translated">表示完整 MIME 类型的字符串 (<code class="docutils literal notranslate"><span class="pre">maintype/subtype</span></code>)</p></li>
+<li><p class="translated">表示 <code class="docutils literal notranslate"><span class="pre">maintype</span></code> 的字符串</p></li>
+<li><p class="translated">空字符串</p></li>
+</ul>
+<p class="translated">如果这些键都没有产生处理程序，则为完整 MIME 类型引发一个 <a class="reference internal" href="exceptions.html#KeyError" title="KeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.contentmanager.ContentManager.set_content">
+<span class="sig-name descname"><span class="pre">set_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.contentmanager.ContentManager.set_content" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">maintype</span></code> 为 <code class="docutils literal notranslate"><span class="pre">multipart</span></code>，则引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>；否则基于 <em>obj</em> 的类型（参见下一段）查找处理函数，在 <em>msg</em> 上调用 <a class="reference internal" href="email.message.html#email.message.EmailMessage.clear_content" title="email.message.EmailMessage.clear_content"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clear_content()</span></code></a>，并调用处理函数，传递所有参数。 预期的效果是处理程序将转换 <em>obj</em> 并存入 <em>msg</em>，并可能对 <em>msg</em> 进行其他更改，例如添加各种 MIME 标头来编码需要用来解释所存储数据的信息。</p>
+<p class="translated">要找到处理程序，将获取 <em>obj</em> 的类型 (<code class="docutils literal notranslate"><span class="pre">typ</span> <span class="pre">=</span> <span class="pre">type(obj)</span></code>)，并在注册表中查找以下键，找到第一个键即停止：</p>
+<ul class="simple">
+<li><p class="translated">类型本身 (<code class="docutils literal notranslate"><span class="pre">typ</span></code>)</p></li>
+<li><p class="translated">类型的完整限定名称 (<code class="docutils literal notranslate"><span class="pre">typ.__module__</span> <span class="pre">+</span> <span class="pre">'.'</span> <span class="pre">+</span> <span class="pre">typ.__qualname__</span></code>)。</p></li>
+<li><p class="translated">类型的 <a class="reference internal" href="../reference/datamodel.html#type.__qualname__" title="type.__qualname__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">qualname</span></code></a> (<code class="docutils literal notranslate"><span class="pre">typ.__qualname__</span></code>)</p></li>
+<li><p class="translated">类型的 <a class="reference internal" href="../reference/datamodel.html#type.__name__" title="type.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> (<code class="docutils literal notranslate"><span class="pre">typ.__name__</span></code>)。</p></li>
+</ul>
+<p class="translated">如果未匹配到上述任何一项，则为 <a class="reference internal" href="../glossary.html#term-MRO"><span class="xref std std-term">MRO</span></a> (<a class="reference internal" href="../reference/datamodel.html#type.__mro__" title="type.__mro__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">typ.__mro__</span></code></a>) 中的每个类型重复上述所有检测。最后，如果没有其他键产生处理器，则为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 键检测处理器。如果没有 <code class="docutils literal notranslate"><span class="pre">None</span></code> 的处理器，则为该类型的完整限定名称引发 <a class="reference internal" href="exceptions.html#KeyError" title="KeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>。</p>
+<p class="translated">并会添加一个 <em class="mailheader">MIME-Version</em> 标头，如果没有的话 (另请参见 <a class="reference internal" href="email.message.html#email.message.MIMEPart" title="email.message.MIMEPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">MIMEPart</span></code></a>)。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.contentmanager.ContentManager.add_get_handler">
+<span class="sig-name descname"><span class="pre">add_get_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.contentmanager.ContentManager.add_get_handler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>handler</em> 函数记录为 <em>key</em> 的处理程序。对于可能的 <em>key</em> 键，请参阅 <a class="reference internal" href="#email.contentmanager.get_content" title="email.contentmanager.get_content"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_content()</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.contentmanager.ContentManager.add_set_handler">
+<span class="sig-name descname"><span class="pre">add_set_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typekey</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.contentmanager.ContentManager.add_set_handler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>handler</em> 记录为当一个匹配 <em>typekey</em> 的类型对象被传递给 <a class="reference internal" href="#email.contentmanager.set_content" title="email.contentmanager.set_content"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_content()</span></code></a> 时所要调用的函数。对于可能的 <em>typekey</em> 值，请参阅 <code class="xref py py-meth docutils literal notranslate"><span class="pre">set_content()</span></code>。</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="content-manager-instances">
+<h2 class="translated">内容管理器实例<a class="headerlink" href="#content-manager-instances" title="Link to this heading">¶</a></h2>
+<p class="translated">目前 email 包只提供了一个具体内容管理器 <a class="reference internal" href="#email.contentmanager.raw_data_manager" title="email.contentmanager.raw_data_manager"><code class="xref py py-data docutils literal notranslate"><span class="pre">raw_data_manager</span></code></a>，不过在未来可能会添加更多。 <code class="xref py py-data docutils literal notranslate"><span class="pre">raw_data_manager</span></code> 是由 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy" title="email.policy.EmailPolicy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EmailPolicy</span></code></a> 及其派生类所提供的 <a class="reference internal" href="email.policy.html#email.policy.EmailPolicy.content_manager" title="email.policy.EmailPolicy.content_manager"><code class="xref py py-attr docutils literal notranslate"><span class="pre">content_manager</span></code></a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="email.contentmanager.raw_data_manager">
+<span class="sig-prename descclassname"><span class="pre">email.contentmanager.</span></span><span class="sig-name descname"><span class="pre">raw_data_manager</span></span><a class="headerlink" href="#email.contentmanager.raw_data_manager" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这个内容管理器仅提供了超出 <a class="reference internal" href="email.compat32-message.html#email.message.Message" title="email.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a> 本身提供内容的最小接口：它只处理文本、原始字节串和 <code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code> 对象。不过相比基础 API，它具有显著的优势：在文本部分上执行 <code class="docutils literal notranslate"><span class="pre">get_content</span></code> 将返回一个 unicode 字符串而无需由应用程序来手动解码，<code class="docutils literal notranslate"><span class="pre">set_content</span></code> 为控制添加到一个部分的标头和控制内容传输编码格式提供了丰富的选项集合，并且它还启用了多种 <code class="docutils literal notranslate"><span class="pre">add_</span></code> 方法，从而简化了多部分消息的创建过程。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="email.contentmanager.get_content">
+<span class="sig-prename descclassname"><span class="pre">email.contentmanager.</span></span><span class="sig-name descname"><span class="pre">get_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'replace'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.contentmanager.get_content" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将指定部分的有效载荷作为字符串（对于 <code class="docutils literal notranslate"><span class="pre">text</span></code> 部分）, <a class="reference internal" href="email.message.html#email.message.EmailMessage" title="email.message.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> 对象（对于 <code class="docutils literal notranslate"><span class="pre">message/rfc822</span></code> 部分）或 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 对象（对于所有其他非多部分类型）返回。如果是在 <code class="docutils literal notranslate"><span class="pre">multipart</span></code> 上调用则会引发 <a class="reference internal" href="exceptions.html#KeyError" title="KeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>。如果指定部分是一个 <code class="docutils literal notranslate"><span class="pre">text</span></code> 部分并且指明了 <em>errors</em>，则会在将载荷解码为 unicode 时将其用作错误处理程序。默认的错误处理程序是 <code class="docutils literal notranslate"><span class="pre">replace</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="email.contentmanager.set_content">
+<span class="sig-prename descclassname"><span class="pre">email.contentmanager.</span></span><span class="sig-name descname"><span class="pre">set_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype=&quot;plain&quot;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charset='utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disposition=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cid=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#email.contentmanager.set_content" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">email.contentmanager.</span></span><span class="sig-name descname"><span class="pre">set_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;'bytes'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maintype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte=&quot;base64&quot;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disposition=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cid=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers=None</span></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">email.contentmanager.</span></span><span class="sig-name descname"><span class="pre">set_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;'EmailMessage'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disposition=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cid=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers=None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p class="translated">向 <em>msg</em> 添加标头和有效载荷：</p>
+<p class="translated">添加一个带有 <code class="docutils literal notranslate"><span class="pre">maintype/subtype</span></code> 值的 <em class="mailheader">Content-Type</em> 标头。</p>
+<ul class="simple">
+<li><p class="translated">对于 <code class="docutils literal notranslate"><span class="pre">str</span></code>，将 MIME <code class="docutils literal notranslate"><span class="pre">maintype</span></code> 设为 <code class="docutils literal notranslate"><span class="pre">text</span></code>，如果指定了子类型 <em>subtype</em> 则设为指定值，否则设为 <code class="docutils literal notranslate"><span class="pre">plain</span></code>.</p></li>
+<li><p class="translated">对于 <code class="docutils literal notranslate"><span class="pre">bytes</span></code>，将使用指定的 <em>maintype</em> 和 <em>subtype</em>，如果未指定则会引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>。</p></li>
+<li><p class="translated">对于 <a class="reference internal" href="email.message.html#email.message.EmailMessage" title="email.message.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> 对象，将 maintype 设为 <code class="docutils literal notranslate"><span class="pre">message</span></code>，如果指定了 <em>subtype</em> 则将 subtype 设为该值，否则设为 <code class="docutils literal notranslate"><span class="pre">rfc822</span></code>。如果 <em>subtype</em> 为 <code class="docutils literal notranslate"><span class="pre">partial</span></code>，则引发一个错误（必须使用 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 对象来构造 <code class="docutils literal notranslate"><span class="pre">message/partial</span></code> 部分）。</p></li>
+</ul>
+<p class="translated">如果提供了 <em>charset*（这只对 ``str`` 适用），则使用指定的字符集将字符串编码为字节串。默认值为 ``utf-8``。如果指定的 *charset</em> 是某个标准 MIME 字符集名称的已知别名，则会改用该标准字符集。</p>
+<p class="translated">如果设置了 <em>cte</em>，则使用指定的内容传输编码格式对有效载荷进行编码，并将 <em class="mailheader">Content-Transfer-Encoding</em> 标头设为该值。可能的 <em>cte</em> 值有 <code class="docutils literal notranslate"><span class="pre">quoted-printable</span></code>, <code class="docutils literal notranslate"><span class="pre">base64</span></code>, <code class="docutils literal notranslate"><span class="pre">7bit</span></code>, <code class="docutils literal notranslate"><span class="pre">8bit</span></code> 和 <code class="docutils literal notranslate"><span class="pre">binary</span></code>。如果输入无法以指定的编码格式被编码（例如，对于包含非 ASCII 值的输入指定 <em>cte</em> 值为 <code class="docutils literal notranslate"><span class="pre">7bit</span></code>)，则会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。</p>
+<ul class="simple">
+<li><p class="translated">对于 <code class="docutils literal notranslate"><span class="pre">str</span></code> 对象，如果未设置 <em>cte</em> 则使用启发式方法来确定最紧凑的编码格式。在编码之前，将使用 <a class="reference internal" href="stdtypes.html#str.splitlines" title="str.splitlines"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.splitlines()</span></code></a> 来正规化所有行边界，确保载荷的每一行是以当前策略的 <a class="reference internal" href="email.policy.html#email.policy.Policy.linesep" title="email.policy.Policy.linesep"><code class="xref py py-data docutils literal notranslate"><span class="pre">linesep</span></code></a> 属性来结束的（即使原始字符串不是以它结束）。</p></li>
+<li><p class="translated">对于 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 对象，如果未设置 <em>cte</em> 则使用 base64，并且不会执行之前提及的换行符转写。</p></li>
+<li><p class="translated">对于 <a class="reference internal" href="email.message.html#email.message.EmailMessage" title="email.message.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a>，按照 <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2046.html"><strong>RFC 2046</strong></a>，如果为 <em>subtype</em> <code class="docutils literal notranslate"><span class="pre">rfc822</span></code> 请求的 <em>cte</em> 为 <code class="docutils literal notranslate"><span class="pre">quoted-printable</span></code> 或 <code class="docutils literal notranslate"><span class="pre">base64</span></code>，或为 <em>subtype</em> <code class="docutils literal notranslate"><span class="pre">external-body</span></code> 请求 <code class="docutils literal notranslate"><span class="pre">7bit</span></code> 以外的任何 <em>cte</em>，则会引发一个错误。对于 <code class="docutils literal notranslate"><span class="pre">message/rfc822</span></code>，如果 <em>cte</em> 未指定则会使用 <code class="docutils literal notranslate"><span class="pre">8bit</span></code>。对于所有其他 <em>subtype</em> 值，都会使用 <code class="docutils literal notranslate"><span class="pre">7bit</span></code>。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><em>cte</em> 值为 <code class="docutils literal notranslate"><span class="pre">binary</span></code> 实际上还不能正确工作。由 <code class="docutils literal notranslate"><span class="pre">set_content</span></code> 所修改的 <code class="docutils literal notranslate"><span class="pre">EmailMessage</span></code> 对象是正确的，但 <a class="reference internal" href="email.generator.html#email.generator.BytesGenerator" title="email.generator.BytesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesGenerator</span></code></a> 不会正确地将其序列化。</p>
+</div>
+<p class="translated">如果设置了 <em>disposition</em>，它会被用作 <em class="mailheader">Content-Disposition</em> 标头的值。 如果未设置，并且指定了 <em>filename</em>，则添加值为 <code class="docutils literal notranslate"><span class="pre">attachment</span></code> 的标头。如果未设置 <em>disposition</em> 并且也未指定 <em>filename</em>，则不添加标头。 <em>disposition</em> 的有效值仅有 <code class="docutils literal notranslate"><span class="pre">attachment</span></code> 和 <code class="docutils literal notranslate"><span class="pre">inline</span></code>。</p>
+<p class="translated">如果设置了 <em>filename</em>，则将其用作 <em class="mailheader">Content-Disposition</em> 标头的 <code class="docutils literal notranslate"><span class="pre">filename</span></code> 参数的值。</p>
+<p class="translated">如果设置了 <em>cid</em>，则添加一个 <em class="mailheader">Content-ID</em> 标头并将其值设为 <em>cid</em>。</p>
+<p class="translated">如果设置了 <em>params</em>，则迭代其 <code class="docutils literal notranslate"><span class="pre">items</span></code> 方法并使用输出的 <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">value)</span></code> 结果对在 <em class="mailheader">Content-Type</em> 标头上设置附加参数。</p>
+<p class="translated">如果设置了 <em>headers</em> 并且为 <code class="docutils literal notranslate"><span class="pre">headername:</span> <span class="pre">headervalue</span></code> 形式的字符串的列表或为 <code class="docutils literal notranslate"><span class="pre">header</span></code> 对象的列表（通过一个 <code class="docutils literal notranslate"><span class="pre">name</span></code> 属性与字符串相区分），则将标头添加到 <em>msg</em>。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated rubric">脚注</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p class="translated">最初在 3.4 中作为 <a class="reference internal" href="../glossary.html#term-provisional-package"><span class="xref std std-term">暂定模块</span></a> 添加</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容</a><ul>
+<li><a class="reference internal" href="#content-manager-instances">内容管理器实例</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="email.headerregistry.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.headerregistry</span></code>: 自定义标头对象</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="email.examples.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">email</span></code>: 示例</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/email.contentmanager.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/email.contentmanager.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/email.contentmanager.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="email.examples.html" title="email: 示例"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="email.headerregistry.html" title="email.headerregistry: 自定义标头对象"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="netdata.html" >互联网数据处理</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="email.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">email</span></code> --- 电子邮件与 MIME 处理包</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">email.contentmanager</span></code>: 管理 MIME 内容</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="concurrent.futures --- 启动并行任务" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/concurrent.futures.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/concurrent/futures/thread.py, Lib/concurrent/futures/process.py 和 Lib/concurrent/futures/interpreter.py concurrent.futures 模块提供异步执行可调用对象的高层级接口。 异步执行可以使用线程来实现，即使用 ThreadPoolExecutor 或 Inter..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_concurrent.futures_84014178.png" />
+<meta property="og:image:alt" content="源代码: Lib/concurrent/futures/thread.py, Lib/concurrent/futures/process.py 和 Lib/concurrent/futures/interpreter.py concurrent.futures 模块提供异步执行可调用对象的高层级接口。 异步执行可以使用线程来实现，即使用 ThreadPoolExecutor 或 Inter..." />
+<meta name="description" content="源代码: Lib/concurrent/futures/thread.py, Lib/concurrent/futures/process.py 和 Lib/concurrent/futures/interpreter.py concurrent.futures 模块提供异步执行可调用对象的高层级接口。 异步执行可以使用线程来实现，即使用 ThreadPoolExecutor 或 Inter..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>concurrent.futures --- 启动并行任务 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="concurrent.interpreters --- 同一进程中的多个解释器" href="concurrent.interpreters.html" />
+    <link rel="prev" title="concurrent 包" href="concurrent.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/concurrent.futures.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.futures</span></code> --- 启动并行任务</a><ul>
+<li><a class="reference internal" href="#executor-objects">Executor 对象</a></li>
+<li><a class="reference internal" href="#threadpoolexecutor">ThreadPoolExecutor</a><ul>
+<li><a class="reference internal" href="#threadpoolexecutor-example">ThreadPoolExecutor 例子</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#interpreterpoolexecutor">InterpreterPoolExecutor</a></li>
+<li><a class="reference internal" href="#processpoolexecutor">ProcessPoolExecutor</a><ul>
+<li><a class="reference internal" href="#processpoolexecutor-example">ProcessPoolExecutor 例子</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#future-objects">Future 对象</a></li>
+<li><a class="reference internal" href="#module-functions">模块函数</a></li>
+<li><a class="reference internal" href="#exception-classes">Exception 类</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="concurrent.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent</span></code> 包</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="concurrent.interpreters.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.interpreters</span></code> --- 同一进程中的多个解释器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/concurrent.futures.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/concurrent.futures.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/concurrent.futures.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="concurrent.interpreters.html" title="concurrent.interpreters --- 同一进程中的多个解释器"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="concurrent.html" title="concurrent 包"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concurrency.html" accesskey="U">并发执行</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.futures</span></code> --- 启动并行任务</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-concurrent.futures">
+<span id="concurrent-futures-launching-parallel-tasks"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.futures</span></code> --- 启动并行任务<a class="headerlink" href="#module-concurrent.futures" title="Link to this heading">¶</a></h1>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/concurrent/futures/thread.py">Lib/concurrent/futures/thread.py</a>, <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/concurrent/futures/process.py">Lib/concurrent/futures/process.py</a> 和 <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/concurrent/futures/interpreter.py">Lib/concurrent/futures/interpreter.py</a></p>
+<hr class="docutils" />
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.futures</span></code> 模块提供异步执行可调用对象的高层级接口。</p>
+<p class="translated">异步执行可以使用线程来实现，即使用 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 或 <a class="reference internal" href="#concurrent.futures.InterpreterPoolExecutor" title="concurrent.futures.InterpreterPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterpreterPoolExecutor</span></code></a> 或者使用进程，即使用 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a>。 每种方式实现了相同的接口，它是由抽象类 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 来定义的。</p>
+<p class="translated"><a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.Future</span></code></a> 不可与 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Future</span></code></a> 混淆，后者被设计用于 <a class="reference internal" href="asyncio.html#module-asyncio" title="asyncio: Asynchronous I/O."><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code></a> 任务和协程。 请参阅 <a class="reference internal" href="asyncio-future.html"><span class="doc">asyncio 的 Future</span></a> 文档查看两者的详细比较。</p>
+<div class="availability docutils container">
+<p class="untranslated"><a class="reference internal" href="intro.html#availability"><span class="std std-ref">适用范围</span></a>: not WASI.</p>
+<p class="translated">此模块在 WebAssembly 平台上无效或不可用。 请参阅 <a class="reference internal" href="intro.html#wasm-availability"><span class="std std-ref">WebAssembly 平台</span></a> 了解详情。</p>
+</div>
+<section id="executor-objects">
+<h2 class="translated">Executor 对象<a class="headerlink" href="#executor-objects" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="concurrent.futures.Executor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">Executor</span></span><a class="headerlink" href="#concurrent.futures.Executor" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">抽象类提供异步执行调用方法。要通过它的子类调用，而不是直接调用。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Executor.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Executor.submit" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">调度可调用对象 <em>fn</em>，以 <code class="docutils literal notranslate"><span class="pre">fn(*args,</span> <span class="pre">**kwargs)</span></code> 方式执行并返回一个代表该可调用对象的执行的 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 对象。</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="nb">pow</span><span class="p">,</span> <span class="mi">323</span><span class="p">,</span> <span class="mi">1235</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Executor.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">iterables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffersize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Executor.map" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="functions.html#map" title="map"><code class="xref py py-func docutils literal notranslate"><span class="pre">map(fn,</span> <span class="pre">*iterables)</span></code></a> 但有以下差异：</p>
+<ul class="simple">
+<li><p class="translated"><em>iterables</em> 的收集是立即而非惰性的，除非指定了 <em>buffersize</em> 来限制提交结果尚未产生的任务数量。 如果缓冲区已满，对 <em>iterables</em> 的迭代将暂停直到缓冲区产生了一个结果。</p></li>
+<li><p class="translated"><em>fn</em> 是异步执行的并且可以并发对 <em>fn</em> 的多个调用。</p></li>
+</ul>
+<p class="translated">如果 <a class="reference internal" href="stdtypes.html#iterator.__next__" title="iterator.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__next__()</span></code></a> 被调用且从对 <a class="reference internal" href="#concurrent.futures.Executor.map" title="concurrent.futures.Executor.map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.map()</span></code></a> 原始调用 <em>timeout</em> 秒之后其结果还不可用则已返回的迭代器将引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。 <em>timeout</em> 可以是整数或浮点数。 如果 <em>timeout</em> 未指定或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则不限制等待时间。</p>
+<p class="translated">如果 <em>fn</em> 调用引发了异常，那么当从迭代器获取其值时该异常将被引发。</p>
+<p class="translated">当使用 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 时，这个方法会将 <em>iterables</em> 分块并作为单独的任务提交到执行池中。 这些分块的（近似）大小可通过将 <em>chunksize</em> 设为一个正整数来指定。 对于非常长的迭代器来说，使用较大的 <em>chunksize</em> 值相比默认大小 1 能显著地提升性能。 对于 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 和 <a class="reference internal" href="#concurrent.futures.InterpreterPoolExecutor" title="concurrent.futures.InterpreterPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterpreterPoolExecutor</span></code></a>，<em>chunksize</em> 将没有效果。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>增加了 <em>chunksize</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>增加了 <em>buffersize</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Executor.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancel_futures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Executor.shutdown" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当待执行的 future 对象完成执行后向执行者发送信号，它就会释放正在使用的任何资源。 在关闭后调用 <a class="reference internal" href="#concurrent.futures.Executor.submit" title="concurrent.futures.Executor.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.submit()</span></code></a> 和 <a class="reference internal" href="#concurrent.futures.Executor.map" title="concurrent.futures.Executor.map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.map()</span></code></a> 将会引发 <a class="reference internal" href="exceptions.html#RuntimeError" title="RuntimeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>。</p>
+<p class="translated">如果 <em>wait</em> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code> 则此方法只有在所有待执行的 future 对象完成执行且释放已分配的资源后才会返回。 如果 <em>wait</em> 为 <code class="docutils literal notranslate"><span class="pre">False</span></code>，方法立即返回，所有待执行的 future 对象完成执行后会释放已分配的资源。 不管 <em>wait</em> 的值是什么，整个 Python 程序将等到所有待执行的 future 对象完成执行后才退出。</p>
+<p class="translated">如果 <em>cancel_futures</em> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，此方法将取消所有执行器还未开始运行的挂起的 Future。无论 <em>cancel_futures</em> 的值是什么，任何已完成或正在运行的 Future 都不会被取消。</p>
+<p class="translated">如果 <em>cancel_futures</em> 和 <em>wait</em> 均为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，则执行器已开始运行的所有 Future 将在此方法返回之前完成。 其余的 Future 会被取消。</p>
+<p class="translated">若通过 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句将执行器作为 <a class="reference internal" href="../glossary.html#term-context-manager"><span class="xref std std-term">context manager</span></a> 使用，则可避免显式调用此方法，因为该语句会自动关闭 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> (其等待行为等同于调用 <a class="reference internal" href="#concurrent.futures.Executor.shutdown" title="concurrent.futures.Executor.shutdown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.shutdown()</span></code></a> 并将 <em>wait</em> 参数设为 <code class="docutils literal notranslate"><span class="pre">True</span></code> 的情况):</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">,</span> <span class="s1">&#39;src1.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;dest1.txt&#39;</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">,</span> <span class="s1">&#39;src2.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;dest2.txt&#39;</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">,</span> <span class="s1">&#39;src3.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;dest3.txt&#39;</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">,</span> <span class="s1">&#39;src4.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;dest4.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>增加了 <em>cancel_futures</em>。</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="threadpoolexecutor">
+<h2 class="translated">ThreadPoolExecutor<a class="headerlink" href="#threadpoolexecutor" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 是 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 的子类，它使用线程池来异步执行调用。</p>
+<p class="translated">当可调用对象已关联了一个 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 然后在等待另一个 <code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code> 的结果时就会导致死锁情况。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wait_on_b</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>  <span class="c1"># b 永远不会结束因为它在等待 a。</span>
+    <span class="k">return</span> <span class="mi">5</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wait_on_a</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>  <span class="c1"># a 永远不会结束因为它在等待 b。</span>
+    <span class="k">return</span> <span class="mi">6</span>
+
+
+<span class="n">executor</span> <span class="o">=</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">wait_on_b</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">wait_on_a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">以及:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">wait_on_future</span><span class="p">():</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="nb">pow</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># 这将永远不会完成因为只有一个工作线程</span>
+    <span class="c1"># 并且它正在执行此函数</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
+
+<span class="n">executor</span> <span class="o">=</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">future</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">wait_on_future</span><span class="p">)</span>
+<span class="c1"># 注意：调用 future.result() 也会导致死锁因为</span>
+<span class="c1"># 这个工作线程已经在等待 wait_on_future()。</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="concurrent.futures.ThreadPoolExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">ThreadPoolExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread_name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.ThreadPoolExecutor" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 子类使用最多 <em>max_workers</em> 个线程的线程池来异步执行调用。</p>
+<p class="translated">所有排入 <code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> 的线程将在解释器退出之前被合并。 请注意执行此操作的退出处理器会在任何使用 <code class="docutils literal notranslate"><span class="pre">atexit</span></code> 添加的退出处理器 <em>之前</em> 被执行。 这意味着主线程中的异常必须被捕获和处理以便向线程发出信号使其能够优雅地退出。 由于这个原因，建议不要将 <code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> 用于长期运行的任务。</p>
+<p class="translated"><em>initializer</em> 是在每个工作者线程开始处调用的一个可选可调用对象。 <em>initargs</em> 是传递给初始化器的元组参数。如果 <em>initializer</em> 引发了异常，所有当前等待的任务以及任何向池提交更多任务的尝试都将引发 <a class="reference internal" href="#concurrent.futures.thread.BrokenThreadPool" title="concurrent.futures.thread.BrokenThreadPool"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenThreadPool</span></code></a>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>如果 <em>max_workers</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 或没有指定，将默认为机器处理器的个数乘以 <code class="docutils literal notranslate"><span class="pre">5</span></code>，因为假定 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 通常用来重叠 I/O 操作而非 CPU 运算，并且工作线程的数量应当高于 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 的工作进程数量。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>增加了 <em>thread_name_prefix</em> 形参来允许用户控制由线程池创建的 <a class="reference internal" href="threading.html#threading.Thread" title="threading.Thread"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></a> 工作线程名称以方便调试。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>加入 <em>initializer</em> 和 <em>initargs</em> 参数。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span><em>max_workers</em> 的默认值已改为 <code class="docutils literal notranslate"><span class="pre">min(32,</span> <span class="pre">os.cpu_count()</span> <span class="pre">+</span> <span class="pre">4)</span></code>。 这个默认值会保留至少 5 个工作线程用于 I/O 密集型任务。 对于那些释放了 GIL 的 CPU 密集型任务，它最多会使用 32 个 CPU 核心。这样能够避免在多核机器上不知不觉地使用大量资源。</p>
+<p class="translated">现在 ThreadPoolExecutor 在启动 <em>max_workers</em> 个工作线程之前也会重用空闲的工作线程。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span><em>max_workers</em> 的默认值已改为 <code class="docutils literal notranslate"><span class="pre">min(32,</span> <span class="pre">(os.process_cpu_count()</span> <span class="pre">or</span> <span class="pre">1)</span> <span class="pre">+</span> <span class="pre">4)</span></code>。</p>
+</div>
+</dd></dl>
+
+<section id="threadpoolexecutor-example">
+<span id="id1"></span><h3 class="translated">ThreadPoolExecutor 例子<a class="headerlink" href="#threadpoolexecutor-example" title="Link to this heading">¶</a></h3>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+
+<span class="n">URLS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;http://www.foxnews.com/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;http://www.cnn.com/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;http://europe.wsj.com/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;http://www.bbc.co.uk/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;http://nonexistent-subdomain.python.org/&#39;</span><span class="p">]</span>
+
+<span class="c1"># 获取一个页面并报告其 URL 和内容</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="c1"># 我们可以使用一个 with 语句来确保线程被迅速清理</span>
+<span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+    <span class="c1"># 开始加载操作并以每个 Future 对象的 URL 对其进行标记</span>
+    <span class="n">future_to_url</span> <span class="o">=</span> <span class="p">{</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">load_url</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="mi">60</span><span class="p">):</span> <span class="n">url</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">URLS</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">as_completed</span><span class="p">(</span><span class="n">future_to_url</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">future_to_url</span><span class="p">[</span><span class="n">future</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> generated an exception: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">exc</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> page is </span><span class="si">%d</span><span class="s1"> bytes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="interpreterpoolexecutor">
+<h2 class="translated">InterpreterPoolExecutor<a class="headerlink" href="#interpreterpoolexecutor" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+<p class="translated"><a class="reference internal" href="#concurrent.futures.InterpreterPoolExecutor" title="concurrent.futures.InterpreterPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterpreterPoolExecutor</span></code></a> 类使用一个解释器池来异步地执行调用。 它是 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 的子类，这意味着每个工作解释器在它自己的线程中运行。 它与其父类的区别在于每个工作线程都具有自己的解释器，并使用该解释器运行每个任务。</p>
+<p class="translated">使用解释器而非只用线程的最大好处是真正的多核心并行。 每个解释器都有自己的 <a class="reference internal" href="../glossary.html#term-global-interpreter-lock"><span class="xref std std-term">全局解释器锁</span></a>，因此在一个解释器中运行的代码可以在一个 CPU 核心上运行，而在另一个解释器中运行的代码可以在不同的核心上无阻塞地运行。</p>
+<p class="translated">作为交换的是编写用于多解释器的并发代码需要额外的考量。 不过，这是由于它会迫使你谨慎处理多解释器要怎样以及何时进行交互，并明确哪些数据要在解释器之间进行共享。 这导致几项有助于对额外的考量进行平衡的好处，包括真正的多核心并行。 例如，以这种方式编写的代码可以更容易地理顺并发过程。另一项重要的好处是你不必处理某些使用线程的关键痛点，比如竞争条件等。</p>
+<p class="translated">每个工作线程的解释器都是与其他所有解释器隔离的。“隔离”意味着每个解释器都有自己的运行时状态，并且完全独立地运行。例如，如果你在一个解释器中重定向 <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a> ，它不会自动重定向到任何其他解释器。如果你在一个解释器中导入了一个模块，它不会在其他解释器中自动导入。你需要在需要它的解释器中单独导入模块。事实上，在解释器中导入的每个模块都是与不同解释器中的相同模块完全独立的对象，包括 <a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a>、<a class="reference internal" href="builtins.html#module-builtins" title="builtins: The module that provides the built-in namespace."><code class="xref py py-mod docutils literal notranslate"><span class="pre">builtins</span></code></a> 甚至 <code class="docutils literal notranslate"><span class="pre">__main__</span></code>。</p>
+<p class="translated">隔离意味着可变对象或其他数据不能同时被多个解释器使用。这实际上意味着解释器实际上不能共享这些对象或数据。相反，每个解释器必须有自己的副本，并且必须手动同步副本之间的任何更改。不可变对象和数据，如不可变对象的内置单例、字符串和元组，就没有这些限制。</p>
+<p class="translated">解释器之间的通信和同步使用专用工具是最有效的，就像在 <span class="target" id="index-4"></span><a class="pep reference external" href="https://peps.python.org/pep-0734/"><strong>PEP 734</strong></a> 中建议的那样。 一种效率较低的替代方法是使用 <a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> 进行序列化，然后通过共享的 <a class="reference internal" href="socket.html#module-socket" title="socket: Low-level networking interface."><code class="xref py py-mod docutils literal notranslate"><span class="pre">套接字</span></code></a> 或 <a class="reference internal" href="os.html#os.pipe" title="os.pipe"><code class="xref py py-func docutils literal notranslate"><span class="pre">管道</span></code></a> 发送字节。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="concurrent.futures.InterpreterPoolExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">InterpreterPoolExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread_name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.InterpreterPoolExecutor" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 子类，使用最多 <em>max_workers</em> 线程的池异步执行调用。 每个线程在自己的解释器中运行任务。 工作解释器彼此隔离，这意味着每个解释器都有自己的运行时状态，并且它们不能共享任何可变对象或其他数据。 每个解释器都有自己的 <a class="reference internal" href="../glossary.html#term-global-interpreter-lock"><span class="xref std std-term">全局解释器锁</span></a>，这意味着使用该执行器运行的代码具有真正的多核并行性。</p>
+<p class="translated">可选的 <em>initializer</em> 和 <em>initargs</em> 参数与 <code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> 具有相同的含义：初始化器在每个工作线程被创建时运行，尽管在这种情况下它是在工作线程的解释器中运行的。 当执行器将 <em>initializer</em> 和 <em>initargs</em> 发送给工作线程的解释器时，使用 <a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> 对它们进行序列化。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">执行器可以将来自 <em>initializer</em> 的未捕获异常替换为 <a class="reference internal" href="concurrent.interpreters.html#concurrent.interpreters.ExecutionFailed" title="concurrent.interpreters.ExecutionFailed"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionFailed</span></code></a>。</p>
+</div>
+<p class="translated">来自 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 的其他警告也适用于此。</p>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#concurrent.futures.Executor.submit" title="concurrent.futures.Executor.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> 和 <a class="reference internal" href="#concurrent.futures.Executor.map" title="concurrent.futures.Executor.map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">map()</span></code></a> 的工作方式与正常情况一样，只是工作线程在将可调用函数和参数发送到其解释器时使用 <a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> 对其进行序列化。 在发送返回值时，工作线程同样会对其进行序列化。</p>
+<p class="translated">当一个工作线程的当前任务引发未捕获的异常时，工作线程总是会尝试原样保留异常。 如果成功则它还会将 <code class="docutils literal notranslate"><span class="pre">__cause__</span></code> 设为对应的 <a class="reference internal" href="concurrent.interpreters.html#concurrent.interpreters.ExecutionFailed" title="concurrent.interpreters.ExecutionFailed"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionFailed</span></code></a> 实例，该实例包含原始异常的概要信息。 在工作线程不能原样保留异常的少数情况下它会改为直接保留对应的 <code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionFailed</span></code> 实例。</p>
+</section>
+<section id="processpoolexecutor">
+<h2 class="translated">ProcessPoolExecutor<a class="headerlink" href="#processpoolexecutor" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 类是 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 的子类，它使用进程池来异步地执行调用。 <code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code> 会使用 <a class="reference internal" href="multiprocessing.html#module-multiprocessing" title="multiprocessing: Process-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> 模块，这允许它绕过 <a class="reference internal" href="../glossary.html#term-global-interpreter-lock"><span class="xref std std-term">全局解释器锁</span></a> 但也意味着只可以处理和返回可封存的对象。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">__main__</span></code> 模块必须可以被工作者子进程导入。这意味着 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 不可以工作在交互式解释器中。</p>
+<p class="translated">从已提交给 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 的可调用对象中调用 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 或 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 的方法会导致死锁。</p>
+<p class="translated">请注意，在 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 上使用 <a class="reference internal" href="#concurrent.futures.Executor.submit" title="concurrent.futures.Executor.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> 和 <a class="reference internal" href="#concurrent.futures.Executor.map" title="concurrent.futures.Executor.map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">map()</span></code></a> 时函数和参数需要如 <a class="reference internal" href="multiprocessing.html#multiprocessing.Process" title="multiprocessing.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.Process</span></code></a> 那样应用必要的限制条件以支持 pickle 操作。 在 REPL 或 lambda 中定义的函数不应被期望能正确工作。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="concurrent.futures.ProcessPoolExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">ProcessPoolExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mp_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tasks_per_child</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.ProcessPoolExecutor" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">异步地执行调用的 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 子类使用最多 <em>max_workers</em> 个进程的进程池。 如果 <em>max_workers</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 或未给出，它将默认为 <a class="reference internal" href="os.html#os.process_cpu_count" title="os.process_cpu_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.process_cpu_count()</span></code></a>。 如果 <em>max_workers</em> 小于等于 <code class="docutils literal notranslate"><span class="pre">0</span></code>，则将引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。 在 Windows 上，<em>max_workers</em> 必须小于等于 <code class="docutils literal notranslate"><span class="pre">61</span></code>。 如果不是这样则将引发 <code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code>。 如果 <em>max_workers</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则选择的默认值最多为 <code class="docutils literal notranslate"><span class="pre">61</span></code>，即使存在更多的处理器。 <em>mp_context</em> 可以是一个 <a class="reference internal" href="multiprocessing.html#module-multiprocessing" title="multiprocessing: Process-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> 上下文或是 <code class="docutils literal notranslate"><span class="pre">None</span></code>。 它将被用来启动工作进程。 如果 <em>mp_context</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 或未给出，则将使用默认的 <code class="xref py py-mod docutils literal notranslate"><span class="pre">multiprocessing</span></code> 上下文。 参见 <a class="reference internal" href="multiprocessing.html#multiprocessing-start-methods"><span class="std std-ref">上下文和启动方法</span></a>。</p>
+<p class="translated"><em>initializer</em> 是一个可选的可调用对象，它会在每个工作进程启动时被调用；<em>initargs</em> 是传给 initializer 的参数元组。 如果 <em>initializer</em> 引发了异常，则所有当前在等待的任务以及任何向进程池提交更多任务的尝试都将引发 <a class="reference internal" href="#concurrent.futures.process.BrokenProcessPool" title="concurrent.futures.process.BrokenProcessPool"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenProcessPool</span></code></a>。</p>
+<p class="translated"><em>max_tasks_per_child</em> 是指定单个进程在其退出并替换为新工作进程之前可以执行的最大任务数量的可选参数。 在默认情况下 <em>max_tasks_per_child</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 表示工作进程将存活与进程池一样长的时间。 当指定了最大数量时，则如果不存在 <em>mp_context</em> 形参则将默认使用 &quot;spawn&quot; 多进程启动方法。 此特性不能兼容 &quot;fork&quot; 启动方法。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>当某个工作进程突然终止时，现在将引发 <a class="reference internal" href="#concurrent.futures.process.BrokenProcessPool" title="concurrent.futures.process.BrokenProcessPool"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenProcessPool</span></code></a>。 在之前版本中，它的行为是未定义的但在执行器上的操作或它的 future 对象往往会被冻结或死锁。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>添加 <em>mp_context</em> 参数允许用户控制由进程池创建的工作者进程的启动方法。</p>
+<p class="translated">加入 <em>initializer</em> 和 <em>initargs</em> 参数。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>增加了 <em>max_tasks_per_child</em> 参数以允许用户控制进程池中工作进程的生命期。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>在 POSIX 系统上，如果你的应用程序有多个线程而 <a class="reference internal" href="multiprocessing.html#module-multiprocessing" title="multiprocessing: Process-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> 上下文使用了 <code class="docutils literal notranslate"><span class="pre">&quot;fork&quot;</span></code> 启动方法：内部调用的 <a class="reference internal" href="os.html#os.fork" title="os.fork"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.fork()</span></code></a> 函数来生成工作进程可能会引发 <a class="reference internal" href="exceptions.html#DeprecationWarning" title="DeprecationWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>。 请传递配置为使用不同启动方法的 <em>mp_context</em>。 进一步的解释请参阅 <code class="xref py py-func docutils literal notranslate"><span class="pre">os.fork()</span></code> 文档。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>在默认情况下 <em>max_workers</em> 将使用 <a class="reference internal" href="os.html#os.process_cpu_count" title="os.process_cpu_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.process_cpu_count()</span></code></a>，而不是 <a class="reference internal" href="os.html#os.cpu_count" title="os.cpu_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.cpu_count()</span></code></a>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>默认的进程启动方法 (参见 <a class="reference internal" href="multiprocessing.html#multiprocessing-start-methods"><span class="std std-ref">上下文和启动方法</span></a>) 已改为不再使用 <em>fork</em>。 如果你需要为 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 使用 <em>fork</em> 启动方法你必须显式地传入 <code class="docutils literal notranslate"><span class="pre">mp_context=multiprocessing.get_context(&quot;fork&quot;)</span></code>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14.7 版本发生变更: </span>Fixed a deadlock (<a class="reference external" href="https://github.com/python/cpython/issues/115634">gh-115634</a>) where the executor could hang after
+a worker process exited upon reaching its <em>max_tasks_per_child</em>
+limit while tasks remained queued.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.ProcessPoolExecutor.terminate_workers">
+<span class="sig-name descname"><span class="pre">terminate_workers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.ProcessPoolExecutor.terminate_workers" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">尝试通过对每个存活的工作进程调用 <a class="reference internal" href="multiprocessing.html#multiprocessing.Process.terminate" title="multiprocessing.Process.terminate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Process.terminate</span></code></a> 来立即终止它们。 在内部，它还将调用 <a class="reference internal" href="#concurrent.futures.Executor.shutdown" title="concurrent.futures.Executor.shutdown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.shutdown()</span></code></a> 以确保所有与执行器相关联的其他资源被释放。</p>
+<p class="translated">在调用此方法之后调用方不应再向执行器提交任务。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.ProcessPoolExecutor.kill_workers">
+<span class="sig-name descname"><span class="pre">kill_workers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.ProcessPoolExecutor.kill_workers" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">尝试通过对每个进程调用 <a class="reference internal" href="multiprocessing.html#multiprocessing.Process.kill" title="multiprocessing.Process.kill"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Process.kill</span></code></a> 来立即杀死所有存活的工作进程。 在内部，它还将调用 <a class="reference internal" href="#concurrent.futures.Executor.shutdown" title="concurrent.futures.Executor.shutdown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.shutdown()</span></code></a> 来确保释放与执行器相关的所有其他资源。</p>
+<p class="translated">在调用此方法之后调用方不应再向执行器提交任务。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<section id="processpoolexecutor-example">
+<span id="id2"></span><h3 class="translated">ProcessPoolExecutor 例子<a class="headerlink" href="#processpoolexecutor-example" title="Link to this heading">¶</a></h3>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="n">PRIMES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">112272535095293</span><span class="p">,</span>
+    <span class="mi">112582705942171</span><span class="p">,</span>
+    <span class="mi">112272535095293</span><span class="p">,</span>
+    <span class="mi">115280095190773</span><span class="p">,</span>
+    <span class="mi">115797848077099</span><span class="p">,</span>
+    <span class="mi">1099726899285419</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_prime</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">sqrt_n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">sqrt_n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ProcessPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">prime</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">PRIMES</span><span class="p">,</span> <span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">is_prime</span><span class="p">,</span> <span class="n">PRIMES</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> is prime: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">prime</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="future-objects">
+<h2 class="translated">Future 对象<a class="headerlink" href="#future-objects" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 类将可调用对象封装为异步执行。<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code> 实例由 <a class="reference internal" href="#concurrent.futures.Executor.submit" title="concurrent.futures.Executor.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.submit()</span></code></a> 创建。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="concurrent.futures.Future">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">Future</span></span><a class="headerlink" href="#concurrent.futures.Future" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将可调用对象封装为异步执行。<a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 实例由 <a class="reference internal" href="#concurrent.futures.Executor.submit" title="concurrent.futures.Executor.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Executor.submit()</span></code></a> 创建，除非测试，不应直接创建。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.cancel">
+<span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.cancel" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">尝试取消调用。 如果调用正在执行或已结束运行不能被取消则该方法将返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>，否则调用会被取消并且该方法将返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.cancelled">
+<span class="sig-name descname"><span class="pre">cancelled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.cancelled" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果调用成功取消返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.running">
+<span class="sig-name descname"><span class="pre">running</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.running" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果调用正在执行而且不能被取消那么返回 <code class="docutils literal notranslate"><span class="pre">True</span></code> 。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.done">
+<span class="sig-name descname"><span class="pre">done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.done" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果调用已被取消或正常结束那么返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.result" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回调用所返回的值。 如果调用尚未完成则此方法将等待至多 <em>timeout</em> 秒。 如果调用在 <em>timeout</em> 秒内仍未完成，则将引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。 <em>timeout</em> 可以为整数或浮点数。 如果 <em>timeout</em> 未指定或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则不限制等待时间。</p>
+<p class="translated">如果 future 在完成前被取消则 <a class="reference internal" href="#concurrent.futures.CancelledError" title="concurrent.futures.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 将被触发。</p>
+<p class="translated">如果调用引发了一个异常，这个方法也会引发同样的异常。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.exception">
+<span class="sig-name descname"><span class="pre">exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.exception" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回调用所引发的异常。 如果调用尚未完成则此方法将等待至多 <em>timeout</em> 秒。 如果调用在 <em>timeout</em> 秒内仍未完成，则将引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。 <em>timeout</em> 可以为整数或浮点数。 如果 <em>timeout</em> 未指定或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则不限制等待时间。</p>
+<p class="translated">如果 future 在完成前被取消则 <a class="reference internal" href="#concurrent.futures.CancelledError" title="concurrent.futures.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 将被触发。</p>
+<p class="translated">如果调用正常完成那么返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.add_done_callback">
+<span class="sig-name descname"><span class="pre">add_done_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.add_done_callback" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">附加可调用 <em>fn</em> 到 future 对象。当 future 对象被取消或完成运行时，将会调用 <em>fn</em>，而这个 future 对象将作为它唯一的参数。</p>
+<p class="translated">加入的可调用对象总被属于添加它们的进程中的线程按加入的顺序调用。如果可调用对象引发一个 <a class="reference internal" href="exceptions.html#Exception" title="Exception"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> 子类，它会被记录下来并被忽略掉。如果可调用对象引发一个 <a class="reference internal" href="exceptions.html#BaseException" title="BaseException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseException</span></code></a> 子类，这个行为没有定义。</p>
+<p class="translated">如果 future 对象已经完成或已取消，<em>fn</em> 会被立即调用。</p>
+</dd></dl>
+
+<p class="translated">下面这些 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 方法用于单元测试和 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 实现。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.set_running_or_notify_cancel">
+<span class="sig-name descname"><span class="pre">set_running_or_notify_cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.set_running_or_notify_cancel" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这个方法只可以在执行关联 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 工作之前由 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 实现调用或由单元测试调用。</p>
+<p class="translated">如果此方法返回 <code class="docutils literal notranslate"><span class="pre">False</span></code> 则 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 已被取消，即 <a class="reference internal" href="#concurrent.futures.Future.cancel" title="concurrent.futures.Future.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.cancel()</span></code></a> 已被调用并返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。 任何等待 <code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code> 完成 (即通过 <a class="reference internal" href="#concurrent.futures.as_completed" title="concurrent.futures.as_completed"><code class="xref py py-func docutils literal notranslate"><span class="pre">as_completed()</span></code></a> 或 <a class="reference internal" href="#concurrent.futures.wait" title="concurrent.futures.wait"><code class="xref py py-func docutils literal notranslate"><span class="pre">wait()</span></code></a>) 的线程将被唤醒。</p>
+<p class="translated">如果此方法返回 <code class="docutils literal notranslate"><span class="pre">True</span></code> 则 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 没有被取消并已被置为正在运行的状态，即对 <a class="reference internal" href="#concurrent.futures.Future.running" title="concurrent.futures.Future.running"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.running()</span></code></a> 的调用将返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+<p class="translated">这个方法只可以被调用一次并且不能在调用 <a class="reference internal" href="#concurrent.futures.Future.set_result" title="concurrent.futures.Future.set_result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.set_result()</span></code></a> 或 <a class="reference internal" href="#concurrent.futures.Future.set_exception" title="concurrent.futures.Future.set_exception"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.set_exception()</span></code></a> 之后再调用。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.set_result">
+<span class="sig-name descname"><span class="pre">set_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.set_result" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 关联工作的结果设为 <em>result</em>。</p>
+<p class="translated">这个方法只可以由 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 实现和单元测试使用。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>如果 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 已经完成则此方法会引发 <a class="reference internal" href="#concurrent.futures.InvalidStateError" title="concurrent.futures.InvalidStateError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">concurrent.futures.InvalidStateError</span></code></a>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="concurrent.futures.Future.set_exception">
+<span class="sig-name descname"><span class="pre">set_exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.Future.set_exception" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 关联工作的异常设为 <a class="reference internal" href="exceptions.html#Exception" title="Exception"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a> <em>exception</em>。</p>
+<p class="translated">这个方法只可以由 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 实现和单元测试使用。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>如果 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 已经完成则此方法会引发 <a class="reference internal" href="#concurrent.futures.InvalidStateError" title="concurrent.futures.InvalidStateError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">concurrent.futures.InvalidStateError</span></code></a>。</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-functions">
+<h2 class="translated">模块函数<a class="headerlink" href="#module-functions" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="concurrent.futures.wait">
+<span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ALL_COMPLETED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.wait" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">等待由 <em>fs</em> 指定的 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 实例（可能由不同的 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 实例创建）完成。 重复传给 <em>fs</em> 的 future 会被移除并将只返回一次。 返回一个由集合组成的具名 2 元组。 第一个集合的名称为 <code class="docutils literal notranslate"><span class="pre">done</span></code>，包含在等待完成之前已完成的 future（包括正常结束或被取消的 future）。 第二个集合的名称为 <code class="docutils literal notranslate"><span class="pre">not_done</span></code>，包含未完成的 future（包括挂起的或正在运行的 future）。</p>
+<p class="translated"><em>timeout</em> 可以用来控制返回前最大的等待秒数。 <em>timeout</em> 可以为 int 或 float 类型。 如果 <em>timeout</em> 未指定或为 <code class="docutils literal notranslate"><span class="pre">None</span></code> ，则不限制等待时间。</p>
+<p class="translated"><em>return_when</em> 指定此函数应在何时返回。它必须为以下常数之一:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">常量</p></th>
+<th class="head"><p class="translated">描述</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="py data">
+<dt class="sig sig-object py" id="concurrent.futures.FIRST_COMPLETED">
+<span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">FIRST_COMPLETED</span></span><a class="headerlink" href="#concurrent.futures.FIRST_COMPLETED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">函数将在任意 future 对象结束或取消时返回。</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="py data">
+<dt class="sig sig-object py" id="concurrent.futures.FIRST_EXCEPTION">
+<span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">FIRST_EXCEPTION</span></span><a class="headerlink" href="#concurrent.futures.FIRST_EXCEPTION" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">该函数将在任何 future 对象通过引发异常而结束时返回。 如果没有任何 future 对象引发异常那么它将等价于 <a class="reference internal" href="#concurrent.futures.ALL_COMPLETED" title="concurrent.futures.ALL_COMPLETED"><code class="xref py py-const docutils literal notranslate"><span class="pre">ALL_COMPLETED</span></code></a>。</p></td>
+</tr>
+<tr class="row-even"><td><dl class="py data">
+<dt class="sig sig-object py" id="concurrent.futures.ALL_COMPLETED">
+<span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">ALL_COMPLETED</span></span><a class="headerlink" href="#concurrent.futures.ALL_COMPLETED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">函数将在所有 future 对象结束或取消时返回。</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="concurrent.futures.as_completed">
+<span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">as_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#concurrent.futures.as_completed" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个迭代器，每当 <em>fs</em> 所给出的 <a class="reference internal" href="#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 实例（可能由不同的 <a class="reference internal" href="#concurrent.futures.Executor" title="concurrent.futures.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a> 实例创建）完成时这个迭代器会产生新的 future（包括正常结束或被取消的 future 对象）。 任何由 <em>fs</em> 给出的重复的 future 对象将只被返回一次。 任何在 <a class="reference internal" href="#concurrent.futures.as_completed" title="concurrent.futures.as_completed"><code class="xref py py-func docutils literal notranslate"><span class="pre">as_completed()</span></code></a> 被调用之前完成的 future 对象将优先被产生。 如果 <a class="reference internal" href="stdtypes.html#iterator.__next__" title="iterator.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__next__()</span></code></a> 被调用并且在最初调用 <code class="xref py py-func docutils literal notranslate"><span class="pre">as_completed()</span></code> 之后的 <em>timeout</em> 秒内其结果仍不可用，这个迭代器将引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。 <em>timeout</em> 可以为整数或浮点数。 如果 <em>timeout</em> 未指定或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则不限制等待时间。</p>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><span class="target" id="index-5"></span><a class="pep reference external" href="https://peps.python.org/pep-3148/"><strong>PEP 3148</strong></a> -- future 对象 - 异步执行指令。</dt><dd><p class="translated">该提案描述了将此特性纳入 Python 标准库。</p>
+</dd>
+</dl>
+</div>
+</section>
+<section id="exception-classes">
+<h2 class="translated">Exception 类<a class="headerlink" href="#exception-classes" title="Link to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.CancelledError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">CancelledError</span></span><a class="headerlink" href="#concurrent.futures.CancelledError" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">future 对象被取消时会触发。</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.TimeoutError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">TimeoutError</span></span><a class="headerlink" href="#concurrent.futures.TimeoutError" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a> 的一个已被弃用的别名，会在 future 操作超出了给定的时限时被引发。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>这个类是 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a> 的别名。</p>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.BrokenExecutor">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">BrokenExecutor</span></span><a class="headerlink" href="#concurrent.futures.BrokenExecutor" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">派生自 <a class="reference internal" href="exceptions.html#RuntimeError" title="RuntimeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>，当执行器因某些原因而中断且不能用来提交或执行新任务时将被引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.InvalidStateError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.</span></span><span class="sig-name descname"><span class="pre">InvalidStateError</span></span><a class="headerlink" href="#concurrent.futures.InvalidStateError" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当某个操作在一个当前状态所不允许的 future 上执行时将被引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.thread.BrokenThreadPool">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.thread.</span></span><span class="sig-name descname"><span class="pre">BrokenThreadPool</span></span><a class="headerlink" href="#concurrent.futures.thread.BrokenThreadPool" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">派生自 <a class="reference internal" href="#concurrent.futures.BrokenExecutor" title="concurrent.futures.BrokenExecutor"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenExecutor</span></code></a>，这个异常类会在 <a class="reference internal" href="#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code></a> 的某个工作线程初始化失败时被引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.interpreter.BrokenInterpreterPool">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.interpreter.</span></span><span class="sig-name descname"><span class="pre">BrokenInterpreterPool</span></span><a class="headerlink" href="#concurrent.futures.interpreter.BrokenInterpreterPool" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">派生自 <a class="reference internal" href="#concurrent.futures.thread.BrokenThreadPool" title="concurrent.futures.thread.BrokenThreadPool"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenThreadPool</span></code></a>，这个异常类会在 <a class="reference internal" href="#concurrent.futures.InterpreterPoolExecutor" title="concurrent.futures.InterpreterPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterpreterPoolExecutor</span></code></a> 的某个工作线程初始化失败时被引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="concurrent.futures.process.BrokenProcessPool">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">concurrent.futures.process.</span></span><span class="sig-name descname"><span class="pre">BrokenProcessPool</span></span><a class="headerlink" href="#concurrent.futures.process.BrokenProcessPool" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">派生自 <a class="reference internal" href="#concurrent.futures.BrokenExecutor" title="concurrent.futures.BrokenExecutor"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenExecutor</span></code></a> (原为 <a class="reference internal" href="exceptions.html#RuntimeError" title="RuntimeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>)，这个异常类会在 <a class="reference internal" href="#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code></a> 的某个工作进程以不完整的方式终结（例如，从外部杀掉）时被引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.futures</span></code> --- 启动并行任务</a><ul>
+<li><a class="reference internal" href="#executor-objects">Executor 对象</a></li>
+<li><a class="reference internal" href="#threadpoolexecutor">ThreadPoolExecutor</a><ul>
+<li><a class="reference internal" href="#threadpoolexecutor-example">ThreadPoolExecutor 例子</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#interpreterpoolexecutor">InterpreterPoolExecutor</a></li>
+<li><a class="reference internal" href="#processpoolexecutor">ProcessPoolExecutor</a><ul>
+<li><a class="reference internal" href="#processpoolexecutor-example">ProcessPoolExecutor 例子</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#future-objects">Future 对象</a></li>
+<li><a class="reference internal" href="#module-functions">模块函数</a></li>
+<li><a class="reference internal" href="#exception-classes">Exception 类</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="concurrent.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent</span></code> 包</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="concurrent.interpreters.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.interpreters</span></code> --- 同一进程中的多个解释器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/concurrent.futures.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/concurrent.futures.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/concurrent.futures.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="concurrent.interpreters.html" title="concurrent.interpreters --- 同一进程中的多个解释器"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="concurrent.html" title="concurrent 包"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concurrency.html" >并发执行</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">concurrent.futures</span></code> --- 启动并行任务</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="用 asyncio 开发" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/asyncio-dev.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="异步编程与传统的“顺序”编程不同。 本页列出常见的错误和陷阱，并解释如何避免它们。 调试模式: 默认情况下，asyncio 以生产模式运行。为了简化开发，asyncio 还有一种*调试模式* 。 有几种方法可以启用异步调试模式： 将 PYTHONASYNCIODEBUG 环境变量设置为 1 。, 使用 Python 开发模式 。, 将 debug=True 传递给 asyncio.run()..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_asyncio-dev_0c37113f.png" />
+<meta property="og:image:alt" content="异步编程与传统的“顺序”编程不同。 本页列出常见的错误和陷阱，并解释如何避免它们。 调试模式: 默认情况下，asyncio 以生产模式运行。为了简化开发，asyncio 还有一种*调试模式* 。 有几种方法可以启用异步调试模式： 将 PYTHONASYNCIODEBUG 环境变量设置为 1 。, 使用 Python 开发模式 。, 将 debug=True 传递给 asyncio.run()..." />
+<meta name="description" content="异步编程与传统的“顺序”编程不同。 本页列出常见的错误和陷阱，并解释如何避免它们。 调试模式: 默认情况下，asyncio 以生产模式运行。为了简化开发，asyncio 还有一种*调试模式* 。 有几种方法可以启用异步调试模式： 将 PYTHONASYNCIODEBUG 环境变量设置为 1 。, 使用 Python 开发模式 。, 将 debug=True 传递给 asyncio.run()..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>用 asyncio 开发 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="asyncio and free-threaded Python" href="asyncio-threading.html" />
+    <link rel="prev" title="低层级 API 索引" href="asyncio-llapi-index.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/asyncio-dev.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">用 asyncio 开发</a><ul>
+<li><a class="reference internal" href="#debug-mode">调试模式</a></li>
+<li><a class="reference internal" href="#concurrency-and-multithreading">并发性和多线程</a></li>
+<li><a class="reference internal" href="#running-blocking-code">运行阻塞的代码</a></li>
+<li><a class="reference internal" href="#logging">日志记录</a></li>
+<li><a class="reference internal" href="#detect-never-awaited-coroutines">检测从未被等待的协程</a></li>
+<li><a class="reference internal" href="#detect-never-retrieved-exceptions">检测从未被获取的异常</a></li>
+<li><a class="reference internal" href="#asynchronous-generators-best-practices">异步生成器最佳实践</a><ul>
+<li><a class="reference internal" href="#close-asynchronous-generators-explicitly">显式地关闭异步生成器</a></li>
+<li><a class="reference internal" href="#create-asynchronous-generators-only-when-the-event-loop-is-running">仅在事件循环正在运行时创建异步生成器</a></li>
+<li><a class="reference internal" href="#avoid-concurrent-iteration-and-closure-of-the-same-generator">避免同一迭代器的并发迭代和闭包</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-llapi-index.html"
+                          title="上一章">低层级 API 索引</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-threading.html"
+                          title="下一章">asyncio and free-threaded Python</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-dev.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-dev.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-dev.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-threading.html" title="asyncio and free-threaded Python"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-llapi-index.html" title="低层级 API 索引"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">用 asyncio 开发</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="developing-with-asyncio">
+<span id="asyncio-dev"></span><h1 class="translated">用 asyncio 开发<a class="headerlink" href="#developing-with-asyncio" title="Link to this heading">¶</a></h1>
+<p class="translated">异步编程与传统的“顺序”编程不同。</p>
+<p class="translated">本页列出常见的错误和陷阱，并解释如何避免它们。</p>
+<section id="debug-mode">
+<span id="asyncio-debug-mode"></span><h2 class="translated">调试模式<a class="headerlink" href="#debug-mode" title="Link to this heading">¶</a></h2>
+<p class="translated">默认情况下，asyncio 以生产模式运行。为了简化开发，asyncio 还有一种*调试模式* 。</p>
+<p class="translated">有几种方法可以启用异步调试模式：</p>
+<ul class="simple">
+<li><p class="translated">将 <span class="target" id="index-2"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONASYNCIODEBUG"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONASYNCIODEBUG</span></code></a> 环境变量设置为 <code class="docutils literal notranslate"><span class="pre">1</span></code>。</p></li>
+<li><p class="translated">使用 <a class="reference internal" href="devmode.html#devmode"><span class="std std-ref">Python 开发模式</span></a>。</p></li>
+<li><p class="translated">将 <code class="docutils literal notranslate"><span class="pre">debug=True</span></code> 传递给 <a class="reference internal" href="asyncio-runner.html#asyncio.run" title="asyncio.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.run()</span></code></a>。</p></li>
+<li><p class="translated">调用 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.set_debug" title="asyncio.loop.set_debug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.set_debug()</span></code></a>。</p></li>
+</ul>
+<p class="translated">除了启用调试模式外，还要考虑：</p>
+<ul>
+<li><p class="translated">将 <a class="reference internal" href="#asyncio-logger"><span class="std std-ref">asyncio logger</span></a> 的级别设为 <a class="reference internal" href="logging.html#logging.DEBUG" title="logging.DEBUG"><code class="xref py py-const docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>，例如下面的代码片段可以在应用程序启动时运行:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="translated">配置 <a class="reference internal" href="warnings.html#module-warnings" title="warnings: Issue warning messages and control their disposition."><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> 模块以显示 <a class="reference internal" href="exceptions.html#ResourceWarning" title="ResourceWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ResourceWarning</span></code></a> 警告。一种方法是使用 <a class="reference internal" href="../using/cmdline.html#cmdoption-W"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W</span></code></a> <code class="docutils literal notranslate"><span class="pre">default</span></code> 命令行选项。</p></li>
+</ul>
+<p class="translated">启用调试模式时：</p>
+<ul class="simple">
+<li><p class="translated">许多非线程安全的异步 APIs (例如 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.call_soon" title="asyncio.loop.call_soon"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.call_soon()</span></code></a> 和 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.call_at" title="asyncio.loop.call_at"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.call_at()</span></code></a> 方法)，如果从错误的线程调用，则会引发异常。</p></li>
+<li><p class="translated">如果执行 I/O 操作花费的时间太长，则记录 I/O 选择器的执行时间。</p></li>
+<li><p class="translated">执行时间超过 100 毫秒的回调会被写入日志。 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.slow_callback_duration" title="asyncio.loop.slow_callback_duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">loop.slow_callback_duration</span></code></a> 属性可用于设置以秒为单位的将被视为“缓慢”的最小执行持续时间。</p></li>
+</ul>
+</section>
+<section id="concurrency-and-multithreading">
+<span id="asyncio-multithreading"></span><h2 class="translated">并发性和多线程<a class="headerlink" href="#concurrency-and-multithreading" title="Link to this heading">¶</a></h2>
+<p class="translated">事件循环在线程中运行 (通常是主线程)，并在其线程中执行所有回调和任务。当一个任务在事件循环中运行时，没有其他任务可以在同一个线程中运行。当一个任务执行一个 <code class="docutils literal notranslate"><span class="pre">await</span></code> 表达式时，正在运行的任务被挂起，事件循环执行下一个任务。</p>
+<p class="translated">要调度来自另一 OS 线程的 <a class="reference internal" href="../glossary.html#term-callback"><span class="xref std std-term">callback</span></a>，应该使用 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.call_soon_threadsafe" title="asyncio.loop.call_soon_threadsafe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.call_soon_threadsafe()</span></code></a> 方法。 例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">loop</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">几乎所有异步对象都不是线程安全的，这通常不是问题，除非在任务或回调函数之外有代码可以使用它们。如果需要这样的代码来调用低级异步 API，应该使用 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.call_soon_threadsafe" title="asyncio.loop.call_soon_threadsafe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.call_soon_threadsafe()</span></code></a> 方法，例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">loop</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="n">fut</span><span class="o">.</span><span class="n">cancel</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">要从不同的 OS 线程调度一个协程对象，应该使用 <a class="reference internal" href="asyncio-task.html#asyncio.run_coroutine_threadsafe" title="asyncio.run_coroutine_threadsafe"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_coroutine_threadsafe()</span></code></a> 函数。它返回一个 <a class="reference internal" href="concurrent.futures.html#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.Future</span></code></a>。查询结果:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">coro_func</span><span class="p">():</span>
+     <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># 随后在另一个 OS 线程中：</span>
+
+<span class="n">future</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run_coroutine_threadsafe</span><span class="p">(</span><span class="n">coro_func</span><span class="p">(),</span> <span class="n">loop</span><span class="p">)</span>
+<span class="c1"># 等待结果：</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">为了能处理信号，事件循环必须在主线程中运行。</p>
+<p class="translated"><a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.run_in_executor" title="asyncio.loop.run_in_executor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.run_in_executor()</span></code></a> 方法可以配合 <a class="reference internal" href="concurrent.futures.html#concurrent.futures.ThreadPoolExecutor" title="concurrent.futures.ThreadPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.ThreadPoolExecutor</span></code></a> 或 <a class="reference internal" href="concurrent.futures.html#concurrent.futures.InterpreterPoolExecutor" title="concurrent.futures.InterpreterPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterpreterPoolExecutor</span></code></a> 使用以在不同的 OS 线程中执行阻塞型的代码而不会阻塞事件循环运行所在的 OS 线程。</p>
+<p class="translated">目前没有办法直接从另一个进程（如使用 <a class="reference internal" href="multiprocessing.html#module-multiprocessing" title="multiprocessing: Process-based parallelism."><code class="xref py py-mod docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> 启动的进程）安排协程或回调。 <a class="reference internal" href="asyncio-eventloop.html#asyncio-event-loop-methods"><span class="std std-ref">事件循环方法集</span></a> 小节列出了一些可以从管道读取并监视文件描述符而不会阻塞事件循环的 API。此外，asyncio 的 <a class="reference internal" href="asyncio-subprocess.html#asyncio-subprocess"><span class="std std-ref">子进程</span></a> API 提供了一种启动进程并在事件循环中与其通信的办法。最后，之前提到的 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.run_in_executor" title="asyncio.loop.run_in_executor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.run_in_executor()</span></code></a> 方法也可以配合 <a class="reference internal" href="concurrent.futures.html#concurrent.futures.ProcessPoolExecutor" title="concurrent.futures.ProcessPoolExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.ProcessPoolExecutor</span></code></a> 使用以在另一个进程中执行代码。</p>
+</section>
+<section id="running-blocking-code">
+<span id="asyncio-handle-blocking"></span><h2 class="translated">运行阻塞的代码<a class="headerlink" href="#running-blocking-code" title="Link to this heading">¶</a></h2>
+<p class="translated">不应该直接调用阻塞 ( CPU 绑定) 代码。例如，如果一个函数执行 1 秒的 CPU 密集型计算，那么所有并发异步任务和 IO 操作都将延迟 1 秒。</p>
+<p class="translated">可以使用执行器让任务运行在不同的线程中，包括不同的解释器中，或者甚至在不同的进程中以避免阻塞事件循环所在的 OS 线程。请参阅 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.run_in_executor" title="asyncio.loop.run_in_executor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.run_in_executor()</span></code></a> 方法了解详情。</p>
+</section>
+<section id="logging">
+<span id="asyncio-logger"></span><h2 class="translated">日志记录<a class="headerlink" href="#logging" title="Link to this heading">¶</a></h2>
+<p class="translated">asyncio 使用 <a class="reference internal" href="logging.html#module-logging" title="logging: Flexible event logging system for applications."><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> 模块，所有日志记录都是通过 <code class="docutils literal notranslate"><span class="pre">&quot;asyncio&quot;</span></code> logger 执行的。</p>
+<p class="translated">默认的日志级别是 <a class="reference internal" href="logging.html#logging.INFO" title="logging.INFO"><code class="xref py py-const docutils literal notranslate"><span class="pre">logging.INFO</span></code></a>，它可以被方便地调整:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;asyncio&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">网络日志会阻塞事件循环。建议使用一个单独线程来处理日志或者使用非阻塞式 IO。例如，可以参阅 <a class="reference internal" href="../howto/logging-cookbook.html#blocking-handlers"><span class="std std-ref">处理日志 handler 的阻塞</span></a>。</p>
+</section>
+<section id="detect-never-awaited-coroutines">
+<span id="asyncio-coroutine-not-scheduled"></span><h2 class="translated">检测从未被等待的协程<a class="headerlink" href="#detect-never-awaited-coroutines" title="Link to this heading">¶</a></h2>
+<p class="translated">当协程函数被调用而不是被等待时 (即执行 <code class="docutils literal notranslate"><span class="pre">coro()</span></code> 而不是 <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">coro()</span></code>) 或者协程没有通过 <a class="reference internal" href="asyncio-task.html#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-meth docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 被排入计划日程，asyncio 将会发出一条 <a class="reference internal" href="exceptions.html#RuntimeWarning" title="RuntimeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;never scheduled&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">test</span><span class="p">()</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span> <span class="ne">RuntimeWarning</span><span class="p">:</span> <span class="n">coroutine</span> <span class="s1">&#39;test&#39;</span> <span class="n">was</span> <span class="n">never</span> <span class="n">awaited</span>
+  <span class="n">test</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">调试模式的输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span> <span class="ne">RuntimeWarning</span><span class="p">:</span> <span class="n">coroutine</span> <span class="s1">&#39;test&#39;</span> <span class="n">was</span> <span class="n">never</span> <span class="n">awaited</span>
+<span class="n">Coroutine</span> <span class="n">created</span> <span class="n">at</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+  <span class="n">File</span> <span class="s2">&quot;../t.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(),</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="o">&lt;</span> <span class="o">..</span> <span class="o">&gt;</span>
+
+  <span class="n">File</span> <span class="s2">&quot;../t.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">7</span><span class="p">,</span> <span class="ow">in</span> <span class="n">main</span>
+    <span class="n">test</span><span class="p">()</span>
+  <span class="n">test</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">通常的修复方法是等待协程或者调用 <a class="reference internal" href="asyncio-task.html#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-meth docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 函数:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">await</span> <span class="n">test</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-never-retrieved-exceptions">
+<h2 class="translated">检测从未被获取的异常<a class="headerlink" href="#detect-never-retrieved-exceptions" title="Link to this heading">¶</a></h2>
+<p class="translated">如果调用了 <a class="reference internal" href="asyncio-future.html#asyncio.Future.set_exception" title="asyncio.Future.set_exception"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.set_exception()</span></code></a>，但 Future 对象从未被等待，异常将永远不会传播到用户代码。在这种情况下，当 Future 对象被垃圾收集时，asyncio 将发出一条日志消息。</p>
+<p class="translated">未处理异常的例子:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">bug</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;not consumed&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">bug</span><span class="p">())</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">Task</span> <span class="n">exception</span> <span class="n">was</span> <span class="n">never</span> <span class="n">retrieved</span>
+<span class="n">future</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Task</span> <span class="n">finished</span> <span class="n">coro</span><span class="o">=&lt;</span><span class="n">bug</span><span class="p">()</span> <span class="n">done</span><span class="p">,</span> <span class="n">defined</span> <span class="n">at</span> <span class="n">test</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">3</span><span class="o">&gt;</span>
+  <span class="n">exception</span><span class="o">=</span><span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;not consumed&#39;</span><span class="p">)</span><span class="o">&gt;</span>
+
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;test.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">4</span><span class="p">,</span> <span class="ow">in</span> <span class="n">bug</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;not consumed&quot;</span><span class="p">)</span>
+<span class="ne">Exception</span><span class="p">:</span> <span class="ow">not</span> <span class="n">consumed</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#asyncio-debug-mode"><span class="std std-ref">激活调试模式</span></a> 以获取任务创建处的跟踪信息:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(),</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">调试模式的输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">Task</span> <span class="n">exception</span> <span class="n">was</span> <span class="n">never</span> <span class="n">retrieved</span>
+<span class="n">future</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Task</span> <span class="n">finished</span> <span class="n">coro</span><span class="o">=&lt;</span><span class="n">bug</span><span class="p">()</span> <span class="n">done</span><span class="p">,</span> <span class="n">defined</span> <span class="n">at</span> <span class="n">test</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">3</span><span class="o">&gt;</span>
+    <span class="n">exception</span><span class="o">=</span><span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;not consumed&#39;</span><span class="p">)</span> <span class="n">created</span> <span class="n">at</span> <span class="n">asyncio</span><span class="o">/</span><span class="n">tasks</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">321</span><span class="o">&gt;</span>
+
+<span class="n">source_traceback</span><span class="p">:</span> <span class="n">Object</span> <span class="n">created</span> <span class="n">at</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;../t.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(),</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="o">&lt;</span> <span class="o">..</span> <span class="o">&gt;</span>
+
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;../t.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">4</span><span class="p">,</span> <span class="ow">in</span> <span class="n">bug</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;not consumed&quot;</span><span class="p">)</span>
+<span class="ne">Exception</span><span class="p">:</span> <span class="ow">not</span> <span class="n">consumed</span>
+</pre></div>
+</div>
+</section>
+<section id="asynchronous-generators-best-practices">
+<h2 class="translated">异步生成器最佳实践<a class="headerlink" href="#asynchronous-generators-best-practices" title="Link to this heading">¶</a></h2>
+<p class="translated">要编写正确且高效的 asyncio 代码就必须注意某些陷阱。 本节概述了可为您节省大量调试时间的关键最佳实践。</p>
+<section id="close-asynchronous-generators-explicitly">
+<h3 class="translated">显式地关闭异步生成器<a class="headerlink" href="#close-asynchronous-generators-explicitly" title="Link to this heading">¶</a></h3>
+<p class="translated">建议手动关闭 <a class="reference internal" href="../glossary.html#term-asynchronous-generator-iterator"><span class="xref std std-term">异步生成器</span></a>。 如果一个生成器过早关闭 —— 例如，由于在 <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">for</span></code> 循环体中引发了异常 —— 它的异步清理代码可能会在非预期的上下文中运行。 这可能发生在它所依赖的任务完成之后，或是在异步生成器的垃圾收集钩子被调用时事件循环关闭期间。</p>
+<p class="translated">要避免此问题，请通过调用生成器的 <a class="reference internal" href="../reference/expressions.html#agen.aclose" title="agen.aclose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">aclose()</span></code></a> 方法显式地关闭它，或是使用 <a class="reference internal" href="contextlib.html#contextlib.aclosing" title="contextlib.aclosing"><code class="xref py py-func docutils literal notranslate"><span class="pre">contextlib.aclosing()</span></code></a> 上下文管理器:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">gen</span><span class="p">():</span>
+  <span class="k">yield</span> <span class="mi">1</span>
+  <span class="k">yield</span> <span class="mi">2</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">():</span>
+  <span class="k">async</span> <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">aclosing</span><span class="p">(</span><span class="n">gen</span><span class="p">())</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+      <span class="k">break</span>  <span class="c1"># 不迭代一直到结束</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">func</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">如上所述，这些异步生成器的清理代码会延迟执行。 下面的例子显示异步生成器的最终化可能会以非预期的顺序发生:</p>
+<div class="untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="n">work_done</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cursor</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="mi">1</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">work_done</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">rows</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">work_done</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="mi">2</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1"># immitate some async work</span>
+        <span class="n">work_done</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cursor</span><span class="p">():</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">():</span>
+            <span class="k">break</span>
+        <span class="k">break</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">对于这个例子，我们将得到以下输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">unhandled</span> <span class="n">exception</span> <span class="n">during</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> <span class="n">shutdown</span>
+<span class="n">task</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Task</span> <span class="n">finished</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Task-3&#39;</span> <span class="n">coro</span><span class="o">=&lt;&lt;</span><span class="n">async_generator_athrow</span> <span class="n">without</span> <span class="vm">__name__</span><span class="o">&gt;</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">exception</span><span class="o">=</span><span class="ne">AssertionError</span><span class="p">()</span><span class="o">&gt;</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;example.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">6</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cursor</span>
+    <span class="k">yield</span> <span class="mi">1</span>
+<span class="n">asyncio</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">CancelledError</span>
+
+<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
+
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;example.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">8</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cursor</span>
+    <span class="k">assert</span> <span class="n">work_done</span>
+           <span class="o">^^^^^^^^^</span>
+<span class="ne">AssertionError</span>
+</pre></div>
+</div>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">cursor()</span></code> 异步生成器会在 <code class="docutils literal notranslate"><span class="pre">rows</span></code> 生成器之前执行最终化 —— 这是非预期的行为。</p>
+<p class="translated">这个例子可通过显式地关闭 <code class="docutils literal notranslate"><span class="pre">cursor</span></code> 和 <code class="docutils literal notranslate"><span class="pre">rows</span></code> 异步生成器来修正问题:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">aclosing</span><span class="p">(</span><span class="n">cursor</span><span class="p">())</span> <span class="k">as</span> <span class="n">cursor_gen</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cursor_gen</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">aclosing</span><span class="p">(</span><span class="n">rows</span><span class="p">())</span> <span class="k">as</span> <span class="n">rows_gen</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows_gen</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">break</span>
+</pre></div>
+</div>
+</section>
+<section id="create-asynchronous-generators-only-when-the-event-loop-is-running">
+<h3 class="translated">仅在事件循环正在运行时创建异步生成器<a class="headerlink" href="#create-asynchronous-generators-only-when-the-event-loop-is-running" title="Link to this heading">¶</a></h3>
+<p class="translated">推荐做法是只在事件循环已被创建之后才创建 <a class="reference internal" href="../glossary.html#term-asynchronous-generator-iterator"><span class="xref std std-term">异步生成器</span></a>。</p>
+<p class="untranslated">To ensure that asynchronous generators close reliably, the event loop uses the
+<a class="reference internal" href="sys.html#sys.set_asyncgen_hooks" title="sys.set_asyncgen_hooks"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.set_asyncgen_hooks()</span></code></a> function to register callback functions. These
+callbacks update the list of running asynchronous generators to keep it in a
+consistent state.</p>
+<p class="untranslated">When the <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.shutdown_asyncgens" title="asyncio.loop.shutdown_asyncgens"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.shutdown_asyncgens()</span></code></a>
+function is called, the running generators are stopped gracefully and the
+list is cleared.</p>
+<p class="untranslated">The asynchronous generator invokes the corresponding system hook during its
+first iteration. At the same time, the generator records that the hook has
+been called and does not call it again.</p>
+<p class="untranslated">Therefore, if iteration begins before the event loop is created,
+the event loop will not be able to add the generator to its list of active
+generators because the hooks are set after the generator attempts to call them.
+Consequently, the event loop will not be able to terminate the generator
+if necessary.</p>
+<p class="translated">比如下面的例子:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">agenfn</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="mi">10</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Runner</span><span class="p">()</span> <span class="k">as</span> <span class="n">runner</span><span class="p">:</span>
+    <span class="n">agen</span> <span class="o">=</span> <span class="n">agenfn</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">anext</span><span class="p">(</span><span class="n">agen</span><span class="p">)))</span>
+    <span class="k">del</span> <span class="n">agen</span>
+</pre></div>
+</div>
+<p class="translated">输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="mi">10</span>
+<span class="ne">Exception</span> <span class="n">ignored</span> <span class="k">while</span> <span class="n">closing</span> <span class="n">generator</span> <span class="o">&lt;</span><span class="n">async_generator</span> <span class="nb">object</span> <span class="n">agenfn</span> <span class="n">at</span> <span class="mh">0x000002F71CD10D70</span><span class="o">&gt;</span><span class="p">:</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;example.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">13</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+    <span class="k">del</span> <span class="n">agen</span>
+        <span class="o">^^^^</span>
+<span class="ne">RuntimeError</span><span class="p">:</span> <span class="k">async</span> <span class="n">generator</span> <span class="n">ignored</span> <span class="ne">GeneratorExit</span>
+</pre></div>
+</div>
+<p class="translated">该示例可用以下方式修复:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">agenfn</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="mi">10</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">agen</span> <span class="o">=</span> <span class="n">agenfn</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="k">await</span> <span class="n">anext</span><span class="p">(</span><span class="n">agen</span><span class="p">))</span>
+    <span class="k">del</span> <span class="n">agen</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="avoid-concurrent-iteration-and-closure-of-the-same-generator">
+<h3 class="translated">避免同一迭代器的并发迭代和闭包<a class="headerlink" href="#avoid-concurrent-iteration-and-closure-of-the-same-generator" title="Link to this heading">¶</a></h3>
+<p class="translated">异步生成器可以在其他 <a class="reference internal" href="../reference/expressions.html#agen.__anext__" title="agen.__anext__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__anext__()</span></code></a> / <a class="reference internal" href="../reference/expressions.html#agen.athrow" title="agen.athrow"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athrow()</span></code></a> / <a class="reference internal" href="../reference/expressions.html#agen.aclose" title="agen.aclose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">aclose()</span></code></a> 调用正在进行时重新进入。 这可能导致异步生成器状态不一致并造成错误。</p>
+<p class="untranslated">Let's consider the following example:</p>
+<div class="untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">consumer</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">idx</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;received&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">amain</span><span class="p">():</span>
+    <span class="n">agenerator</span> <span class="o">=</span> <span class="n">consumer</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">agenerator</span><span class="o">.</span><span class="n">asend</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">fa</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">agenerator</span><span class="o">.</span><span class="n">asend</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">))</span>
+    <span class="n">fb</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">agenerator</span><span class="o">.</span><span class="n">asend</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">))</span>
+    <span class="k">await</span> <span class="n">fa</span>
+    <span class="k">await</span> <span class="n">fb</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">amain</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">输出:</p>
+<div class="untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">received</span> <span class="n">A</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;test.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">38</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">amain</span><span class="p">())</span>
+    <span class="o">~~~~~~~~~~~^^^^^^^^^</span>
+  <span class="n">File</span> <span class="s2">&quot;Lib/asyncio/runners.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">204</span><span class="p">,</span> <span class="ow">in</span> <span class="n">run</span>
+    <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+           <span class="o">~~~~~~~~~~^^^^^^</span>
+  <span class="n">File</span> <span class="s2">&quot;Lib/asyncio/runners.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">127</span><span class="p">,</span> <span class="ow">in</span> <span class="n">run</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+           <span class="o">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^</span>
+  <span class="n">File</span> <span class="s2">&quot;Lib/asyncio/base_events.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">719</span><span class="p">,</span> <span class="ow">in</span> <span class="n">run_until_complete</span>
+    <span class="k">return</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+           <span class="o">~~~~~~~~~~~~~^^</span>
+  <span class="n">File</span> <span class="s2">&quot;test.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">36</span><span class="p">,</span> <span class="ow">in</span> <span class="n">amain</span>
+    <span class="k">await</span> <span class="n">fb</span>
+<span class="ne">RuntimeError</span><span class="p">:</span> <span class="n">anext</span><span class="p">():</span> <span class="n">asynchronous</span> <span class="n">generator</span> <span class="ow">is</span> <span class="n">already</span> <span class="n">running</span>
+</pre></div>
+</div>
+<p class="untranslated">Therefore, it is recommended to avoid using asynchronous generators in parallel
+tasks or across multiple event loops.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">用 asyncio 开发</a><ul>
+<li><a class="reference internal" href="#debug-mode">调试模式</a></li>
+<li><a class="reference internal" href="#concurrency-and-multithreading">并发性和多线程</a></li>
+<li><a class="reference internal" href="#running-blocking-code">运行阻塞的代码</a></li>
+<li><a class="reference internal" href="#logging">日志记录</a></li>
+<li><a class="reference internal" href="#detect-never-awaited-coroutines">检测从未被等待的协程</a></li>
+<li><a class="reference internal" href="#detect-never-retrieved-exceptions">检测从未被获取的异常</a></li>
+<li><a class="reference internal" href="#asynchronous-generators-best-practices">异步生成器最佳实践</a><ul>
+<li><a class="reference internal" href="#close-asynchronous-generators-explicitly">显式地关闭异步生成器</a></li>
+<li><a class="reference internal" href="#create-asynchronous-generators-only-when-the-event-loop-is-running">仅在事件循环正在运行时创建异步生成器</a></li>
+<li><a class="reference internal" href="#avoid-concurrent-iteration-and-closure-of-the-same-generator">避免同一迭代器的并发迭代和闭包</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-llapi-index.html"
+                          title="上一章">低层级 API 索引</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-threading.html"
+                          title="下一章">asyncio and free-threaded Python</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-dev.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-dev.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-dev.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-threading.html" title="asyncio and free-threaded Python"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-llapi-index.html" title="低层级 API 索引"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">用 asyncio 开发</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

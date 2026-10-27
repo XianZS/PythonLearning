@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="子进程" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/asyncio-subprocess.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/asyncio/subprocess.py, Lib/asyncio/base_subprocess.py 本节介绍了用于创建和管理子进程的高层级 async/await asyncio API。 下面的例子演示了如何用 asyncio 运行一个 shell 命令并获取其结果: 将打印: 由于所有 asyncio 子进程函数都是异步的并且 asyncio 提供了许多工具用来..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_asyncio-subprocess_061c7b2c.png" />
+<meta property="og:image:alt" content="源代码: Lib/asyncio/subprocess.py, Lib/asyncio/base_subprocess.py 本节介绍了用于创建和管理子进程的高层级 async/await asyncio API。 下面的例子演示了如何用 asyncio 运行一个 shell 命令并获取其结果: 将打印: 由于所有 asyncio 子进程函数都是异步的并且 asyncio 提供了许多工具用来..." />
+<meta name="description" content="源代码: Lib/asyncio/subprocess.py, Lib/asyncio/base_subprocess.py 本节介绍了用于创建和管理子进程的高层级 async/await asyncio API。 下面的例子演示了如何用 asyncio 运行一个 shell 命令并获取其结果: 将打印: 由于所有 asyncio 子进程函数都是异步的并且 asyncio 提供了许多工具用来..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>子进程 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="队列" href="asyncio-queue.html" />
+    <link rel="prev" title="同步原语" href="asyncio-sync.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/asyncio-subprocess.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">子进程</a><ul>
+<li><a class="reference internal" href="#creating-subprocesses">创建子进程</a></li>
+<li><a class="reference internal" href="#constants">常量</a></li>
+<li><a class="reference internal" href="#interacting-with-subprocesses">与子进程交互</a><ul>
+<li><a class="reference internal" href="#subprocess-and-threads">子进程和线程</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-sync.html"
+                          title="上一章">同步原语</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-queue.html"
+                          title="下一章">队列</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-subprocess.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-subprocess.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-subprocess.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-queue.html" title="队列"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-sync.html" title="同步原语"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">子进程</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="subprocesses">
+<span id="asyncio-subprocess"></span><h1 class="translated">子进程<a class="headerlink" href="#subprocesses" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/asyncio/subprocess.py">Lib/asyncio/subprocess.py</a>, <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/asyncio/base_subprocess.py">Lib/asyncio/base_subprocess.py</a></p>
+<hr class="docutils" />
+<p class="translated">本节介绍了用于创建和管理子进程的高层级 async/await asyncio API。</p>
+<p class="translated" id="asyncio-example-subprocess-shell">下面的例子演示了如何用 asyncio 运行一个 shell 命令并获取其结果:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_shell</span><span class="p">(</span>
+        <span class="n">cmd</span><span class="p">,</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+
+    <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">cmd</span><span class="si">!r}</span><span class="s1"> exited with </span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">stdout</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[stdout]</span><span class="se">\n</span><span class="si">{</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">stderr</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[stderr]</span><span class="se">\n</span><span class="si">{</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;ls /zzz&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="translated">将打印:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;ls /zzz&#39;</span> <span class="n">exited</span> <span class="k">with</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="n">stderr</span><span class="p">]</span>
+<span class="n">ls</span><span class="p">:</span> <span class="o">/</span><span class="n">zzz</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p class="translated">由于所有 asyncio 子进程函数都是异步的并且 asyncio 提供了许多工具用来配合这些函数使用，因此并行地执行和监视多个子进程十分容易。 要修改上面的例子来同时运行多个命令确实是非常简单的:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">run</span><span class="p">(</span><span class="s1">&#39;ls /zzz&#39;</span><span class="p">),</span>
+        <span class="n">run</span><span class="p">(</span><span class="s1">&#39;sleep 1; echo &quot;hello&quot;&#39;</span><span class="p">))</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">另请参阅 <a class="reference internal" href="#examples">Examples</a> 小节。</p>
+<section id="creating-subprocesses">
+<h2 class="translated">创建子进程<a class="headerlink" href="#creating-subprocesses" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.create_subprocess_exec">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">create_subprocess_exec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.create_subprocess_exec" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个子进程。</p>
+<p class="translated"><em>limit</em> 参数为 <a class="reference internal" href="#asyncio.subprocess.Process.stdout" title="asyncio.subprocess.Process.stdout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stdout</span></code></a> 和 <a class="reference internal" href="#asyncio.subprocess.Process.stderr" title="asyncio.subprocess.Process.stderr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stderr</span></code></a> 设置 <a class="reference internal" href="asyncio-stream.html#asyncio.StreamReader" title="asyncio.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 包装器的缓冲区上限（如果将 <a class="reference internal" href="subprocess.html#subprocess.PIPE" title="subprocess.PIPE"><code class="xref py py-const docutils literal notranslate"><span class="pre">subprocess.PIPE</span></code></a> 传给 <em>stdout</em> 和 <em>stderr</em> 参数）。</p>
+<p class="translated">返回一个 <a class="reference internal" href="#asyncio.subprocess.Process" title="asyncio.subprocess.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></a> 实例。</p>
+<p class="translated">有关其他形参的说明请查阅 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.subprocess_exec" title="asyncio.loop.subprocess_exec"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.subprocess_exec()</span></code></a> 的文档。</p>
+<p class="translated">如果当进程仍在运行时进程对象被作为垃圾回收，则将杀掉子进程。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.create_subprocess_shell">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">create_subprocess_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.create_subprocess_shell" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">运行 <em>cmd</em> shell 命令。</p>
+<p class="translated"><em>limit</em> 参数为 <a class="reference internal" href="#asyncio.subprocess.Process.stdout" title="asyncio.subprocess.Process.stdout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stdout</span></code></a> 和 <a class="reference internal" href="#asyncio.subprocess.Process.stderr" title="asyncio.subprocess.Process.stderr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stderr</span></code></a> 设置 <a class="reference internal" href="asyncio-stream.html#asyncio.StreamReader" title="asyncio.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 包装器的缓冲区上限（如果将 <a class="reference internal" href="subprocess.html#subprocess.PIPE" title="subprocess.PIPE"><code class="xref py py-const docutils literal notranslate"><span class="pre">subprocess.PIPE</span></code></a> 传给 <em>stdout</em> 和 <em>stderr</em> 参数）。</p>
+<p class="translated">返回一个 <a class="reference internal" href="#asyncio.subprocess.Process" title="asyncio.subprocess.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></a> 实例。</p>
+<p class="translated">有关其他形参的说明请查阅 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.subprocess_shell" title="asyncio.loop.subprocess_shell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.subprocess_shell()</span></code></a> 的文档。</p>
+<p class="translated">如果当进程仍在运行时进程对象被作为垃圾回收，则将杀掉子进程。</p>
+<div class="admonition important">
+<p class="admonition-title">重要</p>
+<p class="translated">应用程序要负责确保正确地转义所有空白字符和特殊字符以防止 <a class="reference external" href="https://en.wikipedia.org/wiki/Shell_injection#Shell_injection">shell 注入</a> 漏洞。 <a class="reference internal" href="shlex.html#shlex.quote" title="shlex.quote"><code class="xref py py-func docutils literal notranslate"><span class="pre">shlex.quote()</span></code></a> 函数可以被用来正确地转义字符串中可以被用来构造 shell 命令的空白字符和特殊 shell 字符。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果使用了 <a class="reference internal" href="asyncio-eventloop.html#asyncio.ProactorEventLoop" title="asyncio.ProactorEventLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProactorEventLoop</span></code></a> 则子进程将在 Windows 中可用。详情参见 <a class="reference internal" href="asyncio-platforms.html#asyncio-windows-subprocess"><span class="std std-ref">Windows 上的子进程支持</span></a>。</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated">asyncio 还有下列 <em>低层级</em> API 可配合子进程使用：<a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.subprocess_exec" title="asyncio.loop.subprocess_exec"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.subprocess_exec()</span></code></a>, <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.subprocess_shell" title="asyncio.loop.subprocess_shell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.subprocess_shell()</span></code></a>, <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.connect_read_pipe" title="asyncio.loop.connect_read_pipe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.connect_read_pipe()</span></code></a>, <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.connect_write_pipe" title="asyncio.loop.connect_write_pipe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.connect_write_pipe()</span></code></a> 以及 <a class="reference internal" href="asyncio-protocol.html#asyncio-subprocess-transports"><span class="std std-ref">子进程传输</span></a> 和 <a class="reference internal" href="asyncio-protocol.html#asyncio-subprocess-protocols"><span class="std std-ref">子进程协议</span></a>。</p>
+</div>
+</section>
+<section id="constants">
+<h2 class="translated">常量<a class="headerlink" href="#constants" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="asyncio.subprocess.PIPE">
+<span class="sig-prename descclassname"><span class="pre">asyncio.subprocess.</span></span><span class="sig-name descname"><span class="pre">PIPE</span></span><a class="headerlink" href="#asyncio.subprocess.PIPE" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">可以被传递给 <em>stdin</em>, <em>stdout</em> 或 <em>stderr</em> 形参。</p>
+<p class="translated">如果将 <em>PIPE</em> 传给 <em>stdin</em> 参数，则 <a class="reference internal" href="#asyncio.subprocess.Process.stdin" title="asyncio.subprocess.Process.stdin"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Process.stdin</span></code></a> 属性将指向一个 <a class="reference internal" href="asyncio-stream.html#asyncio.StreamWriter" title="asyncio.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 实例。</p>
+<p class="translated">如果将 <em>PIPE</em> 传给 <em>stdout</em> 或 <em>stderr</em> 参数，则 <a class="reference internal" href="#asyncio.subprocess.Process.stdout" title="asyncio.subprocess.Process.stdout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Process.stdout</span></code></a> 和 <a class="reference internal" href="#asyncio.subprocess.Process.stderr" title="asyncio.subprocess.Process.stderr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Process.stderr</span></code></a> 属性将指向 <a class="reference internal" href="asyncio-stream.html#asyncio.StreamReader" title="asyncio.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 实例。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="asyncio.subprocess.STDOUT">
+<span class="sig-prename descclassname"><span class="pre">asyncio.subprocess.</span></span><span class="sig-name descname"><span class="pre">STDOUT</span></span><a class="headerlink" href="#asyncio.subprocess.STDOUT" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">可以用作 <em>stderr</em> 参数的特殊值，表示标准错误应当被重定向到标准输出。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="asyncio.subprocess.DEVNULL">
+<span class="sig-prename descclassname"><span class="pre">asyncio.subprocess.</span></span><span class="sig-name descname"><span class="pre">DEVNULL</span></span><a class="headerlink" href="#asyncio.subprocess.DEVNULL" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">可以用作进程创建函数的 <em>stdin</em>, <em>stdout</em> 或 <em>stderr</em> 参数的特殊值。它表示将为相应的子进程流使用特殊文件 <a class="reference internal" href="os.html#os.devnull" title="os.devnull"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.devnull</span></code></a>.</p>
+</dd></dl>
+
+</section>
+<section id="interacting-with-subprocesses">
+<h2 class="translated">与子进程交互<a class="headerlink" href="#interacting-with-subprocesses" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#asyncio.create_subprocess_exec" title="asyncio.create_subprocess_exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_exec()</span></code></a> 和 <a class="reference internal" href="#asyncio.create_subprocess_shell" title="asyncio.create_subprocess_shell"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_shell()</span></code></a> 函数都返回 <em>Process</em> 类的实例。 <em>Process</em> 是一个高层级包装器，它允许与子进程通信并监视其完成情况。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.subprocess.</span></span><span class="sig-name descname"><span class="pre">Process</span></span><a class="headerlink" href="#asyncio.subprocess.Process" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个用于包装由 <a class="reference internal" href="#asyncio.create_subprocess_exec" title="asyncio.create_subprocess_exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_exec()</span></code></a> 和 <a class="reference internal" href="#asyncio.create_subprocess_shell" title="asyncio.create_subprocess_shell"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_shell()</span></code></a> 函数创建的 OS 进程的对象。</p>
+<p class="translated">这个类被设计为具有与 <a class="reference internal" href="subprocess.html#subprocess.Popen" title="subprocess.Popen"><code class="xref py py-class docutils literal notranslate"><span class="pre">subprocess.Popen</span></code></a> 类相似的 API，但两者有一些重要的差异：</p>
+<ul class="simple">
+<li><p class="translated">不同于 Popen，Process 实例没有与 <a class="reference internal" href="subprocess.html#subprocess.Popen.poll" title="subprocess.Popen.poll"><code class="xref py py-meth docutils literal notranslate"><span class="pre">poll()</span></code></a> 方法等价的方法；</p></li>
+<li><p class="translated"><a class="reference internal" href="#asyncio.subprocess.Process.communicate" title="asyncio.subprocess.Process.communicate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">communicate()</span></code></a> 和 <a class="reference internal" href="#asyncio.subprocess.Process.wait" title="asyncio.subprocess.Process.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> 方法没有 <em>timeout</em> 形参：请使用 <a class="reference internal" href="asyncio-task.html#asyncio.wait_for" title="asyncio.wait_for"><code class="xref py py-func docutils literal notranslate"><span class="pre">wait_for()</span></code></a> 函数；</p></li>
+<li><p class="translated"><a class="reference internal" href="#asyncio.subprocess.Process.wait" title="asyncio.subprocess.Process.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Process.wait()</span></code></a> 方法是异步的，而 <a class="reference internal" href="subprocess.html#subprocess.Popen.wait" title="subprocess.Popen.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">subprocess.Popen.wait()</span></code></a> 方法则被实现为阻塞型忙循环；</p></li>
+<li><p class="translated"><em>universal_newlines</em> 形参不被支持。</p></li>
+</ul>
+<p class="translated">这个类 <a class="reference internal" href="asyncio-dev.html#asyncio-multithreading"><span class="std std-ref">不是线程安全的</span></a>。</p>
+<p class="translated">请参阅  <a class="reference internal" href="#asyncio-subprocess-threads"><span class="std std-ref">子进程和线程</span></a> 部分。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.wait">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.subprocess.Process.wait" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">等待子进程终结。</p>
+<p class="translated">设置并返回 <a class="reference internal" href="#asyncio.subprocess.Process.returncode" title="asyncio.subprocess.Process.returncode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">returncode</span></code></a> 属性。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">当使用 <code class="docutils literal notranslate"><span class="pre">stdout=PIPE</span></code> 或 <code class="docutils literal notranslate"><span class="pre">stderr=PIPE</span></code> 并且子进程产生了足以阻塞 OS 管道缓冲区等待接收更多的数据的输出时，此方法会发生死锁。当使用管道时请使用 <a class="reference internal" href="#asyncio.subprocess.Process.communicate" title="asyncio.subprocess.Process.communicate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">communicate()</span></code></a> 方法来避免这种情况。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.communicate">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">communicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.subprocess.Process.communicate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">与进程交互：</p>
+<ol class="arabic simple">
+<li><p class="translated">发送数据到 <em>stdin</em> (如果 <em>input</em> 不为 <code class="docutils literal notranslate"><span class="pre">None</span></code>)；</p></li>
+<li><p class="translated">关闭 <em>stdin</em>;</p></li>
+<li><p class="translated">从 <em>stdout</em> 和 <em>stderr</em> 读取数据，直至到达 EOF；</p></li>
+<li><p class="translated">等待进程终结。</p></li>
+</ol>
+<p class="translated">可选的 <em>input</em> 参数为将被发送到子进程的数据 (<a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象)。</p>
+<p class="translated">返回一个元组 <code class="docutils literal notranslate"><span class="pre">(stdout_data,</span> <span class="pre">stderr_data)</span></code>。</p>
+<p class="translated">如果在将 <em>input</em> 写入到 <em>stdin</em> 时引发了 <a class="reference internal" href="exceptions.html#BrokenPipeError" title="BrokenPipeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BrokenPipeError</span></code></a> 或 <a class="reference internal" href="exceptions.html#ConnectionResetError" title="ConnectionResetError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConnectionResetError</span></code></a> 异常，异常会被忽略。此条件会在进程先于所有数据被写入到 <em>stdin</em> 之前退出时发生。</p>
+<p class="translated">如果想要将数据发送到进程的 <em>stdin</em>，则创建进程时必须使用 <code class="docutils literal notranslate"><span class="pre">stdin=PIPE</span></code>。类似地，要在结果元组中获得任何不为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 的值，则创建进程时必须使用 <code class="docutils literal notranslate"><span class="pre">stdout=PIPE</span></code> 和/或 <code class="docutils literal notranslate"><span class="pre">stderr=PIPE</span></code> 参数。</p>
+<p class="translated">注意，数据读取在内存中是带缓冲的，因此如果数据量过大或不受限则不要使用此方法。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span><em>stdin</em> 在 <code class="docutils literal notranslate"><span class="pre">input=None</span></code> 时也会被关闭。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.send_signal">
+<span class="sig-name descname"><span class="pre">send_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.subprocess.Process.send_signal" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将信号 <em>signal</em> 发送给子进程。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">在 Windows 上，<a class="reference internal" href="signal.html#signal.SIGTERM" title="signal.SIGTERM"><code class="xref py py-const docutils literal notranslate"><span class="pre">SIGTERM</span></code></a> 是 <a class="reference internal" href="#asyncio.subprocess.Process.terminate" title="asyncio.subprocess.Process.terminate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminate()</span></code></a> 的别名。 <code class="docutils literal notranslate"><span class="pre">CTRL_C_EVENT</span></code> 和 <code class="docutils literal notranslate"><span class="pre">CTRL_BREAK_EVENT</span></code> 可被发送给启动时带有 <em>creationflags</em> 形参且其中包括 <code class="docutils literal notranslate"><span class="pre">CREATE_NEW_PROCESS_GROUP</span></code> 的进程。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.terminate">
+<span class="sig-name descname"><span class="pre">terminate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.subprocess.Process.terminate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">停止子进程。</p>
+<p class="translated">在 POSIX 系统上此方法会发送 <a class="reference internal" href="signal.html#signal.SIGTERM" title="signal.SIGTERM"><code class="xref py py-const docutils literal notranslate"><span class="pre">SIGTERM</span></code></a> 给子进程。</p>
+<p class="translated">在 Windows 上会调用 Win32 API 函数 <code class="xref c c-func docutils literal notranslate"><span class="pre">TerminateProcess()</span></code> 来停止子进程。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.kill">
+<span class="sig-name descname"><span class="pre">kill</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.subprocess.Process.kill" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">杀掉子进程。</p>
+<p class="translated">在 POSIX 系统中此方法会发送 <a class="reference internal" href="signal.html#signal.SIGKILL" title="signal.SIGKILL"><code class="xref py py-data docutils literal notranslate"><span class="pre">SIGKILL</span></code></a> 给子进程。</p>
+<p class="translated">在 Windows 上此方法是 <a class="reference internal" href="#asyncio.subprocess.Process.terminate" title="asyncio.subprocess.Process.terminate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminate()</span></code></a> 的别名。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.stdin">
+<span class="sig-name descname"><span class="pre">stdin</span></span><a class="headerlink" href="#asyncio.subprocess.Process.stdin" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">标准输入流 (<a class="reference internal" href="asyncio-stream.html#asyncio.StreamWriter" title="asyncio.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a>) 或者如果进程创建时设置了 <code class="docutils literal notranslate"><span class="pre">stdin=None</span></code> 则为 <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.stdout">
+<span class="sig-name descname"><span class="pre">stdout</span></span><a class="headerlink" href="#asyncio.subprocess.Process.stdout" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">标准输出流 (<a class="reference internal" href="asyncio-stream.html#asyncio.StreamReader" title="asyncio.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a>) 或者如果进程创建时设置了 <code class="docutils literal notranslate"><span class="pre">stdout=None</span></code> 则为 <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.stderr">
+<span class="sig-name descname"><span class="pre">stderr</span></span><a class="headerlink" href="#asyncio.subprocess.Process.stderr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">标准错误流 (<a class="reference internal" href="asyncio-stream.html#asyncio.StreamReader" title="asyncio.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a>) 或者如果进程创建时设置了 <code class="docutils literal notranslate"><span class="pre">stderr=None</span></code> 则为 <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated">使用 <a class="reference internal" href="#asyncio.subprocess.Process.communicate" title="asyncio.subprocess.Process.communicate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">communicate()</span></code></a> 方法而非 <a class="reference internal" href="#asyncio.subprocess.Process.stdin" title="asyncio.subprocess.Process.stdin"><code class="xref py py-attr docutils literal notranslate"><span class="pre">process.stdin.write()</span></code></a>, <a class="reference internal" href="#asyncio.subprocess.Process.stdout" title="asyncio.subprocess.Process.stdout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">await</span> <span class="pre">process.stdout.read()</span></code></a> 或 <a class="reference internal" href="#asyncio.subprocess.Process.stderr" title="asyncio.subprocess.Process.stderr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">await</span> <span class="pre">process.stderr.read()</span></code></a>。这可以避免由于流暂停读取或写入并阻塞子进程而导致的死锁。</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.pid">
+<span class="sig-name descname"><span class="pre">pid</span></span><a class="headerlink" href="#asyncio.subprocess.Process.pid" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">进程标识号（PID）。</p>
+<p class="translated">请注意对于由 <a class="reference internal" href="#asyncio.create_subprocess_shell" title="asyncio.create_subprocess_shell"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_shell()</span></code></a> 函数所创建的进程，这个属性将是所生成的 shell 的 PID.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="asyncio.subprocess.Process.returncode">
+<span class="sig-name descname"><span class="pre">returncode</span></span><a class="headerlink" href="#asyncio.subprocess.Process.returncode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">进程退出时的返回码。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">None</span></code> 值表示进程尚未终止。</p>
+<p class="translated">对于使用 <a class="reference internal" href="#asyncio.create_subprocess_exec" title="asyncio.create_subprocess_exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_exec()</span></code></a> 创建的进程，一个负值 <code class="docutils literal notranslate"><span class="pre">-N</span></code> 表示子进程被信号 <code class="docutils literal notranslate"><span class="pre">N</span></code> 终结（仅 POSIX）。</p>
+<p class="translated">对于使用 <a class="reference internal" href="#asyncio.create_subprocess_shell" title="asyncio.create_subprocess_shell"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_shell()</span></code></a> 创建的进程，返回代码反映了 shell 本身 (例如 <code class="docutils literal notranslate"><span class="pre">/bin/sh</span></code>) 的退出状态，它可能会将信号映射到诸如 <code class="docutils literal notranslate"><span class="pre">128+N</span></code> 的代码。 详情参见 shell 的文档（例如，Bash 文档的退出状态说明）。</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="subprocess-and-threads">
+<span id="asyncio-subprocess-threads"></span><h3 class="translated">子进程和线程<a class="headerlink" href="#subprocess-and-threads" title="Link to this heading">¶</a></h3>
+<p class="translated">标准 asyncio 事件循环默认支持从不同线程中运行子进程。</p>
+<p class="translated">在 Windows 上子进程（默认）只由 <a class="reference internal" href="asyncio-eventloop.html#asyncio.ProactorEventLoop" title="asyncio.ProactorEventLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProactorEventLoop</span></code></a> 提供，<a class="reference internal" href="asyncio-eventloop.html#asyncio.SelectorEventLoop" title="asyncio.SelectorEventLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectorEventLoop</span></code></a> 没有子进程支持。</p>
+<p class="translated">请注意其他的事件循环实现可能有其本身的限制；请查看它们各自的文档。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><a class="reference internal" href="asyncio-dev.html#asyncio-multithreading"><span class="std std-ref">asyncio 中的并发和多线程</span></a> 章节。</p>
+</div>
+</section>
+<section id="examples">
+<h3 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h3>
+<p class="translated">一个使用 <a class="reference internal" href="#asyncio.subprocess.Process" title="asyncio.subprocess.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></a> 类来控制子进程并用 <a class="reference internal" href="asyncio-stream.html#asyncio.StreamReader" title="asyncio.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 类来从其标准输出读取信息的示例。</p>
+<p class="translated" id="asyncio-example-create-subprocess-exec">这个子进程是由 <a class="reference internal" href="#asyncio.create_subprocess_exec" title="asyncio.create_subprocess_exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subprocess_exec()</span></code></a> 函数创建的:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_date</span><span class="p">():</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;import datetime as dt; print(dt.datetime.now())&#39;</span>
+
+    <span class="c1"># 创建子进程；重定向标准输出</span>
+    <span class="c1"># 至一个管道。</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+
+    <span class="c1"># 读取一行输出。</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+    <span class="c1"># 等待子进程退出。</span>
+    <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">line</span>
+
+<span class="n">date</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">get_date</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current date: </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">另请参阅使用低层级 API 编写的 <a class="reference internal" href="asyncio-protocol.html#asyncio-example-subprocess-proto"><span class="std std-ref">相同示例</span></a>。</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">子进程</a><ul>
+<li><a class="reference internal" href="#creating-subprocesses">创建子进程</a></li>
+<li><a class="reference internal" href="#constants">常量</a></li>
+<li><a class="reference internal" href="#interacting-with-subprocesses">与子进程交互</a><ul>
+<li><a class="reference internal" href="#subprocess-and-threads">子进程和线程</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-sync.html"
+                          title="上一章">同步原语</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-queue.html"
+                          title="下一章">队列</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-subprocess.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-subprocess.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-subprocess.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-queue.html" title="队列"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-sync.html" title="同步原语"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">子进程</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

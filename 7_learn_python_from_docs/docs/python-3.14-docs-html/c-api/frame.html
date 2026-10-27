@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="帧对象" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/frame.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="可以使用函数 PyEval_GetFrame() 与 PyThreadState_GetFrame() 去获取一个帧对象。 另请参阅 Reflection 。 Frame locals proxies: 帧对象 的 f_locals 属性是“帧 locals 代理”的一个实例。 该代理对象将对外公开一个下层帧 locals 字典的直写视图。这确保了由 f_locals 暴露的变量总是与帧本身..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_frame_81bbf44c.png" />
+<meta property="og:image:alt" content="可以使用函数 PyEval_GetFrame() 与 PyThreadState_GetFrame() 去获取一个帧对象。 另请参阅 Reflection 。 Frame locals proxies: 帧对象 的 f_locals 属性是“帧 locals 代理”的一个实例。 该代理对象将对外公开一个下层帧 locals 字典的直写视图。这确保了由 f_locals 暴露的变量总是与帧本身..." />
+<meta name="description" content="可以使用函数 PyEval_GetFrame() 与 PyThreadState_GetFrame() 去获取一个帧对象。 另请参阅 Reflection 。 Frame locals proxies: 帧对象 的 f_locals 属性是“帧 locals 代理”的一个实例。 该代理对象将对外公开一个下层帧 locals 字典的直写视图。这确保了由 f_locals 暴露的变量总是与帧本身..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>帧对象 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="生成器对象" href="gen.html" />
+    <link rel="prev" title="Capsule 对象" href="capsule.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/frame.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">帧对象</a><ul>
+<li><a class="reference internal" href="#frame-locals-proxies">Frame locals proxies</a></li>
+<li><a class="reference internal" href="#legacy-local-variable-apis">Legacy local variable APIs</a></li>
+<li><a class="reference internal" href="#internal-frames">Internal frames</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="capsule.html"
+                          title="上一章">Capsule 对象</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="gen.html"
+                          title="下一章">生成器对象</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/frame.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/frame.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/frame.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="gen.html" title="生成器对象"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="capsule.html" title="Capsule 对象"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concrete.html" accesskey="U">具体的对象层</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">帧对象</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="frame-objects">
+<h1 class="translated">帧对象<a class="headerlink" href="#frame-objects" title="Link to this heading">¶</a></h1>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyFrameObject">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrameObject</span></span></span><a class="headerlink" href="#c.PyFrameObject" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">受限 API</span></a> （作为不透明的结构体）.</em><p class="translated">用于描述帧对象的对象的 C 结构体。</p>
+<p class="translated">此结构体中无公有成员。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>此结构体的成员已从公有 C API 中移除。请参阅 <a class="reference internal" href="../whatsnew/3.11.html#pyframeobject-3-11-hiding"><span class="std std-ref">What's New entry</span></a> 了解详情。</p>
+</div>
+</dd></dl>
+
+<p class="translated">可以使用函数 <a class="reference internal" href="reflection.html#c.PyEval_GetFrame" title="PyEval_GetFrame"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyEval_GetFrame()</span></code></a> 与 <a class="reference internal" href="threads.html#c.PyThreadState_GetFrame" title="PyThreadState_GetFrame"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyThreadState_GetFrame()</span></code></a> 去获取一个帧对象。</p>
+<p class="translated">另请参阅 <a class="reference internal" href="reflection.html#reflection"><span class="std std-ref">Reflection</span></a>。</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.PyFrame_Type">
+<a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><span class="n"><span class="pre">PyTypeObject</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_Type</span></span></span><a class="headerlink" href="#c.PyFrame_Type" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">帧对象的类型。它与 Python 层中的 <a class="reference internal" href="../library/types.html#types.FrameType" title="types.FrameType"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.FrameType</span></code></a> 是同一对象。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>在之前版本中，此类型仅在包含 <code class="docutils literal notranslate"><span class="pre">&lt;frameobject.h&gt;</span></code> 之后可用。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_New">
+<a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_New</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="threads.html#c.PyThreadState" title="PyThreadState"><span class="n"><span class="pre">PyThreadState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tstate</span></span>, <a class="reference internal" href="code.html#c.PyCodeObject" title="PyCodeObject"><span class="n"><span class="pre">PyCodeObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">code</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">globals</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">locals</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_New" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">新建一个帧对象。此函数成功时将返回一个指向新帧对象的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>，失败时则返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并设置一个异常。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_Check">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_Check</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">obj</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_Check" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果 <em>obj</em> 是一个帧对象则返回非零值。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>在之前版本中，此函数仅在包含 <code class="docutils literal notranslate"><span class="pre">&lt;frameobject.h&gt;</span></code> 之后可用。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetBack">
+<a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetBack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetBack" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">获取 <em>frame</em> 的下一个外部帧。</p>
+<p class="translated">返回一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>，或者如果 <em>frame</em> 没有外部帧则返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。 此函数不会引发异常。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetBuiltins">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetBuiltins</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetBuiltins" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">获取 <em>frame</em> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_builtins" title="frame.f_builtins"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_builtins</span></code></a> 属性。</p>
+<p class="translated">返回一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。此结果不可为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetCode">
+<a class="reference internal" href="code.html#c.PyCodeObject" title="PyCodeObject"><span class="n"><span class="pre">PyCodeObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetCode</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetCode" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.10 版起.</em><p class="translated">获取 <em>frame</em> 的代码。</p>
+<p class="translated">返回一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。</p>
+<p class="translated">结果（帧代码）不可为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetGenerator">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetGenerator</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetGenerator" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">获取拥有该帧的生成器、协程或异步生成器，或者如果该帧不被某个生成器所拥有则为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。不会引发异常，即使其返回值为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">返回一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>，或者 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetGlobals">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetGlobals</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetGlobals" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">获取 <em>frame</em> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_globals" title="frame.f_globals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_globals</span></code></a> 属性。</p>
+<p class="translated">返回一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。此结果不可为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetLasti">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetLasti</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetLasti" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">获取 <em>frame</em> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_lasti" title="frame.f_lasti"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_lasti</span></code></a> 属性。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">frame.f_lasti</span></code> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 则返回 -1。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetVar">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetVar</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetVar" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">获取 <em>frame</em> 的变量 <em>name</em>。</p>
+<ul class="simple">
+<li><p class="translated">成功时返回一个指向变量值的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。</p></li>
+<li><p class="translated">如果该变量不存在，则引发 <a class="reference internal" href="../library/exceptions.html#NameError" title="NameError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NameError</span></code></a> 并返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p></li>
+<li><p class="translated">如果出错，则引发异常并返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p></li>
+</ul>
+<p class="translated"><em>name</em> 必须是 <a class="reference internal" href="../library/stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 类型的。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetVarString">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetVarString</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetVarString" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">和 <a class="reference internal" href="#c.PyFrame_GetVar" title="PyFrame_GetVar"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyFrame_GetVar()</span></code></a> 相似，但该变量名是一个使用 UTF-8 编码的 C 字符串。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetLocals">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetLocals</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetLocals" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">获取 <em>frame</em> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_locals" title="frame.f_locals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_locals</span></code></a> 属性。如果该帧指向一个 <a class="reference internal" href="../glossary.html#term-optimized-scope"><span class="xref std std-term">optimized scope</span></a>，这将返回一个允许修改 locals 的直写代理对象。在所有其他情况下 (类、模块、<a class="reference internal" href="../library/functions.html#exec" title="exec"><code class="xref py py-func docutils literal notranslate"><span class="pre">exec()</span></code></a>、<a class="reference internal" href="../library/functions.html#eval" title="eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>) 它将直接返回代表该帧的 locals 的映射 (如为 <a class="reference internal" href="../library/functions.html#locals" title="locals"><code class="xref py py-func docutils literal notranslate"><span class="pre">locals()</span></code></a> 所描述的)。</p>
+<p class="translated">返回一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>作为 <span class="target" id="index-7"></span><a class="pep reference external" href="https://peps.python.org/pep-0667/"><strong>PEP 667</strong></a> 的组成部分，返回一个 <a class="reference internal" href="#c.PyFrameLocalsProxy_Type" title="PyFrameLocalsProxy_Type"><code class="xref c c-var docutils literal notranslate"><span class="pre">PyFrameLocalsProxy_Type</span></code></a> 的实例。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_GetLineNumber">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_GetLineNumber</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_GetLineNumber" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.10 版起.</em><p class="translated">返回 <em>frame</em> 当前正在执行的行号。</p>
+</dd></dl>
+
+<section id="frame-locals-proxies">
+<h2 class="untranslated">Frame locals proxies<a class="headerlink" href="#frame-locals-proxies" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+<p class="translated"><a class="reference internal" href="../reference/datamodel.html#frame-objects"><span class="std std-ref">帧对象</span></a> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_locals" title="frame.f_locals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_locals</span></code></a> 属性是“帧 locals 代理”的一个实例。 该代理对象将对外公开一个下层帧 locals 字典的直写视图。这确保了由 <code class="docutils literal notranslate"><span class="pre">f_locals</span></code> 暴露的变量总是与帧本身的现有局部变量内容一致。</p>
+<p class="translated">请参阅 <span class="target" id="index-8"></span><a class="pep reference external" href="https://peps.python.org/pep-0667/"><strong>PEP 667</strong></a> 了解详情。</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.PyFrameLocalsProxy_Type">
+<a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><span class="n"><span class="pre">PyTypeObject</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrameLocalsProxy_Type</span></span></span><a class="headerlink" href="#c.PyFrameLocalsProxy_Type" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">帧 <a class="reference internal" href="../library/functions.html#locals" title="locals"><code class="xref py py-func docutils literal notranslate"><span class="pre">locals()</span></code></a> 代理对象的类型。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrameLocalsProxy_Check">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrameLocalsProxy_Check</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">obj</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrameLocalsProxy_Check" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果 <em>obj</em> 是一个帧 <a class="reference internal" href="../library/functions.html#locals" title="locals"><code class="xref py py-func docutils literal notranslate"><span class="pre">locals()</span></code></a> 代理则返回非零值。</p>
+</dd></dl>
+
+</section>
+<section id="legacy-local-variable-apis">
+<h2 class="untranslated">Legacy local variable APIs<a class="headerlink" href="#legacy-local-variable-apis" title="Link to this heading">¶</a></h2>
+<p class="translated">这些 API 已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated"><span class="xref std std-term">soft deprecated</span></a> 状态。从 Python 3.13 起，它们不做任何事。 它们的存在只是为了向下兼容。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_LocalsToFast">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_LocalsToFast</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">f</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">clear</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_LocalsToFast" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在 Python 3.13 之前，此函数会将 <em>f</em> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_locals" title="frame.f_locals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_locals</span></code></a> 属性拷贝至内部的由局部变量组成的 &quot;fast&quot; 数组，以允许在帧对象中的变化对解释器可见。如果 <em>clear</em> 为真值，此函数将处理在 locals 字典中未设置的变量。</p>
+<div class="versionchanged soft-deprecated">
+<p><span class="versionmodified soft-deprecated">自 3.13 版起已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated">Soft deprecated</a> 状态: </span>此函数现在不执行任何操作。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_FastToLocals">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_FastToLocals</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">f</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_FastToLocals" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在 Python 3.13 之前，此函数会将内部的由（供解释器使用的）局部变量组成的 &quot;fast&quot; 数组拷贝至 <em>f</em> 的 <a class="reference internal" href="../reference/datamodel.html#frame.f_locals" title="frame.f_locals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">f_locals</span></code></a> 属性，以允许在局部变量中的变化对帧对象可见。</p>
+<div class="versionchanged soft-deprecated">
+<p><span class="versionmodified soft-deprecated">自 3.13 版起已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated">Soft deprecated</a> 状态: </span>此函数现在不执行任何操作。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyFrame_FastToLocalsWithError">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyFrame_FastToLocalsWithError</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyFrameObject" title="PyFrameObject"><span class="n"><span class="pre">PyFrameObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">f</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyFrame_FastToLocalsWithError" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在 Python 3.13 之前，此函数类似于 <a class="reference internal" href="#c.PyFrame_FastToLocals" title="PyFrame_FastToLocals"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyFrame_FastToLocals()</span></code></a>，但成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>，而在失败时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常。</p>
+<div class="versionchanged soft-deprecated">
+<p><span class="versionmodified soft-deprecated">自 3.13 版起已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated">Soft deprecated</a> 状态: </span>此函数现在不执行任何操作。</p>
+</div>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0667/"><strong>PEP 667</strong></a></p>
+</div>
+</section>
+<section id="internal-frames">
+<h2 class="untranslated">Internal frames<a class="headerlink" href="#internal-frames" title="Link to this heading">¶</a></h2>
+<p class="translated">除非使用 <span class="target" id="index-9"></span><a class="pep reference external" href="https://peps.python.org/pep-0523/"><strong>PEP 523</strong></a>，否则你不会需要它。</p>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c._PyInterpreterFrame">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_PyInterpreterFrame</span></span></span><a class="headerlink" href="#c._PyInterpreterFrame" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">解释器的内部帧表示。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyUnstable_InterpreterFrame_GetCode">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_InterpreterFrame_GetCode</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c._PyInterpreterFrame" title="_PyInterpreterFrame"><span class="n"><span class="pre">_PyInterpreterFrame</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><span class="p"><span class="pre">;</span></span><a class="headerlink" href="#c.PyUnstable_InterpreterFrame_GetCode" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+<blockquote>
+<div><p class="translated">返回一个指向帧的代码对象的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。</p>
+</div></blockquote>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyUnstable_InterpreterFrame_GetLasti">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_InterpreterFrame_GetLasti</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c._PyInterpreterFrame" title="_PyInterpreterFrame"><span class="n"><span class="pre">_PyInterpreterFrame</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><span class="p"><span class="pre">;</span></span><a class="headerlink" href="#c.PyUnstable_InterpreterFrame_GetLasti" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+<p class="translated">返回最后执行的指令的字节偏移量。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyUnstable_InterpreterFrame_GetLine">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_InterpreterFrame_GetLine</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c._PyInterpreterFrame" title="_PyInterpreterFrame"><span class="n"><span class="pre">_PyInterpreterFrame</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frame</span></span><span class="sig-paren">)</span><span class="p"><span class="pre">;</span></span><a class="headerlink" href="#c.PyUnstable_InterpreterFrame_GetLine" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+<p class="translated">返回当前正在执行的行号，如果没有行号则返回 -1。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.PyUnstable_ExecutableKinds">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><span class="n"><span class="pre">PyTypeObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_ExecutableKinds</span></span></span><a class="headerlink" href="#c.PyUnstable_ExecutableKinds" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+<p class="untranslated">An array of executable kinds (executor types) for frames, used for internal
+debugging and tracing.</p>
+<p class="untranslated">Tools like debuggers and profilers can use this to identify the type of execution
+context associated with a frame (such as to filter out internal frames).
+The entries are indexed by the following constants:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="untranslated">Constant</p></th>
+<th class="head"><p class="untranslated">Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_SKIP">
+<span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_EXECUTABLE_KIND_SKIP</span></span></span><a class="headerlink" href="#c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_SKIP" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+</dd></dl>
+
+</td>
+<td><p class="untranslated">The frame is internal (For example: inlined) and should be skipped by tools.</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_PY_FUNCTION">
+<span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_EXECUTABLE_KIND_PY_FUNCTION</span></span></span><a class="headerlink" href="#c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_PY_FUNCTION" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+</dd></dl>
+
+</td>
+<td><p class="untranslated">The frame corresponds to a standard Python function.</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_BUILTIN_FUNCTION">
+<span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_EXECUTABLE_KIND_BUILTIN_FUNCTION</span></span></span><a class="headerlink" href="#c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_BUILTIN_FUNCTION" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+</dd></dl>
+
+</td>
+<td><p class="untranslated">The frame corresponds to a function defined in native code.</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_METHOD_DESCRIPTOR">
+<span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_EXECUTABLE_KIND_METHOD_DESCRIPTOR</span></span></span><a class="headerlink" href="#c.PyUnstable_ExecutableKinds.PyUnstable_EXECUTABLE_KIND_METHOD_DESCRIPTOR" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+</dd></dl>
+
+</td>
+<td><p class="untranslated">The frame corresponds to a method on a class instance.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="untranslated">Note that reading the executable kind from a frame is currently only
+possible with undocumented internal APIs.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyUnstable_EXECUTABLE_KINDS">
+<span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_EXECUTABLE_KINDS</span></span></span><a class="headerlink" href="#c.PyUnstable_EXECUTABLE_KINDS" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+<p class="untranslated">The number of entries in <a class="reference internal" href="#c.PyUnstable_ExecutableKinds" title="PyUnstable_ExecutableKinds"><code class="xref c c-data docutils literal notranslate"><span class="pre">PyUnstable_ExecutableKinds</span></code></a>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">帧对象</a><ul>
+<li><a class="reference internal" href="#frame-locals-proxies">Frame locals proxies</a></li>
+<li><a class="reference internal" href="#legacy-local-variable-apis">Legacy local variable APIs</a></li>
+<li><a class="reference internal" href="#internal-frames">Internal frames</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="capsule.html"
+                          title="上一章">Capsule 对象</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="gen.html"
+                          title="下一章">生成器对象</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/frame.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/frame.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/frame.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="gen.html" title="生成器对象"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="capsule.html" title="Capsule 对象"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concrete.html" >具体的对象层</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">帧对象</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

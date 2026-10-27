@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="runpy --- 查找并执行 Python 模块" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/runpy.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码： Lib/runpy.py runpy 模块用于定位并运行 Python 模块而不必预先导入。 它的主要用途是实现-m 命令行开关以允许使用 Python 模块命名空间而不是文件系统来定位脚本。 请注意，这 并非 一个沙盒模块——所有代码都在当前进程中运行，所有副作用（如其他模块对导入操作进行了缓存）在函数返回后都会留存。 此外，在 runpy 函数返回之后任何由所执行代码定义的函数..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_runpy_8f147b8d.png" />
+<meta property="og:image:alt" content="源代码： Lib/runpy.py runpy 模块用于定位并运行 Python 模块而不必预先导入。 它的主要用途是实现-m 命令行开关以允许使用 Python 模块命名空间而不是文件系统来定位脚本。 请注意，这 并非 一个沙盒模块——所有代码都在当前进程中运行，所有副作用（如其他模块对导入操作进行了缓存）在函数返回后都会留存。 此外，在 runpy 函数返回之后任何由所执行代码定义的函数..." />
+<meta name="description" content="源代码： Lib/runpy.py runpy 模块用于定位并运行 Python 模块而不必预先导入。 它的主要用途是实现-m 命令行开关以允许使用 Python 模块命名空间而不是文件系统来定位脚本。 请注意，这 并非 一个沙盒模块——所有代码都在当前进程中运行，所有副作用（如其他模块对导入操作进行了缓存）在函数返回后都会留存。 此外，在 runpy 函数返回之后任何由所执行代码定义的函数..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>runpy --- 查找并执行 Python 模块 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="importlib --- import 的实现" href="importlib.html" />
+    <link rel="prev" title="modulefinder --- 查找脚本使用的模块" href="modulefinder.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/runpy.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="modulefinder.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">modulefinder</span></code> --- 查找脚本使用的模块</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="importlib.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib</span></code> --- <code class="xref std std-keyword docutils literal notranslate"><span class="pre">import</span></code> 的实现</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/runpy.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/runpy.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/runpy.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="importlib.html" title="importlib --- import 的实现"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="modulefinder.html" title="modulefinder --- 查找脚本使用的模块"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" accesskey="U">导入模块</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">runpy</span></code> --- 查找并执行 Python 模块</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-runpy">
+<span id="runpy-locating-and-executing-python-modules"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runpy</span></code> --- 查找并执行 Python 模块<a class="headerlink" href="#module-runpy" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码：</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/runpy.py">Lib/runpy.py</a></p>
+<hr class="docutils" />
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runpy</span></code> 模块用于定位并运行 Python 模块而不必预先导入。 它的主要用途是实现 <a class="reference internal" href="../using/cmdline.html#cmdoption-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m</span></code></a> 命令行开关以允许使用 Python 模块命名空间而不是文件系统来定位脚本。</p>
+<p class="translated">请注意，这 <em>并非</em> 一个沙盒模块——所有代码都在当前进程中运行，所有副作用（如其他模块对导入操作进行了缓存）在函数返回后都会留存。</p>
+<p class="translated">此外，在 <code class="xref py py-mod docutils literal notranslate"><span class="pre">runpy</span></code> 函数返回之后任何由所执行代码定义的函数和类都不保证能正确工作。 如果特定使用场景不能接受此限制，那么更适合选择 <a class="reference internal" href="importlib.html#module-importlib" title="importlib: The implementation of the import machinery."><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib</span></code></a> 而不是本模块。</p>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runpy</span></code> 模块提供了两个函数：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="runpy.run_module">
+<span class="sig-prename descclassname"><span class="pre">runpy.</span></span><span class="sig-name descname"><span class="pre">run_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_globals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter_sys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#runpy.run_module" title="Link to this definition">¶</a></dt>
+<dd><p class="translated" id="index-0">执行给定模块的代码并返回模块的全局 globals 字典作为结果。首先会使用标准的导入机制来定位该模块的代码（请参阅 <span class="target" id="index-16"></span><a class="pep reference external" href="https://peps.python.org/pep-0302/"><strong>PEP 302</strong></a> 了解详情）然后在新的模块命名空间中执行。</p>
+<p class="translated"><em>mod_name</em> 参数应当是一个绝对模块名。如果模块名指向一个包而非普通模块，则会导入这个包然后执行这个包中的 <a class="reference internal" href="__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a> 子模块再返回模块全局字典。</p>
+<p class="translated">可选的字典参数 <em>init_globals</em> 可用来在代码执行前预填充模块的 globals 字典。 <em>init_globals</em> 不会被修改。如果在 <em>init_globals</em> 中定义了下面的任何一个特殊全局变量，这些定义都会被 <a class="reference internal" href="#runpy.run_module" title="runpy.run_module"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_module()</span></code></a> 覆盖。</p>
+<p class="untranslated">The special global variables <code class="docutils literal notranslate"><span class="pre">__name__</span></code>, <code class="docutils literal notranslate"><span class="pre">__spec__</span></code>, <code class="docutils literal notranslate"><span class="pre">__file__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> and <code class="docutils literal notranslate"><span class="pre">__package__</span></code> are set in the globals
+dictionary before the module code is executed. (Note that this is a
+minimal set of variables - other variables may be set implicitly as an
+interpreter implementation detail.)</p>
+<p class="translated">若可选参数 <em>run_name</em> 不为 <a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code></a> 则 <code class="docutils literal notranslate"><span class="pre">__name__</span></code> 被设为 <em>run_name</em>，若此名称的模块是一个包则设为 <code class="docutils literal notranslate"><span class="pre">mod_name</span> <span class="pre">+</span> <span class="pre">'.__main__'</span></code>，否则设为 <em>mod_name</em> 参数。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">__spec__</span></code> 将针对 <em>实际</em> 导入的模块进行适当的设置 (也就是说，<code class="docutils literal notranslate"><span class="pre">__spec__.name</span></code> 将始终为 <em>mod_name</em> 或 <code class="docutils literal notranslate"><span class="pre">mod_name</span> <span class="pre">+</span> <span class="pre">'.__main__'</span></code>，而不是 <em>run_name</em>)。</p>
+<p class="untranslated"><code class="docutils literal notranslate"><span class="pre">__file__</span></code>, <code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> and <code class="docutils literal notranslate"><span class="pre">__package__</span></code> are
+<a class="reference internal" href="../reference/datamodel.html#import-mod-attrs"><span class="std std-ref">set as normal</span></a> based on the module spec.</p>
+<p class="translated">如果给出了参数 <em>alter_sys</em> 并且值为 <a class="reference internal" href="constants.html#True" title="True"><code class="xref py py-const docutils literal notranslate"><span class="pre">True</span></code></a>，那么 <code class="docutils literal notranslate"><span class="pre">sys.argv[0]</span></code> 将被更新为 <code class="docutils literal notranslate"><span class="pre">__file__</span></code> 的值，<code class="docutils literal notranslate"><span class="pre">sys.modules[__name__]</span></code> 将被更新为临时模块对象。在函数返回前，<code class="docutils literal notranslate"><span class="pre">sys.argv[0]</span></code> 和 <code class="docutils literal notranslate"><span class="pre">sys.modules[__name__]</span></code> 将会复原。</p>
+<p class="translated">请注意对 <a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> 的这种操作不是线程安全的。其他线程可能会看到部分初始化的模块，以及更改后的参数列表。 建议当从线程中的代码调用此函数时不要使用 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 模块。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><a class="reference internal" href="../using/cmdline.html#cmdoption-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m</span></code></a> 选项由命令行提供相同功能。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.1 版本发生变更: </span>增加了通过查找 <a class="reference internal" href="__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a> 子模块来执行包的功能。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>加入了 <code class="docutils literal notranslate"><span class="pre">__cached__</span></code> 全局变量 (参见  <span class="target" id="index-17"></span><a class="pep reference external" href="https://peps.python.org/pep-3147/"><strong>PEP 3147</strong></a>)。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>充分利用 <span class="target" id="index-18"></span><a class="pep reference external" href="https://peps.python.org/pep-0451/"><strong>PEP 451</strong></a> 加入的模块规格功能。使得以这种方式运行的模块能够正确设置 <code class="docutils literal notranslate"><span class="pre">__cached__</span></code>，并确保真正的模块名称总是可以通过 <code class="docutils literal notranslate"><span class="pre">__spec__.name</span></code> 的形式访问。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> 和 <code class="docutils literal notranslate"><span class="pre">__package__</span></code> 的设置已被弃用。替代设置参见 <a class="reference internal" href="importlib.html#importlib.machinery.ModuleSpec" title="importlib.machinery.ModuleSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleSpec</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="runpy.run_path">
+<span class="sig-prename descclassname"><span class="pre">runpy.</span></span><span class="sig-name descname"><span class="pre">run_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_globals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#runpy.run_path" title="Link to this definition">¶</a></dt>
+<dd><p class="translated" id="index-4">执行位于指定文件系统位置上的代码并返回模块的 globals 字典作为结果。与提供给 CPython 命令行的脚本名称一样，<em>file_path</em> 可以指向一个 Python 源文件、编译后的字节码文件或包含 <a class="reference internal" href="__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a> 模块的有效 <a class="reference internal" href="sys.html#sys.path" title="sys.path"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a> 条目（例如一个包含最高层级 <code class="file docutils literal notranslate"><span class="pre">__main__.py</span></code> 文件的 zip 文件）。</p>
+<p class="translated">对于简单的脚本而言，只需在新的模块命名空间中执行指定的代码即可。对于一个有效的 <a class="reference internal" href="sys.html#sys.path" title="sys.path"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a> 条目（通常是一个 zip 文件或目录），首先会将该条目添加到 <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> 的开头。然后函数会使用更新后的路径查找并执行 <a class="reference internal" href="__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a> 模块。 请注意如果在指定的位置上没有 <code class="docutils literal notranslate"><span class="pre">__main__</span></code> 模块那么在唤起位于 <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> 中其他位置上的现有条目时也不会受到特殊保护。</p>
+<p class="translated">可选的字典参数 <em>init_globals</em> 可用来在代码执行前预填充模块的 globals 字典。 <em>init_globals</em> 不会被修改。如果在 <em>init_globals</em> 中定义了下面的任何一个特殊全局变量，这些定义都会被 <a class="reference internal" href="#runpy.run_path" title="runpy.run_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_path()</span></code></a> 覆盖。</p>
+<p class="untranslated">The special global variables <code class="docutils literal notranslate"><span class="pre">__name__</span></code>, <code class="docutils literal notranslate"><span class="pre">__spec__</span></code>, <code class="docutils literal notranslate"><span class="pre">__file__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> and <code class="docutils literal notranslate"><span class="pre">__package__</span></code> are set in the globals
+dictionary before the module code is executed. (Note that this is a
+minimal set of variables - other variables may be set implicitly as an
+interpreter implementation detail.)</p>
+<p class="translated">如果该可选参数不为 <a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code></a>，则 <code class="docutils literal notranslate"><span class="pre">__name__</span></code> 被设为 <em>run_name</em>，否则为 <code class="docutils literal notranslate"><span class="pre">'&lt;run_path&gt;'</span></code>。</p>
+<p class="untranslated">If <em>file_path</em> directly references a script file (whether as source
+or as precompiled byte code), then <code class="docutils literal notranslate"><span class="pre">__file__</span></code> will be set to
+<em>file_path</em>, and <code class="docutils literal notranslate"><span class="pre">__spec__</span></code>, <code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> and
+<code class="docutils literal notranslate"><span class="pre">__package__</span></code> will all be set to <a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<p class="untranslated">If <em>file_path</em> is a reference to a valid <a class="reference internal" href="sys.html#sys.path" title="sys.path"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a> entry, then
+<code class="docutils literal notranslate"><span class="pre">__spec__</span></code> will be set appropriately for the imported <a class="reference internal" href="__main__.html#module-__main__" title="__main__: The environment where top-level code is run. Covers command-line interfaces, import-time behavior, and ``__name__ == '__main__'``."><code class="xref py py-mod docutils literal notranslate"><span class="pre">__main__</span></code></a>
+module (that is, <code class="docutils literal notranslate"><span class="pre">__spec__.name</span></code> will always be <code class="docutils literal notranslate"><span class="pre">__main__</span></code>).
+<code class="docutils literal notranslate"><span class="pre">__file__</span></code>, <code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> and <code class="docutils literal notranslate"><span class="pre">__package__</span></code> will be
+<a class="reference internal" href="../reference/datamodel.html#import-mod-attrs"><span class="std std-ref">set as normal</span></a> based on the module spec.</p>
+<p class="translated"><a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> 模块也进行了多项改动。首先，<a class="reference internal" href="sys.html#sys.path" title="sys.path"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a> 可能会有如上文所描述的调整，<code class="docutils literal notranslate"><span class="pre">sys.argv[0]</span></code> 会使用 <em>file_path</em> 的值进行更新而 <code class="docutils literal notranslate"><span class="pre">sys.modules[__name__]</span></code> 会使用对应于被执行模块的临时模块对象进行更新。 在函数返回之前对 <code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code> 中条目的所有修改都会被复原。</p>
+<p class="translated">请注意，与 <a class="reference internal" href="#runpy.run_module" title="runpy.run_module"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_module()</span></code></a> 不同，对 <a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> 的修改在本函数中不是可选项，因为这些调整对于允许执行 <a class="reference internal" href="sys.html#sys.path" title="sys.path"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a> 条目来说是至关重要的。 由于线程安全限制仍然适用，在线程代码中使用该函数应当使用导入锁进行序列化，或是委托给单独的进程。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><a class="reference internal" href="../using/cmdline.html#using-on-interface-options"><span class="std std-ref">接口选项</span></a> 用于在命令行上实现同等功能 (<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">path/to/script</span></code>)。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>进行更新以便利用 <span class="target" id="index-19"></span><a class="pep reference external" href="https://peps.python.org/pep-0451/"><strong>PEP 451</strong></a> 加入的模块规格特性。这允许在 <code class="docutils literal notranslate"><span class="pre">__main__</span></code> 是从有效的 <a class="reference internal" href="sys.html#sys.path" title="sys.path"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a> 条目导入而不是直接执行的情况下能够正确地设置 <code class="docutils literal notranslate"><span class="pre">__cached__</span></code>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">__cached__</span></code>, <code class="docutils literal notranslate"><span class="pre">__loader__</span></code> 和 <code class="docutils literal notranslate"><span class="pre">__package__</span></code> 已被弃用。</p>
+</div>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><span class="target" id="index-20"></span><a class="pep reference external" href="https://peps.python.org/pep-0338/"><strong>PEP 338</strong></a> -- 将模块作为脚本执行</dt><dd><p class="translated">PEP 由 Nick Coghlan 撰写并实现。</p>
+</dd>
+<dt class="translated"><span class="target" id="index-21"></span><a class="pep reference external" href="https://peps.python.org/pep-0366/"><strong>PEP 366</strong></a> ——主模块的显式相对导入</dt><dd><p class="translated">PEP 由 Nick Coghlan 撰写并实现。</p>
+</dd>
+<dt class="translated"><span class="target" id="index-22"></span><a class="pep reference external" href="https://peps.python.org/pep-0451/"><strong>PEP 451</strong></a> —— 导入系统采用的 ModuleSpec 类型</dt><dd><p class="translated">PEP 由  Eric Snow 撰写并实现。</p>
+</dd>
+</dl>
+<p class="translated"><a class="reference internal" href="../using/cmdline.html#using-on-general"><span class="std std-ref">命令行与环境</span></a> —— CPython 命令行详解</p>
+<p class="translated"><a class="reference internal" href="importlib.html#importlib.import_module" title="importlib.import_module"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> 函数</p>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="modulefinder.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">modulefinder</span></code> --- 查找脚本使用的模块</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="importlib.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib</span></code> --- <code class="xref std std-keyword docutils literal notranslate"><span class="pre">import</span></code> 的实现</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/runpy.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/runpy.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/runpy.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="importlib.html" title="importlib --- import 的实现"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="modulefinder.html" title="modulefinder --- 查找脚本使用的模块"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >导入模块</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">runpy</span></code> --- 查找并执行 Python 模块</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

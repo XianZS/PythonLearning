@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="定时器文件描述符指南" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/timerfd.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="发布版本, 1.13,. 本指南讨论了 Python 对 linux 定时器文件描述符的支持。 例子: 下面的例子演示了如何使用定时器文件描述符每秒钟执行两次某个函数： 为避免 float 类型导致的精度损失，定时器文件描述符允许使用这些函数的_ns 变种形式以整数纳秒值指定初始到期时间和间隔。 这个例子演示了如何使用 epoll() 配合定时器文件描述符来执行等待直到文件描述符准备好读取：..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_timerfd_ddb6a045.png" />
+<meta property="og:image:alt" content="发布版本, 1.13,. 本指南讨论了 Python 对 linux 定时器文件描述符的支持。 例子: 下面的例子演示了如何使用定时器文件描述符每秒钟执行两次某个函数： 为避免 float 类型导致的精度损失，定时器文件描述符允许使用这些函数的_ns 变种形式以整数纳秒值指定初始到期时间和间隔。 这个例子演示了如何使用 epoll() 配合定时器文件描述符来执行等待直到文件描述符准备好读取：..." />
+<meta name="description" content="发布版本, 1.13,. 本指南讨论了 Python 对 linux 定时器文件描述符的支持。 例子: 下面的例子演示了如何使用定时器文件描述符每秒钟执行两次某个函数： 为避免 float 类型导致的精度损失，定时器文件描述符允许使用这些函数的_ns 变种形式以整数纳秒值指定初始到期时间和间隔。 这个例子演示了如何使用 epoll() 配合定时器文件描述符来执行等待直到文件描述符准备好读取：..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>定时器文件描述符指南 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="Python 2.3 方法解析顺序" href="mro.html" />
+    <link rel="prev" title="隔离扩展模块" href="isolating-extensions.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/timerfd.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">定时器文件描述符指南</a><ul>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="isolating-extensions.html"
+                          title="上一章">隔离扩展模块</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="mro.html"
+                          title="下一章">Python 2.3 方法解析顺序</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/timerfd.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/timerfd.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/timerfd.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="mro.html" title="Python 2.3 方法解析顺序"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="isolating-extensions.html" title="隔离扩展模块"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">定时器文件描述符指南</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="timer-file-descriptor-howto">
+<span id="timerfd-howto"></span><h1 class="translated">定时器文件描述符指南<a class="headerlink" href="#timer-file-descriptor-howto" title="Link to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd translated">发布版本<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">1.13</p>
+</dd>
+</dl>
+<p class="translated">本指南讨论了 Python 对 linux 定时器文件描述符的支持。</p>
+<section id="examples">
+<h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p class="translated">下面的例子演示了如何使用定时器文件描述符每秒钟执行两次某个函数：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 真正实用的脚本应当使用非阻塞型定时器，</span>
+<span class="c1"># 这里我们使用阻塞型定时器是出于简单化考虑。</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="c1"># 创建定时器文件描述符</span>
+<span class="n">fd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">timerfd_create</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">CLOCK_REALTIME</span><span class="p">)</span>
+
+<span class="c1"># 在 1 秒钟时启动定时器，间隔时间为半秒</span>
+<span class="n">os</span><span class="o">.</span><span class="n">timerfd_settime</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># 处理定时器事件四次。</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+        <span class="c1"># read() 将会阻塞直到定时器过期</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Timer expired&quot;</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="c1"># 记住要关闭定时器文件描述符！</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">为避免 <a class="reference internal" href="../library/functions.html#float" title="float"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> 类型导致的精度损失，定时器文件描述符允许使用这些函数的 <code class="docutils literal notranslate"><span class="pre">_ns</span></code> 变种形式以整数纳秒值指定初始到期时间和间隔。</p>
+<p class="translated">这个例子演示了如何使用 <a class="reference internal" href="../library/select.html#select.epoll" title="select.epoll"><code class="xref py py-func docutils literal notranslate"><span class="pre">epoll()</span></code></a> 配合定时器文件描述符来执行等待直到文件描述符准备好读取：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">select</span><span class="o">,</span><span class="w"> </span><span class="nn">socket</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="c1"># 创建一个 epoll 对象</span>
+<span class="n">ep</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">epoll</span><span class="p">()</span>
+
+<span class="c1"># 在本例中，使用回环地址向服务器发送 &quot;stop&quot; 命令。</span>
+<span class="c1">#</span>
+<span class="c1"># $ telnet 127.0.0.1 1234</span>
+<span class="c1"># Trying 127.0.0.1...</span>
+<span class="c1"># Connected to 127.0.0.1.</span>
+<span class="c1"># Escape character is &#39;^]&#39;.</span>
+<span class="c1"># stop</span>
+<span class="c1"># Connection closed by foreign host.</span>
+<span class="c1">#</span>
+<span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">1234</span><span class="p">))</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ep</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">select</span><span class="o">.</span><span class="n">EPOLLIN</span><span class="p">)</span>
+
+<span class="c1"># 以非阻塞模式创建定时器文件描述符。</span>
+<span class="n">num</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">fds</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="n">fd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">timerfd_create</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">CLOCK_REALTIME</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">TFD_NONBLOCK</span><span class="p">)</span>
+    <span class="n">fds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+    <span class="c1"># 注册定时器文件描述符用于读取事件</span>
+    <span class="n">ep</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">select</span><span class="o">.</span><span class="n">EPOLLIN</span><span class="p">)</span>
+
+<span class="c1"># 以纳秒精度的 os.timerfd_settime_ns() 启动定时器。</span>
+<span class="c1"># 定时器 1 间隔为 0.25 秒；定时器 2 间隔为 0.5 秒；依此类推</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fds</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">one_sec_in_nsec</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">one_sec_in_nsec</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">timerfd_settime_ns</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">i</span><span class="o">//</span><span class="mi">4</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="n">i</span><span class="o">//</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">timeout</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">is_active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="n">is_active</span><span class="p">:</span>
+        <span class="c1"># 等待定时器 3 秒到期。</span>
+        <span class="c1"># epoll.poll() 返回一个 (fd, event) 对的列表。</span>
+        <span class="c1"># fd 是一个文件描述符。</span>
+        <span class="c1"># sock 和 conn[=socket.accept() 的返回值] 是套接字对象，而不是文件描述符。</span>
+        <span class="c1"># 因此使用 sock.fileno() 和 conn.fileno() 来获取文件描述符。</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
+        <span class="c1"># 如果同时有多个定时器文件描述符准备读取，</span>
+        <span class="c1"># epoll.poll() 将返回一个 (fd, event) 对的列表。</span>
+        <span class="c1">#</span>
+        <span class="c1"># 在本例的设置中，</span>
+        <span class="c1">#    第 1 个定时器在 0.25 秒后间隔 0.25 秒启动。 (0.25, 0.5, 0.75, 1.0, ...)</span>
+        <span class="c1">#    第 2 个定时器在 0.5 秒后间隔 0.5 秒启动。 (0.5, 1.0, 1.5, 2.0, ...)</span>
+        <span class="c1">#    第 3 个定时器在 0.75 秒后间隔 0.75 秒启动。 (0.75, 1.5, 2.25, 3.0, ...)</span>
+        <span class="c1">#</span>
+        <span class="c1">#    在 0.25 秒时，只有第 1 个定时器启动。</span>
+        <span class="c1">#    在 0.5 秒时，第 1 个定时器和第 2 个定时器同时启动。</span>
+        <span class="c1">#    在 0.75 秒时，第 1 个定时器和第 3 个定时器同时启动。</span>
+        <span class="c1">#    在 1.5 秒时，第 1 个定时器、第 2 个定时器和第 3 个定时器同时启动。</span>
+        <span class="c1">#</span>
+        <span class="c1"># 如果一个定时器文件描述符自上次 os.read() 调用后</span>
+        <span class="c1"># 多次发出信号，os.read() 将以主机的类字节顺序</span>
+        <span class="c1"># 返回发出信号的次数。</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Signaled events=</span><span class="si">{</span><span class="n">events</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fd</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">&amp;</span> <span class="n">select</span><span class="o">.</span><span class="n">EPOLLIN</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">fd</span> <span class="o">==</span> <span class="n">sock</span><span class="o">.</span><span class="n">fileno</span><span class="p">():</span>
+                    <span class="c1"># 检查是否有连接请求。</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accepting connection </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">conn</span><span class="p">,</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+                    <span class="n">conn</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accepted connection </span><span class="si">{</span><span class="n">conn</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">ep</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">select</span><span class="o">.</span><span class="n">EPOLLIN</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">conn</span> <span class="ow">and</span> <span class="n">fd</span> <span class="o">==</span> <span class="n">conn</span><span class="o">.</span><span class="n">fileno</span><span class="p">():</span>
+                    <span class="c1"># 检查是否有数据要读取。</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="c1"># 安全起见你应当捕获 UnicodeDecodeError 异常。</span>
+                        <span class="n">cmd</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;stop&quot;</span><span class="p">):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stopping server&quot;</span><span class="p">)</span>
+                            <span class="n">is_active</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown command: </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># 已无数据，关闭连接</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closing connection </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">ep</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+                        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">elif</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">fds</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading timer </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timer </span><span class="si">{</span><span class="n">fds</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> expired </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> times&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown file descriptor </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">fds</span><span class="p">:</span>
+        <span class="n">ep</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+    <span class="n">ep</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">这个例子演示了如何使用 <a class="reference internal" href="../library/select.html#select.select" title="select.select"><code class="xref py py-func docutils literal notranslate"><span class="pre">select()</span></code></a> 配合定时器文件描述符来执行等待直到文件描述符准备好读取：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">select</span><span class="o">,</span><span class="w"> </span><span class="nn">socket</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="c1"># 在本例中，使用回环地址向服务器发送 &quot;stop&quot; 命令。</span>
+<span class="c1">#</span>
+<span class="c1"># $ telnet 127.0.0.1 1234</span>
+<span class="c1"># Trying 127.0.0.1...</span>
+<span class="c1"># Connected to 127.0.0.1.</span>
+<span class="c1"># Escape character is &#39;^]&#39;.</span>
+<span class="c1"># stop</span>
+<span class="c1"># Connection closed by foreign host.</span>
+<span class="c1">#</span>
+<span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">1234</span><span class="p">))</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sock</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># 以非阻塞模式创建定时器文件描述符。</span>
+<span class="n">num</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">fds</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">timerfd_create</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">CLOCK_REALTIME</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">TFD_NONBLOCK</span><span class="p">)</span>
+       <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">)]</span>
+<span class="n">select_fds</span> <span class="o">=</span> <span class="n">fds</span> <span class="o">+</span> <span class="p">[</span><span class="n">sock</span><span class="p">]</span>
+
+<span class="c1"># 使用 os.timerfd_settime() 启动指定秒数的定时器。</span>
+<span class="c1"># 定时器 1 间隔为 0.25 秒；定时器 2 间隔为 0.5 秒；依此类推</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fds</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+   <span class="n">os</span><span class="o">.</span><span class="n">timerfd_settime</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">i</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="n">i</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">timeout</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">is_active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="n">is_active</span><span class="p">:</span>
+       <span class="c1"># 等待定时器 3 秒到期。</span>
+       <span class="c1"># select.select() 返回一个文件描述符或对象的列表。</span>
+       <span class="n">rfd</span><span class="p">,</span> <span class="n">wfd</span><span class="p">,</span> <span class="n">xfd</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">select_fds</span><span class="p">,</span> <span class="n">select_fds</span><span class="p">,</span> <span class="n">select_fds</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+       <span class="k">for</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">rfd</span><span class="p">:</span>
+           <span class="k">if</span> <span class="n">fd</span> <span class="o">==</span> <span class="n">sock</span><span class="p">:</span>
+               <span class="c1"># 检查是否有连接请求。</span>
+               <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accepting connection </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+               <span class="n">conn</span><span class="p">,</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+               <span class="n">conn</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+               <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accepted connection </span><span class="si">{</span><span class="n">conn</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+               <span class="n">select_fds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+           <span class="k">elif</span> <span class="n">conn</span> <span class="ow">and</span> <span class="n">fd</span> <span class="o">==</span> <span class="n">conn</span><span class="p">:</span>
+               <span class="c1"># 检查是否有数据要读取。</span>
+               <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+               <span class="n">data</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+               <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                   <span class="c1"># 安全起见你应当捕获 UnicodeDecodeError 异常。</span>
+                   <span class="n">cmd</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                   <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;stop&quot;</span><span class="p">):</span>
+                       <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stopping server&quot;</span><span class="p">)</span>
+                       <span class="n">is_active</span> <span class="o">=</span> <span class="kc">False</span>
+                   <span class="k">else</span><span class="p">:</span>
+                       <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown command: </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+               <span class="k">else</span><span class="p">:</span>
+                   <span class="c1"># 已无数据，关闭连接</span>
+                   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closing connection </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                   <span class="n">select_fds</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+                   <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                   <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+           <span class="k">elif</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">fds</span><span class="p">:</span>
+               <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading timer </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+               <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+               <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timer </span><span class="si">{</span><span class="n">fds</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> expired </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> times&quot;</span><span class="p">)</span>
+           <span class="k">else</span><span class="p">:</span>
+               <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown file descriptor </span><span class="si">{</span><span class="n">fd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">fds</span><span class="p">:</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+    <span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">sock</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">定时器文件描述符指南</a><ul>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="isolating-extensions.html"
+                          title="上一章">隔离扩展模块</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="mro.html"
+                          title="下一章">Python 2.3 方法解析顺序</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/timerfd.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/timerfd.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/timerfd.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="mro.html" title="Python 2.3 方法解析顺序"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="isolating-extensions.html" title="隔离扩展模块"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">定时器文件描述符指南</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

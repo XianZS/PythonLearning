@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="bisect --- 数组二分算法" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/bisect.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码： Lib/bisect.py 本模块提供对维护一个已排序列表而无须在每次插入后对该列表重排序的支持。对于具有大量条目需要大量比较运算的长列表，这改进了原来的线性搜索或频繁重排序。 本模块被命名为 bisect 是因为它使用基本的二分算法来完成任务。 不同与其他搜索特定值的二分算法工具，本模块中的函数被设计为确定一个插入点。 相应地，这些函数绝不会调用__eq__() 来确定是否找到特..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_bisect_afa3e915.png" />
+<meta property="og:image:alt" content="源代码： Lib/bisect.py 本模块提供对维护一个已排序列表而无须在每次插入后对该列表重排序的支持。对于具有大量条目需要大量比较运算的长列表，这改进了原来的线性搜索或频繁重排序。 本模块被命名为 bisect 是因为它使用基本的二分算法来完成任务。 不同与其他搜索特定值的二分算法工具，本模块中的函数被设计为确定一个插入点。 相应地，这些函数绝不会调用__eq__() 来确定是否找到特..." />
+<meta name="description" content="源代码： Lib/bisect.py 本模块提供对维护一个已排序列表而无须在每次插入后对该列表重排序的支持。对于具有大量条目需要大量比较运算的长列表，这改进了原来的线性搜索或频繁重排序。 本模块被命名为 bisect 是因为它使用基本的二分算法来完成任务。 不同与其他搜索特定值的二分算法工具，本模块中的函数被设计为确定一个插入点。 相应地，这些函数绝不会调用__eq__() 来确定是否找到特..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>bisect --- 数组二分算法 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="array --- 高效的数值数组" href="array.html" />
+    <link rel="prev" title="heapq --- 堆队列算法" href="heapq.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/bisect.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> --- 数组二分算法</a><ul>
+<li><a class="reference internal" href="#performance-notes">性能说明</a></li>
+<li><a class="reference internal" href="#searching-sorted-lists">搜索有序列表</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="heapq.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">heapq</span></code> --- 堆队列算法</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="array.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">array</span></code> --- 高效的数值数组</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/bisect.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/bisect.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/bisect.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="array.html" title="array --- 高效的数值数组"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="heapq.html" title="heapq --- 堆队列算法"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="datatypes.html" accesskey="U">数据类型</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> --- 数组二分算法</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-bisect">
+<span id="bisect-array-bisection-algorithm"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> --- 数组二分算法<a class="headerlink" href="#module-bisect" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码：</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/bisect.py">Lib/bisect.py</a></p>
+<hr class="docutils" />
+<p class="translated">本模块提供对维护一个已排序列表而无须在每次插入后对该列表重排序的支持。对于具有大量条目需要大量比较运算的长列表，这改进了原来的线性搜索或频繁重排序。</p>
+<p class="translated">本模块被命名为 <code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> 是因为它使用基本的二分算法来完成任务。 不同与其他搜索特定值的二分算法工具，本模块中的函数被设计为确定一个插入点。 相应地，这些函数绝不会调用 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> 来确定是否找到特定的值。 相反，这些函数只会调用 <a class="reference internal" href="../reference/datamodel.html#object.__lt__" title="object.__lt__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__lt__()</span></code></a> 方法并将返回一个数组值之间的插入点。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">本模块中的函数不是线程安全的。 如果多个线程并发地在同一个序列上使用 <code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> 函数，可能会导致未定义的行为。 同样地，如果 <code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> 函数正在操作序列时该序列被其他线程修改，结果也将是未定义的。 例如，从多个线程对同一个列表使用 <a class="reference internal" href="#bisect.insort_left" title="bisect.insort_left"><code class="xref py py-func docutils literal notranslate"><span class="pre">insort_left()</span></code></a> 可能会导致该列表处于未排序状态。</p>
+</div>
+<p class="translated" id="bisect-functions">定义了以下函数：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="bisect.bisect_left">
+<span class="sig-prename descclassname"><span class="pre">bisect.</span></span><span class="sig-name descname"><span class="pre">bisect_left</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">len(a)</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bisect.bisect_left" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <em>a</em> 中找到 <em>x</em> 合适的插入点以维持有序。参数 <em>lo</em> 和 <em>hi</em> 可以被用于确定需要考虑的子集；默认情况下整个列表都会被使用。如果 <em>x</em> 已经在 <em>a</em> 里存在，那么插入点会在已存在元素之前（也就是左边）。如果 <em>a</em> 是列表（list）的话，返回值是可以被放在 <code class="docutils literal notranslate"><span class="pre">list.insert()</span></code> 的第一个参数的。</p>
+<p class="translated">返回的插入点 <em>ip</em> 将数组 <em>a</em> 分为两个切片使得对于左侧切片 <code class="docutils literal notranslate"><span class="pre">all(elem</span> <span class="pre">&lt;</span> <span class="pre">x</span> <span class="pre">for</span> <span class="pre">elem</span> <span class="pre">in</span> <span class="pre">a[lo</span> <span class="pre">:</span> <span class="pre">ip])</span></code> 为真值而对于右侧切片 <code class="docutils literal notranslate"><span class="pre">all(elem</span> <span class="pre">&gt;=</span> <span class="pre">x</span> <span class="pre">for</span> <span class="pre">elem</span> <span class="pre">in</span> <span class="pre">a[ip</span> <span class="pre">:</span> <span class="pre">hi])</span></code> 为真值。</p>
+<p class="translated"><em>key</em> 指定带有单个参数的 <a class="reference internal" href="../glossary.html#term-key-function"><span class="xref std std-term">key function</span></a> 用来从数组的每个元素中提取比较键。为了支持搜索复杂记录，键函数不会被应用到 <em>x</em> 值。</p>
+<p class="translated">如果 <em>key</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则将直接比较元素而不调用任何键函数。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>增加了 <em>key</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bisect.bisect_right">
+<span class="sig-prename descclassname"><span class="pre">bisect.</span></span><span class="sig-name descname"><span class="pre">bisect_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">len(a)</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bisect.bisect_right" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="bisect.bisect">
+<span class="sig-prename descclassname"><span class="pre">bisect.</span></span><span class="sig-name descname"><span class="pre">bisect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">len(a)</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bisect.bisect" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#bisect.bisect_left" title="bisect.bisect_left"><code class="xref py py-func docutils literal notranslate"><span class="pre">bisect_left()</span></code></a>，但是返回的插入点是在 <em>a</em> 中任何现有条目 <em>x</em> 之后（即其右侧）。</p>
+<p class="translated">返回的插入点 <em>ip</em> 将数组 <em>a</em> 分为两个切片使得对于左侧切片 <code class="docutils literal notranslate"><span class="pre">all(elem</span> <span class="pre">&lt;=</span> <span class="pre">x</span> <span class="pre">for</span> <span class="pre">elem</span> <span class="pre">in</span> <span class="pre">a[lo</span> <span class="pre">:</span> <span class="pre">ip])</span></code> 为真值而对于右侧切片 <code class="docutils literal notranslate"><span class="pre">all(elem</span> <span class="pre">&gt;</span> <span class="pre">x</span> <span class="pre">for</span> <span class="pre">elem</span> <span class="pre">in</span> <span class="pre">a[ip</span> <span class="pre">:</span> <span class="pre">hi])</span></code> 为真值。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>增加了 <em>key</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bisect.insort_left">
+<span class="sig-prename descclassname"><span class="pre">bisect.</span></span><span class="sig-name descname"><span class="pre">insort_left</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">len(a)</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bisect.insort_left" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">按照已排序顺序将 <em>x</em> 插入到 <em>a</em> 中。</p>
+<p class="translated">此函数会先运行 <a class="reference internal" href="#bisect.bisect_left" title="bisect.bisect_left"><code class="xref py py-func docutils literal notranslate"><span class="pre">bisect_left()</span></code></a> 来定位一个插入点。然后，它会在 <em>a</em> 上运行 <a class="reference internal" href="stdtypes.html#sequence.insert" title="sequence.insert"><code class="xref py py-meth docutils literal notranslate"><span class="pre">insert()</span></code></a> 方法在适当的位置插入 <em>x</em> 以保持排序顺序。</p>
+<p class="translated">为了支持将记录插入到表中，<em>key</em> 函数（如果存在）将被应用到 <em>x</em> 用于搜索步骤但不会用于插入步骤。</p>
+<p class="translated">请记住 <em>O</em>(log <em>n</em>) 搜索是由缓慢的 <em>O</em>(<em>n</em>) 插入步骤主导的。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>增加了 <em>key</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bisect.insort_right">
+<span class="sig-prename descclassname"><span class="pre">bisect.</span></span><span class="sig-name descname"><span class="pre">insort_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">len(a)</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bisect.insort_right" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="bisect.insort">
+<span class="sig-prename descclassname"><span class="pre">bisect.</span></span><span class="sig-name descname"><span class="pre">insort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">len(a)</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bisect.insort" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#bisect.insort_left" title="bisect.insort_left"><code class="xref py py-func docutils literal notranslate"><span class="pre">insort_left()</span></code></a>，但是会把 <em>x</em> 插入到 <em>a</em> 中任何现有条目 <em>x</em> 之后。</p>
+<p class="translated">此函数会先运行 <a class="reference internal" href="#bisect.bisect_right" title="bisect.bisect_right"><code class="xref py py-func docutils literal notranslate"><span class="pre">bisect_right()</span></code></a> 来定位一个插入点。然后，它会在 <em>a</em> 上运行 <a class="reference internal" href="stdtypes.html#sequence.insert" title="sequence.insert"><code class="xref py py-meth docutils literal notranslate"><span class="pre">insert()</span></code></a> 方法在适当的位置插入 <em>x</em> 以保持排序顺序。</p>
+<p class="translated">为了支持将记录插入到表中，<em>key</em> 函数（如果存在）将被应用到 <em>x</em> 用于搜索步骤但不会用于插入步骤。</p>
+<p class="translated">请记住 <em>O</em>(log <em>n</em>) 搜索是由缓慢的 <em>O</em>(<em>n</em>) 插入步骤主导的。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>增加了 <em>key</em> 形参。</p>
+</div>
+</dd></dl>
+
+<section id="performance-notes">
+<h2 class="translated">性能说明<a class="headerlink" href="#performance-notes" title="Link to this heading">¶</a></h2>
+<p class="translated">当使用 <em>bisect()</em> 和 <em>insort()</em> 编写时间敏感的代码时，请记住以下概念。</p>
+<ul class="simple">
+<li><p class="translated">二分法对于搜索一定范围的值是很高效的。对于定位特定的值，则字典的性能更好。</p></li>
+<li><p class="translated"><em>insort()</em> 函数的时间复杂度为 <em>O</em>(<em>n</em>) 因为对数时间的搜索步骤被线性时间的插入步骤所主导。</p></li>
+<li><p class="untranslated">The search functions are stateless and discard key function results after
+they are used.  Consequently, if the search functions are used in a loop,
+the key function may be called again and again on the same array elements.
+If the key function isn't fast, consider wrapping it with
+<a class="reference internal" href="functools.html#functools.cache" title="functools.cache"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;functools.cache</span></code></a> to avoid duplicate computations.  Alternatively,
+consider searching an array of precomputed keys to locate the insertion
+point (as shown in the examples section below).</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference external" href="https://grantjenks.com/docs/sortedcollections/">Sorted Collections</a> 是一个使用 <em>bisect</em> 来管理数据的已排序多项集的高性能模块。</p></li>
+<li><p class="translated"><a class="reference external" href="https://code.activestate.com/recipes/577197-sortedcollection/">SortedCollection recipe</a> 使用 bisect 构建了一个功能完整的多项集类，拥有直观的搜索方法和对键函数的支持。所有键函数都是预先计算好的以避免在搜索期间对键函数的不必要的调用。</p></li>
+</ul>
+</div>
+</section>
+<section id="searching-sorted-lists">
+<h2 class="translated">搜索有序列表<a class="headerlink" href="#searching-sorted-lists" title="Link to this heading">¶</a></h2>
+<p class="translated">上面的 <a class="reference internal" href="#bisect-functions">bisect functions</a> 对于找到插入点是有用的，但在一般的搜索任务中可能会有点尴尬。 下面的五个函数展示了如何将其转换为针对有序列表的标准查找函数:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="s1">&#39;定位恰好等于 x 的最靠左的值&#39;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">i</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_lt</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="s1">&#39;找到小于 x 的最靠右的值&#39;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_le</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="s1">&#39;找到小于等于 x 的最靠右的值&#39;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect_right</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_gt</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="s1">&#39;找到大于 x 的最靠左的值&#39;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect_right</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_ge</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="s1">&#39;找到大于等于 x 的最靠左的项&#39;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span>
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p class="translated" id="bisect-example"><a class="reference internal" href="#bisect.bisect" title="bisect.bisect"><code class="xref py py-func docutils literal notranslate"><span class="pre">bisect()</span></code></a> 函数对于数字表查询也是适用的。这个例子使用 <code class="xref py py-func docutils literal notranslate"><span class="pre">bisect()</span></code> 根据一组有序的数字划分点来查找考试成绩对应的字母等级：（如）90 及以上为 'A'，80 至 89 为 'B'，依此类推:</p>
+<div class="untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">grade</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect</span><span class="p">([</span><span class="mi">60</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="n">score</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="s2">&quot;FDCBA&quot;</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">grade</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">100</span><span class="p">]]</span>
+<span class="go">[&#39;F&#39;, &#39;A&#39;, &#39;C&#39;, &#39;C&#39;, &#39;B&#39;, &#39;A&#39;, &#39;A&#39;]</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#bisect.bisect" title="bisect.bisect"><code class="xref py py-func docutils literal notranslate"><span class="pre">bisect()</span></code></a> 和 <a class="reference internal" href="#bisect.insort" title="bisect.insort"><code class="xref py py-func docutils literal notranslate"><span class="pre">insort()</span></code></a> 函数也适用于元组的列表。 <em>key</em> 参数可以提取用于表中记录排序的字段:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">operator</span><span class="w"> </span><span class="kn">import</span> <span class="n">attrgetter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">bisect</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisect</span><span class="p">,</span> <span class="n">insort</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Movie</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Movie&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;released&#39;</span><span class="p">,</span> <span class="s1">&#39;director&#39;</span><span class="p">))</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">movies</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Jaws&#39;</span><span class="p">,</span> <span class="mi">1975</span><span class="p">,</span> <span class="s1">&#39;Spielberg&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Titanic&#39;</span><span class="p">,</span> <span class="mi">1997</span><span class="p">,</span> <span class="s1">&#39;Cameron&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;The Birds&#39;</span><span class="p">,</span> <span class="mi">1963</span><span class="p">,</span> <span class="s1">&#39;Hitchcock&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Aliens&#39;</span><span class="p">,</span> <span class="mi">1986</span><span class="p">,</span> <span class="s1">&#39;Cameron&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 找到 1960 年之后上映的第一部电影</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">by_year</span> <span class="o">=</span> <span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;released&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">movies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">by_year</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">movies</span><span class="p">[</span><span class="n">bisect</span><span class="p">(</span><span class="n">movies</span><span class="p">,</span> <span class="mi">1960</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">by_year</span><span class="p">)]</span>
+<span class="go">Movie(name=&#39;The Birds&#39;, released=1963, director=&#39;Hitchcock&#39;)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 在保持排序顺序的同时插入一部电影</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">romance</span> <span class="o">=</span> <span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Love Story&#39;</span><span class="p">,</span> <span class="mi">1970</span><span class="p">,</span> <span class="s1">&#39;Hiller&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">insort</span><span class="p">(</span><span class="n">movies</span><span class="p">,</span> <span class="n">romance</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">by_year</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pprint</span><span class="p">(</span><span class="n">movies</span><span class="p">)</span>
+<span class="go">[Movie(name=&#39;The Birds&#39;, released=1963, director=&#39;Hitchcock&#39;),</span>
+<span class="go"> Movie(name=&#39;Love Story&#39;, released=1970, director=&#39;Hiller&#39;),</span>
+<span class="go"> Movie(name=&#39;Jaws&#39;, released=1975, director=&#39;Spielberg&#39;),</span>
+<span class="go"> Movie(name=&#39;Aliens&#39;, released=1986, director=&#39;Cameron&#39;),</span>
+<span class="go"> Movie(name=&#39;Titanic&#39;, released=1997, director=&#39;Cameron&#39;)]</span>
+</pre></div>
+</div>
+<p class="translated">如果键函数较为消耗资源，可以通过搜索一个预先计算的键列表来查找记录的索引以避免重复的函数调用:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>       <span class="c1"># 或者使用 operator.itemgetter(1)。</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>         <span class="c1"># 预计算一个由键组成的列表。</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+<span class="go">(&#39;black&#39;, 0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="go">(&#39;blue&#39;, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="mi">5</span><span class="p">)]</span>
+<span class="go">(&#39;red&#39;, 5)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="mi">8</span><span class="p">)]</span>
+<span class="go">(&#39;yellow&#39;, 8)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> --- 数组二分算法</a><ul>
+<li><a class="reference internal" href="#performance-notes">性能说明</a></li>
+<li><a class="reference internal" href="#searching-sorted-lists">搜索有序列表</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="heapq.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">heapq</span></code> --- 堆队列算法</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="array.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">array</span></code> --- 高效的数值数组</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/bisect.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/bisect.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/bisect.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="array.html" title="array --- 高效的数值数组"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="heapq.html" title="heapq --- 堆队列算法"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="datatypes.html" >数据类型</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">bisect</span></code> --- 数组二分算法</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

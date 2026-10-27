@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="引用计数" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/refcounting.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="本节介绍的函数和宏被用于管理 Python 对象的引用计数。" />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_refcounting_c9540b54.png" />
+<meta property="og:image:alt" content="本节介绍的函数和宏被用于管理 Python 对象的引用计数。" />
+<meta name="description" content="本节介绍的函数和宏被用于管理 Python 对象的引用计数。" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>引用计数 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="异常处理" href="exceptions.html" />
+    <link rel="prev" title="极高层级 API" href="veryhigh.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/refcounting.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="veryhigh.html"
+                          title="上一章">极高层级 API</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="exceptions.html"
+                          title="下一章">异常处理</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/refcounting.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/refcounting.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/refcounting.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="异常处理"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="veryhigh.html" title="极高层级 API"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">引用计数</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="reference-counting">
+<span id="countingrefs"></span><h1 class="translated">引用计数<a class="headerlink" href="#reference-counting" title="Link to this heading">¶</a></h1>
+<p class="translated">本节介绍的函数和宏被用于管理 Python 对象的引用计数。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_REFCNT">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_REFCNT</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_REFCNT" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.14 版起.</em><p class="translated">获取 Python 对象 <em>o</em> 的引用计数。</p>
+<p class="translated">请注意返回的值可能并不真正反映实际持有的对象引用数。例如，有些对象属于 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象并具有并不反映实际引用数的非常高的 refcount 值。因此，除了 0 或 1 这两个值，不要依赖返回值的准确性。</p>
+<p class="translated">使用 <a class="reference internal" href="#c.Py_SET_REFCNT" title="Py_SET_REFCNT"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_SET_REFCNT()</span></code></a> 函数来设置一个对象引用计数。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">在 Python 的 <a class="reference internal" href="../glossary.html#term-free-threaded-build"><span class="xref std std-term">自由线程构建版</span></a>，返回 1 并不足以确定是否能安全地将 <em>o</em> 视为不可被其他线程访问。对于此类场景请改用 <a class="reference internal" href="object.html#c.PyUnstable_Object_IsUniquelyReferenced" title="PyUnstable_Object_IsUniquelyReferenced"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnstable_Object_IsUniquelyReferenced()</span></code></a>。</p>
+<p class="translated">另请参阅 <a class="reference internal" href="object.html#c.PyUnstable_Object_IsUniqueReferencedTemporary" title="PyUnstable_Object_IsUniqueReferencedTemporary"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnstable_Object_IsUniqueReferencedTemporary()</span></code></a> 函数。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span><a class="reference internal" href="#c.Py_REFCNT" title="Py_REFCNT"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_REFCNT()</span></code></a> 被改为内联的静态函数。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>形参类型不再是 <span class="c-expr sig sig-inline c"><span class="k">const</span><span class="w"> </span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n">PyObject</span></a><span class="p">*</span></span>。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_SET_REFCNT">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_SET_REFCNT</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">refcnt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_SET_REFCNT" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">将对象 <em>o</em> 的引用计数器设为 <em>refcnt</em>。</p>
+<p class="translated">在 <a class="reference internal" href="../using/configure.html#free-threading-build"><span class="std std-ref">启用自由线程的 Python 编译版</span></a> 中，如果 <em>refcnt</em> 大于 <code class="docutils literal notranslate"><span class="pre">UINT32_MAX</span></code>，该对象将被设为 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象。</p>
+<p class="translated">此函数对 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象没有效果。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>永生对象不会被修改。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_INCREF">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_INCREF</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_INCREF" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">表示为对象 <em>o</em> 获取一个新的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>，指明该对象正在被使用且不应被销毁。</p>
+<p class="translated">此函数对 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象没有效果。</p>
+<p class="translated">此函数通常被用来将 <a class="reference internal" href="../glossary.html#term-borrowed-reference"><span class="xref std std-term">borrowed reference</span></a> 原地转换为 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。 <a class="reference internal" href="#c.Py_NewRef" title="Py_NewRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewRef()</span></code></a> 函数可被用来创建新的 <span class="xref std std-term">strong reference</span>。</p>
+<p class="translated">当对象使用完毕后，可调用 <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code></a> 来释放它。</p>
+<p class="translated">此对象必须不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>；如果你不能确定它不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，请使用 <a class="reference internal" href="#c.Py_XINCREF" title="Py_XINCREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XINCREF()</span></code></a>。</p>
+<p class="translated">不要预期此函数会以任何方式实际地改变 <em>o</em>。至少对 <span class="target" id="index-4"></span><a class="pep reference external" href="https://peps.python.org/pep-0683/"><strong>某些对象</strong></a> 来说，此函数将没有任何效果。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>永生对象不会被修改。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_XINCREF">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_XINCREF</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_XINCREF" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">与 <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_INCREF()</span></code></a> 类似，但对象 <em>o</em> 可以为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，在这种情况下此函数将没有任何效果。</p>
+<p class="translated">另请参阅 <a class="reference internal" href="#c.Py_XNewRef" title="Py_XNewRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XNewRef()</span></code></a>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_NewRef">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Py_NewRef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_NewRef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.10 版起.</em><p class="translated">为对象创建一个新的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>: 在 <em>o</em> 上调用 <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_INCREF()</span></code></a> 并返回对象 <em>o</em>。</p>
+<p class="translated">当不再需要这个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a> 时，应当在其上调用 <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code></a> 来释放引用。</p>
+<p class="translated">对象 <em>o</em> 必须不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>；如果 <em>o</em> 可以为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 则应改用 <a class="reference internal" href="#c.Py_XNewRef" title="Py_XNewRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XNewRef()</span></code></a>。</p>
+<p class="translated">例如：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">Py_INCREF</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="n">self</span><span class="o">-&gt;</span><span class="n">attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obj</span><span class="p">;</span>
+</pre></div>
+</div>
+<p class="translated">可以写成:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">self</span><span class="o">-&gt;</span><span class="n">attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Py_NewRef</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">另请参阅 <a class="reference internal" href="#c.Py_INCREF" title="Py_INCREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_INCREF()</span></code></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_XNewRef">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Py_XNewRef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_XNewRef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.10 版起.</em><p class="translated">类似于 <a class="reference internal" href="#c.Py_NewRef" title="Py_NewRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewRef()</span></code></a>，但对象 <em>o</em> 可以为 NULL。</p>
+<p class="translated">如果对象 <em>o</em> 为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，该函数也将返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_DECREF">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_DECREF</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_DECREF" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">释放一个指向对象 <em>o</em> 的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>，表明该引用不再被使用。</p>
+<p class="translated">此函数对 <a class="reference internal" href="../glossary.html#term-immortal"><span class="xref std std-term">immortal</span></a> 对象没有效果。</p>
+<p class="translated">当最后一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a> 被释放时 (即对象的引用计数变为 0)，将会调用该对象所属类型的 deallocation 函数 (它必须不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>)。</p>
+<p class="translated">此函数通常被用于在退出作用域之前删除一个 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。</p>
+<p class="translated">此对象必须不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>；如果你不能确定它不为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，请使用 <a class="reference internal" href="#c.Py_XDECREF" title="Py_XDECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XDECREF()</span></code></a>。</p>
+<p class="translated">不要预期此函数会以任何方式实际地改变 <em>o</em>。至少对 <span class="target" id="index-5"></span><a class="pep reference external" href="https://peps.python.org/pep-0683/"><strong>某些对象</strong></a> 来说，此函数将没有任何效果。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated">释放函数会导致任意 Python 代码被调用（例如当一个带有 <a class="reference internal" href="../reference/datamodel.html#object.__del__" title="object.__del__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__del__()</span></code></a> 方法的类实例被释放时就是如此）。 虽然这些代码中的异常不会被传播，但被执行的代码能够自由访问所有 Python 全局变量。这意味着在调用 <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code></a> 之前任何可通过全局变量获取的对象都应该处于完好的状态。 例如，从一个列表中删除对象的代码应该将被删除对象的引用拷贝到一个临时变量中，更新列表数据结构，然后再为临时变量调用 <code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code>.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>永生对象不会被修改。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_XDECREF">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_XDECREF</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_XDECREF" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">与 <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code></a> 类似，但对象 <em>o</em> 可以为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，在这种情况下此函数将没有任何效果。来自 <code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code> 的警告同样适用于此处。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_CLEAR">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_CLEAR</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_CLEAR" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">释放一个指向对象 <em>o</em> 的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。对象可以为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，在此情况下该宏将没有任何效果；在其他情况下其效果与 <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code></a> 相同，区别在于其参数也会被设为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。针对 <code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code> 的警告不适用于所传递的对象，因为该宏会细心地使用一个临时变量并在释放引用之前将参数设为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
+<p class="translated">当需要释放指向一个在垃圾回收期间可能会被遍历的对象的引用时使用该宏是一个好主意。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>该宏参数现在只会被求值一次。如果该参数具有附带影响，它们将不会再被复制。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_IncRef">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_IncRef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_IncRef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">表示获取一个指向对象 <em>o</em> 的新 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。 <a class="reference internal" href="#c.Py_XINCREF" title="Py_XINCREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XINCREF()</span></code></a> 的函数版本。 它可被用于 Python 的运行时动态嵌入。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_DecRef">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_DecRef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">o</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_DecRef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">释放一个指向对象 <em>o</em> 的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>。 <a class="reference internal" href="#c.Py_XDECREF" title="Py_XDECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XDECREF()</span></code></a> 的函数版本。它可被用于 Python 的运行时动态嵌入。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_SETREF">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_SETREF</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">dst</span></span>, <span class="n"><span class="pre">src</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_SETREF" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">该宏可安全地释放一个指向对象 <em>dst</em> 的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a>，并将 <em>dst</em> 设为 <em>src</em>。</p>
+<p class="translated">在 <a class="reference internal" href="#c.Py_CLEAR" title="Py_CLEAR"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_CLEAR()</span></code></a> 的情况中，这样“直观”的代码可能会是致命的:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">dst</span><span class="p">);</span>
+<span class="n">dst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">src</span><span class="p">;</span>
+</pre></div>
+</div>
+<p class="translated">安全的方式是这样:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">Py_SETREF</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">这样使得在释放对旧 <em>dst</em> 值的引用 <em>之前</em> 将 <em>dst</em> 设为 <em>src</em>，从而让任何因 <em>dst</em> 被去除而触发的代码不再相信 <em>dst</em> 指向一个有效的对象。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>该宏参数现在只会被求值一次。如果某个参数具有附带影响，它们将不会再被复制。</p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_XSETREF">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_XSETREF</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">dst</span></span>, <span class="n"><span class="pre">src</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_XSETREF" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用 <a class="reference internal" href="#c.Py_XDECREF" title="Py_XDECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XDECREF()</span></code></a> 代替 <a class="reference internal" href="#c.Py_DECREF" title="Py_DECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_DECREF()</span></code></a> 的 <a class="reference internal" href="#c.Py_SETREF" title="Py_SETREF"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_SETREF</span></code></a> 宏的变种。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>该宏参数现在只会被求值一次。如果某个参数具有附带影响，它们将不会再被复制。</p>
+</div>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="veryhigh.html"
+                          title="上一章">极高层级 API</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="exceptions.html"
+                          title="下一章">异常处理</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/refcounting.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/refcounting.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/refcounting.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="异常处理"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="veryhigh.html" title="极高层级 API"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">引用计数</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

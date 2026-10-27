@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="wsgiref --- WSGI 工具和参考实现" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/wsgiref.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/wsgiref Web 服务器网关接口（WSGI）是 Web 服务器软件和用 Python 编写的 Web 应用程序之间的标准接口。 具有标准接口能够让支持 WSGI 的应用程序与多种不同的 Web 服务器配合使用。 只有 Web 服务器和编程框架的开发者才需要了解 WSGI 设计的每个细节和边界情况。 你不需要了解 WSGI 的每个细节而只需要安装一个 WSGI 应用程序..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_wsgiref_d16acd8a.png" />
+<meta property="og:image:alt" content="源代码: Lib/wsgiref Web 服务器网关接口（WSGI）是 Web 服务器软件和用 Python 编写的 Web 应用程序之间的标准接口。 具有标准接口能够让支持 WSGI 的应用程序与多种不同的 Web 服务器配合使用。 只有 Web 服务器和编程框架的开发者才需要了解 WSGI 设计的每个细节和边界情况。 你不需要了解 WSGI 的每个细节而只需要安装一个 WSGI 应用程序..." />
+<meta name="description" content="源代码: Lib/wsgiref Web 服务器网关接口（WSGI）是 Web 服务器软件和用 Python 编写的 Web 应用程序之间的标准接口。 具有标准接口能够让支持 WSGI 的应用程序与多种不同的 Web 服务器配合使用。 只有 Web 服务器和编程框架的开发者才需要了解 WSGI 设计的每个细节和边界情况。 你不需要了解 WSGI 的每个细节而只需要安装一个 WSGI 应用程序..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>wsgiref --- WSGI 工具和参考实现 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="urllib --- URL 处理模块" href="urllib.html" />
+    <link rel="prev" title="webbrowser --- 方便的 Web 浏览器控制工具" href="webbrowser.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/wsgiref.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> --- WSGI 工具和参考实现</a><ul>
+<li><a class="reference internal" href="#module-wsgiref.util"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.util</span></code> -- WSGI environment utilities</a></li>
+<li><a class="reference internal" href="#module-wsgiref.headers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.headers</span></code> -- WSGI response header tools</a></li>
+<li><a class="reference internal" href="#module-wsgiref.simple_server"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.simple_server</span></code> -- a simple WSGI HTTP server</a></li>
+<li><a class="reference internal" href="#module-wsgiref.validate"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.validate</span></code> --- WSGI conformance checker</a></li>
+<li><a class="reference internal" href="#module-wsgiref.handlers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.handlers</span></code> -- server/gateway base classes</a></li>
+<li><a class="reference internal" href="#module-wsgiref.types"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.types</span></code> -- WSGI types for static type checking</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="webbrowser.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">webbrowser</span></code> --- 方便的 Web 浏览器控制工具</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="urllib.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> --- URL 处理模块</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/wsgiref.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/wsgiref.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/wsgiref.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="urllib.html" title="urllib --- URL 处理模块"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="webbrowser.html" title="webbrowser --- 方便的 Web 浏览器控制工具"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="internet.html" accesskey="U">互联网协议和支持</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> --- WSGI 工具和参考实现</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-wsgiref">
+<span id="wsgiref-wsgi-utilities-and-reference-implementation"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> --- WSGI 工具和参考实现<a class="headerlink" href="#module-wsgiref" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/wsgiref">Lib/wsgiref</a></p>
+<hr class="docutils" />
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> 是一个参考实现，不建议用于生产环境。该模块仅实现了基本的安全检查。</p>
+</div>
+<p class="translated">Web 服务器网关接口（WSGI）是 Web 服务器软件和用 Python 编写的 Web 应用程序之间的标准接口。 具有标准接口能够让支持 WSGI 的应用程序与多种不同的 Web 服务器配合使用。</p>
+<p class="translated">只有 Web 服务器和编程框架的开发者才需要了解 WSGI 设计的每个细节和边界情况。 你不需要了解 WSGI 的每个细节而只需要安装一个 WSGI 应用程序或编写使用现有框架的 Web 应用程序。</p>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> 是 WSGI 规范的一个参考实现，可用来为 Web 服务器或框架添加 WSGI 支持。 它提供了操作 WSGI 环境变量和响应标头的工具、实现 WSGI 服务器的基类、发布 WSGI 应用程序的演示 HTTP 服务器、用于静态类型检查的类型，以及检查 WSGI 服务器和应用程序是否符合 WSGI 规范 (<span class="target" id="index-46"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a>) 的验证工具。</p>
+<p class="translated">参看 <a class="reference external" href="https://wsgi.readthedocs.io/">wsgi.readthedocs.io</a> 获取有关 WSGI 的更多信息，以及教程和其他资源的链接。</p>
+<section id="module-wsgiref.util">
+<span id="wsgiref-util-wsgi-environment-utilities"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.util</span></code> -- WSGI environment utilities<a class="headerlink" href="#module-wsgiref.util" title="Link to this heading">¶</a></h2>
+<p class="translated">本模块提供了多种工具函数配合 WSGI 环境使用。 WSGI 环境就是一个包含 <span class="target" id="index-47"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 所描述的 HTTP 请求变量的字典。 所有接受 <em>environ</em> 形参的函数都会预期得到一个符合 WSGI 规范的字典；请参阅 <span class="target" id="index-48"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 来了解相关规范的细节并请参阅 <a class="reference internal" href="#wsgiref.types.WSGIEnvironment" title="wsgiref.types.WSGIEnvironment"><code class="xref py py-data docutils literal notranslate"><span class="pre">WSGIEnvironment</span></code></a> 来了解可被用于类型标注的类型别名。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.util.guess_scheme">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">guess_scheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.guess_scheme" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回对于 <code class="docutils literal notranslate"><span class="pre">wsgi.url_scheme</span></code> 应为 &quot;http&quot; 还是 &quot;https&quot; 的猜测，具体方式是在 <em>environ</em> 中检查 <code class="docutils literal notranslate"><span class="pre">HTTPS</span></code> 环境变量。 返回值是一个字符串。</p>
+<p class="translated">此函数适用于创建一个包装了 CGI 或 CGI 类协议例如 FastCGI 的网关。 通常，提供这种协议的服务器将包括一个 <code class="docutils literal notranslate"><span class="pre">HTTPS</span></code> 变量并会在通过 SSL 接收请求时将其值设为 &quot;1&quot;, &quot;yes&quot; 或 &quot;on&quot;。 这样，此函数会在找到上述值时返回 &quot;https&quot;，否则返回 &quot;http&quot;。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.util.request_uri">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">request_uri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.request_uri" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用 <span class="target" id="index-49"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 的 &quot;URL Reconstruction&quot; 一节中的算法返回完整的请求 URL，可能包括查询字符串。 如果 <em>include_query</em> 为假值，则结果 URI 中将不包括查询字符串。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.util.application_uri">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">application_uri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.application_uri" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#wsgiref.util.request_uri" title="wsgiref.util.request_uri"><code class="xref py py-func docutils literal notranslate"><span class="pre">request_uri()</span></code></a>，区别在于 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 和 <code class="docutils literal notranslate"><span class="pre">QUERY_STRING</span></code> 变量会被忽略。 结果为请求所指定的应用程序对象的基准 URI。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.util.shift_path_info">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">shift_path_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.shift_path_info" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将单个名称从 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 变换为 <code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code> 并返回该名称。 <em>environ</em> 字典将被原地 <em>修改</em>；如果你需要保留原始 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 或 <code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code> 不变请使用一个副本。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 中没有剩余的路径节，则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">通常，此例程被用来处理请求 URI 路径的每个部分，比如说将路径当作是一系列字典键。 此例程会修改传入的环境以使其适合唤起位于目标 URI 上的其他 WSGI 应用程序，如果有一个 WSGI 应用程序位于 <code class="docutils literal notranslate"><span class="pre">/foo</span></code>，而请求 URI 路径为 <code class="docutils literal notranslate"><span class="pre">/foo/bar/baz</span></code>，且位于 <code class="docutils literal notranslate"><span class="pre">/foo</span></code> 的 WSGI 应用程序调用了 <a class="reference internal" href="#wsgiref.util.shift_path_info" title="wsgiref.util.shift_path_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">shift_path_info()</span></code></a>，它将获得字符串 &quot;bar&quot;，而环境将被更新以适合传递给位于 <code class="docutils literal notranslate"><span class="pre">/foo/bar</span></code> 的 WSGI 应用程序。 也就是说，<code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code> 将由 <code class="docutils literal notranslate"><span class="pre">/foo</span></code> 变为 <code class="docutils literal notranslate"><span class="pre">/foo/bar</span></code>，而 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 将由 <code class="docutils literal notranslate"><span class="pre">/bar/baz</span></code> 变为 <code class="docutils literal notranslate"><span class="pre">/baz</span></code>。</p>
+<p class="translated">当 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 只是 &quot;/&quot; 时，此例程会返回一个空字符串并在 <code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code> 末尾添加一个斜杠，虽然空的路径节通常会被忽略，并且 <code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code> 通常也不以斜杠作为结束。 此行为是有意为之的，用来确保应用程序在使用此例程执行对象遍历时能区分以 <code class="docutils literal notranslate"><span class="pre">/x</span></code> 结束的和以 <code class="docutils literal notranslate"><span class="pre">/x/</span></code> 结束的 URI。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.util.setup_testing_defaults">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">setup_testing_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.setup_testing_defaults" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">以简短的默认值更新 <em>environ</em> 用于测试目的。</p>
+<p class="translated">此例程会添加 WSGI 所需要的各种参数，包括 <code class="docutils literal notranslate"><span class="pre">HTTP_HOST</span></code>, <code class="docutils literal notranslate"><span class="pre">SERVER_NAME</span></code>, <code class="docutils literal notranslate"><span class="pre">SERVER_PORT</span></code>, <code class="docutils literal notranslate"><span class="pre">REQUEST_METHOD</span></code>, <code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code>, <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 以及 <span class="target" id="index-50"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 中定义的所有 <code class="docutils literal notranslate"><span class="pre">wsgi.*</span></code> 变量。 它只提供默认值，而不会替换这些变量的现有设置。</p>
+<p class="translated">此例程的目的是让 WSGI 服务器的单元测试以及应用程序设置测试环境更为容易。 它不应该被实际的 WSGI 服务器或应用程序所使用，因为它用的是假数据！</p>
+<p class="translated">用法示例 (另请参阅 <a class="reference internal" href="#wsgiref.simple_server.demo_app" title="wsgiref.simple_server.demo_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">demo_app()</span></code></a> 中的其他示例):</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_testing_defaults</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.simple_server</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_server</span>
+
+<span class="c1"># 一个相对简单的 WSGI 应用程序。 它将打印出</span>
+<span class="c1"># 由 setup_testing_defaults 更新之后的环境字典</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simple_app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+    <span class="n">setup_testing_defaults</span><span class="p">(</span><span class="n">environ</span><span class="p">)</span>
+
+    <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;200 OK&#39;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s1">&#39;text/plain; charset=utf-8&#39;</span><span class="p">)]</span>
+
+    <span class="n">start_response</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">with</span> <span class="n">make_server</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">,</span> <span class="n">simple_app</span><span class="p">)</span> <span class="k">as</span> <span class="n">httpd</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Serving on port 8000...&quot;</span><span class="p">)</span>
+    <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="untranslated">In addition to the environment functions above, the <code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.util</span></code> module
+also provides these miscellaneous utilities:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.util.is_hop_by_hop">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">is_hop_by_hop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.is_hop_by_hop" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 'header_name' 是 <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2616.html"><strong>RFC 2616</strong></a> 所定义的 HTTP/1.1 &quot;Hop-by-Hop&quot; 标头则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.util.FileWrapper">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.util.</span></span><span class="sig-name descname"><span class="pre">FileWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filelike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8192</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.util.FileWrapper" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个 <a class="reference internal" href="#wsgiref.types.FileWrapper" title="wsgiref.types.FileWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">wsgiref.types.FileWrapper</span></code></a> 协议的具体实现，被用来将文件型对象转换为 <a class="reference internal" href="../glossary.html#term-iterator"><span class="xref std std-term">iterator</span></a>。 结果对象将为 <a class="reference internal" href="../glossary.html#term-iterable"><span class="xref std std-term">iterable</span></a>。 当对象被迭代时，可选的 <em>blksize</em> 形参将被反复地传给 <em>filelike</em> 对象的 <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> 方法以获取字节串并产生输出。 当 <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> 返回空字节串时，迭代将结束并且不可再恢复。</p>
+<p class="translated">如果 <em>filelike</em> 具有 <code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code> 方法，返回的对象也将具有 <code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code> 方法，并且它将在被调用时唤起 <em>filelike</em> 对象的 <code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code> 方法。</p>
+<p class="translated">用法示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileWrapper</span>
+
+<span class="c1"># 我们使用一个 StringIO 缓冲区作为文件型对象</span>
+<span class="n">filelike</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="s2">&quot;This is an example file-like object&quot;</span><span class="o">*</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">wrapper</span> <span class="o">=</span> <span class="n">FileWrapper</span><span class="p">(</span><span class="n">filelike</span><span class="p">,</span> <span class="n">blksize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">wrapper</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>对 <a class="reference internal" href="../reference/datamodel.html#object.__getitem__" title="object.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__()</span></code></a> 方法的支持已被移除。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-wsgiref.headers">
+<span id="wsgiref-headers-wsgi-response-header-tools"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.headers</span></code> -- WSGI response header tools<a class="headerlink" href="#module-wsgiref.headers" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块提供了一个单独的类 <a class="reference internal" href="#wsgiref.headers.Headers" title="wsgiref.headers.Headers"><code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code></a>，可以方便地使用一个映射类接口操作 WSGI 响应标头。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.headers.Headers">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.headers.</span></span><span class="sig-name descname"><span class="pre">Headers</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">headers</span></span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.headers.Headers" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个包装了 <em>headers</em> 的映射类对象，它必须为如 <span class="target" id="index-52"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 所描述的由标头名称/值元组构成的列表。 <em>headers</em> 的默认值为一个空列表。</p>
+<p class="translated"><a class="reference internal" href="#wsgiref.headers.Headers" title="wsgiref.headers.Headers"><code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code></a> 对象支持典型的映射操作包括 <a class="reference internal" href="../reference/datamodel.html#object.__getitem__" title="object.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__()</span></code></a>, <a class="reference internal" href="stdtypes.html#dict.get" title="dict.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#object.__setitem__" title="object.__setitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setitem__()</span></code></a>, <a class="reference internal" href="stdtypes.html#dict.setdefault" title="dict.setdefault"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setdefault()</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#object.__delitem__" title="object.__delitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__delitem__()</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#object.__contains__" title="object.__contains__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__contains__()</span></code></a>。 对于以上各个方法，映射的键都是标头名称（大小写不敏感），而值则是关联到该标头名称的第一个值。 设置一个标头会移除该标头的任何现有值，再将一个新值添加到所包装的标头列表末尾。 标头的现有顺序通常会保持不变，新的标头会被添加到所包装的列表末尾。</p>
+<p class="translated">与字典不同，当你试图获取或删除所包装的标头列表中不存在的键时 <a class="reference internal" href="#wsgiref.headers.Headers" title="wsgiref.headers.Headers"><code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code></a> 对象不会引发错误。 获取一个不存在的标头只是返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>，而删除一个不存在的标头则没有任何影响。</p>
+<p class="translated"><a class="reference internal" href="#wsgiref.headers.Headers" title="wsgiref.headers.Headers"><code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code></a> 对象还支持 <code class="xref py py-meth docutils literal notranslate"><span class="pre">keys()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">values()</span></code> 以及 <code class="xref py py-meth docutils literal notranslate"><span class="pre">items()</span></code> 方法。 如果存在具有多个值的键则 <code class="xref py py-meth docutils literal notranslate"><span class="pre">keys()</span></code> 和 <code class="xref py py-meth docutils literal notranslate"><span class="pre">items()</span></code> 所返回的列表可能包括多个相同的键。 对 <code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code> 对象执行 <code class="docutils literal notranslate"><span class="pre">len()</span></code> 的结果与 <code class="xref py py-meth docutils literal notranslate"><span class="pre">items()</span></code> 的长度相同，也与所包装的标头列表的长度相同。 实际上，<code class="xref py py-meth docutils literal notranslate"><span class="pre">items()</span></code> 方法只是返回所包装的标头列表的一个副本。</p>
+<p class="translated">在 <a class="reference internal" href="#wsgiref.headers.Headers" title="wsgiref.headers.Headers"><code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code></a> 对象上调用 <code class="docutils literal notranslate"><span class="pre">bytes()</span></code> 将返回适用于作为 HTTP 响应标头来传输的已格式化字节串。 每个标头附带以冒号加空格分隔的值放置在一行中。 每一行都以回车符加换行符结束，且该字节串会以一个空行作为结束。</p>
+<p class="translated">除了映射接口和格式化特性，<a class="reference internal" href="#wsgiref.headers.Headers" title="wsgiref.headers.Headers"><code class="xref py py-class docutils literal notranslate"><span class="pre">Headers</span></code></a> 对象还具有下列方法用来查询和添加多值标头，以及添加具有 MIME 参数的标头:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.headers.Headers.get_all">
+<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.headers.Headers.get_all" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回包含指定标头的所有值的列表。</p>
+<p class="translated">返回的列表项将按它们在原始标头列表中的出现或被添加到实例中的顺序排序，并可能包含重复项。 任何被删除并重新插入的字段总是会被添加到标头列表末尾。 如果给定名称的字段不存在，则返回一个空列表。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.headers.Headers.add_header">
+<span class="sig-name descname"><span class="pre">add_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.headers.Headers.add_header" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">添加一个（可能有多个值）标头，带有通过关键字参数指明的可选的 MIME 参数。</p>
+<p class="translated"><em>name</em> 是要添加的标头字段。 可以使用关键字参数来为标头字段设置 MIME 参数。 每个参数必须为字符串或 <code class="docutils literal notranslate"><span class="pre">None</span></code>。 参数名中的下划线会被转换为连字符，因为连字符不可在 Python 标识符中出现，但许多 MIME 参数名都包括连字符。 如果参数值为字符串，它会以 <code class="docutils literal notranslate"><span class="pre">name=&quot;value&quot;</span></code> 的形式被添加到标头值参数中。 如果为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则只会添加参数名。 （这适用于没有值的 MIME 参数。） 示例用法:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">h</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;content-disposition&#39;</span><span class="p">,</span> <span class="s1">&#39;attachment&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;bud.gif&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">以上代码将添加一个这样的标头:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">Content</span><span class="o">-</span><span class="n">Disposition</span><span class="p">:</span> <span class="n">attachment</span><span class="p">;</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;bud.gif&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>headers</em> 形参是可选的。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-wsgiref.simple_server">
+<span id="wsgiref-simple-server-a-simple-wsgi-http-server"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.simple_server</span></code> -- a simple WSGI HTTP server<a class="headerlink" href="#module-wsgiref.simple_server" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块实现了一个简单的 HTTP 服务器 (基于 <a class="reference internal" href="http.server.html#module-http.server" title="http.server: HTTP server and request handlers."><code class="xref py py-mod docutils literal notranslate"><span class="pre">http.server</span></code></a>) 来发布 WSGI 应用程序。 每个服务器实例会在给定的主机名和端口号上发布一个 WSGI 应用程序。 如果你想在一个主机名和端口号上发布多个应用程序，你应当创建一个通过解析 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 来选择每个请求要唤起哪个应用程序的 WSGI 应用程序。 (例如，使用 <a class="reference internal" href="#module-wsgiref.util" title="wsgiref.util: WSGI environment utilities."><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.util</span></code></a> 中的  <code class="xref py py-func docutils literal notranslate"><span class="pre">shift_path_info()</span></code> 函数。)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.simple_server.make_server">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.simple_server.</span></span><span class="sig-name descname"><span class="pre">make_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WSGIServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WSGIRequestHandler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.make_server" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个新的 WSGI 服务器并在 <em>host</em> 和 <em>port</em> 上进行监听，接受对 <em>app</em> 的连接。 返回值是所提供的 <em>server_class</em> 的实例，并将使用指定的 <em>handler_class</em> 来处理请求。 <em>app</em> 必须是一个如 <span class="target" id="index-53"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 所定义的 WSGI 应用程序对象。</p>
+<p class="translated">用法示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.simple_server</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_server</span><span class="p">,</span> <span class="n">demo_app</span>
+
+<span class="k">with</span> <span class="n">make_server</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">,</span> <span class="n">demo_app</span><span class="p">)</span> <span class="k">as</span> <span class="n">httpd</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Serving HTTP on port 8000...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 响应请求直到进程被杀死</span>
+    <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+
+    <span class="c1"># 或者：服务一次请求，然后退出</span>
+    <span class="n">httpd</span><span class="o">.</span><span class="n">handle_request</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.simple_server.demo_app">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.simple_server.</span></span><span class="sig-name descname"><span class="pre">demo_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_response</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.demo_app" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">This function is a small but complete WSGI application that returns a text page
+containing the message &quot;Hello world!&quot; and a list of the key/value pairs provided
+in the <em>environ</em> parameter.  It's useful for verifying that a WSGI server (such
+as <code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.simple_server</span></code>) is able to run a simple WSGI application
+correctly.</p>
+<p class="translated"><em>start_response</em> 可调用对象必须遵循 <a class="reference internal" href="#wsgiref.types.StartResponse" title="wsgiref.types.StartResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">StartResponse</span></code></a> 协议。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.simple_server.</span></span><span class="sig-name descname"><span class="pre">WSGIServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RequestHandlerClass</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIServer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个 <a class="reference internal" href="#wsgiref.simple_server.WSGIServer" title="wsgiref.simple_server.WSGIServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">WSGIServer</span></code></a> 实例。 <em>server_address</em> 应当是一个 <code class="docutils literal notranslate"><span class="pre">(host,port)</span></code> 元组，而 <em>RequestHandlerClass</em> 应当是 <a class="reference internal" href="http.server.html#http.server.BaseHTTPRequestHandler" title="http.server.BaseHTTPRequestHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">http.server.BaseHTTPRequestHandler</span></code></a> 的子类，它将被用来处理请求。</p>
+<p class="translated">你通常不需要调用此构造器，因为 <a class="reference internal" href="#wsgiref.simple_server.make_server" title="wsgiref.simple_server.make_server"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_server()</span></code></a> 函数能为你处理所有的细节。</p>
+<p class="translated"><a class="reference internal" href="#wsgiref.simple_server.WSGIServer" title="wsgiref.simple_server.WSGIServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">WSGIServer</span></code></a> 是 <a class="reference internal" href="http.server.html#http.server.HTTPServer" title="http.server.HTTPServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">http.server.HTTPServer</span></code></a> 的子类，因此它所有的方法 (例如 <code class="xref py py-meth docutils literal notranslate"><span class="pre">serve_forever()</span></code> 和 <code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_request()</span></code>) 都是可用的。 <code class="xref py py-class docutils literal notranslate"><span class="pre">WSGIServer</span></code> 还提供了以下 WSGI 专属的方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIServer.set_app">
+<span class="sig-name descname"><span class="pre">set_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIServer.set_app" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将可调用对象 <em>application</em> 设为将要接受请求的 WSGI 应用程序。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIServer.get_app">
+<span class="sig-name descname"><span class="pre">get_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIServer.get_app" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前设置的应用程序可调用对象。</p>
+</dd></dl>
+
+<p class="translated">但是，你通常不需要使用这些附加的方法，因为 <a class="reference internal" href="#wsgiref.simple_server.WSGIServer.set_app" title="wsgiref.simple_server.WSGIServer.set_app"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_app()</span></code></a> 通常会由 <a class="reference internal" href="#wsgiref.simple_server.make_server" title="wsgiref.simple_server.make_server"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_server()</span></code></a> 来调用，而 <a class="reference internal" href="#wsgiref.simple_server.WSGIServer.get_app" title="wsgiref.simple_server.WSGIServer.get_app"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_app()</span></code></a> 主要是针对请求处理器实例的。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIRequestHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.simple_server.</span></span><span class="sig-name descname"><span class="pre">WSGIRequestHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIRequestHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">为给定的 <em>request</em> (即一个套接字)、<em>client_address</em> (一个 <code class="docutils literal notranslate"><span class="pre">(host,port)</span></code> 元组) 以及 <em>server</em> (<a class="reference internal" href="#wsgiref.simple_server.WSGIServer" title="wsgiref.simple_server.WSGIServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">WSGIServer</span></code></a> 实例) 创建一个 HTTP 处理器。</p>
+<p class="translated">你不需要直接创建该类的实例；它们会根据 <a class="reference internal" href="#wsgiref.simple_server.WSGIServer" title="wsgiref.simple_server.WSGIServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">WSGIServer</span></code></a> 对象的需要自动创建。 但是，你可以子类化该类并将其作为 <em>handler_class</em> 提供给 <a class="reference internal" href="#wsgiref.simple_server.make_server" title="wsgiref.simple_server.make_server"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_server()</span></code></a> 函数。 一些可能在子类中重载的相关方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIRequestHandler.get_environ">
+<span class="sig-name descname"><span class="pre">get_environ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIRequestHandler.get_environ" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回对应于一个请求的 <a class="reference internal" href="#wsgiref.types.WSGIEnvironment" title="wsgiref.types.WSGIEnvironment"><code class="xref py py-data docutils literal notranslate"><span class="pre">WSGIEnvironment</span></code></a> 字典。 默认实现会拷贝 <a class="reference internal" href="#wsgiref.simple_server.WSGIServer" title="wsgiref.simple_server.WSGIServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">WSGIServer</span></code></a> 对象的 <code class="xref py py-attr docutils literal notranslate"><span class="pre">base_environ</span></code> 字典属性的内容然后添加从 HTTP 请求获取的各种标头。 对此方法的每次调用都应当返回一个新的包含 <span class="target" id="index-54"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 所规定的所有相关 CGI 环境变量的字典。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIRequestHandler.get_stderr">
+<span class="sig-name descname"><span class="pre">get_stderr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIRequestHandler.get_stderr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回应被用作 <code class="docutils literal notranslate"><span class="pre">wsgi.errors</span></code> 流的对象。 默认实现将只返回 <code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.simple_server.WSGIRequestHandler.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.simple_server.WSGIRequestHandler.handle" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">处理 HTTP 请求。 默认的实现会使用 <a class="reference internal" href="#module-wsgiref.handlers" title="wsgiref.handlers: WSGI server/gateway base classes."><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.handlers</span></code></a> 类创建一个处理器实例来实现实际的 WSGI 应用程序接口。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-wsgiref.validate">
+<span id="wsgiref-validate-wsgi-conformance-checker"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.validate</span></code> --- WSGI conformance checker<a class="headerlink" href="#module-wsgiref.validate" title="Link to this heading">¶</a></h2>
+<p class="untranslated">When creating new WSGI application objects, frameworks, servers, or middleware,
+it can be useful to validate the new code's conformance using
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.validate</span></code>.  This module provides a function that creates WSGI
+application objects that validate communications between a WSGI server or
+gateway and a WSGI application object, to check both sides for protocol
+conformance.</p>
+<p class="translated">请注意这个工具并不保证完全符合 <span class="target" id="index-55"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a>；此模块没有报告错误并不一定表示不存在错误。 但是，如果此模块确实报告了错误，那么几乎可以肯定服务器或应用程序不是 100% 符合要求的。</p>
+<p class="translated">此模块是基于 Ian Bicking 的 &quot;Python Paste&quot; 库的 <code class="xref py py-mod docutils literal notranslate"><span class="pre">paste.lint</span></code> 模块。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.validate.validator">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.validate.</span></span><span class="sig-name descname"><span class="pre">validator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.validate.validator" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">包装 <em>application</em> 并返回一个新的 WSGI 应用程序对象。  返回的应用程序将转发所有请求到原始的 <em>application</em>，并将检查 <em>application</em> 和唤起它的服务器是否都符合 WSGI 规范和 <span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2616.html"><strong>RFC 2616</strong></a>。</p>
+<p class="translated">任何被检测到的不一致性都会导致引发 <a class="reference internal" href="exceptions.html#AssertionError" title="AssertionError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AssertionError</span></code></a>；但是请注意，如何对待这些错误取决于具体服务器。 例如，<a class="reference internal" href="#module-wsgiref.simple_server" title="wsgiref.simple_server: A simple WSGI HTTP server."><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.simple_server</span></code></a> 和其他基于 <a class="reference internal" href="#module-wsgiref.handlers" title="wsgiref.handlers: WSGI server/gateway base classes."><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.handlers</span></code></a> 的服务器（它们没有重载错误处理方法来做其他操作）将简单地输出一条消息报告发生了错误，并将回溯转给 <code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code> 或者其他错误数据流。</p>
+<p class="translated">这个包装器也可能会使用 <a class="reference internal" href="warnings.html#module-warnings" title="warnings: Issue warning messages and control their disposition."><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> 模块生成输出来指明存在问题但实际上未被 <span class="target" id="index-57"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 所禁止的行为。 除非它们被 Python 命令行选项或 <code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code> API 所屏蔽，否则任何此类警告都将被写入到 <code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code> (<em>不是</em> <code class="docutils literal notranslate"><span class="pre">wsgi.errors</span></code>，除非它们恰好是同一个对象)。</p>
+<p class="translated">用法示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.validate</span><span class="w"> </span><span class="kn">import</span> <span class="n">validator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.simple_server</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_server</span>
+
+<span class="c1"># 我们的可调用对象与标准是故意不兼容的，</span>
+<span class="c1"># 因此验证器将会出错</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simple_app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;200 OK&#39;</span>  <span class="c1"># HTTP 状态</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">)]</span>  <span class="c1"># HTTP 标头</span>
+    <span class="n">start_response</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+    <span class="c1"># 这将会出错因为我们需要返回一个列表，</span>
+    <span class="c1"># 验证器将会提醒我们</span>
+    <span class="k">return</span> <span class="sa">b</span><span class="s2">&quot;Hello World&quot;</span>
+
+<span class="c1"># 这是包装在验证器中的应用程序</span>
+<span class="n">validator_app</span> <span class="o">=</span> <span class="n">validator</span><span class="p">(</span><span class="n">simple_app</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">make_server</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">,</span> <span class="n">validator_app</span><span class="p">)</span> <span class="k">as</span> <span class="n">httpd</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Listening on port 8000....&quot;</span><span class="p">)</span>
+    <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-wsgiref.handlers">
+<span id="wsgiref-handlers-server-gateway-base-classes"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.handlers</span></code> -- server/gateway base classes<a class="headerlink" href="#module-wsgiref.handlers" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块提供了用于实现 WSGI 服务器和网关的处理器基类。 这些基类可处理大部分与 WSGI 应用程序通信的工作，只要给予它们一个带有输入、输出和错误流的 CGI 类环境。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.handlers.CGIHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.handlers.</span></span><span class="sig-name descname"><span class="pre">CGIHandler</span></span><a class="headerlink" href="#wsgiref.handlers.CGIHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">通过 <code class="docutils literal notranslate"><span class="pre">sys.stdin</span></code>, <code class="docutils literal notranslate"><span class="pre">sys.stdout</span></code>, <code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code> 和 <code class="docutils literal notranslate"><span class="pre">os.environ</span></code> 发起基于 CGI 的调用。 这在当你有一个 WSGI 应用程序并想将其作为 CGI 脚本运行时很有用处。 只需唤起 <code class="docutils literal notranslate"><span class="pre">CGIHandler().run(app)</span></code>，其中 <code class="docutils literal notranslate"><span class="pre">app</span></code> 是你想要唤起的 WSGI 应用程序。</p>
+<p class="translated">该类是 <a class="reference internal" href="#wsgiref.handlers.BaseCGIHandler" title="wsgiref.handlers.BaseCGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCGIHandler</span></code></a> 的子类，它将设置 <code class="docutils literal notranslate"><span class="pre">wsgi.run_once</span></code> 为真值，<code class="docutils literal notranslate"><span class="pre">wsgi.multithread</span></code> 为假值，<code class="docutils literal notranslate"><span class="pre">wsgi.multiprocess</span></code> 为真值，并总是使用 <a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> 和 <a class="reference internal" href="os.html#module-os" title="os: Miscellaneous operating system interfaces."><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> 来获取所需的 CGI 流和环境。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.handlers.IISCGIHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.handlers.</span></span><span class="sig-name descname"><span class="pre">IISCGIHandler</span></span><a class="headerlink" href="#wsgiref.handlers.IISCGIHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a> 的一个专门化替代，用于在 Microsoft 的 IIS Web 服务器上部署，无需设置 config allowPathInfo 选项 (IIS&gt;=7) 或 metabase allowPathInfoForScriptMappings (IIS&lt;7)。</p>
+<p class="translated">默认情况下，IIS 给出的 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code> 会与前面的 <code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code> 重复，导致想要实现路由的 WSGI 应用程序出现问题。 这个处理器会去除任何这样的重复路径。</p>
+<p class="translated">IIS 可被配置为传递正确的 <code class="docutils literal notranslate"><span class="pre">PATH_INFO</span></code>，但这会导致另一个 <code class="docutils literal notranslate"><span class="pre">PATH_TRANSLATED</span></code> 出错的问题。 幸运的是这个变量很少被使用并且不被 WSGI 所保证。 但是在 IIS&lt;7 上，这个设置只能在 vhost 层级上进行，影响到所有其他脚本映射，其中许多在受 <code class="docutils literal notranslate"><span class="pre">PATH_TRANSLATED</span></code> 问题影响时都会中断运行。 因此 IIS&lt;7 的部署几乎从不附带这样的修正（即使 IIS7 也很少使用它，因为它仍然不带 UI）。</p>
+<p class="translated">CGI 代码没有办法确定该选项是否已设置，因此提供了一个单独的处理器类。 它的用法与 <a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a> 相同，即通过调用 <code class="docutils literal notranslate"><span class="pre">IISCGIHandler().run(app)</span></code>，其中 <code class="docutils literal notranslate"><span class="pre">app</span></code> 是你想要唤起的 WSGI 应用程序。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseCGIHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.handlers.</span></span><span class="sig-name descname"><span class="pre">BaseCGIHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stdin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multithread</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseCGIHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a>，但不是使用 <a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> 和 <a class="reference internal" href="os.html#module-os" title="os: Miscellaneous operating system interfaces."><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> 模块，而是显式地指定 CGI 环境和 I/O 流。 <em>multithread</em> 和 <em>multiprocess</em> 值被用来为处理器实例所运行的任何应用程序设置 <code class="docutils literal notranslate"><span class="pre">wsgi.multithread</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wsgi.multiprocess</span></code> 旗标。</p>
+<p class="translated">该类是 <a class="reference internal" href="#wsgiref.handlers.SimpleHandler" title="wsgiref.handlers.SimpleHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleHandler</span></code></a> 的子类，旨在用于 HTTP &quot;原始服务器&quot; 以外的软件。 如果你在编写一个网关协议实现（例如 CGI, FastCGI, SCGI 等等），它使用 <code class="docutils literal notranslate"><span class="pre">Status:</span></code> 标头来发布 HTTP 状态，你可能会想要子类化该类而不是 <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleHandler</span></code>。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.handlers.SimpleHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.handlers.</span></span><span class="sig-name descname"><span class="pre">SimpleHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stdin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multithread</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.SimpleHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#wsgiref.handlers.BaseCGIHandler" title="wsgiref.handlers.BaseCGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCGIHandler</span></code></a>，但被设计用于 HTTP 原始服务器。 如果你在编写一个 HTTP 服务器实现，你可能会想要子类化该类而不是 <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCGIHandler</span></code>。</p>
+<p class="translated">该类是 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 的子类。 它重载了 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code>, <a class="reference internal" href="#wsgiref.handlers.BaseHandler.get_stdin" title="wsgiref.handlers.BaseHandler.get_stdin"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_stdin()</span></code></a>, <a class="reference internal" href="#wsgiref.handlers.BaseHandler.get_stderr" title="wsgiref.handlers.BaseHandler.get_stderr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_stderr()</span></code></a>, <a class="reference internal" href="#wsgiref.handlers.BaseHandler.add_cgi_vars" title="wsgiref.handlers.BaseHandler.add_cgi_vars"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_cgi_vars()</span></code></a>, <a class="reference internal" href="#wsgiref.handlers.BaseHandler._write" title="wsgiref.handlers.BaseHandler._write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_write()</span></code></a> 和 <a class="reference internal" href="#wsgiref.handlers.BaseHandler._flush" title="wsgiref.handlers.BaseHandler._flush"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_flush()</span></code></a> 方法以支持通过构造器显式地设置环境和流。 所提供的环境和流存储在 <code class="xref py py-attr docutils literal notranslate"><span class="pre">stdin</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">stdout</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">stderr</span></code> 和 <code class="xref py py-attr docutils literal notranslate"><span class="pre">environ</span></code> 属性中。</p>
+<p class="translated"><em>stdout</em> 的 <a class="reference internal" href="io.html#io.BufferedIOBase.write" title="io.BufferedIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 方法应该完整写入每个数据块，与 <a class="reference internal" href="io.html#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> 一样。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.handlers.</span></span><span class="sig-name descname"><span class="pre">BaseHandler</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是适用于运行 WSGI 应用程序的抽象基类。 每个实例将处理一个单独的 HTTP 请求，不过在原则上你也可以创建一个可针对多个请求重用的子类。</p>
+<p class="translated"><a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 实例只有一个方法提供给外部使用:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.run" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">运行指定的 WSGI 应用程序 <em>app</em>。</p>
+</dd></dl>
+
+<p class="translated">所有的 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 其他方法都是在运行应用程序过程中由该方法唤起的，因此主要是为了允许定制运行过程。</p>
+<p class="translated">以下方法必须在子类中被重载:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler._write">
+<span class="sig-name descname"><span class="pre">_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler._write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">缓冲字节数据 <em>data</em> 以便传输给客户端。 如果此方法真的传输了数据也是可以的；<a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 只有在底层系统真有这样的区分时才会区分写入和刷新操作以提高效率。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler._flush">
+<span class="sig-name descname"><span class="pre">_flush</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler._flush" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">强制将缓冲的数据传输给客户端。 如果此方法无任何操作也是可以的（例如，<a class="reference internal" href="#wsgiref.handlers.BaseHandler._write" title="wsgiref.handlers.BaseHandler._write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_write()</span></code></a> 实际上已发送了数据）。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.get_stdin">
+<span class="sig-name descname"><span class="pre">get_stdin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.get_stdin" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个兼容 <a class="reference internal" href="#wsgiref.types.InputStream" title="wsgiref.types.InputStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputStream</span></code></a> 的适合用作当前所处理请求的 <code class="docutils literal notranslate"><span class="pre">wsgi.input</span></code> 的对象。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.get_stderr">
+<span class="sig-name descname"><span class="pre">get_stderr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.get_stderr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个兼容 <a class="reference internal" href="#wsgiref.types.ErrorStream" title="wsgiref.types.ErrorStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorStream</span></code></a> 的适合用作当前所处理请求的 <code class="docutils literal notranslate"><span class="pre">wsgi.errors</span></code> 的对象。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.add_cgi_vars">
+<span class="sig-name descname"><span class="pre">add_cgi_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.add_cgi_vars" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将当前请求的 CGI 变量插入到 <code class="xref py py-attr docutils literal notranslate"><span class="pre">environ</span></code> 属性。</p>
+</dd></dl>
+
+<p class="translated">以下是一些你可能会想要重载的其他方法。 但这只是个简略的列表，它不包括每个可被重载的方法。 你应当在在尝试创建自定义的 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 子类之前参阅文档字符串和源代码来了解更多信息。</p>
+<p class="translated">用于自定义 WSGI 环境的属性和方法:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.wsgi_multithread">
+<span class="sig-name descname"><span class="pre">wsgi_multithread</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.wsgi_multithread" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于 <code class="docutils literal notranslate"><span class="pre">wsgi.multithread</span></code> 环境变量的值。 它在 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 中默认为真值，但在其他子类中可能有不同的默认值（或是由构造器来设置）。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.wsgi_multiprocess">
+<span class="sig-name descname"><span class="pre">wsgi_multiprocess</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.wsgi_multiprocess" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于 <code class="docutils literal notranslate"><span class="pre">wsgi.multiprocess</span></code> 环境变量的值。 它在 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 中默认为真值，但在其他子类中可能有不同的默认值（或是由构造器来设置）。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.wsgi_run_once">
+<span class="sig-name descname"><span class="pre">wsgi_run_once</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.wsgi_run_once" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于 <code class="docutils literal notranslate"><span class="pre">wsgi.run_once</span></code> 环境变量的值。 它在 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 中默认为假值，但在 <a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a> 中默认为真值。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.os_environ">
+<span class="sig-name descname"><span class="pre">os_environ</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.os_environ" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">The default environment variables to be included in every request's WSGI
+environment.  By default, this is a copy of <code class="docutils literal notranslate"><span class="pre">os.environ</span></code> at the time that
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.handlers</span></code> was imported, but subclasses can either create their own
+at the class or instance level.  Note that the dictionary should be considered
+read-only, since the default value is shared between multiple classes and
+instances.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.server_software">
+<span class="sig-name descname"><span class="pre">server_software</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.server_software" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果设置了 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.origin_server" title="wsgiref.handlers.BaseHandler.origin_server"><code class="xref py py-attr docutils literal notranslate"><span class="pre">origin_server</span></code></a> 属性，该属性的值会被用来设置默认的 <code class="docutils literal notranslate"><span class="pre">SERVER_SOFTWARE</span></code> WSGI 环境变量，并且还会被用来设置 HTTP 响应中默认的 <code class="docutils literal notranslate"><span class="pre">Server:</span></code> 标头。 它会被不是 HTTP 原始服务器的处理器所忽略 (例如 <a class="reference internal" href="#wsgiref.handlers.BaseCGIHandler" title="wsgiref.handlers.BaseCGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCGIHandler</span></code></a> 和 <a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a>)。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>名称 &quot;Python&quot; 会被替换为实现专属的名称如 &quot;CPython&quot;, &quot;Jython&quot; 等等。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.get_scheme">
+<span class="sig-name descname"><span class="pre">get_scheme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.get_scheme" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前请求所使用的 URL 方案。 默认的实现会使用来自 <a class="reference internal" href="#module-wsgiref.util" title="wsgiref.util: WSGI environment utilities."><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.util</span></code></a> 的 <code class="xref py py-func docutils literal notranslate"><span class="pre">guess_scheme()</span></code> 函数根据当前请求的 <code class="xref py py-attr docutils literal notranslate"><span class="pre">environ</span></code> 变量来猜测方案应该是 &quot;http&quot; 还是 &quot;https&quot;。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.setup_environ">
+<span class="sig-name descname"><span class="pre">setup_environ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.setup_environ" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <code class="xref py py-attr docutils literal notranslate"><span class="pre">environ</span></code> 属性设为填充了完整内容的 WSGI 环境。 默认的实现会使用上述的所有方法和属性，加上 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.get_stdin" title="wsgiref.handlers.BaseHandler.get_stdin"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_stdin()</span></code></a>, <a class="reference internal" href="#wsgiref.handlers.BaseHandler.get_stderr" title="wsgiref.handlers.BaseHandler.get_stderr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_stderr()</span></code></a> 和 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.add_cgi_vars" title="wsgiref.handlers.BaseHandler.add_cgi_vars"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_cgi_vars()</span></code></a> 方法以及 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.wsgi_file_wrapper" title="wsgiref.handlers.BaseHandler.wsgi_file_wrapper"><code class="xref py py-attr docutils literal notranslate"><span class="pre">wsgi_file_wrapper</span></code></a> 属性。 它还会在 <code class="docutils literal notranslate"><span class="pre">SERVER_SOFTWARE</span></code> 不存在时插入该键，只要 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.origin_server" title="wsgiref.handlers.BaseHandler.origin_server"><code class="xref py py-attr docutils literal notranslate"><span class="pre">origin_server</span></code></a> 属性为真值并且设置了 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.server_software" title="wsgiref.handlers.BaseHandler.server_software"><code class="xref py py-attr docutils literal notranslate"><span class="pre">server_software</span></code></a> 属性。</p>
+</dd></dl>
+
+<p class="translated">用于自定义异常处理的方法和属性:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.log_exception">
+<span class="sig-name descname"><span class="pre">log_exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc_info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.log_exception" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>exc_info</em> 元组记录到服务器日志。 <em>exc_info</em> 是一个 <code class="docutils literal notranslate"><span class="pre">(type,</span> <span class="pre">value,</span> <span class="pre">traceback)</span></code> 元组。 默认的实现会简单地将回溯信息写入请求的 <code class="docutils literal notranslate"><span class="pre">wsgi.errors</span></code> 流并刷新它。 子类可以重写此方法来修改格式或重设输出目标，通过邮件将回溯信息发给管理员，或执行任何其他符合要求的动作。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.traceback_limit">
+<span class="sig-name descname"><span class="pre">traceback_limit</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.traceback_limit" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">要包括在默认 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.log_exception" title="wsgiref.handlers.BaseHandler.log_exception"><code class="xref py py-meth docutils literal notranslate"><span class="pre">log_exception()</span></code></a> 方法的回溯信息输出中的最大帧数。 如果为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则会包括所有的帧。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.error_output">
+<span class="sig-name descname"><span class="pre">error_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_response</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.error_output" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此方法是一个为用户生成错误页面的 WSGI 应用程序。 它仅当将标头发送给客户端之前发生错误时会被唤起。</p>
+<p class="translated">此方法可以使用 <code class="docutils literal notranslate"><span class="pre">sys.exception()</span></code> 来访问当前错误信息，并应当在调用它时将该信息传给 <em>start_response</em> (如 <span class="target" id="index-58"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 的 &quot;Error Handling&quot; 一节所描述的)。 具体而言，<em>start_response</em> 可调用对象应当遵循 <a class="reference internal" href="#wsgiref.types.StartResponse" title="wsgiref.types.StartResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">StartResponse</span></code></a> 协议。</p>
+<p class="translated">默认的实现只是使用 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.error_status" title="wsgiref.handlers.BaseHandler.error_status"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error_status</span></code></a>, <a class="reference internal" href="#wsgiref.handlers.BaseHandler.error_headers" title="wsgiref.handlers.BaseHandler.error_headers"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error_headers</span></code></a>, 和 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.error_body" title="wsgiref.handlers.BaseHandler.error_body"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error_body</span></code></a> 属性来生成一个输出页面。 子类可以重写此方法来产生更动态化的错误输出。</p>
+<p class="translated">但是请注意，从安全角度看来是不建议将诊断信息暴露给任何用户的；理想的做法是你应当通过特别处理来启用诊断输出，因此默认的实现并不包括这样的内容。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.error_status">
+<span class="sig-name descname"><span class="pre">error_status</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.error_status" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于错误响应的 HTTP 状态。 这应当是一个在 <span class="target" id="index-59"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 中定义的状态字符串；它默认为代码 500 及相应的消息。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.error_headers">
+<span class="sig-name descname"><span class="pre">error_headers</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.error_headers" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于错误响应的 HTTP 标头。 这应当是由 WSGI 响应标头 (<code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">value)</span></code> 元组) 构成的列表，如 <span class="target" id="index-60"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 所定义的。 默认的列表只是将内容类型设为 <code class="docutils literal notranslate"><span class="pre">text/plain</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.error_body">
+<span class="sig-name descname"><span class="pre">error_body</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.error_body" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">错误响应体。  这应当是一个 HTTP 响应体字节串。 它默认为纯文本 &quot;A server error occurred.  Please contact the administrator.&quot;</p>
+</dd></dl>
+
+<p class="translated">用于 <span class="target" id="index-61"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 的 &quot;可选的平台专属文件处理&quot; 特性的方法和属性:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.wsgi_file_wrapper">
+<span class="sig-name descname"><span class="pre">wsgi_file_wrapper</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.wsgi_file_wrapper" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个 <code class="docutils literal notranslate"><span class="pre">wsgi.file_wrapper</span></code> 工厂对象，兼容 <a class="reference internal" href="#wsgiref.types.FileWrapper" title="wsgiref.types.FileWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">wsgiref.types.FileWrapper</span></code></a>，或者为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。 该属性的默认值是 <a class="reference internal" href="#wsgiref.util.FileWrapper" title="wsgiref.util.FileWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">wsgiref.util.FileWrapper</span></code></a> 类。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.sendfile">
+<span class="sig-name descname"><span class="pre">sendfile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.sendfile" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">重载以实现平台专属的文件传输。 此方法仅在应用程序的返回值是由 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.wsgi_file_wrapper" title="wsgiref.handlers.BaseHandler.wsgi_file_wrapper"><code class="xref py py-attr docutils literal notranslate"><span class="pre">wsgi_file_wrapper</span></code></a> 属性指定的类的实例时会被调用。 如果它能够成功地传输文件则应当返回真值，以使得默认的传输代码将不会被执行。 此方法的默认实现只会返回假值。</p>
+</dd></dl>
+
+<p class="translated">杂项方法和属性:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.origin_server">
+<span class="sig-name descname"><span class="pre">origin_server</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.origin_server" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">该属性在处理器的 <a class="reference internal" href="#wsgiref.handlers.BaseHandler._write" title="wsgiref.handlers.BaseHandler._write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_write()</span></code></a> 和 <a class="reference internal" href="#wsgiref.handlers.BaseHandler._flush" title="wsgiref.handlers.BaseHandler._flush"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_flush()</span></code></a> 被用于同客户端直接通信而不是通过需要 HTTP 状态为某种特殊 <code class="docutils literal notranslate"><span class="pre">Status:</span></code> 标头的 CGI 类网关协议时应当被设为真值。</p>
+<p class="translated">该属性在 <a class="reference internal" href="#wsgiref.handlers.BaseHandler" title="wsgiref.handlers.BaseHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHandler</span></code></a> 中默认为真值，但在 <a class="reference internal" href="#wsgiref.handlers.BaseCGIHandler" title="wsgiref.handlers.BaseCGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCGIHandler</span></code></a> 和 <a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a> 中则为假值。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="wsgiref.handlers.BaseHandler.http_version">
+<span class="sig-name descname"><span class="pre">http_version</span></span><a class="headerlink" href="#wsgiref.handlers.BaseHandler.http_version" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 <a class="reference internal" href="#wsgiref.handlers.BaseHandler.origin_server" title="wsgiref.handlers.BaseHandler.origin_server"><code class="xref py py-attr docutils literal notranslate"><span class="pre">origin_server</span></code></a> 为真值，则该字符串属性会被用来设置给客户端的响应的 HTTP 版本。 它的默认值为 <code class="docutils literal notranslate"><span class="pre">&quot;1.0&quot;</span></code>。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="wsgiref.handlers.read_environ">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.handlers.</span></span><span class="sig-name descname"><span class="pre">read_environ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wsgiref.handlers.read_environ" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将来自 <code class="docutils literal notranslate"><span class="pre">os.environ</span></code> 的 CGI 变量转码为 <span class="target" id="index-62"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> &quot;bytes in unicode&quot; 字符串，返回一个新的字典。 此函数被 <a class="reference internal" href="#wsgiref.handlers.CGIHandler" title="wsgiref.handlers.CGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGIHandler</span></code></a> 和 <a class="reference internal" href="#wsgiref.handlers.IISCGIHandler" title="wsgiref.handlers.IISCGIHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">IISCGIHandler</span></code></a> 用来替代直接使用 <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>，后者不一定在所有使用 Python 3 的平台和 Web 服务器上都符合 WSGI 标准 -- 特别是当 OS 的实际环境为 Unicode 时 (例如 Windows)，或者当环境为字节数据，但被 Python 用来解码它的系统编码格式不是 ISO-8859-1 时 (例如使用 UTF-8 的 Unix 系统)。</p>
+<p class="translated">如果你要实现自己的基于 CGI 的处理器，你可能会想要使用此例程而不是简单地从 <code class="docutils literal notranslate"><span class="pre">os.environ</span></code> 直接拷贝值。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-wsgiref.types">
+<span id="wsgiref-types-wsgi-types-for-static-type-checking"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.types</span></code> -- WSGI types for static type checking<a class="headerlink" href="#module-wsgiref.types" title="Link to this heading">¶</a></h2>
+<p class="translated">本模块提供了多种用于 <span class="target" id="index-63"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a> 中所描述的静态类型检查的类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.types.StartResponse">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.types.</span></span><span class="sig-name descname"><span class="pre">StartResponse</span></span><a class="headerlink" href="#wsgiref.types.StartResponse" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个描述 <span class="target" id="index-64"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/#the-start-response-callable"><strong>start_response()</strong></a> 可调用对象的 <a class="reference internal" href="typing.html#typing.Protocol" title="typing.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Protocol</span></code></a> (<span class="target" id="index-65"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/"><strong>PEP 3333</strong></a>)。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="wsgiref.types.WSGIEnvironment">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.types.</span></span><span class="sig-name descname"><span class="pre">WSGIEnvironment</span></span><a class="headerlink" href="#wsgiref.types.WSGIEnvironment" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个描述 WSGI 环境字典的类型别名。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="wsgiref.types.WSGIApplication">
+<span class="sig-prename descclassname"><span class="pre">wsgiref.types.</span></span><span class="sig-name descname"><span class="pre">WSGIApplication</span></span><a class="headerlink" href="#wsgiref.types.WSGIApplication" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个描述 WSGI 应用程序可调用对象的类型别名。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.types.InputStream">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.types.</span></span><span class="sig-name descname"><span class="pre">InputStream</span></span><a class="headerlink" href="#wsgiref.types.InputStream" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个描述 <span class="target" id="index-66"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/#input-and-error-streams"><strong>WSGI 输入流</strong></a> 的 <a class="reference internal" href="typing.html#typing.Protocol" title="typing.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Protocol</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.types.ErrorStream">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.types.</span></span><span class="sig-name descname"><span class="pre">ErrorStream</span></span><a class="headerlink" href="#wsgiref.types.ErrorStream" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个描述 <span class="target" id="index-67"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/#input-and-error-streams"><strong>WSGI 错误流</strong></a> 的 <a class="reference internal" href="typing.html#typing.Protocol" title="typing.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Protocol</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="wsgiref.types.FileWrapper">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">wsgiref.types.</span></span><span class="sig-name descname"><span class="pre">FileWrapper</span></span><a class="headerlink" href="#wsgiref.types.FileWrapper" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个描述 <span class="target" id="index-68"></span><a class="pep reference external" href="https://peps.python.org/pep-3333/#optional-platform-specific-file-handling"><strong>文件包装器</strong></a> 的 <a class="reference internal" href="typing.html#typing.Protocol" title="typing.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Protocol</span></code></a>。 请参阅 <a class="reference internal" href="#wsgiref.util.FileWrapper" title="wsgiref.util.FileWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">wsgiref.util.FileWrapper</span></code></a> 查看此协议的一个具体实现。</p>
+</dd></dl>
+
+</section>
+<section id="examples">
+<h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p class="translated">下面是一个可运行的 &quot;Hello World&quot; WSGI 应用程序，其中 <em>start_response</em> 可调用对象应当遵循 <a class="reference internal" href="#wsgiref.types.StartResponse" title="wsgiref.types.StartResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">StartResponse</span></code></a> 协议:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">每个 WSGI 应用程序必须有一个应用程序对象 —— 即一个将接受</span>
+<span class="sd">两个参数的可调用对象。 为达成此目的，我们准备使用一个函数</span>
+<span class="sd">（请注意并非仅限使用函数，例如你也可以使用一个类）。</span>
+<span class="sd">传给该函数的第一个参数是一个包含 CGI 风格的环境变量的字典</span>
+<span class="sd">而第二个变量就是上述的可调用对象。</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref.simple_server</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_server</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">hello_world_app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;200 OK&quot;</span>  <span class="c1"># HTTP Status</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;Content-type&quot;</span><span class="p">,</span> <span class="s2">&quot;text/plain; charset=utf-8&quot;</span><span class="p">)]</span>  <span class="c1"># HTTP 标头</span>
+    <span class="n">start_response</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+    <span class="c1"># 返回的对象将被打印出来</span>
+    <span class="k">return</span> <span class="p">[</span><span class="sa">b</span><span class="s2">&quot;Hello World&quot;</span><span class="p">]</span>
+
+<span class="k">with</span> <span class="n">make_server</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">,</span> <span class="n">hello_world_app</span><span class="p">)</span> <span class="k">as</span> <span class="n">httpd</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Serving on port 8000...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 运行服务直到进程被杀掉</span>
+    <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">一个发布当前目录的 WSGI 应用程序示例，接受通过命令行指定可选的目录和端口号 (默认值: 8000):</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">基于 wsgiref 的小型 web 服务器。 接受一个服务路径和</span>
+<span class="sd">一个可选的端口号 (默认为 8000)，然后尝试发布文件。</span>
+<span class="sd">MIME 类型将根据文件名来猜测，如果文件未找到则会</span>
+<span class="sd">引发 404 错误。</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mimetypes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wsgiref</span><span class="w"> </span><span class="kn">import</span> <span class="n">simple_server</span><span class="p">,</span> <span class="n">util</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">respond</span><span class="p">):</span>
+    <span class="c1"># 获取文件名和 MIME 类型</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PATH_INFO&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;index.html&quot;</span><span class="p">)</span>
+    <span class="n">mime_type</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_file_type</span><span class="p">(</span><span class="n">fn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># 如果文件存在则返回 200 OK，否则返回 404 Not Found</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+        <span class="n">respond</span><span class="p">(</span><span class="s2">&quot;200 OK&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="n">mime_type</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">FileWrapper</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">respond</span><span class="p">(</span><span class="s2">&quot;404 Not Found&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;text/plain&quot;</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">b</span><span class="s2">&quot;not found&quot;</span><span class="p">]</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># 从命令行参数获取路径和端口</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">8000</span>
+
+    <span class="c1"># 创建并启动服务直至被 control-c 中断</span>
+    <span class="n">httpd</span> <span class="o">=</span> <span class="n">simple_server</span><span class="o">.</span><span class="n">make_server</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">app</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Serving </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> on port </span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">, control-C to stop&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shutting down.&quot;</span><span class="p">)</span>
+        <span class="n">httpd</span><span class="o">.</span><span class="n">server_close</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> --- WSGI 工具和参考实现</a><ul>
+<li><a class="reference internal" href="#module-wsgiref.util"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.util</span></code> -- WSGI environment utilities</a></li>
+<li><a class="reference internal" href="#module-wsgiref.headers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.headers</span></code> -- WSGI response header tools</a></li>
+<li><a class="reference internal" href="#module-wsgiref.simple_server"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.simple_server</span></code> -- a simple WSGI HTTP server</a></li>
+<li><a class="reference internal" href="#module-wsgiref.validate"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.validate</span></code> --- WSGI conformance checker</a></li>
+<li><a class="reference internal" href="#module-wsgiref.handlers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.handlers</span></code> -- server/gateway base classes</a></li>
+<li><a class="reference internal" href="#module-wsgiref.types"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref.types</span></code> -- WSGI types for static type checking</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="webbrowser.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">webbrowser</span></code> --- 方便的 Web 浏览器控制工具</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="urllib.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> --- URL 处理模块</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/wsgiref.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/wsgiref.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/wsgiref.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="urllib.html" title="urllib --- URL 处理模块"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="webbrowser.html" title="webbrowser --- 方便的 Web 浏览器控制工具"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="internet.html" >互联网协议和支持</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">wsgiref</span></code> --- WSGI 工具和参考实现</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

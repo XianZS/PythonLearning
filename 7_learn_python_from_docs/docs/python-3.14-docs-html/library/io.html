@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="io --- 处理流的核心工具" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/io.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/io.py 概述: io 模块提供了 Python 用于处理各种 I/O 类型的主要工具。三种主要的 I/O类型分别为: 文本 I/O, 二进制 I/O 和 原始 I/O 。这些是泛型类型，有很多种后端存储可以用在他们上面。一个归属于这些类型中任何一个的具体对象被称作 file object 。 其他同类的术语还有 流 和 文件型对象 。 独立于其类别，每个具体流对象也将具..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_io_52bfabf1.png" />
+<meta property="og:image:alt" content="源代码: Lib/io.py 概述: io 模块提供了 Python 用于处理各种 I/O 类型的主要工具。三种主要的 I/O类型分别为: 文本 I/O, 二进制 I/O 和 原始 I/O 。这些是泛型类型，有很多种后端存储可以用在他们上面。一个归属于这些类型中任何一个的具体对象被称作 file object 。 其他同类的术语还有 流 和 文件型对象 。 独立于其类别，每个具体流对象也将具..." />
+<meta name="description" content="源代码: Lib/io.py 概述: io 模块提供了 Python 用于处理各种 I/O 类型的主要工具。三种主要的 I/O类型分别为: 文本 I/O, 二进制 I/O 和 原始 I/O 。这些是泛型类型，有很多种后端存储可以用在他们上面。一个归属于这些类型中任何一个的具体对象被称作 file object 。 其他同类的术语还有 流 和 文件型对象 。 独立于其类别，每个具体流对象也将具..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>io --- 处理流的核心工具 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="time --- 时间的访问和转换" href="time.html" />
+    <link rel="prev" title="os --- 多种操作系统接口" href="os.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/io.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> --- 处理流的核心工具</a><ul>
+<li><a class="reference internal" href="#overview">概述</a><ul>
+<li><a class="reference internal" href="#text-i-o">文本 I/O</a></li>
+<li><a class="reference internal" href="#binary-i-o">二进制 I/O</a></li>
+<li><a class="reference internal" href="#raw-i-o">原始 I/O</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#text-encoding">文本编码格式</a><ul>
+<li><a class="reference internal" href="#opt-in-encodingwarning">选择性的 EncodingWarning</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#high-level-module-interface">高阶模块接口</a></li>
+<li><a class="reference internal" href="#class-hierarchy">类的层次结构</a><ul>
+<li><a class="reference internal" href="#i-o-base-classes">I/O 基类</a></li>
+<li><a class="reference internal" href="#raw-file-i-o">原始文件 I/O</a></li>
+<li><a class="reference internal" href="#buffered-streams">缓冲流</a></li>
+<li><a class="reference internal" href="#id1">文本 I/O</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#static-typing">静态类型</a></li>
+<li><a class="reference internal" href="#performance">性能</a><ul>
+<li><a class="reference internal" href="#id2">二进制 I/O</a></li>
+<li><a class="reference internal" href="#id3">文本 I/O</a></li>
+<li><a class="reference internal" href="#multi-threading">多线程</a></li>
+<li><a class="reference internal" href="#reentrancy">可重入性</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="os.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code> --- 多种操作系统接口</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="time.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">time</span></code> --- 时间的访问和转换</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/io.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/io.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/io.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="time.html" title="time --- 时间的访问和转换"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="os.html" title="os --- 多种操作系统接口"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="allos.html" accesskey="U">通用操作系统服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> --- 处理流的核心工具</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-io">
+<span id="io-core-tools-for-working-with-streams"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> --- 处理流的核心工具<a class="headerlink" href="#module-io" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/io.py">Lib/io.py</a></p>
+<hr class="docutils" />
+<section id="overview">
+<span id="io-overview"></span><h2 class="translated">概述<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p class="translated" id="index-0"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> 模块提供了 Python 用于处理各种 I/O 类型的主要工具。三种主要的 I/O类型分别为: <em>文本 I/O</em>, <em>二进制 I/O</em> 和 <em>原始 I/O</em>。这些是泛型类型，有很多种后端存储可以用在他们上面。一个归属于这些类型中任何一个的具体对象被称作 <a class="reference internal" href="../glossary.html#term-file-object"><span class="xref std std-term">file object</span></a>。 其他同类的术语还有 <em>流</em> 和 <em>文件型对象</em>。</p>
+<p class="translated">独立于其类别，每个具体流对象也将具有各种功能：它可以是只读，只写或读写。它还可以允许任意随机访问（向前或向后寻找任何位置），或仅允许顺序访问（例如在套接字或管道的情况下）。</p>
+<p class="translated">所有流对提供给它们的数据类型都很敏感。 例如将 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 对象提供给二进制流的 <code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code> 方法将引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>。 将 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象提供给文本流的 <code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code> 方法也是如此。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>由于 <a class="reference internal" href="exceptions.html#IOError" title="IOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IOError</span></code></a> 现在是 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> 的别名，因此过去会引发 <code class="xref py py-exc docutils literal notranslate"><span class="pre">IOError</span></code> 的操作现在会引发 <code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code> 。</p>
+</div>
+<section id="text-i-o">
+<span id="text-io"></span><h3 class="translated">文本 I/O<a class="headerlink" href="#text-i-o" title="Link to this heading">¶</a></h3>
+<p class="translated">文本I/O预期并生成 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 对象。这意味着，无论何时后台存储是由字节组成的（例如在文件的情况下），数据的编码和解码都是透明的，并且可以选择转换特定于平台的换行符。</p>
+<p class="translated">创建文本流的最简单方式是通过 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open()</span></code></a>，并可选择指定编码格式:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;myfile.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">内存中文本流也可以作为 <a class="reference internal" href="#io.StringIO" title="io.StringIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringIO</span></code></a> 对象使用:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="s2">&quot;some initial text data&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">使用非阻塞流时，请注意，如果流不能立即执行操作，则对文本 I/O 对象的读取操作可能会引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a>。</p>
+</div>
+<p class="translated"><a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 的文档中详细描述了文本流的 API。</p>
+</section>
+<section id="binary-i-o">
+<span id="binary-io"></span><h3 class="translated">二进制 I/O<a class="headerlink" href="#binary-i-o" title="Link to this heading">¶</a></h3>
+<p class="translated">二进制 I/O（也称为缓冲 I/O）接受 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">字节型对象</span></a> 并生成  <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象。 不执行编码、解码或换行转换。 这种类型的流可以用于所有类型的非文本数据，并且还可以在需要手动控制文本数据的处理时使用。</p>
+<p class="translated">创建二进制流的最简单方式是通过 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open()</span></code></a> 并在模式字符串中使用 <code class="docutils literal notranslate"><span class="pre">'b'</span></code>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;myfile.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">内存中二进制流也可以作为 <a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 对象使用:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;some initial binary data: </span><span class="se">\x00\x01</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 的文档中详细描述了二进制流 API。</p>
+<p class="translated">其他库模块可以提供额外的方式来创建文本或二进制流。参见 <a class="reference internal" href="socket.html#socket.socket.makefile" title="socket.socket.makefile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">socket.socket.makefile()</span></code></a> 的示例。</p>
+</section>
+<section id="raw-i-o">
+<h3 class="translated">原始 I/O<a class="headerlink" href="#raw-i-o" title="Link to this heading">¶</a></h3>
+<p class="translated">原始 I/O (也称为 <em>非缓冲 I/O</em>) 通常用作二进制和文本流的低级构建块。 用户代码直接操作原始流的用法非常罕见。 不过，可以通过在禁用缓冲的情况下以二进制模式打开文件来创建原始流:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;myfile.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 的文档中详细描述了原始流的 API。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="untranslated">Raw I/O is a low-level interface and methods generally must have their return
+values checked and be explicitly retried to ensure an operation completes.
+For instance <a class="reference internal" href="#io.RawIOBase.write" title="io.RawIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> returns the number of bytes written
+which may be less than the number of bytes provided (a partial write).
+High-level I/O objects like <a class="reference internal" href="#binary-io"><span class="std std-ref">二进制 I/O</span></a> and <a class="reference internal" href="#text-io"><span class="std std-ref">文本 I/O</span></a> implement
+retry behavior.</p>
+</div>
+</section>
+</section>
+<section id="text-encoding">
+<span id="io-text-encoding"></span><h2 class="translated">文本编码格式<a class="headerlink" href="#text-encoding" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 和 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 的默认编码格式取决于语言区域的设置 (<a class="reference internal" href="locale.html#locale.getencoding" title="locale.getencoding"><code class="xref py py-func docutils literal notranslate"><span class="pre">locale.getencoding()</span></code></a>)。</p>
+<p class="translated">但是，很多开发者在打开以 UTF-8 编码的文本文件 (例如 JSON, TOML, Markdown 等等...) 时会忘记指定编码格式，因为大多数 Unix 平台默认使用 UTF-8 语言区域。  这会导致各种错误因为大多数 Windows 用户的语言区域编码格式并不是 UTF-8。 例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 当文件中有非 ASCII 字符时可能无法在 Windows 下使用。</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;README.md&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">long_description</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">为此，强烈建议你在打开文本文件时显式地指定编码格式。 如果你想要使用 UTF-8，就传入 <code class="docutils literal notranslate"><span class="pre">encoding=&quot;utf-8&quot;</span></code>。 要使用当前语言区域的编码格式，<code class="docutils literal notranslate"><span class="pre">encoding=&quot;locale&quot;</span></code> 自 Python 3.10 开始已被支持。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><a class="reference internal" href="os.html#utf8-mode"><span class="std std-ref">Python UTF-8 模式</span></a></dt><dd><p class="translated">Python UTF-8 模式可以用来将默认编码格式由语言区域所确定的编码格式改为 UTF-8。</p>
+</dd>
+<dt class="translated"><span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0686/"><strong>PEP 686</strong></a></dt><dd><p class="translated">Python 3.15 将把 <a class="reference internal" href="os.html#utf8-mode"><span class="std std-ref">Python UTF-8 模式</span></a> 设为默认值。</p>
+</dd>
+</dl>
+</div>
+<section id="opt-in-encodingwarning">
+<span id="io-encoding-warning"></span><h3 class="translated">选择性的 EncodingWarning<a class="headerlink" href="#opt-in-encodingwarning" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10: </span>请参阅 <span class="target" id="index-13"></span><a class="pep reference external" href="https://peps.python.org/pep-0597/"><strong>PEP 597</strong></a> 了解详情。</p>
+</div>
+<p class="translated">要找出哪里使用了默认语言区域的编码格式，你可以启用 <a class="reference internal" href="../using/cmdline.html#cmdoption-X"><code class="xref std std-option docutils literal notranslate"><span class="pre">-X</span> <span class="pre">warn_default_encoding</span></code></a> 命令行选项或设置 <span class="target" id="index-14"></span><a class="reference internal" href="../using/cmdline.html#envvar-PYTHONWARNDEFAULTENCODING"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONWARNDEFAULTENCODING</span></code></a> 环境变量，这将在使用默认编码格式时发出 <a class="reference internal" href="exceptions.html#EncodingWarning" title="EncodingWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EncodingWarning</span></code></a>。</p>
+<p class="translated">如果你提供了使用 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 或 <a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 的 API 并将 <code class="docutils literal notranslate"><span class="pre">encoding=None</span></code> 作为形参传入，你可以使用 <a class="reference internal" href="#io.text_encoding" title="io.text_encoding"><code class="xref py py-func docutils literal notranslate"><span class="pre">text_encoding()</span></code></a> 以便  API 的调用方在没有传入 <code class="docutils literal notranslate"><span class="pre">encoding</span></code> 的时候将发出 <a class="reference internal" href="exceptions.html#EncodingWarning" title="EncodingWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EncodingWarning</span></code></a>。 但是，对于新的 API 请考虑默认就使用 UTF-8 (即 <code class="docutils literal notranslate"><span class="pre">encoding=&quot;utf-8&quot;</span></code>)。</p>
+</section>
+</section>
+<section id="high-level-module-interface">
+<h2 class="translated">高阶模块接口<a class="headerlink" href="#high-level-module-interface" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="io.DEFAULT_BUFFER_SIZE">
+<span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_BUFFER_SIZE</span></span><a class="headerlink" href="#io.DEFAULT_BUFFER_SIZE" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">包含模块缓冲 I/O 类使用的默认缓冲区大小的 int。 在可能的情况下 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 将使用文件的 blksize（由 <a class="reference internal" href="os.html#os.stat" title="os.stat"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.stat()</span></code></a> 获得）。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="io.open">
+<span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closefd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opener</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.open" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是内置的 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 函数的别名。</p>
+<p class="audit-hook translated">此函数将引发一个 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">open</span></code> 并附带参数 <em>path</em>, <em>mode</em> 和 <em>flags</em>。 <em>mode</em> 和 <em>flags</em> 参数可能在原始调用的基础上修改或推断得到。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="io.open_code">
+<span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">open_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.open_code" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">以 <code class="docutils literal notranslate"><span class="pre">'rb'</span></code> 模式打开提供的文件。如果目的是将文件内容做为可执行代码，则应使用此函数。</p>
+<p class="translated"><em>path</em> 应当为 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 类型并且是一个绝对路径。</p>
+<p class="translated">该函数的行为可通过先期调用 <a class="reference internal" href="../c-api/file.html#c.PyFile_SetOpenCodeHook" title="PyFile_SetOpenCodeHook"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyFile_SetOpenCodeHook()</span></code></a> 来重写。 不过，假如 <em>path</em> 为 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 类型并且是一个绝对路径，<code class="docutils literal notranslate"><span class="pre">open_code(path)</span></code> 的行为应当总是与 <code class="docutils literal notranslate"><span class="pre">open(path,</span> <span class="pre">'rb')</span></code> 一致。 重写行为的目的是为了给文件附加额外的验证或预处理。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="io.text_encoding">
+<span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">text_encoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.text_encoding" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是一个针对使用 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 或 <a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 的可调用对象的辅助函数并且具有 <code class="docutils literal notranslate"><span class="pre">encoding=None</span></code> 形参。</p>
+<p class="translated">如果 <em>encoding</em> 不为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 则将其返回。 在其他情况下，它将根据是否启用了 <a class="reference internal" href="os.html#utf8-mode"><span class="std std-ref">UTF-8 模式</span></a> 返回 <code class="docutils literal notranslate"><span class="pre">&quot;locale&quot;</span></code> 或 <code class="docutils literal notranslate"><span class="pre">&quot;utf-8&quot;</span></code>。</p>
+<p class="translated">如果 <a class="reference internal" href="sys.html#sys.flags" title="sys.flags"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.flags.warn_default_encoding</span></code></a> 为真值且 <em>encoding</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 则此函数会发出 <a class="reference internal" href="exceptions.html#EncodingWarning" title="EncodingWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodingWarning</span></code></a>。 <em>stacklevel</em> 指明警告在哪里发出。 例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read_text</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">text_encoding</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>  <span class="c1"># stacklevel=2</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">在这个例子中，将为 <code class="docutils literal notranslate"><span class="pre">read_text()</span></code> 的调用方发出 <a class="reference internal" href="exceptions.html#EncodingWarning" title="EncodingWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodingWarning</span></code></a>。</p>
+<p class="translated">请参阅 <a class="reference internal" href="#io-text-encoding"><span class="std std-ref">文本编码格式</span></a> 了解更多信息。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>当启用 UTF-8 模式且 <em>encoding</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 时 <a class="reference internal" href="#io.text_encoding" title="io.text_encoding"><code class="xref py py-func docutils literal notranslate"><span class="pre">text_encoding()</span></code></a> 将返回 &quot;utf-8&quot;。</p>
+</div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="io.BlockingIOError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BlockingIOError</span></span><a class="headerlink" href="#io.BlockingIOError" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是内置的 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 异常的兼容性别名。</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="io.UnsupportedOperation">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">UnsupportedOperation</span></span><a class="headerlink" href="#io.UnsupportedOperation" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在流上调用不支持的操作时引发的继承 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> 和 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 的异常。</p>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><a class="reference internal" href="sys.html#module-sys" title="sys: Access system-specific parameters and functions."><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a></dt><dd><p class="translated">包含标准IO流: <a class="reference internal" href="sys.html#sys.stdin" title="sys.stdin"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdin</span></code></a>, <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a> 和 <a class="reference internal" href="sys.html#sys.stderr" title="sys.stderr"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> 。</p>
+</dd>
+</dl>
+</div>
+</section>
+<section id="class-hierarchy">
+<h2 class="translated">类的层次结构<a class="headerlink" href="#class-hierarchy" title="Link to this heading">¶</a></h2>
+<p class="translated">I/O 流被安排为按类的层次结构实现。 首先是 <a class="reference internal" href="../glossary.html#term-abstract-base-class"><span class="xref std std-term">抽象基类</span></a> (ABC)，用于指定流的各种类别，然后是提供标准流实现的具体类。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">这些抽象基类还提供了一些方法的默认实现，以帮助实现具体的流类。 例如，<a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 提供了 <code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code> 和 <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> 的未优化实现。</p>
+</div>
+<p class="translated">I/O层次结构的顶部是抽象基类 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 。它定义了流的基本接口。但是请注意，对流的读取和写入之间没有分离。如果实现不支持指定的操作，则会引发 <a class="reference internal" href="#io.UnsupportedOperation" title="io.UnsupportedOperation"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a> 。</p>
+<p class="translated">抽象基类 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 是 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的子类。它负责将字节读取和写入流中。 <code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code> 的子类 <a class="reference internal" href="#io.FileIO" title="io.FileIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileIO</span></code></a> 提供计算机文件系统中文件的接口。</p>
+<p class="translated">抽象基类 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 扩展了 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a>。 它能处理原始二进制流 (<a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a>) 上的缓冲。 它的子类 <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a>, <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 和 <a class="reference internal" href="#io.BufferedRWPair" title="io.BufferedRWPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRWPair</span></code></a> 分别缓冲可写、可读以及同时可读写的原始二进制流。 <a class="reference internal" href="#io.BufferedRandom" title="io.BufferedRandom"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRandom</span></code></a> 提供了带缓冲的可随机访问接口。 <code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code> 的另一子类 <a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 是内存中字节流。</p>
+<p class="translated">抽象基类 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 继承了 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 。它处理可表示文本的流，并处理字符串的编码和解码。类 <a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 继承了 <code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code> ，是原始缓冲流（ <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> ）的缓冲文本接口。最后， <a class="reference internal" href="#io.StringIO" title="io.StringIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringIO</span></code></a> 是文本的内存流。</p>
+<p class="translated">参数名不是规范的一部分，只有 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 的参数才用作关键字参数。</p>
+<p class="translated">下表汇总了由 <code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> 模块提供的 ABC：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">抽象基类</p></th>
+<th class="head"><p class="translated">继承</p></th>
+<th class="head"><p class="translated">抽象方法</p></th>
+<th class="head"><p class="translated">Mixin方法和属性</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a></p></td>
+<td></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">fileno</span></code>, <code class="docutils literal notranslate"><span class="pre">seek</span></code>, 和 <code class="docutils literal notranslate"><span class="pre">truncate</span></code></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">close</span></code>, <code class="docutils literal notranslate"><span class="pre">closed</span></code>, <code class="docutils literal notranslate"><span class="pre">__enter__</span></code>, <code class="docutils literal notranslate"><span class="pre">__exit__</span></code>, <code class="docutils literal notranslate"><span class="pre">flush</span></code>, <code class="docutils literal notranslate"><span class="pre">isatty</span></code>, <code class="docutils literal notranslate"><span class="pre">__iter__</span></code>, <code class="docutils literal notranslate"><span class="pre">__next__</span></code>, <code class="docutils literal notranslate"><span class="pre">readable</span></code>, <code class="docutils literal notranslate"><span class="pre">readline</span></code>, <code class="docutils literal notranslate"><span class="pre">readlines</span></code>, <code class="docutils literal notranslate"><span class="pre">seekable</span></code>, <code class="docutils literal notranslate"><span class="pre">tell</span></code>, <code class="docutils literal notranslate"><span class="pre">writable</span></code> 和 <code class="docutils literal notranslate"><span class="pre">writelines</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">readinto</span></code> 和 <code class="docutils literal notranslate"><span class="pre">write</span></code></p></td>
+<td><p class="translated">继承 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 方法, <code class="docutils literal notranslate"><span class="pre">read</span></code>, 和 <code class="docutils literal notranslate"><span class="pre">readall</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">detach</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">read1</span></code>, 和 <code class="docutils literal notranslate"><span class="pre">write</span></code></p></td>
+<td><p class="translated">继承 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 方法, <code class="docutils literal notranslate"><span class="pre">readinto</span></code>, 和 <code class="docutils literal notranslate"><span class="pre">readinto1</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a></p></td>
+<td><p class="translated"><code class="docutils literal notranslate"><span class="pre">detach</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">readline</span></code>, 和 <code class="docutils literal notranslate"><span class="pre">write</span></code></p></td>
+<td><p class="translated">继承 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 方法, <code class="docutils literal notranslate"><span class="pre">encoding</span></code>, <code class="docutils literal notranslate"><span class="pre">errors</span></code>, 和 <code class="docutils literal notranslate"><span class="pre">newlines</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="i-o-base-classes">
+<h3 class="translated">I/O 基类<a class="headerlink" href="#i-o-base-classes" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="io.IOBase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">IOBase</span></span><a class="headerlink" href="#io.IOBase" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">所有 I/O 类的抽象基类。</p>
+<p class="translated">此类为许多方法提供了空的抽象实现，派生类可以有选择地重写。默认实现代表一个无法读取、写入或查找的文件。</p>
+<p class="translated">尽管 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 并未声明 <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> 或 <code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code>，因为它们的签名会有所不同，但是实现和客户端应该将这些方法视为接口的一部分。 此外，当调用不支持的操作时实现可能会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (或 <a class="reference internal" href="#io.UnsupportedOperation" title="io.UnsupportedOperation"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a>)。</p>
+<p class="translated">从文件读取或写入文件的二进制数据的基本类型为 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 。其他 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like objects</span></a> 也可以作为方法参数。文本I/O类使用 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 数据。</p>
+<p class="translated">请注意，在关闭的流上调用任何方法（甚至查询）都是未定义的（undefined）。在这种情况下，实现可能会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 。</p>
+<p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> （及其子类）支持迭代器协议，这意味着可以迭代 <code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code> 对象以产生流中的行。根据流是二进制流（产生字节）还是文本流（产生字符串），行的定义略有不同。请参见下面的 <a class="reference internal" href="#io.IOBase.readline" title="io.IOBase.readline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code></a> 。</p>
+<p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 也是一个上下文管理器，因此支持 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句。 在这个示例中，<em>file</em> 将在 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句块执行完成之后被关闭 --- 即使是发生了异常:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;spam.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Spam and eggs!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 提供以下数据属性和方法：</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.close" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">刷新并关闭此流。如果文件已经关闭，则此方法无效。文件关闭后，对文件的任何操作（例如读取或写入）都会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 。</p>
+<p class="translated">为方便起见，允许多次调用此方法。但是，只有第一个调用才会生效。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.IOBase.closed">
+<span class="sig-name descname"><span class="pre">closed</span></span><a class="headerlink" href="#io.IOBase.closed" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果流已关闭，则返回 True。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.fileno">
+<span class="sig-name descname"><span class="pre">fileno</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.fileno" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回流的底层文件描述符（整数）---如果存在。如果 IO 对象不使用文件描述符，则会引发 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> 。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.flush">
+<span class="sig-name descname"><span class="pre">flush</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.flush" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">刷新流的写入缓冲区（如果适用）。这对只读和非阻塞流不起作用。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.isatty">
+<span class="sig-name descname"><span class="pre">isatty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.isatty" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果流是交互式的（即连接到终端/tty设备），则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code> 。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.readable">
+<span class="sig-name descname"><span class="pre">readable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.readable" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果可以读取流则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。 如果返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>，则 <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> 将引发 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.readline">
+<span class="sig-name descname"><span class="pre">readline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.readline" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从流中读取并返回一行。如果指定了 <em>size</em>，将至多读取 <em>size</em> 个字节。</p>
+<p class="translated">对于二进制文件行结束符总是 <code class="docutils literal notranslate"><span class="pre">b'\n'</span></code>；对于文本文件，可以用将 <em>newline</em> 参数传给 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 的方式来选择要识别的行结束符。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.readlines">
+<span class="sig-name descname"><span class="pre">readlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.readlines" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从流中读取并返回包含多行的列表。可以指定 <em>hint</em> 来控制要读取的行数：如果（以字节/字符数表示的）所有行的总大小超出了 <em>hint</em> 则将不会读取更多的行。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">0</span></code> 或更小的 <em>hint</em> 值以及 <code class="docutils literal notranslate"><span class="pre">None</span></code>，会被视为没有 hint。</p>
+<p class="translated">请注意，在不调用 <code class="xref py py-meth docutils literal notranslate"><span class="pre">file.readlines()</span></code> 的情况下使用 <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">line</span> <span class="pre">in</span> <span class="pre">file:</span> <span class="pre">...</span></code> 来遍历文件对象已经成为可能。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">os.SEEK_SET</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.seek" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将流位置修改到给定的字节 <em>offset</em>，它将相对于 <em>whence</em> 所指明的位置进行解析，并返回新的绝对位置。 <em>whence</em> 的可用值有:</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="os.html#os.SEEK_SET" title="os.SEEK_SET"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.SEEK_SET</span></code></a> 或 <code class="docutils literal notranslate"><span class="pre">0</span></code> -- 流的开头（默认值；<em>offset</em> 应为零或正值</p></li>
+<li><p class="translated"><a class="reference internal" href="os.html#os.SEEK_CUR" title="os.SEEK_CUR"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.SEEK_CUR</span></code></a> 或 <code class="docutils literal notranslate"><span class="pre">1</span></code> -- 当前流位置；<em>offset</em> 可以为负值</p></li>
+<li><p class="translated"><a class="reference internal" href="os.html#os.SEEK_END" title="os.SEEK_END"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.SEEK_END</span></code></a> 或 <code class="docutils literal notranslate"><span class="pre">2</span></code> -- 流的末尾；<em>offset</em> 通常为负值</p></li>
+</ul>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1: </span><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_*</span></code> 常量。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3: </span>某些操作系统还可支持其他的值，如 <a class="reference internal" href="os.html#os.SEEK_HOLE" title="os.SEEK_HOLE"><code class="xref py py-const docutils literal notranslate"><span class="pre">os.SEEK_HOLE</span></code></a> 或 <a class="reference internal" href="os.html#os.SEEK_DATA" title="os.SEEK_DATA"><code class="xref py py-const docutils literal notranslate"><span class="pre">os.SEEK_DATA</span></code></a>。 特定文件的可用值还会取决于它是以文本还是二进制模式打开。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.seekable">
+<span class="sig-name descname"><span class="pre">seekable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.seekable" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果流支持随机访问则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。 如为 <code class="docutils literal notranslate"><span class="pre">False</span></code>，则 <a class="reference internal" href="#io.IOBase.seek" title="io.IOBase.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a>, <a class="reference internal" href="#io.IOBase.tell" title="io.IOBase.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code></a> 和 <a class="reference internal" href="#io.IOBase.truncate" title="io.IOBase.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> 将引发 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.tell">
+<span class="sig-name descname"><span class="pre">tell</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.tell" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前流的位置。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.truncate">
+<span class="sig-name descname"><span class="pre">truncate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.truncate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将流的大小调整为给定的 <em>size</em> 个字节（如果未指定 <em>size</em> 则调整至当前位置）。 当前的流位置不变。 这个调整操作可扩展或减小当前文件大小。 在扩展的情况下，新文件区域的内容取决于具体平台（在大多数系统上，额外的字节会填充为零）。 返回新的文件大小。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>现在Windows在扩展时将文件填充为零。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.writable">
+<span class="sig-name descname"><span class="pre">writable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.writable" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果流支持写入则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。 如为 <code class="docutils literal notranslate"><span class="pre">False</span></code>，则 <code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code> 和 <a class="reference internal" href="#io.IOBase.truncate" title="io.IOBase.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> 将引发 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.writelines">
+<span class="sig-name descname"><span class="pre">writelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.writelines" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将行列表写入到流。 不会添加行分隔符，因此通常所提供的每一行都带有末尾行分隔符。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.IOBase.__del__">
+<span class="sig-name descname"><span class="pre">__del__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.IOBase.__del__" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">为对象销毁进行准备。 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 提供了此方法的默认实现，该实现会调用实例的 <a class="reference internal" href="#io.IOBase.close" title="io.IOBase.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a> 方法。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.RawIOBase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">RawIOBase</span></span><a class="headerlink" href="#io.RawIOBase" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">原始二进制流的基类。 它继承自 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a>。</p>
+<p class="translated">原始二进制流通常会提供对下层 OS 设备或 API 的低层级访问，而不是尝试将其封装到高层级的基元中（此功能是在更高层级的缓冲二进制流和文本流中实现的，将在下文中描述）。</p>
+<p class="translated"><a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 在 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的现有成员以外还提供了下列方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.RawIOBase.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.RawIOBase.read" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">Read up to <em>size</em> bytes from the object and return them.  As a convenience,
+if <em>size</em> is unspecified or -1, all bytes until EOF are returned.</p>
+<p class="untranslated">Attempts to make only one system call but will retry if interrupted and
+the signal handler does not raise an exception (see <span class="target" id="index-4"></span><a class="pep reference external" href="https://peps.python.org/pep-0475/"><strong>PEP 475</strong></a> for the
+rationale). This means fewer than <em>size</em> bytes may be returned if the
+operating system call returns fewer than <em>size</em> bytes.</p>
+<p class="translated">如果返回 0 个字节而 <em>size</em> 不为 0，这表明到达文件末尾。 如果处于非阻塞模式并且没有更多字节可用，则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">默认实现会转至 <a class="reference internal" href="#io.RawIOBase.readall" title="io.RawIOBase.readall"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readall()</span></code></a> 和 <a class="reference internal" href="#io.RawIOBase.readinto" title="io.RawIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.RawIOBase.readall">
+<span class="sig-name descname"><span class="pre">readall</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.RawIOBase.readall" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从流中读取并返回所有字节直到 EOF，如有必要将对流执行多次调用。</p>
+<p class="untranslated">If <code class="docutils literal notranslate"><span class="pre">0</span></code> bytes are returned this indicates end of file. If the object is in
+non-blocking mode and the underlying <a class="reference internal" href="#io.RawIOBase.read" title="io.RawIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> returns <code class="docutils literal notranslate"><span class="pre">None</span></code>
+indicating no bytes are available, <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.RawIOBase.readinto">
+<span class="sig-name descname"><span class="pre">readinto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.RawIOBase.readinto" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">Read bytes into a pre-allocated, writable
+<a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> <em>b</em>, and return the
+number of bytes read.  For example, <em>b</em> might be a <a class="reference internal" href="stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a>.</p>
+<p class="untranslated">If <code class="docutils literal notranslate"><span class="pre">0</span></code> is returned and <code class="docutils literal notranslate"><span class="pre">len(b)</span></code> is not <code class="docutils literal notranslate"><span class="pre">0</span></code>, this indicates end of file. If
+the object is in non-blocking mode and no bytes are available, <code class="docutils literal notranslate"><span class="pre">None</span></code> is
+returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.RawIOBase.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.RawIOBase.write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将给定的 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> <em>b</em> 写入到下层的原始流，并返回所写入的字节数。 这可以少于 <em>b</em> 的总字节数，具体取决于下层原始流的设定，特别是如果它处于非阻塞模式的话。 如果原始流设为非阻塞并且不能真正向其写入单个字节时则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。 调用者可以在此方法返回后释放或改变 <em>b</em>，因此该实现应该仅在方法调用期间访问 <em>b</em>。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="untranslated">This function does not ensure all bytes are written or an exception is
+thrown. Callers may implement that behavior by checking the return
+value and, if it is less than the length of <em>b</em>, looping with additional
+write calls until all unwritten bytes are written. High-level I/O
+objects like <a class="reference internal" href="#binary-io"><span class="std std-ref">二进制 I/O</span></a> and <a class="reference internal" href="#text-io"><span class="std std-ref">文本 I/O</span></a> implement retry behavior.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.BufferedIOBase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BufferedIOBase</span></span><a class="headerlink" href="#io.BufferedIOBase" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">支持某种缓冲的二进制流的基类。 它继承自 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a>。</p>
+<p class="translated">与 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 的主要差别在于 <a class="reference internal" href="#io.BufferedIOBase.read" title="io.BufferedIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>, <a class="reference internal" href="#io.BufferedIOBase.readinto" title="io.BufferedIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a> 和 <a class="reference internal" href="#io.BufferedIOBase.write" title="io.BufferedIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 等方法会（分别）按要求读取尽可能多的输入或是耗尽已提供的所有数据。</p>
+<p class="translated">此外，如果下层的原始流处于非阻塞模式，当系统返回时会阻塞时 <a class="reference internal" href="#io.BufferedIOBase.write" title="io.BufferedIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 将引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 并附带 <a class="reference internal" href="exceptions.html#BlockingIOError.characters_written" title="BlockingIOError.characters_written"><code class="xref py py-attr docutils literal notranslate"><span class="pre">BlockingIOError.characters_written</span></code></a> 而 <a class="reference internal" href="#io.BufferedIOBase.read" title="io.BufferedIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 将返回当前读取的数据或者如果数据不可用则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">并且，<a class="reference internal" href="#io.BufferedIOBase.read" title="io.BufferedIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 方法也没有转向 <a class="reference internal" href="#io.BufferedIOBase.readinto" title="io.BufferedIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a> 的默认实现。</p>
+<p class="translated">典型的 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 实现不应当继承自 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 实现，而要包装一个该实现，正如 <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a> 和 <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 所做的那样。</p>
+<p class="translated"><a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 在 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的现有成员以外还提供或重写了下列数据属性和方法:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.BufferedIOBase.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#io.BufferedIOBase.raw" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">由 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 处理的下层原始流 (<a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 的实例)。 它不是 <code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code> API 的组成部分并且不存在于某些实现中。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedIOBase.detach">
+<span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedIOBase.detach" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从缓冲区分离出下层原始流并将其返回。</p>
+<p class="translated">在原始流被分离之后，缓冲区将处于不可用的状态。</p>
+<p class="translated">某些缓冲区例如 <a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 并无可从此方法返回的单独原始流的概念。 它们将会引发 <a class="reference internal" href="#io.UnsupportedOperation" title="io.UnsupportedOperation"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedIOBase.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedIOBase.read" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">读取并返回至多 <em>size</em> 个字节。 如果此参数被省略、为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 或为负值则会读取尽可能多的数据。</p>
+<p class="translated">返回的字节数可能会少于请求数。 如果流已到达 EOF 则将返回一个空 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象。 如果遇到某些问题可能会进行多次读取并可能尝试重新调用，请参阅 <a class="reference internal" href="os.html#os.read" title="os.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">os.read()</span></code></a> 和 <span class="target" id="index-15"></span><a class="pep reference external" href="https://peps.python.org/pep-0475/"><strong>PEP 475</strong></a> 了解详情。 返回的字节数少于 size 并不意味着已到达 EOF。</p>
+<p class="translated">当需要尽量多读取时默认实现将在可能的情况下使用 <code class="docutils literal notranslate"><span class="pre">raw.readall</span></code> (它应当实现 <a class="reference internal" href="#io.RawIOBase.readall" title="io.RawIOBase.readall"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RawIOBase.readall()</span></code></a>)，否则将在循环中读取直到读取操作返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>、空 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 或是不可重试的错误。 对于大多数流来说就是直到 EOF，但对于非阻塞流来说可能会有更多数据可用。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">当下层的原始流是非阻塞流时，实现可能会引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 或在没有可用数据时返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。 <code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> 的实现将返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedIOBase.read1">
+<span class="sig-name descname"><span class="pre">read1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedIOBase.read1" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">读取并返回至多 <em>size</em> 个字节，调用根据 <span class="target" id="index-16"></span><a class="pep reference external" href="https://peps.python.org/pep-0475/"><strong>PEP 475</strong></a> 在遇到 <a class="reference internal" href="errno.html#errno.EINTR" title="errno.EINTR"><code class="xref py py-const docutils literal notranslate"><span class="pre">EINTR</span></code></a> 时可能重试的 <a class="reference internal" href="#io.RawIOBase.readinto" title="io.RawIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a>。 如果 <em>size</em> 为 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 或未被提供，实现将为 <em>size</em> 选择一个任意值。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">当下层的原始流是非阻塞流时，实现可能会引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 或在没有可用数据时返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。 <code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> 的实现将返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedIOBase.readinto">
+<span class="sig-name descname"><span class="pre">readinto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedIOBase.readinto" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将字节数据读入预先分配的可写 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> <em>b</em> 并返回所读取的字节数。 例如，<em>b</em> 可以是一个 <a class="reference internal" href="stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a>。</p>
+<p class="translated">类似于 <a class="reference internal" href="#io.BufferedIOBase.read" title="io.BufferedIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>，可能对下层原始流发起多次读取，除非后者为交互式。</p>
+<p class="translated"><a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 会在下层原始流不处于阻塞模式，并且当前没有可用数据时被引发。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedIOBase.readinto1">
+<span class="sig-name descname"><span class="pre">readinto1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedIOBase.readinto1" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将字节数据读入预先分配的可写 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> <em>b</em>，其中至多使用一次对下层原始流 <a class="reference internal" href="#io.RawIOBase.read" title="io.RawIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> (或 <a class="reference internal" href="#io.RawIOBase.readinto" title="io.RawIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a>) 方法的调用。 返回所读取的字节数。</p>
+<p class="translated"><a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 会在下层原始流不处于阻塞模式，并且当前没有可用数据时被引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedIOBase.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedIOBase.write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">写入给定的 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> <em>b</em>，并返回写入的字节数 (总是等于 <em>b</em> 的字节长度，因为如果写入失败则会引发 <a class="reference internal" href="exceptions.html#OSError" title="OSError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>)。 根据具体实现的不同，这些字节可能被实际写入下层流，或是出于运行效率和冗余等考虑而暂存于缓冲区。</p>
+<p class="translated">当处于非阻塞模式时，如果需要将数据写入原始流但它无法在不阻塞的情况下接受所有数据则将引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a>。</p>
+<p class="translated">调用者可能会在此方法返回后释放或改变 <em>b</em>，因此该实现应当仅在方法调用期间访问 <em>b</em>。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="raw-file-i-o">
+<h3 class="translated">原始文件 I/O<a class="headerlink" href="#raw-file-i-o" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="io.FileIO">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">FileIO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closefd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opener</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.FileIO" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">A raw binary stream representing an OS-level file containing bytes data.  It
+inherits from <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> and implements its low-level access design.
+This means <a class="reference internal" href="#io.RawIOBase.write" title="io.RawIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> does not guarantee all bytes are written
+and <a class="reference internal" href="#io.RawIOBase.read" title="io.RawIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> may read less bytes than requested even when more
+bytes may be present in the underlying file. To get &quot;write all&quot; and
+&quot;read at least&quot; behavior, use <a class="reference internal" href="#binary-io"><span class="std std-ref">二进制 I/O</span></a>.</p>
+<p class="translated"><em>name</em> 可以是以下两项之一：</p>
+<ul class="simple">
+<li><p class="translated">代表将被打开的文件路径的字符串或 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象。 在此情况下 closefd 必须为 <code class="docutils literal notranslate"><span class="pre">True</span></code> (默认值) 否则将会引发异常。</p></li>
+<li><p class="translated">代表一个现有 OS 层级文件描述符的号码的整数，作为结果的 <a class="reference internal" href="#io.FileIO" title="io.FileIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileIO</span></code></a> 对象将可访问该文件。 当 FileIO 对象被关闭时此 fd 也将被关闭，除非 <em>closefd</em> 设为 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p></li>
+</ul>
+<p class="translated"><em>mode</em> 可以为 <code class="docutils literal notranslate"><span class="pre">'r'</span></code>, <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'a'</span></code> 分别表示读取（默认模式）、写入、独占新建或添加。 如果以写入或添加模式打开的文件不存在将自动新建；当以写入模式打开时文件将先清空。 以新建模式打开时如果文件已存在则将引发 <a class="reference internal" href="exceptions.html#FileExistsError" title="FileExistsError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FileExistsError</span></code></a>。 以新建模式打开文件也意味着要写入，因此该模式的行为与 <code class="docutils literal notranslate"><span class="pre">'w'</span></code> 类似。 在模式中附带 <code class="docutils literal notranslate"><span class="pre">'+'</span></code> 将允许同时读取和写入。</p>
+<p class="translated">可以通过传入一个可调用对象作为 <em>opener</em> 来使用自定义文件打开器。 然后通过调用 <em>opener</em> 并传入 (<em>name</em>, <em>flags</em>) 来获取文件对象所对应的下层文件描述符。 <em>opener</em> 必须返回一个打开文件描述符（传入 <a class="reference internal" href="os.html#os.open" title="os.open"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os.open</span></code></a> 作为 <em>opener</em> 的结果在功能上将与传入 <code class="docutils literal notranslate"><span class="pre">None</span></code> 类似）。</p>
+<p class="translated">新创建的文件是 <a class="reference internal" href="os.html#fd-inheritance"><span class="std std-ref">不可继承的</span></a>。</p>
+<p class="translated">有关 opener 参数的示例，请参见内置函数 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="untranslated"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileIO</span></code> is a low-level I/O object and members, such as
+<a class="reference internal" href="#io.RawIOBase.read" title="io.RawIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> and <a class="reference internal" href="#io.RawIOBase.write" title="io.RawIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a>, need to have their
+return values checked explicitly in a retry loop to implement &quot;write all&quot;
+and &quot;read at least&quot; behavior. High-level I/O objects <a class="reference internal" href="#binary-io"><span class="std std-ref">二进制 I/O</span></a> and
+<a class="reference internal" href="#text-io"><span class="std std-ref">文本 I/O</span></a> implement retry behavior.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>增加了 <em>opener</em> 参数。增加了 <code class="docutils literal notranslate"><span class="pre">'x'</span></code> 模式。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>文件现在禁止继承。</p>
+</div>
+<p class="translated"><a class="reference internal" href="#io.FileIO" title="io.FileIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileIO</span></code></a> 在继承自 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 和 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的现有成员以外还提供了以下数据属性和方法:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.FileIO.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#io.FileIO.mode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">构造函数中给定的模式。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.FileIO.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#io.FileIO.name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">文件名。当构造函数中没有给定名称时，这是文件的文件描述符。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="buffered-streams">
+<h3 class="translated">缓冲流<a class="headerlink" href="#buffered-streams" title="Link to this heading">¶</a></h3>
+<p class="translated">相比原始 I/O，缓冲 I/O 流提供了针对 I/O 设备的更高层级接口。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="io.BytesIO">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BytesIO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_bytes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BytesIO" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个使用内存字节缓冲区的二进制流。 它继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>。 当 <a class="reference internal" href="#io.IOBase.close" title="io.IOBase.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a> 方法被调用时缓冲区将被丢弃。</p>
+<p class="translated">可选参数 <em>initial_bytes</em> 是一个包含初始数据的 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a>。</p>
+<p class="translated"><a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 在继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 和 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的成员以外还提供或重写了下列方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BytesIO.getbuffer">
+<span class="sig-name descname"><span class="pre">getbuffer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.BytesIO.getbuffer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个对应于缓冲区内容的可读写视图而不必拷贝其数据。 此外，改变视图将透明地更新缓冲区内容:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;abcdef&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">view</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">view</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;56&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+<span class="go">b&#39;ab56ef&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">只要视图保持存在，<a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 对象就无法被改变大小或关闭。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BytesIO.getvalue">
+<span class="sig-name descname"><span class="pre">getvalue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.BytesIO.getvalue" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回包含整个缓冲区内容的 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BytesIO.read1">
+<span class="sig-name descname"><span class="pre">read1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BytesIO.read1" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 中，这与 <a class="reference internal" href="#io.BufferedIOBase.read" title="io.BufferedIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 相同。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span><em>size</em> 参数现在是可选的。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BytesIO.readinto1">
+<span class="sig-name descname"><span class="pre">readinto1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BytesIO.readinto1" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 中，这与 <a class="reference internal" href="#io.BufferedIOBase.readinto" title="io.BufferedIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a> 相同。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.BufferedReader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BufferedReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_BUFFER_SIZE</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedReader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个提供对可读、不可定位的 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 原始二进制流的高层级访问的缓冲二进制流。 它继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>。</p>
+<p class="translated">当从此对象读取数据时，可能会从下层原始流请求更大量的数据，并存放到内部缓冲区中。 接下来可以在后续读取时直接返回缓冲数据。</p>
+<p class="translated">根据给定的可读 <em>raw</em> 流和 <em>buffer_size</em> 创建 <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 的构造器。 如果省略 <em>buffer_size</em>，则会使用 <a class="reference internal" href="#io.DEFAULT_BUFFER_SIZE" title="io.DEFAULT_BUFFER_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BUFFER_SIZE</span></code></a>。</p>
+<p class="translated"><a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 在继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 和 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的成员以外还提供或重写了下列方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedReader.peek">
+<span class="sig-name descname"><span class="pre">peek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedReader.peek" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从流返回字节数据而不会前移指针位置。 返回的字节数量可能少于或多于请求的数量。 如果下层的原始流是非阻塞流而操作将要阻塞，则返回空字节串。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedReader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedReader.read" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 中这与 <a class="reference internal" href="#io.BufferedIOBase.read" title="io.BufferedIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BufferedIOBase.read()</span></code></a> 相同</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedReader.read1">
+<span class="sig-name descname"><span class="pre">read1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedReader.read1" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 中这与 <a class="reference internal" href="#io.BufferedIOBase.read1" title="io.BufferedIOBase.read1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BufferedIOBase.read1()</span></code></a> 相同</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span><em>size</em> 参数现在是可选的。</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.BufferedWriter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BufferedWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_BUFFER_SIZE</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedWriter" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个提供对可写、不可定位的 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 原始二进制流的高层级访问的缓冲二进制流。 它继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>。</p>
+<p class="translated">当写入到此对象时，数据通常会被放入到内部缓冲区中。 缓冲区将在满足某些条件的情况下被写到下层的 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 对象，包括:</p>
+<ul class="simple">
+<li><p class="translated">当缓冲区对于所有挂起数据而言太小时；</p></li>
+<li><p class="translated">当 <a class="reference internal" href="#io.BufferedWriter.flush" title="io.BufferedWriter.flush"><code class="xref py py-meth docutils literal notranslate"><span class="pre">flush()</span></code></a> 被调用时；</p></li>
+<li><p class="translated">当 <a class="reference internal" href="#io.IOBase.seek" title="io.IOBase.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> 被请求时（针对 <a class="reference internal" href="#io.BufferedRandom" title="io.BufferedRandom"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRandom</span></code></a> 对象）；</p></li>
+<li><p class="translated">当 <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a> 对象被关闭或销毁时。</p></li>
+</ul>
+<p class="translated">该构造器会为给定的可写 <em>raw</em> 流创建一个 <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a>。 如果未给定 <em>buffer_size</em>，则使用默认的 <a class="reference internal" href="#io.DEFAULT_BUFFER_SIZE" title="io.DEFAULT_BUFFER_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BUFFER_SIZE</span></code></a>。</p>
+<p class="translated"><a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a> 在继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 和 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的成员以外还提供或重写了下列方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedWriter.flush">
+<span class="sig-name descname"><span class="pre">flush</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedWriter.flush" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将缓冲区中保存的字节数据强制放入原始流。 如果原始流发生阻塞则应当引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.BufferedWriter.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedWriter.write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">写入 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> <em>b</em>，并返回写入的字节数。 当处于非阻塞模式时，如果缓冲区需要被写入但原始流发生阻塞则会引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> 并设置 <a class="reference internal" href="exceptions.html#BlockingIOError.characters_written" title="BlockingIOError.characters_written"><code class="xref py py-attr docutils literal notranslate"><span class="pre">BlockingIOError.characters_written</span></code></a>。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.BufferedRandom">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BufferedRandom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_BUFFER_SIZE</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedRandom" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">A buffered binary stream implementing <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> interfaces
+providing higher-level access to a seekable <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> raw binary
+stream.</p>
+<p class="translated">该构造器会为在第一个参数中给定的可查找原始流创建一个读取器和写入器。 如果省略 <em>buffer_size</em> 则使用默认的 <a class="reference internal" href="#io.DEFAULT_BUFFER_SIZE" title="io.DEFAULT_BUFFER_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BUFFER_SIZE</span></code></a>。</p>
+<p class="translated"><a class="reference internal" href="#io.BufferedRandom" title="io.BufferedRandom"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRandom</span></code></a> 能做到 <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> 或 <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a> 所能做的任何事。 此外，还会确保实现 <a class="reference internal" href="#io.IOBase.seek" title="io.IOBase.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> 和 <a class="reference internal" href="#io.IOBase.tell" title="io.IOBase.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.BufferedRWPair">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">BufferedRWPair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_BUFFER_SIZE</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.BufferedRWPair" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个提供对两个不可定位的 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 原始二进制流的高层级访问的缓冲二进制流 --- 一个可读，另一个可写。 它继承自 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>。</p>
+<p class="translated"><em>reader</em> 和 <em>writer</em> 分别是可读和可写的 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 对象。 如果省略 <em>buffer_size</em> 则使用默认的 <a class="reference internal" href="#io.DEFAULT_BUFFER_SIZE" title="io.DEFAULT_BUFFER_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BUFFER_SIZE</span></code></a>。</p>
+<p class="translated"><a class="reference internal" href="#io.BufferedRWPair" title="io.BufferedRWPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRWPair</span></code></a> 实现了 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 的所有方法，但 <a class="reference internal" href="#io.BufferedIOBase.detach" title="io.BufferedIOBase.detach"><code class="xref py py-meth docutils literal notranslate"><span class="pre">detach()</span></code></a> 除外，调用该方法将引发 <a class="reference internal" href="#io.UnsupportedOperation" title="io.UnsupportedOperation"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a>。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated"><a class="reference internal" href="#io.BufferedRWPair" title="io.BufferedRWPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRWPair</span></code></a> 不会尝试同步访问其下层的原始流。 你不应当将传给它与读取器和写入器相同的对象；而要改用 <a class="reference internal" href="#io.BufferedRandom" title="io.BufferedRandom"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRandom</span></code></a>。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="id1">
+<h3 class="translated">文本 I/O<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="io.TextIOBase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">TextIOBase</span></span><a class="headerlink" href="#io.TextIOBase" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">文本流的基类。 该类提供了基于字符和行的流 I/O 的接口。 它继承自 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a>。</p>
+<p class="translated"><a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 在来自 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的成员以外还提供或重写了以下数据属性和方法:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.TextIOBase.encoding">
+<span class="sig-name descname"><span class="pre">encoding</span></span><a class="headerlink" href="#io.TextIOBase.encoding" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于将流的字节串解码为字符串以及将字符串编码为字节串的编码格式名称。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.TextIOBase.errors">
+<span class="sig-name descname"><span class="pre">errors</span></span><a class="headerlink" href="#io.TextIOBase.errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">解码器或编码器的错误设置。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.TextIOBase.newlines">
+<span class="sig-name descname"><span class="pre">newlines</span></span><a class="headerlink" href="#io.TextIOBase.newlines" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个字符串、字符串元组或者 <code class="docutils literal notranslate"><span class="pre">None</span></code>，表示目前已经转写的新行。 根据具体实现和初始构造器旗标的不同，此属性或许会不可用。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.TextIOBase.buffer">
+<span class="sig-name descname"><span class="pre">buffer</span></span><a class="headerlink" href="#io.TextIOBase.buffer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">由 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 处理的下层二进制缓冲区（一个 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 或 <a class="reference internal" href="#io.RawIOBase" title="io.RawIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> 实例）。 它不是 <code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code> API 的组成部分并且不存在于某些实现中。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOBase.detach">
+<span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOBase.detach" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 分离出下层二进制缓冲区并将其返回。</p>
+<p class="translated">在下层缓冲区被分离后，<a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 将处于不可用的状态。</p>
+<p class="translated">某些 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 的实现，例如 <a class="reference internal" href="#io.StringIO" title="io.StringIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringIO</span></code></a> 可能并无下层缓冲区的概念，因此调用此方法将引发 <a class="reference internal" href="#io.UnsupportedOperation" title="io.UnsupportedOperation"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOBase.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOBase.read" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从流中读取至多 <em>size</em> 个字符并以单个 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 的形式返回。 如果 <em>size</em> 为负值或 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则读取至 EOF。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOBase.readline">
+<span class="sig-name descname"><span class="pre">readline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOBase.readline" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">读取至换行符或 EOF 并返回单个 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>。 如果流已经到达 EOF，则将返回一个空字符串。</p>
+<p class="translated">如果指定了 <em>size</em> ，最多将读取 <em>size</em> 个字符。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOBase.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEEK_SET</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOBase.seek" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将流位置改为给定的 <em>offset</em>。 具体行为取决于 <em>whence</em> 形参。 <em>whence</em> 的默认值为 <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code>。</p>
+<ul class="simple">
+<li><p class="translated"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code> 或 <code class="docutils literal notranslate"><span class="pre">0</span></code>: 从流的起始位置开始查找（默认值）；<em>offset</em> 必须为 <a class="reference internal" href="#io.TextIOBase.tell" title="io.TextIOBase.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TextIOBase.tell()</span></code></a> 所返回的数值或为零。 任何其他 <em>offset</em> 值都将导致未定义的行为。</p></li>
+<li><p class="translated"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_CUR</span></code> 或 <code class="docutils literal notranslate"><span class="pre">1</span></code>: &quot;查找&quot; 到当前位置；<em>offset</em> 必须为零，表示无操作（所有其他值均不受支持）。</p></li>
+<li><p class="translated"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> 或 <code class="docutils literal notranslate"><span class="pre">2</span></code>: 查找到流的末尾；<em>offset</em> 必须为零（所有其他值均不受支持）。</p></li>
+</ul>
+<p class="translated">以不透明数字形式返回新的绝对位置。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1: </span><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_*</span></code> 常量。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOBase.tell">
+<span class="sig-name descname"><span class="pre">tell</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOBase.tell" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">以不透明数字形式返回当前流的位置。 该数字通常并不代表下层二进制存储中对应的字节数。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOBase.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOBase.write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将字符串 <em>s</em> 写入到流并返回写入的字符数。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.TextIOWrapper">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">TextIOWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_buffering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_through</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOWrapper" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个提供对 <a class="reference internal" href="#io.BufferedIOBase" title="io.BufferedIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> 缓冲二进制流的高层级访问的缓冲文本流。 它继承自 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a>。</p>
+<p class="translated"><em>encoding</em> 给出将被解码或编码的流的编码格式。 在 <a class="reference internal" href="os.html#utf8-mode"><span class="std std-ref">UTF-8 模式</span></a> 中，默认为 UTF-8。 否则，默认为 <a class="reference internal" href="locale.html#locale.getencoding" title="locale.getencoding"><code class="xref py py-func docutils literal notranslate"><span class="pre">locale.getencoding()</span></code></a>。 <code class="docutils literal notranslate"><span class="pre">encoding=&quot;locale&quot;</span></code> 可以用来显式指定当前语言环境的编码格式。 请参阅 <a class="reference internal" href="#io-text-encoding"><span class="std std-ref">文本编码格式</span></a> 了解更多信息。</p>
+<p class="translated"><em>errors</em> 是一个可选的字符串，它指明编码格式和编码格式错误的处理方式。 传入 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 将在出现编码格式错误时引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (默认值 <code class="docutils literal notranslate"><span class="pre">None</span></code> 具有相同的效果)，传入 <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code> 将忽略错误。 (请注意忽略编码格式错误会导致数据丢失。)  <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> 会在出现错误数据时插入一个替换标记 (例如 <code class="docutils literal notranslate"><span class="pre">'?'</span></code>)。 <code class="docutils literal notranslate"><span class="pre">'backslashreplace'</span></code> 将把错误数据替换为一个反斜杠转义序列。 在写入时，还可以使用 <code class="docutils literal notranslate"><span class="pre">'xmlcharrefreplace'</span></code> (替换为适当的 XML 字符引用)  或 <code class="docutils literal notranslate"><span class="pre">'namereplace'</span></code> (替换为 <code class="docutils literal notranslate"><span class="pre">\N{...}</span></code> 转义序列)。 任何其他通过 <a class="reference internal" href="codecs.html#codecs.register_error" title="codecs.register_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.register_error()</span></code></a> 注册的错误处理方式名称也可以被接受。</p>
+<p class="translated" id="index-7"><em>newline</em> 控制行结束符处理方式。 它可以为 <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>, <code class="docutils literal notranslate"><span class="pre">'\r'</span></code> 和 <code class="docutils literal notranslate"><span class="pre">'\r\n'</span></code>。 其工作原理如下:</p>
+<ul class="simple">
+<li><p class="translated">当从流读取输入时，如果 <em>newline</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则将启用 <a class="reference internal" href="../glossary.html#term-universal-newlines"><span class="xref std std-term">universal newlines</span></a> 模式。 输入中的行结束符可以为 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>, <code class="docutils literal notranslate"><span class="pre">'\r'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'\r\n'</span></code>，在返回给调用者之前它们会被统一转写为 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>。 如果 <em>newline</em> 为 <code class="docutils literal notranslate"><span class="pre">''</span></code>，也会启用通用换行模式，但行结束符会不加转写即返回给调用者。 如果 <em>newline</em> 具有任何其他合法的值，则输入行将仅由给定的字符串结束，并且行结束符会不加转写即返回给调用者。</p></li>
+<li><p class="translated">将输出写入流时，如果 <em>newline</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则写入的任何 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code> 字符都将转换为系统默认行分隔符 <a class="reference internal" href="os.html#os.linesep" title="os.linesep"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.linesep</span></code></a>。如果 <em>newline</em> 是 <code class="docutils literal notranslate"><span class="pre">''</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>，则不进行转换。如果 <em>newline</em> 是任何其他合法值，则写入的任何 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code> 字符都将被转换为给定的字符串。</p></li>
+</ul>
+<p class="translated">如果 <em>line_buffering</em> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，则当一个写入调用包含换行或回车符时将会应用 <a class="reference internal" href="#io.IOBase.flush" title="io.IOBase.flush"><code class="xref py py-meth docutils literal notranslate"><span class="pre">flush()</span></code></a>。</p>
+<p class="translated">如果 <em>write_through</em> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，则对 <a class="reference internal" href="#io.BufferedIOBase.write" title="io.BufferedIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 的调用会确保不被缓冲：在 <a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 对象上写入的任何数据会立即交给其下层的 <em>buffer</em> 来处理。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>已添加 <em>write_through</em> 参数</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>默认的 <em>encoding</em> 现在将为 <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding(False)</span></code> 而非 <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>。 不要使用 <a class="reference internal" href="locale.html#locale.setlocale" title="locale.setlocale"><code class="xref py py-func docutils literal notranslate"><span class="pre">locale.setlocale()</span></code></a> 来临时改变区域编码格式，要使用当前区域编码格式而不是用户的首选编码格式。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span><em>encoding</em> 参数现在支持 <code class="docutils literal notranslate"><span class="pre">&quot;locale&quot;</span></code> 作为编码格式名称。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">当底层原始流是非阻塞时，如果读取操作不能立即完成，可能会引发 <a class="reference internal" href="exceptions.html#BlockingIOError" title="BlockingIOError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a>。</p>
+</div>
+<p class="translated"><a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 在继承自 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 和 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的现有成员以外还提供了以下数据属性和方法:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.TextIOWrapper.line_buffering">
+<span class="sig-name descname"><span class="pre">line_buffering</span></span><a class="headerlink" href="#io.TextIOWrapper.line_buffering" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">是否启用行缓冲。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="io.TextIOWrapper.write_through">
+<span class="sig-name descname"><span class="pre">write_through</span></span><a class="headerlink" href="#io.TextIOWrapper.write_through" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">写入是否要立即传给下层的二进制缓冲。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOWrapper.reconfigure">
+<span class="sig-name descname"><span class="pre">reconfigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_buffering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_through</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOWrapper.reconfigure" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用 <em>encoding</em>, <em>errors</em>, <em>newline</em>, <em>line_buffering</em> 和 <em>write_through</em> 的新设置来重新配置此文本流。</p>
+<p class="translated">未指定的形参将保留当前设定，例外情况是当指定了 <em>encoding</em> 但未指定 <em>errors</em> 时将会使用 <code class="docutils literal notranslate"><span class="pre">errors='strict'</span></code>。</p>
+<p class="translated">如果已经有数据从流中被读取则将无法再改变编码格式或行结束符。 另一方面，在写入数据之后再改变编码格式则是可以的。</p>
+<p class="translated">此方法会在设置新的形参之前执行隐式的流刷新。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>此方法支持 <code class="docutils literal notranslate"><span class="pre">encoding=&quot;locale&quot;</span></code> 选项。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOWrapper.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cookie</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">os.SEEK_SET</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOWrapper.seek" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">设置流位置。 以 <a class="reference internal" href="functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> 的形式返回新的流位置。</p>
+<p class="translated">支持四种操作，由下列参数组合给出：</p>
+<ul class="simple">
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">seek(0,</span> <span class="pre">SEEK_SET)</span></code>: 回退到流的开头。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">seek(cookie,</span> <span class="pre">SEEK_SET)</span></code>: 恢复之前的位置；<em>cookie</em> <strong>必须是</strong> 由 <a class="reference internal" href="#io.TextIOWrapper.tell" title="io.TextIOWrapper.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code></a> 返回的数字。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">seek(0,</span> <span class="pre">SEEK_END)</span></code>: 快进到流的末尾。</p></li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">seek(0,</span> <span class="pre">SEEK_CUR)</span></code>: 保持当前流位置不变。</p></li>
+</ul>
+<p class="translated">任何其他参数组合均无效，并可能引发异常。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><a class="reference internal" href="os.html#os.SEEK_SET" title="os.SEEK_SET"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.SEEK_SET</span></code></a>, <a class="reference internal" href="os.html#os.SEEK_CUR" title="os.SEEK_CUR"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.SEEK_CUR</span></code></a> 和 <a class="reference internal" href="os.html#os.SEEK_END" title="os.SEEK_END"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.SEEK_END</span></code></a>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="io.TextIOWrapper.tell">
+<span class="sig-name descname"><span class="pre">tell</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.TextIOWrapper.tell" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">以不透明数字的形式返回流位置。 <code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code> 的返回值可以作为 <a class="reference internal" href="#io.TextIOWrapper.seek" title="io.TextIOWrapper.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> 的输入，以恢复之前的流位置。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.StringIO">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">StringIO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.StringIO" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个使用内存文本缓冲区的文本流。 它继承自 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a>。</p>
+<p class="translated">当 <a class="reference internal" href="#io.IOBase.close" title="io.IOBase.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a> 方法被调用时将会丢弃文本缓冲区。</p>
+<p class="translated">缓冲区的初始值可通过提供 <em>initial_value</em> 来设置。 如果启用了换行符转写，换行符将以与 <a class="reference internal" href="#io.TextIOBase.write" title="io.TextIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 相同的方式进行编码。 流将被定位到缓冲区的起点，这模拟了以 <code class="docutils literal notranslate"><span class="pre">w+</span></code> 模式打开一个现有文件的操作，使其准备好从头开始立即写入或是将要覆盖初始值的写入。 要模拟以 <code class="docutils literal notranslate"><span class="pre">a+</span></code> 模式打开一个文件准备好追加内容，请使用 <code class="docutils literal notranslate"><span class="pre">f.seek(0,</span> <span class="pre">io.SEEK_END)</span></code> 来将流重新定位到缓冲区的末尾。</p>
+<p class="translated"><em>newline</em> 参数的规则与 <a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 所用的一致，不同之处在于当将输出写入到流时，如果 <em>newline</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则在所有平台上换行符都会被写入为 <code class="docutils literal notranslate"><span class="pre">\n</span></code>。</p>
+<p class="translated"><a class="reference internal" href="#io.StringIO" title="io.StringIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringIO</span></code></a> 在继承自 <a class="reference internal" href="#io.TextIOBase" title="io.TextIOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOBase</span></code></a> 和 <a class="reference internal" href="#io.IOBase" title="io.IOBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOBase</span></code></a> 的现有成员以外还提供了以下方法:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.StringIO.getvalue">
+<span class="sig-name descname"><span class="pre">getvalue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.StringIO.getvalue" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个包含缓冲区全部内容的 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>。 换行符会以与 <a class="reference internal" href="#io.TextIOBase.read" title="io.TextIOBase.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 相同的方式被解码，但是流位置不会改变。</p>
+</dd></dl>
+
+<p class="translated">用法示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;First line.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Second line.&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+
+<span class="c1"># 提取文件内容 -- 这将为</span>
+<span class="c1"># &#39;First line.\nSecond line.\n&#39;</span>
+<span class="n">contents</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+
+<span class="c1"># 关闭对象并丢弃内存缓冲区 --</span>
+<span class="c1"># 现在 .getvalue() 将引发一个异常。</span>
+<span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class" id="index-8">
+<dt class="sig sig-object py" id="io.IncrementalNewlineDecoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">IncrementalNewlineDecoder</span></span><a class="headerlink" href="#io.IncrementalNewlineDecoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于在 <a class="reference internal" href="../glossary.html#term-universal-newlines"><span class="xref std std-term">universal newlines</span></a> 模式下解码换行符的辅助编解码器。 它继承自 <a class="reference internal" href="codecs.html#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">codecs.IncrementalDecoder</span></code></a>。</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="static-typing">
+<h2 class="translated">静态类型<a class="headerlink" href="#static-typing" title="Link to this heading">¶</a></h2>
+<p class="translated">以下协议可用于注解简单流读取或写入操作的函数和方法参数。这些协议由 <a class="reference internal" href="typing.html#typing.runtime_checkable" title="typing.runtime_checkable"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;typing.runtime_checkable</span></code></a> 装饰。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="io.Reader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">Reader</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">]</span><a class="headerlink" href="#io.Reader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于从文件或其他输入流读取的泛型协议。 通常 <code class="docutils literal notranslate"><span class="pre">T</span></code> 将为 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 或 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>，但也可以是能从流读取的任意类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.Reader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#io.Reader.read" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p class="translated">从输入流读取数据并将其返回。 如果指定了 <em>size</em>，它应当是一个整数，并且至多有 <em>size</em> 个条目（字节/字符）将被读取。</p>
+</dd></dl>
+
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read_it</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">Reader</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="io.Writer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">io.</span></span><span class="sig-name descname"><span class="pre">Writer</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">]</span><a class="headerlink" href="#io.Writer" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于向文件或其他输出流写入的泛型协议。 通常 <code class="docutils literal notranslate"><span class="pre">T</span></code> 将为 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 或 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>，但也可以是能被写入流的任意类型。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="io.Writer.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#io.Writer.write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>data</em> 写入到输出流并返回写入的条目（字节/字符）数。</p>
+</dd></dl>
+
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">write_binary</span><span class="p">(</span><span class="n">writer</span><span class="p">:</span> <span class="n">Writer</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]):</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Hello world!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="translated">请参阅 <a class="reference internal" href="typing.html#typing-io"><span class="std std-ref">与 IO 相关的抽象基类和协议</span></a> 了解其他 I/O 相关的可被用于静态类型检查的协议和类。</p>
+</section>
+<section id="performance">
+<h2 class="translated">性能<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h2>
+<p class="translated">本节讨论所提供的具体 I/O 实现的性能。</p>
+<section id="id2">
+<h3 class="translated">二进制 I/O<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p class="translated">即使在用户请求单个字节时，也只读取和写入大块数据。通过该方法，缓冲 I/O 隐藏了操作系统调用和执行无缓冲 I/O 例程时的任何低效性。增益取决于操作系统和执行的 I/O 类型。例如，在某些现代操作系统上（例如 Linux），无缓冲磁盘 I/O 可以与缓冲 I/O 一样快。但最重要的是，无论平台和支持设备如何，缓冲 I/O 都能提供可预测的性能。因此，对于二进制数据，应首选使用缓冲的 I/O 而不是未缓冲的 I/O 。</p>
+</section>
+<section id="id3">
+<h3 class="translated">文本 I/O<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p class="translated">二进制存储（如文件）上的文本 I/O 比同一存储上的二进制 I/O 慢得多，因为它需要使用字符编解码器在 unicode 和二进制数据之间进行转换。 在处理大量文本数据（如大型日志文件）时这种情况会非常明显。 此外，由于使用了重构算法因而 <a class="reference internal" href="#io.TextIOBase.tell" title="io.TextIOBase.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code></a> 和 <a class="reference internal" href="#io.TextIOBase.seek" title="io.TextIOBase.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> 的速度都相当慢。</p>
+<p class="translated"><a class="reference internal" href="#io.StringIO" title="io.StringIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringIO</span></code></a> 是原生的内存 Unicode 容器，速度与 <a class="reference internal" href="#io.BytesIO" title="io.BytesIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a> 相似。</p>
+</section>
+<section id="multi-threading">
+<h3 class="translated">多线程<a class="headerlink" href="#multi-threading" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="#io.FileIO" title="io.FileIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileIO</span></code></a> 对象在它们封装的操作系统调用 (如 Unix 下的 <em class="manpage"><a class="manpage reference external" href="https://manpages.debian.org/read(2)">read(2)</a></em>) 是线程安全的情况下也是线程安全的。</p>
+<p class="translated">二进制缓冲对象 (例如 <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a>, <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a>, <a class="reference internal" href="#io.BufferedRandom" title="io.BufferedRandom"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRandom</span></code></a> 和 <a class="reference internal" href="#io.BufferedRWPair" title="io.BufferedRWPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRWPair</span></code></a>) 使用锁来保护其内部结构；因此，可以安全地一次从多个线程中调用它们。</p>
+<p class="translated"><a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 对象不是线程安全的。</p>
+</section>
+<section id="reentrancy">
+<h3 class="translated">可重入性<a class="headerlink" href="#reentrancy" title="Link to this heading">¶</a></h3>
+<p class="translated">二进制缓冲对象（ <a class="reference internal" href="#io.BufferedReader" title="io.BufferedReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> ， <a class="reference internal" href="#io.BufferedWriter" title="io.BufferedWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedWriter</span></code></a> ， <a class="reference internal" href="#io.BufferedRandom" title="io.BufferedRandom"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRandom</span></code></a> 和 <a class="reference internal" href="#io.BufferedRWPair" title="io.BufferedRWPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedRWPair</span></code></a> 的实例）不是可重入的。虽然在正常情况下不会发生可重入调用，但仍可能会在 <a class="reference internal" href="signal.html#module-signal" title="signal: Set handlers for asynchronous events."><code class="xref py py-mod docutils literal notranslate"><span class="pre">signal</span></code></a> 处理程序执行 I/O 时产生。如果线程尝试重入已经访问的缓冲对象，则会引发 <a class="reference internal" href="exceptions.html#RuntimeError" title="RuntimeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> 。注意，这并不禁止其他线程进入缓冲对象。</p>
+<p class="translated">上述内容将隐式地扩展到文本文件，因为 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 函数将把缓冲的对象包装在 <a class="reference internal" href="#io.TextIOWrapper" title="io.TextIOWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIOWrapper</span></code></a> 中。 这包括标准流因而也会影响内置的 <a class="reference internal" href="functions.html#print" title="print"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> 函数。</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> --- 处理流的核心工具</a><ul>
+<li><a class="reference internal" href="#overview">概述</a><ul>
+<li><a class="reference internal" href="#text-i-o">文本 I/O</a></li>
+<li><a class="reference internal" href="#binary-i-o">二进制 I/O</a></li>
+<li><a class="reference internal" href="#raw-i-o">原始 I/O</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#text-encoding">文本编码格式</a><ul>
+<li><a class="reference internal" href="#opt-in-encodingwarning">选择性的 EncodingWarning</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#high-level-module-interface">高阶模块接口</a></li>
+<li><a class="reference internal" href="#class-hierarchy">类的层次结构</a><ul>
+<li><a class="reference internal" href="#i-o-base-classes">I/O 基类</a></li>
+<li><a class="reference internal" href="#raw-file-i-o">原始文件 I/O</a></li>
+<li><a class="reference internal" href="#buffered-streams">缓冲流</a></li>
+<li><a class="reference internal" href="#id1">文本 I/O</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#static-typing">静态类型</a></li>
+<li><a class="reference internal" href="#performance">性能</a><ul>
+<li><a class="reference internal" href="#id2">二进制 I/O</a></li>
+<li><a class="reference internal" href="#id3">文本 I/O</a></li>
+<li><a class="reference internal" href="#multi-threading">多线程</a></li>
+<li><a class="reference internal" href="#reentrancy">可重入性</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="os.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code> --- 多种操作系统接口</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="time.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">time</span></code> --- 时间的访问和转换</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/io.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/io.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/io.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="time.html" title="time --- 时间的访问和转换"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="os.html" title="os --- 多种操作系统接口"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="allos.html" >通用操作系统服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code> --- 处理流的核心工具</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

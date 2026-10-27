@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="隔离扩展模块" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/isolating-extensions.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="摘要: 在传统上，属于 Python 扩展模块的状态都是保存为 C static 变量，它们具有进程级的作用域。 本文档描述了此类进程级状态的问题并演示了一种更安全的方式：模块级状态。 本文档还描述了如何在可能的情况下切换到模块级状态。这种转换涉及为状态分配空间、从静态类型到堆类型的潜在切换，以及 — 也许是最重要的 — 从代码访问模块级状态。 谁应当阅读本文档: 本指南是针对想要让扩展更安..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_isolating-extensions_d8a0866b.png" />
+<meta property="og:image:alt" content="摘要: 在传统上，属于 Python 扩展模块的状态都是保存为 C static 变量，它们具有进程级的作用域。 本文档描述了此类进程级状态的问题并演示了一种更安全的方式：模块级状态。 本文档还描述了如何在可能的情况下切换到模块级状态。这种转换涉及为状态分配空间、从静态类型到堆类型的潜在切换，以及 — 也许是最重要的 — 从代码访问模块级状态。 谁应当阅读本文档: 本指南是针对想要让扩展更安..." />
+<meta name="description" content="摘要: 在传统上，属于 Python 扩展模块的状态都是保存为 C static 变量，它们具有进程级的作用域。 本文档描述了此类进程级状态的问题并演示了一种更安全的方式：模块级状态。 本文档还描述了如何在可能的情况下切换到模块级状态。这种转换涉及为状态分配空间、从静态类型到堆类型的潜在切换，以及 — 也许是最重要的 — 从代码访问模块级状态。 谁应当阅读本文档: 本指南是针对想要让扩展更安..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>隔离扩展模块 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="定时器文件描述符指南" href="timerfd.html" />
+    <link rel="prev" title="注解最佳实践" href="annotations.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/isolating-extensions.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">隔离扩展模块</a><ul>
+<li><a class="reference internal" href="#who-should-read-this">谁应当阅读本文档</a></li>
+<li><a class="reference internal" href="#background">背景</a><ul>
+<li><a class="reference internal" href="#enter-per-module-state">进入模块级状态</a></li>
+<li><a class="reference internal" href="#isolated-module-objects">隔离的模块对象</a></li>
+<li><a class="reference internal" href="#surprising-edge-cases">令人惊讶的边界情况</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-modules-safe-with-multiple-interpreters">让多解释器下模块保持安全</a><ul>
+<li><a class="reference internal" href="#managing-global-state">管理全局状态</a></li>
+<li><a class="reference internal" href="#managing-per-module-state">管理模块级状态</a></li>
+<li><a class="reference internal" href="#opt-out-limiting-to-one-module-object-per-process">回退选项：每个进程限一个模块对象</a></li>
+<li><a class="reference internal" href="#module-state-access-from-functions">函数对模块状态的访问</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#heap-types">堆类型</a><ul>
+<li><a class="reference internal" href="#changing-static-types-to-heap-types">将静态类型改为堆类型</a></li>
+<li><a class="reference internal" href="#defining-heap-types">定义堆类型</a></li>
+<li><a class="reference internal" href="#garbage-collection-protocol">垃圾回收协议</a><ul>
+<li><a class="reference internal" href="#tp-traverse-in-python-3-8-and-lower"><code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code> 在 Python 3.8 及更低的版本中</a></li>
+<li><a class="reference internal" href="#delegating-tp-traverse">委托 <code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code></a></li>
+<li><a class="reference internal" href="#defining-tp-dealloc">定义 <code class="docutils literal notranslate"><span class="pre">tp_dealloc</span></code></a></li>
+<li><a class="reference internal" href="#not-overriding-tp-free">没有重载 <code class="docutils literal notranslate"><span class="pre">tp_free</span></code></a></li>
+<li><a class="reference internal" href="#avoiding-pyobject-new">避免 <code class="docutils literal notranslate"><span class="pre">PyObject_New</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-state-access-from-classes">类对模块状态的访问</a></li>
+<li><a class="reference internal" href="#module-state-access-from-regular-methods">常规方法对模块状态的访问</a></li>
+<li><a class="reference internal" href="#module-state-access-from-slot-methods-getters-and-setters">槽位方法、读取方法和设置方法对模块状态的访问</a></li>
+<li><a class="reference internal" href="#lifetime-of-the-module-state">模块状态的生命期</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#open-issues">未解决的问题</a><ul>
+<li><a class="reference internal" href="#per-class-scope">类级作用域</a></li>
+<li><a class="reference internal" href="#lossless-conversion-to-heap-types">无损转换为堆类型</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="annotations.html"
+                          title="上一章">注解最佳实践</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="timerfd.html"
+                          title="下一章">定时器文件描述符指南</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/isolating-extensions.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/isolating-extensions.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/isolating-extensions.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="timerfd.html" title="定时器文件描述符指南"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="annotations.html" title="注解最佳实践"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">隔离扩展模块</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="isolating-extension-modules">
+<span id="isolating-extensions-howto"></span><h1 class="translated">隔离扩展模块<a class="headerlink" href="#isolating-extension-modules" title="Link to this heading">¶</a></h1>
+<aside class="topic">
+<p class="translated topic-title">摘要</p>
+<p class="translated">在传统上，属于 Python 扩展模块的状态都是保存为 C <code class="docutils literal notranslate"><span class="pre">static</span></code> 变量，它们具有进程级的作用域。 本文档描述了此类进程级状态的问题并演示了一种更安全的方式：模块级状态。</p>
+<p class="translated">本文档还描述了如何在可能的情况下切换到模块级状态。这种转换涉及为状态分配空间、从静态类型到堆类型的潜在切换，以及 — 也许是最重要的 — 从代码访问模块级状态。</p>
+</aside>
+<section id="who-should-read-this">
+<h2 class="translated">谁应当阅读本文档<a class="headerlink" href="#who-should-read-this" title="Link to this heading">¶</a></h2>
+<p class="translated">本指南是针对想要让扩展更安全地在将 Python 本身用作库的应用程序中使用的 <a class="reference internal" href="../c-api/index.html#c-api-index"><span class="std std-ref">C-API</span></a> 扩展维护者撰写的。</p>
+</section>
+<section id="background">
+<h2 class="translated">背景<a class="headerlink" href="#background" title="Link to this heading">¶</a></h2>
+<p class="translated"><em>解释器</em> 是 Python 代码运行所在的上下文。它包含配置（例如导入路径）和运行时状态（例如已导入模块的集合）。</p>
+<p class="translated">Python 支持在一个进程中运行多个解释器。这里有两种情况需要考虑 — 用户可能会以下列方式运行解释器：</p>
+<ul class="simple">
+<li><p class="translated">串行，使用多个 <a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_InitializeEx" title="Py_InitializeEx"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_InitializeEx()</span></code></a>/<a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_FinalizeEx" title="Py_FinalizeEx"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_FinalizeEx()</span></code></a> 循环，以及</p></li>
+<li><p class="translated">并行，使用 <a class="reference internal" href="../c-api/subinterpreters.html#c.Py_NewInterpreter" title="Py_NewInterpreter"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_NewInterpreter()</span></code></a>/<a class="reference internal" href="../c-api/subinterpreters.html#c.Py_EndInterpreter" title="Py_EndInterpreter"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_EndInterpreter()</span></code></a> 管理多个“子解释器”。</p></li>
+</ul>
+<p class="translated">这两种情况（以及它们的组合）最适用于将 Python 嵌入到某个库中。库通常不应假定使用它们的应用程序，这包括假定存在一个进程级的“主 Python 解释器”。</p>
+<p class="translated">在历史上，Python 扩展模块对这种应用场景处理不佳。许多扩展模块（甚至是某些标准库模块）都是使用 <em>进程内共享</em> 的全局状态，因为 C <code class="docutils literal notranslate"><span class="pre">static</span></code> 变量十分易用。结果，本应专属于某个解释器的数据最终却被多个解释器所共享。 除非扩展的开发者小心谨慎，否则当一个模块被相同进程内的多个解释器导入时很容易引入会导致崩溃的边界情况。</p>
+<p class="translated">不幸的是，<em>解释器级</em> 状态很不容易做到。扩展的作者在开发中总是倾向于不考虑多解释器的情况，并且目前要测试此类行为也是很困难的。</p>
+<section id="enter-per-module-state">
+<h3 class="translated">进入模块级状态<a class="headerlink" href="#enter-per-module-state" title="Link to this heading">¶</a></h3>
+<p class="translated">Python 的 C API 不是专注于解释器级状态，而是演化为更好地支持更细粒度的 <em>模块级</em> 状态。这意味着 C 层级数据应当关联到 <em>模块对象</em>。每个解释器都会创建自己的模块对象，保持数据的相互分隔。要测试这种分隔，甚至可以在单个解释器中加载对应于单个扩展的多个模块对象。</p>
+<p class="translated">模块级状态提供了一种处理生命周期和资源归属的简单方式：扩展模块将在模块对象被创建时初始化，并在其释放时被清理。在这一点上，模块就像是任何其他的 <span class="c-expr sig sig-inline c"><a class="reference internal" href="../c-api/structures.html#c.PyObject" title="PyObject"><span class="n">PyObject</span></a><span class="p">*</span></span>；没有必要添加 — 或者去除 — 处理“解释器关闭”的钩子。</p>
+<p class="translated">请注意各种不同&quot;全局&quot;状态：进程级、解释器级、线程级或任务级状态的应用场景。 默认为模块级状态，其他状态也是可选择的，但你应当将它们视为特殊情况：如果你需要它们，你应当给予它们额外的关注和测试。 （请注意本指南并没有涉及它们。）</p>
+</section>
+<section id="isolated-module-objects">
+<h3 class="translated">隔离的模块对象<a class="headerlink" href="#isolated-module-objects" title="Link to this heading">¶</a></h3>
+<p class="translated">在开发扩展模块时要记住的关键点是多个模块对象可以从单个共享库来创建。例如：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">old_binascii</span> <span class="o">=</span> <span class="n">binascii</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s1">&#39;binascii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>  <span class="c1"># create a new module object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">old_binascii</span> <span class="o">==</span> <span class="n">binascii</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p class="translated">作为经验法则，这两个模块应该是完全独立的。模块专属的所有对象和状态应该被封装在模块对象内部，不与其他模块对象共享，并在模块对象被释放时进行清理。 由于这只是一个经验法则，例外情况也是可能的（参见 <a class="reference internal" href="#managing-global-state">Managing Global State</a>)，但这将需要更多的考虑并注意边界情况。</p>
+<p class="translated">虽然有些模块不用太多的严格限制，但是隔离的模块使得更容易制定适合各种应用场景的明确期望和指南。</p>
+</section>
+<section id="surprising-edge-cases">
+<h3 class="translated">令人惊讶的边界情况<a class="headerlink" href="#surprising-edge-cases" title="Link to this heading">¶</a></h3>
+<p class="translated">请注意隔离的模块会创造一些令人吃惊的边界情况。 最明显的一点，每个模块对象通常都不会与其他类似模块共享它的类和异常。 继续 <a class="reference internal" href="#isolated-module-objects">example above</a>，请注意 <code class="docutils literal notranslate"><span class="pre">old_binascii.Error</span></code> 和 <code class="docutils literal notranslate"><span class="pre">binascii.Error</span></code> 是单独的对象。 在下面的代码中，异常 <em>不会</em> 被捕获：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">old_binascii</span><span class="o">.</span><span class="n">Error</span> <span class="o">==</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">old_binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;qwertyuiop&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;boo&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">2</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">binascii.Error</span>: <span class="n">Non-hexadecimal digit found</span>
+</pre></div>
+</div>
+<p class="translated">这是预期的结果。请注意纯 Python 模块的行为相同：它是 Python 语言特性的一部分。</p>
+<p class="translated">最终目标是让扩展模块在 C 层级上保持安全，而不是让投机取巧的做法也能表现正常。 &quot;手动&quot;改变 <code class="docutils literal notranslate"><span class="pre">sys.modules</span></code> 就属于投机取巧。</p>
+</section>
+</section>
+<section id="making-modules-safe-with-multiple-interpreters">
+<h2 class="translated">让多解释器下模块保持安全<a class="headerlink" href="#making-modules-safe-with-multiple-interpreters" title="Link to this heading">¶</a></h2>
+<section id="managing-global-state">
+<h3 class="translated">管理全局状态<a class="headerlink" href="#managing-global-state" title="Link to this heading">¶</a></h3>
+<p class="translated">有时，与一个 Python 模块相关联的状态并不是该模块专属的，而是整个进程（或者比模块“更全局化”的其他东西）共享。例如：</p>
+<ul class="simple">
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">readline</span></code> 模块管理的是 <em>那个</em> 终端。</p></li>
+<li><p class="translated">在电路板上运行的模块想要控制 <em>那个</em> 板载 LED。</p></li>
+</ul>
+<p class="translated">在这些情况下，Python 模块应当提供对全局状态的 <em>访问</em>，而不是 <em>拥有</em> 它。 如果可能，编写模块时要让它的多个副本可以独立地访问全局状态（能配合其它的库，不论它们是使用 Python 还是其他语言）。 如果这无法做到，可考虑显式加锁。</p>
+<p class="translated">如果有必要使用进程级全局状态，那么避免多解释器相关问题的最简单方式是显式地阻止模块在一个进程中被多次加载 — 参见 <a class="reference internal" href="#isolating-extensions-optout"><span class="std std-ref">回退选项：每个进程限一个模块对象</span></a>。</p>
+</section>
+<section id="managing-per-module-state">
+<h3 class="translated">管理模块级状态<a class="headerlink" href="#managing-per-module-state" title="Link to this heading">¶</a></h3>
+<p class="translated">要使用模块级状态，请使用 <a class="reference internal" href="../c-api/extension-modules.html#multi-phase-initialization"><span class="std std-ref">多阶段扩展模块初始化</span></a>。 这将标示你的模块能正确地支持多解释器。</p>
+<p class="translated">将 <code class="docutils literal notranslate"><span class="pre">PyModuleDef.m_size</span></code> 设为一个正数来为模块请求指定字节的本地存储。通常，这将被设为某个模块专属 <code class="docutils literal notranslate"><span class="pre">struct</span></code> 的大小，它可以保存模块的所有 C 层级状态。特别地，它应当是你存放类指针（包括异常，但不包括静态类型）和 C 代码正常运作所需设置（如 <code class="docutils literal notranslate"><span class="pre">csv</span></code> 的 <a class="reference internal" href="../library/csv.html#csv.field_size_limit" title="csv.field_size_limit"><code class="xref py py-data docutils literal notranslate"><span class="pre">field_size_limit</span></code></a> 等）的地方。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">另一个选项是将状态保存在模块的 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 中，但你必须避免当用户从 Python 代码中修改 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 导致的程序崩溃。 这通常意味着要在 C 层级上进行错误和类型检查，很容易弄错又很难充分测试。</p>
+<p class="translated">但是，如果 C 代码不需要模块状态，则仅将其保存在 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 中就是一个好主意。</p>
+</div>
+<p class="translated">如果模块状态包括 <code class="docutils literal notranslate"><span class="pre">PyObject</span></code> 指针，则模块对象必须持有对这些对象的引用并实现模块层级的钩子 <code class="docutils literal notranslate"><span class="pre">m_traverse</span></code>, <code class="docutils literal notranslate"><span class="pre">m_clear</span></code> 和 <code class="docutils literal notranslate"><span class="pre">m_free</span></code>。它们的作用方式很像类的 <code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code>, <code class="docutils literal notranslate"><span class="pre">tp_clear</span></code> 和 <code class="docutils literal notranslate"><span class="pre">tp_free</span></code>。添加它们将会增加工作量并使代码更冗长；这是为了让模块能干净地卸载所需的代价。</p>
+<p class="translated">带有模块级状态的模块示例目前可在 <a class="reference external" href="https://github.com/python/cpython/blob/master/Modules/xxlimited.c">xxlimited</a> 获取；模块初始化的示例见文件的末尾部分。</p>
+</section>
+<section id="opt-out-limiting-to-one-module-object-per-process">
+<span id="isolating-extensions-optout"></span><h3 class="translated">回退选项：每个进程限一个模块对象<a class="headerlink" href="#opt-out-limiting-to-one-module-object-per-process" title="Link to this heading">¶</a></h3>
+<p class="translated">非负的 <code class="docutils literal notranslate"><span class="pre">PyModuleDef.m_size</span></code> 值表示一个模块能正确地支持多解释器。 如果你的模块还不能做到这样，你可以显式地设置你的模块在每个进程中只能加载一次。例如:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// 作用于进程的旗标</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">// 提供线程安全的互斥锁（仅在自由线程版 Python 中需要）</span>
+<span class="k">static</span><span class="w"> </span><span class="n">PyMutex</span><span class="w"> </span><span class="n">modinit_mutex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span>
+<span class="nf">exec_module</span><span class="p">(</span><span class="n">PyObject</span><span class="o">*</span><span class="w"> </span><span class="n">module</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyMutex_Lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modinit_mutex</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">loaded</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PyMutex_Unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modinit_mutex</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PyErr_SetString</span><span class="p">(</span><span class="n">PyExc_ImportError</span><span class="p">,</span>
+<span class="w">                        </span><span class="s">&quot;cannot load module more than once per process&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PyMutex_Unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modinit_mutex</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// ... 初始化的其余部分</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">如果你的模块的 <a class="reference internal" href="../c-api/module.html#c.PyModuleDef.m_clear" title="PyModuleDef.m_clear"><code class="xref c c-member docutils literal notranslate"><span class="pre">PyModuleDef.m_clear</span></code></a> 函数能够为将来的重新初始化做好准备，它应当清除 <code class="docutils literal notranslate"><span class="pre">loaded</span></code> 旗标。在此情况下，你的模块将不支持多个实例 <em>并发地</em> 存在，但举例来说，它将支持在 Python 运行时关闭 (<a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_FinalizeEx" title="Py_FinalizeEx"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_FinalizeEx()</span></code></a>) 和重新初始化 (<a class="reference internal" href="../c-api/interp-lifecycle.html#c.Py_Initialize" title="Py_Initialize"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_Initialize()</span></code></a>) 之后被加载。</p>
+</section>
+<section id="module-state-access-from-functions">
+<h3 class="translated">函数对模块状态的访问<a class="headerlink" href="#module-state-access-from-functions" title="Link to this heading">¶</a></h3>
+<p class="translated">从模块层级的函数访问状态是相当直观的。函数通过它们的第一个参数获得模块对象；要提取状态，你可以使用 <code class="docutils literal notranslate"><span class="pre">PyModule_GetState</span></code>:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">func</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">my_struct</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">my_struct</span><span class="o">*</span><span class="p">)</span><span class="n">PyModule_GetState</span><span class="p">(</span><span class="n">module</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ... 其余的逻辑</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果模块状态不存在则 <code class="docutils literal notranslate"><span class="pre">PyModule_GetState</span></code> 可能返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 而不设置异常，即 <code class="docutils literal notranslate"><span class="pre">PyModuleDef.m_size</span></code> 为零。在你自己的模块中，你可以任意控制 <code class="docutils literal notranslate"><span class="pre">m_size</span></code>，因此这很容易避免。</p>
+</div>
+</section>
+</section>
+<section id="heap-types">
+<h2 class="translated">堆类型<a class="headerlink" href="#heap-types" title="Link to this heading">¶</a></h2>
+<p class="translated">在传统上，在 C 代码中定义的类型都是 <em>静态的</em>；也就是说，<code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">PyTypeObject</span></code> 结构体在代码中直接定义并使用 <code class="docutils literal notranslate"><span class="pre">PyType_Ready()</span></code> 来初始化。</p>
+<p class="translated">这样的类型必须在进程范围内共享。在模块对象之间共享它们需要注意它们所拥有或访问的任何状态。要限制可能出现的问题，静态类型在 Python 层级上是不可变的：例如，你无法设置 <code class="docutils literal notranslate"><span class="pre">str.myattribute</span> <span class="pre">=</span> <span class="pre">123</span></code>。</p>
+<div class="impl-detail compound">
+<p class="translated">在解释器之间共享真正不可变的对象是可行的，只要它们不提供对可变对象的访问。但是，在 CPython 中，每个 Python 对象都有一个可变的实现细节：引用计数。对引用计数的更改是由 GIL 来保护的。因此，跨解释器共享任何 Python 对象的代码都隐式地依赖于 CPython 现有的、进程级的 GIL。</p>
+</div>
+<p class="translated">因为它们是不可变的进程级全局对象，所以静态类型无法访问“它们的”模块状态。如果任何此种类型的方法需要访问模块状态，则该类型必须被转换为 <em>堆分配类型</em>，或者简称为 <em>堆类型</em>。此种类型相对更接近由 Python 的 <code class="docutils literal notranslate"><span class="pre">class</span></code> 语句所创建的类。</p>
+<p class="translated">对于新模块，默认使用堆类型是一个很好的经验法则。</p>
+<section id="changing-static-types-to-heap-types">
+<h3 class="translated">将静态类型改为堆类型<a class="headerlink" href="#changing-static-types-to-heap-types" title="Link to this heading">¶</a></h3>
+<p class="translated">静态类型可以转换为堆类型，但要注意堆类型 API 并非针对静态类型的“无损”转换 — 也就是说，创建与给定静态类型完全一致的类型来设计的。 因此，当在新的 API 中重写类定义时，你很容易在无意中改变一些细节（例如可封存性或所继承的槽位等）。请始终确保测试对你来说重要的细节。</p>
+<p class="translated">特别要关注以下两点（但请注意这并非一个完整的列表）:</p>
+<ul class="simple">
+<li><p class="translated">不同于静态类型，堆类型对象默认是可变的。请使用 <a class="reference internal" href="../c-api/typeobj.html#c.Py_TPFLAGS_IMMUTABLETYPE" title="Py_TPFLAGS_IMMUTABLETYPE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_TPFLAGS_IMMUTABLETYPE</span></code></a> 旗标来防止可变性。</p></li>
+<li><p class="translated">堆类型默认继承 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_new" title="PyTypeObject.tp_new"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_new</span></code></a>，因此有可能通过 Python 代码来初始化它们。你可以使用 <a class="reference internal" href="../c-api/typeobj.html#c.Py_TPFLAGS_DISALLOW_INSTANTIATION" title="Py_TPFLAGS_DISALLOW_INSTANTIATION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_TPFLAGS_DISALLOW_INSTANTIATION</span></code></a> 旗标来防止此特性。</p></li>
+</ul>
+</section>
+<section id="defining-heap-types">
+<h3 class="translated">定义堆类型<a class="headerlink" href="#defining-heap-types" title="Link to this heading">¶</a></h3>
+<p class="translated">堆类型可以通过填充 <a class="reference internal" href="../c-api/type.html#c.PyType_Spec" title="PyType_Spec"><code class="xref c c-struct docutils literal notranslate"><span class="pre">PyType_Spec</span></code></a> 结构体来创建，它是对于特定类的描述或&quot;蓝图&quot;，并调用 <a class="reference internal" href="../c-api/type.html#c.PyType_FromModuleAndSpec" title="PyType_FromModuleAndSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_FromModuleAndSpec()</span></code></a> 来构造新的类对象。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">其他的函数，如 <a class="reference internal" href="../c-api/type.html#c.PyType_FromSpec" title="PyType_FromSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_FromSpec()</span></code></a>，也可以创建堆类型，但 <a class="reference internal" href="../c-api/type.html#c.PyType_FromModuleAndSpec" title="PyType_FromModuleAndSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_FromModuleAndSpec()</span></code></a> 会将模块关联到类，以允许从方法访问模块状态。</p>
+</div>
+<p class="translated">类通常应当 <em>同时</em> 保存在模块的状态（用于从 C 中安全地访问）和模块的 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 中（用于从 Python 代码中访问）。</p>
+</section>
+<section id="garbage-collection-protocol">
+<h3 class="translated">垃圾回收协议<a class="headerlink" href="#garbage-collection-protocol" title="Link to this heading">¶</a></h3>
+<p class="translated">堆类型的实例会持有一个指向其类型的引用。这能确保类型的销毁不会发生在其实例之前，但可能会导致需要由垃圾回收器来打破的引用循环。</p>
+<p class="translated">要避免内存泄漏，堆类型的实例必须实现垃圾回收协议。也就是说，堆类型应当：</p>
+<ul class="simple">
+<li><p class="translated">具有 <a class="reference internal" href="../c-api/typeobj.html#c.Py_TPFLAGS_HAVE_GC" title="Py_TPFLAGS_HAVE_GC"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_TPFLAGS_HAVE_GC</span></code></a> 旗标。</p></li>
+<li><p class="translated">定义一个使用 <a class="reference internal" href="../c-api/typeobj.html#c.Py_tp_traverse" title="Py_tp_traverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_tp_traverse</span></code></a> 的遍历函数，它将访问该类型 (例如使用 <code class="docutils literal notranslate"><span class="pre">Py_VISIT(Py_TYPE(self))</span></code>)。</p></li>
+</ul>
+<p class="translated">请参阅 <a class="reference internal" href="../c-api/typeobj.html#c.Py_TPFLAGS_HAVE_GC" title="Py_TPFLAGS_HAVE_GC"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_TPFLAGS_HAVE_GC</span></code></a> 和 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_traverse" title="PyTypeObject.tp_traverse"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_traverse</span></code></a> 的文档以获取更多说明。</p>
+<p class="translated">定义堆类型的 API 在有机地增长，使得它目前的使用状况有些尴尬。以下章节将引导您解决常见的问题。</p>
+<section id="tp-traverse-in-python-3-8-and-lower">
+<h4 class="translated"><code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code> 在 Python 3.8 及更低的版本中<a class="headerlink" href="#tp-traverse-in-python-3-8-and-lower" title="Link to this heading">¶</a></h4>
+<p class="translated">从 <code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code> 访问类型的要求是在 Python 3.9 中添加的。如果你要支持 Python 3.8 及更低版本，则遍历函数 <em>不可</em> 访问类型，因此必须使用更复杂的方式:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">my_traverse</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">visitproc</span><span class="w"> </span><span class="n">visit</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Py_Version</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mh">0x03090000</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Py_VISIT</span><span class="p">(</span><span class="n">Py_TYPE</span><span class="p">(</span><span class="n">self</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">不幸的是，<a class="reference internal" href="../c-api/apiabiversion.html#c.Py_Version" title="Py_Version"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_Version</span></code></a> 直到 Python 3.11 才被加入。作为替代，请使用：</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="../c-api/apiabiversion.html#c.PY_VERSION_HEX" title="PY_VERSION_HEX"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PY_VERSION_HEX</span></code></a>，如果不使用稳定 ABI 的话，或者</p></li>
+<li><p class="translated"><a class="reference internal" href="../library/sys.html#sys.version_info" title="sys.version_info"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.version_info</span></code></a> (通过 <a class="reference internal" href="../c-api/sys.html#c.PySys_GetObject" title="PySys_GetObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PySys_GetObject()</span></code></a> 和 <a class="reference internal" href="../c-api/arg.html#c.PyArg_ParseTuple" title="PyArg_ParseTuple"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyArg_ParseTuple()</span></code></a>)。</p></li>
+</ul>
+</section>
+<section id="delegating-tp-traverse">
+<h4 class="translated">委托 <code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code><a class="headerlink" href="#delegating-tp-traverse" title="Link to this heading">¶</a></h4>
+<p class="translated">如果你的遍历函数委托给了其基类（或另一个类型）的 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_traverse" title="PyTypeObject.tp_traverse"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_traverse</span></code></a>，请确保 <code class="docutils literal notranslate"><span class="pre">Py_TYPE(self)</span></code> 只被访问一次。请注意只有堆类型会被预期访问 <code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code> 中的类型。</p>
+<p class="translated">举例来说，如果你的遍历函数包括:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">base</span><span class="o">-&gt;</span><span class="n">tp_traverse</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">visit</span><span class="p">,</span><span class="w"> </span><span class="n">arg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">... 并且 <code class="docutils literal notranslate"><span class="pre">base</span></code> 可能是一个静态类型，则它也应当包括:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">base</span><span class="o">-&gt;</span><span class="n">tp_flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">Py_TPFLAGS_HEAPTYPE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 一个堆类型的 tp_traverse 已经访问了 Py_TYPE(self)</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Py_Version</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mh">0x03090000</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Py_VISIT</span><span class="p">(</span><span class="n">Py_TYPE</span><span class="p">(</span><span class="n">self</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">不需要在 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_new" title="PyTypeObject.tp_new"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_new</span></code></a> 和 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_clear" title="PyTypeObject.tp_clear"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_clear</span></code></a> 中处理该类型的引用计数。</p>
+</section>
+<section id="defining-tp-dealloc">
+<h4 class="translated">定义 <code class="docutils literal notranslate"><span class="pre">tp_dealloc</span></code><a class="headerlink" href="#defining-tp-dealloc" title="Link to this heading">¶</a></h4>
+<p class="translated">如果你的类型有自定义的 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_dealloc" title="PyTypeObject.tp_dealloc"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_dealloc</span></code></a> 函数，则它需要：</p>
+<ul class="simple">
+<li><p class="translated">在任何字段失效之前调用 <a class="reference internal" href="../c-api/gcsupport.html#c.PyObject_GC_UnTrack" title="PyObject_GC_UnTrack"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GC_UnTrack()</span></code></a>，并且</p></li>
+<li><p class="translated">递减该类型的引用计数。</p></li>
+</ul>
+<p class="translated">要在 <code class="docutils literal notranslate"><span class="pre">tp_free</span></code> 被调用时保持类型有效，必须在撤销分配实例 <em>之后</em> 递减该类型的引用计数。例如:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">my_dealloc</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyObject_GC_UnTrack</span><span class="p">(</span><span class="n">self</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="n">PyTypeObject</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Py_TYPE</span><span class="p">(</span><span class="n">self</span><span class="p">);</span>
+<span class="w">    </span><span class="n">type</span><span class="o">-&gt;</span><span class="n">tp_free</span><span class="p">(</span><span class="n">self</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">type</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">默认的 <code class="docutils literal notranslate"><span class="pre">tp_dealloc</span></code> 函数会执行此操作，因此如果你的类型 <em>没有</em> 重载 <code class="docutils literal notranslate"><span class="pre">tp_dealloc</span></code> 你就不需要添加它。</p>
+</section>
+<section id="not-overriding-tp-free">
+<h4 class="translated">没有重载 <code class="docutils literal notranslate"><span class="pre">tp_free</span></code><a class="headerlink" href="#not-overriding-tp-free" title="Link to this heading">¶</a></h4>
+<p class="translated">堆类型的 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_free" title="PyTypeObject.tp_free"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_free</span></code></a> 槽位必须设为 <a class="reference internal" href="../c-api/gcsupport.html#c.PyObject_GC_Del" title="PyObject_GC_Del"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GC_Del()</span></code></a>。 这是默认的设置；请不要重载它。</p>
+</section>
+<section id="avoiding-pyobject-new">
+<h4 class="translated">避免 <code class="docutils literal notranslate"><span class="pre">PyObject_New</span></code><a class="headerlink" href="#avoiding-pyobject-new" title="Link to this heading">¶</a></h4>
+<p class="translated">带 GC 追踪的对象需要使用带 GC 感知的函数来分配。</p>
+<p class="translated">如果你使用 <a class="reference internal" href="../c-api/allocation.html#c.PyObject_New" title="PyObject_New"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_New()</span></code></a> 或 <a class="reference internal" href="../c-api/allocation.html#c.PyObject_NewVar" title="PyObject_NewVar"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_NewVar()</span></code></a>:</p>
+<ul>
+<li><p class="translated">如有可能，请获取并调用类型的 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_alloc" title="PyTypeObject.tp_alloc"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_alloc</span></code></a> 槽位。也就是说，将 <code class="docutils literal notranslate"><span class="pre">TYPE</span> <span class="pre">*o</span> <span class="pre">=</span> <span class="pre">PyObject_New(TYPE,</span> <span class="pre">typeobj)</span></code> 替换为:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">TYPE</span><span class="w"> </span><span class="o">*</span><span class="n">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">typeobj</span><span class="o">-&gt;</span><span class="n">tp_alloc</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">同样地替换 <code class="docutils literal notranslate"><span class="pre">o</span> <span class="pre">=</span> <span class="pre">PyObject_NewVar(TYPE,</span> <span class="pre">typeobj,</span> <span class="pre">size)</span></code>，但要使用指定大小而不是 0。</p>
+</li>
+<li><p class="translated">如果无法执行以上操作（例如在自定义的 <code class="docutils literal notranslate"><span class="pre">tp_alloc</span></code> 中），请调用 <a class="reference internal" href="../c-api/gcsupport.html#c.PyObject_GC_New" title="PyObject_GC_New"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GC_New()</span></code></a> 或 <a class="reference internal" href="../c-api/gcsupport.html#c.PyObject_GC_NewVar" title="PyObject_GC_NewVar"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GC_NewVar()</span></code></a>:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">TYPE</span><span class="w"> </span><span class="o">*</span><span class="n">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyObject_GC_New</span><span class="p">(</span><span class="n">TYPE</span><span class="p">,</span><span class="w"> </span><span class="n">typeobj</span><span class="p">);</span>
+
+<span class="n">TYPE</span><span class="w"> </span><span class="o">*</span><span class="n">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyObject_GC_NewVar</span><span class="p">(</span><span class="n">TYPE</span><span class="p">,</span><span class="w"> </span><span class="n">typeobj</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="module-state-access-from-classes">
+<h3 class="translated">类对模块状态的访问<a class="headerlink" href="#module-state-access-from-classes" title="Link to this heading">¶</a></h3>
+<p class="translated">如果你有一个使用 <a class="reference internal" href="../c-api/type.html#c.PyType_FromModuleAndSpec" title="PyType_FromModuleAndSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_FromModuleAndSpec()</span></code></a> 定义的类型对象，你可以调用 <a class="reference internal" href="../c-api/type.html#c.PyType_GetModule" title="PyType_GetModule"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GetModule()</span></code></a> 来获取关联的模块，然后调用 <a class="reference internal" href="../c-api/module.html#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 来获取模块的状态。</p>
+<p class="translated">要省略一些繁琐的错误处理样板代码，你可以使用 <a class="reference internal" href="../c-api/type.html#c.PyType_GetModuleState" title="PyType_GetModuleState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GetModuleState()</span></code></a> 来合并这两步，得到:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">my_struct</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">my_struct</span><span class="o">*</span><span class="p">)</span><span class="n">PyType_GetModuleState</span><span class="p">(</span><span class="n">type</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="module-state-access-from-regular-methods">
+<h3 class="translated">常规方法对模块状态的访问<a class="headerlink" href="#module-state-access-from-regular-methods" title="Link to this heading">¶</a></h3>
+<p class="translated">从一个类的方法访问模块层级的状态在某些方面会更为复杂，但通过 Python 3.9 所引入的 API 这是可能做到的。为了获取状态，你需要首先获取 <em>定义的类</em>，然后从中获取模块状态。</p>
+<p class="translated">最大的障碍是获取 <em>方法定义所在的类</em>，简称为方法的&quot;定义类&quot;。定义类可以持有一个指向它所属模块的引用。</p>
+<p class="translated">不要混淆定义的类和 <code class="docutils literal notranslate"><span class="pre">Py_TYPE(self)</span></code>。如果方法是在你的类型的一个 <em>子类</em> 上被调用的，则 <code class="docutils literal notranslate"><span class="pre">Py_TYPE(self)</span></code> 将指向该子类，它可能是在另一个模块中定义的。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">下面的 Python 代码可以演示这一概念。<code class="docutils literal notranslate"><span class="pre">Base.get_defining_class</span></code> 将返回 <code class="docutils literal notranslate"><span class="pre">Base</span></code>，即使 <code class="docutils literal notranslate"><span class="pre">type(self)</span> <span class="pre">==</span> <span class="pre">Sub</span></code>:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_type_of_self</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_defining_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="vm">__class__</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Sub</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+<p class="translated">对于要获取其&quot;定义类&quot;的方法，它必须使用 <a class="reference internal" href="../c-api/structures.html#meth-method-meth-fastcall-meth-keywords"><span class="std std-ref">METH_METHOD | METH_FASTCALL | METH_KEYWORDS</span></a> <a class="reference internal" href="../c-api/structures.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">调用惯例</span></code></a> 以及相应的 <a class="reference internal" href="../c-api/structures.html#c.PyCMethod" title="PyCMethod"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyCMethod</span></code></a> 签名:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">PyCMethod</span><span class="p">(</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w">               </span><span class="c1">// 方法调用所在的对象</span>
+<span class="w">    </span><span class="n">PyTypeObject</span><span class="w"> </span><span class="o">*</span><span class="n">defining_class</span><span class="p">,</span><span class="w"> </span><span class="c1">// 定义的类</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="w">        </span><span class="c1">// 由参数组成的 C 数组</span>
+<span class="w">    </span><span class="n">Py_ssize_t</span><span class="w"> </span><span class="n">nargs</span><span class="p">,</span><span class="w">             </span><span class="c1">// &quot;args&quot; 的长度</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">kwnames</span><span class="p">)</span><span class="w">            </span><span class="c1">// NULL，或由关键字参数组成的字典</span>
+</pre></div>
+</div>
+<p class="translated">一旦你得到了定义的类，即可调用 <a class="reference internal" href="../c-api/type.html#c.PyType_GetModuleState" title="PyType_GetModuleState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GetModuleState()</span></code></a> 来获取它所关联的模块的状态。</p>
+<p class="translated">例如：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">example_method</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span>
+<span class="w">        </span><span class="n">PyTypeObject</span><span class="w"> </span><span class="o">*</span><span class="n">defining_class</span><span class="p">,</span>
+<span class="w">        </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Py_ssize_t</span><span class="w"> </span><span class="n">nargs</span><span class="p">,</span>
+<span class="w">        </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">kwnames</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">my_struct</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">my_struct</span><span class="o">*</span><span class="p">)</span><span class="n">PyType_GetModuleState</span><span class="p">(</span><span class="n">defining_class</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span><span class="w"> </span><span class="c1">// rest of logic</span>
+<span class="p">}</span>
+
+<span class="n">PyDoc_STRVAR</span><span class="p">(</span><span class="n">example_method_doc</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;...&quot;</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">PyMethodDef</span><span class="w"> </span><span class="n">my_methods</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="s">&quot;example_method&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="p">(</span><span class="n">PyCFunction</span><span class="p">)(</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">void</span><span class="p">))</span><span class="n">example_method</span><span class="p">,</span>
+<span class="w">      </span><span class="n">METH_METHOD</span><span class="o">|</span><span class="n">METH_FASTCALL</span><span class="o">|</span><span class="n">METH_KEYWORDS</span><span class="p">,</span>
+<span class="w">      </span><span class="n">example_method_doc</span><span class="p">}</span>
+<span class="w">    </span><span class="p">{</span><span class="nb">NULL</span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="module-state-access-from-slot-methods-getters-and-setters">
+<h3 class="translated">槽位方法、读取方法和设置方法对模块状态的访问<a class="headerlink" href="#module-state-access-from-slot-methods-getters-and-setters" title="Link to this heading">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">这是 Python 3.11 的新增特性。</p>
+</div>
+<p class="translated">槽位方法 — 即特殊方法的 C 快速等价物，如 <a class="reference internal" href="../c-api/typeobj.html#c.PyNumberMethods.nb_add" title="PyNumberMethods.nb_add"><code class="xref c c-member docutils literal notranslate"><span class="pre">nb_add</span></code></a> 对应 <a class="reference internal" href="../reference/datamodel.html#object.__add__" title="object.__add__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__add__</span></code></a> 而 <a class="reference internal" href="../c-api/typeobj.html#c.PyTypeObject.tp_new" title="PyTypeObject.tp_new"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_new</span></code></a> 对应初始化方法 — 具有不允许传入定义类的非常简单的 API，这不同于 <a class="reference internal" href="../c-api/structures.html#c.PyCMethod" title="PyCMethod"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyCMethod</span></code></a>。同样的机制也适用于通过 <a class="reference internal" href="../c-api/structures.html#c.PyGetSetDef" title="PyGetSetDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyGetSetDef</span></code></a> 定义的读取方法和设置方法。</p>
+<p class="translated">要在这些场景下访问模块状态，请使用 <a class="reference internal" href="../c-api/type.html#c.PyType_GetModuleByDef" title="PyType_GetModuleByDef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GetModuleByDef()</span></code></a> 函数，并传入模块定义。一旦你得到该模块，即可调用 <a class="reference internal" href="../c-api/module.html#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 来获取状态:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">module</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyType_GetModuleByDef</span><span class="p">(</span><span class="n">Py_TYPE</span><span class="p">(</span><span class="n">self</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">module_def</span><span class="p">);</span>
+<span class="n">my_struct</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">my_struct</span><span class="o">*</span><span class="p">)</span><span class="n">PyModule_GetState</span><span class="p">(</span><span class="n">module</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GetModuleByDef()</span></code> 的作用方式是通过搜索 <a class="reference internal" href="../glossary.html#term-method-resolution-order"><span class="xref std std-term">method resolution order</span></a> (即所有超类) 来找到具有相应模块的第一个超类。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">在非常特别的情况下（继承链跨越由同样定义创建的多个模块），<code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_GetModuleByDef()</span></code> 可能不会返回真正定义类所属的模块。但是，它总是会返回一个具有同样定义的模块，这将确保具有兼容的 C 内存布局。</p>
+</div>
+</section>
+<section id="lifetime-of-the-module-state">
+<h3 class="translated">模块状态的生命期<a class="headerlink" href="#lifetime-of-the-module-state" title="Link to this heading">¶</a></h3>
+<p class="translated">当一个模块对象被当作垃圾回收时，它的模块状态将被释放。对于每个指向（一部分）模块状态的指针来说，你必须持有一个对模块对象的引用。</p>
+<p class="translated">通常这不会有问题，因为使用 <a class="reference internal" href="../c-api/type.html#c.PyType_FromModuleAndSpec" title="PyType_FromModuleAndSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_FromModuleAndSpec()</span></code></a> 创建的类型，以及它们的实例，都持有对模块的引用。 但是，当你从其他地方，例如对外部库的回调引用模块状态时必须小心谨慎。</p>
+</section>
+</section>
+<section id="open-issues">
+<h2 class="translated">未解决的问题<a class="headerlink" href="#open-issues" title="Link to this heading">¶</a></h2>
+<p class="translated">围绕模块级状态和堆类型仍然存在一些未解决的问题。</p>
+<p class="translated">有关改进此状况最好的讨论是在 <a class="reference external" href="https://discuss.python.org/c/core-dev/c-api/30">discuss 论坛的 c-api 标签下</a> 进行的。</p>
+<section id="per-class-scope">
+<h3 class="translated">类级作用域<a class="headerlink" href="#per-class-scope" title="Link to this heading">¶</a></h3>
+<p class="translated">目前（即 Python 3.11）还无法将状态关联到单个 <em>类型</em> 而不依赖于 CPython 实现细节（这在未来可能发生改变 — 或许，颇具讽刺意味地，正是为了提供适当的类级作用域解决方案）。</p>
+</section>
+<section id="lossless-conversion-to-heap-types">
+<h3 class="translated">无损转换为堆类型<a class="headerlink" href="#lossless-conversion-to-heap-types" title="Link to this heading">¶</a></h3>
+<p class="translated">堆类型 API 没有从静态类型进行“无损”转换的设计；所谓无损转换，就是创建与给定静态类型完全一致的类型。</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">隔离扩展模块</a><ul>
+<li><a class="reference internal" href="#who-should-read-this">谁应当阅读本文档</a></li>
+<li><a class="reference internal" href="#background">背景</a><ul>
+<li><a class="reference internal" href="#enter-per-module-state">进入模块级状态</a></li>
+<li><a class="reference internal" href="#isolated-module-objects">隔离的模块对象</a></li>
+<li><a class="reference internal" href="#surprising-edge-cases">令人惊讶的边界情况</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-modules-safe-with-multiple-interpreters">让多解释器下模块保持安全</a><ul>
+<li><a class="reference internal" href="#managing-global-state">管理全局状态</a></li>
+<li><a class="reference internal" href="#managing-per-module-state">管理模块级状态</a></li>
+<li><a class="reference internal" href="#opt-out-limiting-to-one-module-object-per-process">回退选项：每个进程限一个模块对象</a></li>
+<li><a class="reference internal" href="#module-state-access-from-functions">函数对模块状态的访问</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#heap-types">堆类型</a><ul>
+<li><a class="reference internal" href="#changing-static-types-to-heap-types">将静态类型改为堆类型</a></li>
+<li><a class="reference internal" href="#defining-heap-types">定义堆类型</a></li>
+<li><a class="reference internal" href="#garbage-collection-protocol">垃圾回收协议</a><ul>
+<li><a class="reference internal" href="#tp-traverse-in-python-3-8-and-lower"><code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code> 在 Python 3.8 及更低的版本中</a></li>
+<li><a class="reference internal" href="#delegating-tp-traverse">委托 <code class="docutils literal notranslate"><span class="pre">tp_traverse</span></code></a></li>
+<li><a class="reference internal" href="#defining-tp-dealloc">定义 <code class="docutils literal notranslate"><span class="pre">tp_dealloc</span></code></a></li>
+<li><a class="reference internal" href="#not-overriding-tp-free">没有重载 <code class="docutils literal notranslate"><span class="pre">tp_free</span></code></a></li>
+<li><a class="reference internal" href="#avoiding-pyobject-new">避免 <code class="docutils literal notranslate"><span class="pre">PyObject_New</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-state-access-from-classes">类对模块状态的访问</a></li>
+<li><a class="reference internal" href="#module-state-access-from-regular-methods">常规方法对模块状态的访问</a></li>
+<li><a class="reference internal" href="#module-state-access-from-slot-methods-getters-and-setters">槽位方法、读取方法和设置方法对模块状态的访问</a></li>
+<li><a class="reference internal" href="#lifetime-of-the-module-state">模块状态的生命期</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#open-issues">未解决的问题</a><ul>
+<li><a class="reference internal" href="#per-class-scope">类级作用域</a></li>
+<li><a class="reference internal" href="#lossless-conversion-to-heap-types">无损转换为堆类型</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="annotations.html"
+                          title="上一章">注解最佳实践</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="timerfd.html"
+                          title="下一章">定时器文件描述符指南</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/isolating-extensions.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/isolating-extensions.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/isolating-extensions.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="timerfd.html" title="定时器文件描述符指南"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="annotations.html" title="注解最佳实践"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">隔离扩展模块</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

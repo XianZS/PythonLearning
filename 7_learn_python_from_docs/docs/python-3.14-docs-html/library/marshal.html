@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="marshal --- 内部 Python 对象序列化" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/marshal.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="此模块包含一些能以二进制格式来读写 Python 值的函数。 这种格式是 Python 专属的，但是独立于特定的机器架构（即你可以在一台 PC 上写入某个 Python 值，将文件传到一台 Mac 上并在那里读取它）。 这种格式的细节有意不带文档说明；它可能在不同 Python 版本之间发生改变（但这种情况极少发生）。 1 这不是一个通用的“持久化”模块。 对于通用的持久化以及通过 RPC ..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_marshal_506ecf52.png" />
+<meta property="og:image:alt" content="此模块包含一些能以二进制格式来读写 Python 值的函数。 这种格式是 Python 专属的，但是独立于特定的机器架构（即你可以在一台 PC 上写入某个 Python 值，将文件传到一台 Mac 上并在那里读取它）。 这种格式的细节有意不带文档说明；它可能在不同 Python 版本之间发生改变（但这种情况极少发生）。 1 这不是一个通用的“持久化”模块。 对于通用的持久化以及通过 RPC ..." />
+<meta name="description" content="此模块包含一些能以二进制格式来读写 Python 值的函数。 这种格式是 Python 专属的，但是独立于特定的机器架构（即你可以在一台 PC 上写入某个 Python 值，将文件传到一台 Mac 上并在那里读取它）。 这种格式的细节有意不带文档说明；它可能在不同 Python 版本之间发生改变（但这种情况极少发生）。 1 这不是一个通用的“持久化”模块。 对于通用的持久化以及通过 RPC ..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>marshal --- 内部 Python 对象序列化 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="dbm --- Unix &#34;数据库&#34; 接口" href="dbm.html" />
+    <link rel="prev" title="shelve --- Python 对象持久化" href="shelve.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/marshal.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="shelve.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">shelve</span></code> --- Python 对象持久化</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="dbm.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dbm</span></code> --- Unix &quot;数据库&quot; 接口</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/marshal.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/marshal.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/marshal.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="dbm.html" title="dbm --- Unix &#34;数据库&#34; 接口"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="shelve.html" title="shelve --- Python 对象持久化"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="persistence.html" accesskey="U">数据持久化</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">marshal</span></code> --- 内部 Python 对象序列化</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-marshal">
+<span id="marshal-internal-python-object-serialization"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">marshal</span></code> --- 内部 Python 对象序列化<a class="headerlink" href="#module-marshal" title="Link to this heading">¶</a></h1>
+<hr class="docutils" />
+<p class="translated">此模块包含一些能以二进制格式来读写 Python 值的函数。 这种格式是 Python 专属的，但是独立于特定的机器架构（即你可以在一台 PC 上写入某个 Python 值，将文件传到一台 Mac 上并在那里读取它）。 这种格式的细节有意不带文档说明；它可能在不同 Python 版本之间发生改变（但这种情况极少发生）。<a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<p class="translated" id="index-0">这不是一个通用的“持久化”模块。 对于通用的持久化以及通过 RPC 调用传递 Python 对象，请参阅 <a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> 和 <a class="reference internal" href="shelve.html#module-shelve" title="shelve: Python object persistence."><code class="xref py py-mod docutils literal notranslate"><span class="pre">shelve</span></code></a> 等模块。 <code class="xref py py-mod docutils literal notranslate"><span class="pre">marshal</span></code> 模块的存在主要是为了支持读写 Python 模块的 <code class="file docutils literal notranslate"><span class="pre">.pyc</span></code> 文件形式的“伪编译”代码。 因此，Python 维护者保留在必要时以不向下兼容的方式修改 marshal 格式的权利。 代码对象的格式在 Python 版本之间不保证兼容，即使格式的版本是相同的。 在不正确的 Python 版本中反序列化代码对象是未定义的行为。 如果你要序列化和反序列化 Python 对象，请改用 <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> 模块 —— 具有类似的性能，保证版本独立性，并且 pickle 还支持比 marshal 更丰富种类的对象。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="translated">The <code class="xref py py-mod docutils literal notranslate"><span class="pre">marshal</span></code> 模块对于错误或恶意构建的数据来说是不安全的。 永远不要 unmarshal 来自不受信任的或未经验证的来源的数据。</p>
+</div>
+<p class="translated">有些函数可以读/写文件，还有些函数可以操作字节类对象。</p>
+<p class="translated" id="index-1">并非所有 Python 对象类型都受支持；一般来说，只有其值独立于 Python 特定调用的对象才能被此模块写入和读取。支持以下类型：</p>
+<ul class="simple">
+<li><p class="translated">数值类型：<a class="reference internal" href="functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>、<a class="reference internal" href="functions.html#bool" title="bool"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>、<a class="reference internal" href="functions.html#float" title="float"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>、<a class="reference internal" href="functions.html#complex" title="complex"><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></a>。</p></li>
+<li><p class="translated">字符串 (<a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) 和 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>。 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">字节型对象</span></a> 如 <a class="reference internal" href="stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a> 被序列化为 <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>。</p></li>
+<li><p class="untranslated">Containers: <a class="reference internal" href="stdtypes.html#tuple" title="tuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference internal" href="stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a>, <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a>,
+and (since <a class="reference internal" href="#marshal.version" title="marshal.version"><code class="xref py py-data docutils literal notranslate"><span class="pre">version</span></code></a> 5), <a class="reference internal" href="functions.html#slice" title="slice"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a>.
+It should be understood that these are supported only if the values contained
+therein are themselves supported.
+Recursive containers are supported since <code class="xref py py-data docutils literal notranslate"><span class="pre">version</span></code> 3.</p></li>
+<li><p class="translated">单例：<a class="reference internal" href="constants.html#None" title="None"><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code></a>、 <a class="reference internal" href="constants.html#Ellipsis" title="Ellipsis"><code class="xref py py-const docutils literal notranslate"><span class="pre">Ellipsis</span></code></a> 和 <a class="reference internal" href="exceptions.html#StopIteration" title="StopIteration"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StopIteration</span></code></a>。</p></li>
+<li><p class="translated"><a class="reference internal" href="code.html#module-code" title="code: Facilities to implement read-eval-print loops."><code class="xref py py-class docutils literal notranslate"><span class="pre">code</span></code></a> 对象，如果 <em>allow_code</em> 为真值。 请参阅上面关于版本依赖性的说明。</p></li>
+</ul>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span></p>
+<ul class="simple">
+<li><p class="translated">增加了格式版本3，支持序列化递归列表、集合和字典。</p></li>
+<li><p class="translated">增加了格式版本4，支持短字符串的有效表示。</p></li>
+</ul>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>增加了格式版本5，支持切片。</p>
+</div>
+<p class="translated">这个模块定义了以下函数：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="marshal.dump">
+<span class="sig-prename descclassname"><span class="pre">marshal.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marshal.dump" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">向打开的文件写入值。 值必须为受支持的类型。 文件必须为可写的 <a class="reference internal" href="../glossary.html#term-binary-file"><span class="xref std std-term">binary file</span></a>。</p>
+<p class="translated">如果值具有（或其包含的对象具有）不受支持的类型，则会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 异常 --- 但还是会向文件写入垃圾数据。 对象将不能使用 <a class="reference internal" href="#marshal.load" title="marshal.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> 正确地重新读取。 <a class="reference internal" href="../reference/datamodel.html#code-objects"><span class="std std-ref">代码对象</span></a> 仅在 <em>allow_code</em> 为真值时受到支持。</p>
+<p class="translated"><em>version</em> 参数指明 <code class="docutils literal notranslate"><span class="pre">dump</span></code> 应当使用的数据格式（见下文）。</p>
+<p class="audit-hook translated">引发一个 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">marshal.dumps</span></code> 并附带参数 <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>增加了 <em>allow_code</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marshal.load">
+<span class="sig-prename descclassname"><span class="pre">marshal.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marshal.load" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从打开的文件读取一个值并返回它。 如果没有读取到有效的值（例如由于数据具有来自不同 Python 版本的不兼容的 marshal 格式），则会引发 <a class="reference internal" href="exceptions.html#EOFError" title="EOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 或 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>。 <a class="reference internal" href="../reference/datamodel.html#code-objects"><span class="std std-ref">代码对象</span></a> 仅在 <em>allow_code</em> 为真值时受到支持。 文件必须为可读的 <a class="reference internal" href="../glossary.html#term-binary-file"><span class="xref std std-term">binary file</span></a>。</p>
+<p class="audit-hook translated">引发一个不带参数的 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">marshal.load</span></code>。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果通过 <a class="reference internal" href="#marshal.dump" title="marshal.dump"><code class="xref py py-func docutils literal notranslate"><span class="pre">dump()</span></code></a> marshal 了一个包含不受支持类型的对象，<a class="reference internal" href="#marshal.load" title="marshal.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> 将为不可 marshal 的类型替换 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>此调用过去会为每个代码对象引发一个 <code class="docutils literal notranslate"><span class="pre">code.__new__</span></code> 审计事件。 现在它会为整个载入操作引发单个 <code class="docutils literal notranslate"><span class="pre">marshal.load</span></code> 事件。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>增加了 <em>allow_code</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marshal.dumps">
+<span class="sig-prename descclassname"><span class="pre">marshal.</span></span><span class="sig-name descname"><span class="pre">dumps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marshal.dumps" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回将通过 <code class="docutils literal notranslate"><span class="pre">dump(value,</span> <span class="pre">file)</span></code> 写入到文件的字节串对象。 值必须是受支持的类型。 如果值具有（或其包含的对象具有）不受支持的类型则会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 异常。 <a class="reference internal" href="../reference/datamodel.html#code-objects"><span class="std std-ref">代码对象</span></a> 仅在 <em>allow_code</em> 为真值时受到支持。</p>
+<p class="translated"><em>version</em> 参数指明 <code class="docutils literal notranslate"><span class="pre">dumps</span></code> 应当使用的数据格式（见下文）。</p>
+<p class="audit-hook translated">引发一个 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">marshal.dumps</span></code> 并附带参数 <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>增加了 <em>allow_code</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marshal.loads">
+<span class="sig-prename descclassname"><span class="pre">marshal.</span></span><span class="sig-name descname"><span class="pre">loads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marshal.loads" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> 转换为一个值。 如果找不到有效的值，则会引发 <a class="reference internal" href="exceptions.html#EOFError" title="EOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> 或 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>。 <a class="reference internal" href="../reference/datamodel.html#code-objects"><span class="std std-ref">代码对象</span></a> 仅在 <em>allow_code</em> 为真值时受支持。 输入的额外字节串会被忽略。</p>
+<p class="audit-hook translated">引发一个 <a class="reference internal" href="sys.html#auditing"><span class="std std-ref">审计事件</span></a> <code class="docutils literal notranslate"><span class="pre">marshal.loads</span></code> 并附带参数 <code class="docutils literal notranslate"><span class="pre">bytes</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>此调用过去会为每个代码对象引发一个 <code class="docutils literal notranslate"><span class="pre">code.__new__</span></code> 审计事件。 现在它会为整个载入操作引发单个 <code class="docutils literal notranslate"><span class="pre">marshal.loads</span></code> 事件。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>增加了 <em>allow_code</em> 形参。</p>
+</div>
+</dd></dl>
+
+<p class="translated">此外，还定义了以下常量：</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="marshal.version">
+<span class="sig-prename descclassname"><span class="pre">marshal.</span></span><span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#marshal.version" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">指明该模块使用的格式。版本0是历史上的第一个版本；后续版本添加了新特性。通常，新版本在引入时就会成为默认版本。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">版本</p></th>
+<th class="head"><p class="translated">起始可用版本</p></th>
+<th class="head"><p class="translated">新的特性</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">1</p></td>
+<td><p class="translated">Python 2.4</p></td>
+<td><p class="translated">共享驻留字符串</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">2</p></td>
+<td><p class="translated">Python 2.5</p></td>
+<td><p class="translated">浮点数的二进制表示</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">3</p></td>
+<td><p class="translated">Python 3.4</p></td>
+<td><p class="translated">支持对象实例化和递归</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">4</p></td>
+<td><p class="translated">Python 3.4</p></td>
+<td><p class="translated">短字符串的有效表示</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">5</p></td>
+<td><p class="translated">Python 3.14</p></td>
+<td><p class="translated">支持 <a class="reference internal" href="functions.html#slice" title="slice"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> 对象</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="translated rubric">备注</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p class="translated">此模块的名称来源于 Modula-3 (及其他语言) 的设计者所使用的术语，他们使用术语 &quot;marshal&quot; 来表示以自包含的形式传输数据。 严格地说，将数据从内部形式转换为外部形式 (例如用于 RPC 缓冲区) 称为 &quot;marshal&quot; 而其逆过程则称为 &quot;unmarshal&quot;。</p>
+</aside>
+</aside>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="shelve.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">shelve</span></code> --- Python 对象持久化</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="dbm.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dbm</span></code> --- Unix &quot;数据库&quot; 接口</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/marshal.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/marshal.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/marshal.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="dbm.html" title="dbm --- Unix &#34;数据库&#34; 接口"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="shelve.html" title="shelve --- Python 对象持久化"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="persistence.html" >数据持久化</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">marshal</span></code> --- 内部 Python 对象序列化</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

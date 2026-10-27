@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="协程与任务" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/asyncio-task.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="本节将简述用于协程与任务的高层级 API。 协程, 可等待对象, 创建任务, 任务取消, 任务组, 休眠, 并发地运行任务, 主动任务工厂, 屏蔽取消操作, 超时, 等待原语, 在线程中运行, 跨线程调度, 内省, Task 对象. 协程: 源码： Lib/asyncio/coroutines.py 通过 async/await 语法来声明 协程 是编写 asyncio 应用的推荐方式。例如..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_asyncio-task_002315b8.png" />
+<meta property="og:image:alt" content="本节将简述用于协程与任务的高层级 API。 协程, 可等待对象, 创建任务, 任务取消, 任务组, 休眠, 并发地运行任务, 主动任务工厂, 屏蔽取消操作, 超时, 等待原语, 在线程中运行, 跨线程调度, 内省, Task 对象. 协程: 源码： Lib/asyncio/coroutines.py 通过 async/await 语法来声明 协程 是编写 asyncio 应用的推荐方式。例如..." />
+<meta name="description" content="本节将简述用于协程与任务的高层级 API。 协程, 可等待对象, 创建任务, 任务取消, 任务组, 休眠, 并发地运行任务, 主动任务工厂, 屏蔽取消操作, 超时, 等待原语, 在线程中运行, 跨线程调度, 内省, Task 对象. 协程: 源码： Lib/asyncio/coroutines.py 通过 async/await 语法来声明 协程 是编写 asyncio 应用的推荐方式。例如..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>协程与任务 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="流" href="asyncio-stream.html" />
+    <link rel="prev" title="运行器" href="asyncio-runner.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/asyncio-task.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">协程与任务</a><ul>
+<li><a class="reference internal" href="#coroutines">协程</a></li>
+<li><a class="reference internal" href="#awaitables">可等待对象</a></li>
+<li><a class="reference internal" href="#creating-tasks">创建任务</a></li>
+<li><a class="reference internal" href="#task-cancellation">任务取消</a></li>
+<li><a class="reference internal" href="#task-groups">任务组</a><ul>
+<li><a class="reference internal" href="#terminating-a-task-group">Terminating a task group</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sleeping">休眠</a></li>
+<li><a class="reference internal" href="#running-tasks-concurrently">并发地运行任务</a></li>
+<li><a class="reference internal" href="#eager-task-factory">主动任务工厂</a></li>
+<li><a class="reference internal" href="#shielding-from-cancellation">屏蔽取消操作</a></li>
+<li><a class="reference internal" href="#timeouts">超时</a></li>
+<li><a class="reference internal" href="#waiting-primitives">等待原语</a></li>
+<li><a class="reference internal" href="#running-in-threads">在线程中运行</a></li>
+<li><a class="reference internal" href="#scheduling-from-other-threads">跨线程调度</a></li>
+<li><a class="reference internal" href="#introspection">内省</a></li>
+<li><a class="reference internal" href="#task-object">Task 对象</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-runner.html"
+                          title="上一章">运行器</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-stream.html"
+                          title="下一章">流</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-task.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-task.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-task.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-stream.html" title="流"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-runner.html" title="运行器"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">协程与任务</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="coroutines-and-tasks">
+<h1 class="translated">协程与任务<a class="headerlink" href="#coroutines-and-tasks" title="Link to this heading">¶</a></h1>
+<p class="translated">本节将简述用于协程与任务的高层级 API。</p>
+<nav class="contents local" id="id1">
+<ul class="simple">
+<li><p><a class="reference internal" href="#coroutines" id="id3">协程</a></p></li>
+<li><p><a class="reference internal" href="#awaitables" id="id4">可等待对象</a></p></li>
+<li><p><a class="reference internal" href="#creating-tasks" id="id5">创建任务</a></p></li>
+<li><p><a class="reference internal" href="#task-cancellation" id="id6">任务取消</a></p></li>
+<li><p><a class="reference internal" href="#task-groups" id="id7">任务组</a></p></li>
+<li><p><a class="reference internal" href="#sleeping" id="id8">休眠</a></p></li>
+<li><p><a class="reference internal" href="#running-tasks-concurrently" id="id9">并发地运行任务</a></p></li>
+<li><p><a class="reference internal" href="#eager-task-factory" id="id10">主动任务工厂</a></p></li>
+<li><p><a class="reference internal" href="#shielding-from-cancellation" id="id11">屏蔽取消操作</a></p></li>
+<li><p><a class="reference internal" href="#timeouts" id="id12">超时</a></p></li>
+<li><p><a class="reference internal" href="#waiting-primitives" id="id13">等待原语</a></p></li>
+<li><p><a class="reference internal" href="#running-in-threads" id="id14">在线程中运行</a></p></li>
+<li><p><a class="reference internal" href="#scheduling-from-other-threads" id="id15">跨线程调度</a></p></li>
+<li><p><a class="reference internal" href="#introspection" id="id16">内省</a></p></li>
+<li><p><a class="reference internal" href="#task-object" id="id17">Task 对象</a></p></li>
+</ul>
+</nav>
+<section id="coroutines">
+<span id="coroutine"></span><h2 class="translated"><a class="toc-backref" href="#id3" role="doc-backlink">协程</a><a class="headerlink" href="#coroutines" title="Link to this heading">¶</a></h2>
+<p class="translated"><strong>源码：</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/asyncio/coroutines.py">Lib/asyncio/coroutines.py</a></p>
+<hr class="docutils" />
+<p class="translated">通过 async/await 语法来声明 <a class="reference internal" href="../glossary.html#term-coroutine"><span class="xref std std-term">协程</span></a> 是编写 asyncio 应用的推荐方式。例如，以下代码段会打印 &quot;hello&quot;，等待 1 秒，再打印 &quot;world&quot;:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;world&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+<span class="go">hello</span>
+<span class="go">world</span>
+</pre></div>
+</div>
+<p class="translated">注意：简单地调用一个协程并不会使其被调度执行:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">main</span><span class="p">()</span>
+<span class="go">&lt;coroutine object main at 0x1053bb7c8&gt;</span>
+</pre></div>
+</div>
+<p class="translated">要实际运行一个协程，asyncio 提供了以下几种机制：</p>
+<ul>
+<li><p class="translated"><a class="reference internal" href="asyncio-runner.html#asyncio.run" title="asyncio.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.run()</span></code></a> 函数用来运行最高层级的入口点 &quot;main()&quot; 函数 (参见上面的示例。)</p></li>
+<li><p class="translated">对协程执行 await。以下代码段会在等待 1 秒后打印 &quot;hello&quot;，然后 <em>再次</em> 等待 2 秒后打印 &quot;world&quot;:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">say_after</span><span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="n">what</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">what</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;started at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">say_after</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">say_after</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;world&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;finished at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">预期的输出:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">started</span> <span class="n">at</span> <span class="mi">17</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">52</span>
+<span class="n">hello</span>
+<span class="n">world</span>
+<span class="n">finished</span> <span class="n">at</span> <span class="mi">17</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">55</span>
+</pre></div>
+</div>
+</li>
+<li><p class="translated"><a class="reference internal" href="#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 函数用来并发运行作为 asyncio <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">任务</span></code></a> 的多个协程。</p>
+<p class="translated">让我们修改以上示例，<em>并发</em> 运行两个 <code class="docutils literal notranslate"><span class="pre">say_after</span></code> 协程:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+        <span class="n">say_after</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+        <span class="n">say_after</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;world&#39;</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;started at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 等待直到两个任务都完成</span>
+    <span class="c1"># （会花费约 2 秒钟。）</span>
+    <span class="k">await</span> <span class="n">task1</span>
+    <span class="k">await</span> <span class="n">task2</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;finished at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">注意，预期的输出显示代码段的运行时间比之前快了 1 秒:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">started</span> <span class="n">at</span> <span class="mi">17</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mi">32</span>
+<span class="n">hello</span>
+<span class="n">world</span>
+<span class="n">finished</span> <span class="n">at</span> <span class="mi">17</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mi">34</span>
+</pre></div>
+</div>
+</li>
+<li><p class="translated"><a class="reference internal" href="#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.TaskGroup</span></code></a> 类提供了 <a class="reference internal" href="#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_task()</span></code></a> 的更现代化的替代。使用此 API，之前的例子将变为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">tg</span><span class="p">:</span>
+        <span class="n">task1</span> <span class="o">=</span> <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+            <span class="n">say_after</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+
+        <span class="n">task2</span> <span class="o">=</span> <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+            <span class="n">say_after</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;world&#39;</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;started at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 当上下文管理器退出时 await 是隐式执行的。</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;finished at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">用时和输出结果应当与之前的版本相同。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11: </span><a class="reference internal" href="#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.TaskGroup</span></code></a>.</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="awaitables">
+<span id="asyncio-awaitables"></span><h2 class="translated"><a class="toc-backref" href="#id4" role="doc-backlink">可等待对象</a><a class="headerlink" href="#awaitables" title="Link to this heading">¶</a></h2>
+<p class="translated">如果一个对象可以在 <a class="reference internal" href="../reference/expressions.html#await"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">await</span></code></a>  语句中使用，那么它就是 <strong>可等待</strong> 对象。许多 asyncio API 都被设计为接受可等待对象。</p>
+<p class="translated"><em>可等待</em> 对象有三种主要类型：<strong>协程</strong>, <strong>任务</strong> 和 <strong>Future</strong>.</p>
+<p class="translated rubric">协程</p>
+<p class="translated">Python 协程属于 <em>可等待</em> 对象，因此可以在其他协程中被等待:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">nested</span><span class="p">():</span>
+    <span class="k">return</span> <span class="mi">42</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 如果我们只调用 &quot;nested()&quot; 则无事发生。</span>
+    <span class="c1"># 一个协程对象被创建但是没有被等待，</span>
+    <span class="c1"># 因此它 *根本不会运行*。</span>
+    <span class="n">nested</span><span class="p">()</span>  <span class="c1"># 将引发 &quot;RuntimeWarning&quot;。</span>
+
+    <span class="c1"># 现在让我们等待它：</span>
+    <span class="nb">print</span><span class="p">(</span><span class="k">await</span> <span class="n">nested</span><span class="p">())</span>  <span class="c1"># 将打印 &quot;42&quot;。</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">重要</p>
+<p class="translated">在本文档中 &quot;协程&quot; 可用来表示两个紧密关联的概念：</p>
+<ul class="simple">
+<li><p class="translated"><em>协程函数</em>: 定义形式为 <a class="reference internal" href="../reference/compound_stmts.html#async-def"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">async</span> <span class="pre">def</span></code></a> 的函数;</p></li>
+<li><p class="translated"><em>协程对象</em>: 调用 <em>协程函数</em> 所返回的对象。</p></li>
+</ul>
+</div>
+<p class="translated rubric">任务</p>
+<p class="translated"><em>任务</em> 被用来 <em>并发地</em> 调度协程。</p>
+<p class="translated">当一个协程被 <a class="reference internal" href="#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 等函数封装为一个 <em>任务</em> 时，该协程会被自动调度执行:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">nested</span><span class="p">():</span>
+    <span class="k">return</span> <span class="mi">42</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 调度 nested() 与 &quot;main()&quot; 并发运行。</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">nested</span><span class="p">())</span>
+
+    <span class="c1"># 现在可以通过 &quot;task&quot; 来取消 &quot;nested()&quot;，</span>
+    <span class="c1"># 也可以等待 &quot;task&quot; 直到它被完成：</span>
+    <span class="k">await</span> <span class="n">task</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated rubric">Futures</p>
+<p class="translated"><a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 是一种特殊的 <strong>低层级</strong> 可等待对象，表示一个异步操作的 <strong>最终结果</strong>。</p>
+<p class="translated">当一个 Future 对象 <em>被等待</em>，这意味着协程将保持等待直到该 Future 对象在其他地方操作完毕。</p>
+<p class="translated">在 asyncio 中需要 Future 对象以便允许通过 async/await 使用基于回调的代码。</p>
+<p class="translated">通常情况下 <strong>没有必要</strong> 在应用层级的代码中创建 Future 对象。</p>
+<p class="translated">Future 对象有时会由库和某些 asyncio API 暴露给用户，用作可等待对象:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">await</span> <span class="n">function_that_returns_a_future_object</span><span class="p">()</span>
+
+    <span class="c1"># 这样也可以：</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">function_that_returns_a_future_object</span><span class="p">(),</span>
+        <span class="n">some_python_coroutine</span><span class="p">()</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">一个很好的返回 Future 对象的低层级函数的示例是 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.run_in_executor" title="asyncio.loop.run_in_executor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.run_in_executor()</span></code></a>。</p>
+</section>
+<section id="creating-tasks">
+<h2 class="translated"><a class="toc-backref" href="#id5" role="doc-backlink">创建任务</a><a class="headerlink" href="#creating-tasks" title="Link to this heading">¶</a></h2>
+<p class="translated"><strong>源码：</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/asyncio/tasks.py">Lib/asyncio/tasks.py</a></p>
+<hr class="docutils" />
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.create_task">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">create_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coro</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eager_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.create_task" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>coro</em> <a class="reference internal" href="#coroutine"><span class="std std-ref">协程</span></a> 封装为一个 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 并调度其执行。返回 Task 对象。</p>
+<p class="translated">完整函数签名与 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 构造器（或工厂函数）的大致相同 —— 所有传给此函数的关键字参数都会被传给该接口。</p>
+<p class="translated">可选的 <em>context</em> 参数允许指定自定义的 <a class="reference internal" href="contextvars.html#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">contextvars.Context</span></code></a> 供 <em>coro</em> 运行。当未提供 <em>context</em> 时将创建当前上下文的副本。</p>
+<p class="translated">一个可选的仅限关键字的 <em>eager_start</em> 参数允许指定任务是应该在调用 create_task 期间主动执行，还是应稍后被调度。如果没有传递 <em>eager_start</em>，则会使用 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.set_task_factory" title="asyncio.loop.set_task_factory"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.set_task_factory()</span></code></a> 设置的模式。</p>
+<p class="translated">该任务会在 <a class="reference internal" href="asyncio-eventloop.html#asyncio.get_running_loop" title="asyncio.get_running_loop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_running_loop()</span></code></a> 返回的循环中执行，如果当前线程没有在运行的循环则会引发 <a class="reference internal" href="exceptions.html#RuntimeError" title="RuntimeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><a class="reference internal" href="#asyncio.TaskGroup.create_task" title="asyncio.TaskGroup.create_task"><code class="xref py py-meth docutils literal notranslate"><span class="pre">asyncio.TaskGroup.create_task()</span></code></a> 是一个平衡了结构化并发的新选择；它允许等待一组相关任务并具有极强的安全保证。</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">重要</p>
+<p class="translated">保存一个指向此函数的结果的引用，以避免任务在执行过程中消失。事件循环将只保留对任务的弱引用。 未在其他地方被引用的任务可能在任何时候被作为垃圾回收，即使是在它被完成之前。如果需要可靠的“发射后不用管”后台任务，请将它们放到一个多项集中:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">background_tasks</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">some_coro</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="c1"># 将任务加入集合。这将创建一个强引用。</span>
+    <span class="n">background_tasks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+    <span class="c1"># 为避免永远保留对已结束任务的引用，</span>
+    <span class="c1"># 让每个任务在完成后将对自己的引用</span>
+    <span class="c1"># 移出集合：</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">background_tasks</span><span class="o">.</span><span class="n">discard</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="untranslated">Note that this approach never awaits the tasks, so if a task
+fails, its exception is never retrieved and asyncio logs a
+&quot;Task exception was never retrieved&quot; message when the task is
+garbage collected.  To avoid this, use <a class="reference internal" href="#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.TaskGroup</span></code></a>
+which keeps a strong reference to each task, awaits them and
+propagates their exceptions:</p>
+<div class="untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">tg</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">some_coro</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">i</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>增加了 <em>name</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>增加了 <em>context</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>通过传递所有的 <em>kwargs</em> 添加了 <em>eager_start</em> 形参。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="task-cancellation">
+<h2 class="translated"><a class="toc-backref" href="#id6" role="doc-backlink">任务取消</a><a class="headerlink" href="#task-cancellation" title="Link to this heading">¶</a></h2>
+<p class="translated">任务可以便捷和安全地取消。当任务被取消时，<a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 将在遇到机会时在任务中被引发。</p>
+<p class="translated">推荐协程使用 <code class="docutils literal notranslate"><span class="pre">try/finally</span></code> 代码块来可靠地执行清理逻辑。对于 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 被显式捕获的情况，它通常应当在清理完成时被传播。 <code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code> 会直接子类化 <a class="reference internal" href="exceptions.html#BaseException" title="BaseException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseException</span></code></a> 因此大多数代码都不需要关心这一点。</p>
+<p class="translated">启用结构化并发的 asyncio 组件，如 <a class="reference internal" href="#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.TaskGroup</span></code></a> 和 <a class="reference internal" href="#asyncio.timeout" title="asyncio.timeout"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout()</span></code></a>，在内部是使用撤销操作来实现的因而在协程屏蔽了 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 时可能无法正常工作。类似地，用户代码通常也不应调用 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uncancel</span></code></a>。 但是，在确实想要屏蔽 <code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code> 的情况下，则还有必要调用 <code class="docutils literal notranslate"><span class="pre">uncancel()</span></code> 来完全移除撤销状态。</p>
+</section>
+<section id="task-groups">
+<span id="taskgroups"></span><h2 class="translated"><a class="toc-backref" href="#id7" role="doc-backlink">任务组</a><a class="headerlink" href="#task-groups" title="Link to this heading">¶</a></h2>
+<p class="translated">任务组合并了一套用于等待分组中所有任务完成的方便可靠方式的任务创建 API。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.TaskGroup">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">TaskGroup</span></span><a class="headerlink" href="#asyncio.TaskGroup" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">持有一个任务分组的 <a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">异步上下文管理器</span></a>。可以使用 <a class="reference internal" href="#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_task()</span></code></a> 将任务添加到分组中。当该上下文管理器退出时所有任务都将被等待。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.TaskGroup.create_task">
+<span class="sig-name descname"><span class="pre">create_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coro</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eager_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.TaskGroup.create_task" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在该任务组中创建一个任务。签名与 <a class="reference internal" href="#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 的签名相匹配。 如果该任务组未激活（例如尚未进入、已经结束或在关闭过程中），我们将关闭所给出的 <code class="docutils literal notranslate"><span class="pre">coro</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>如果任务组未激活则关闭所给出的协程。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>将所有的 <em>kwargs</em> 传递给 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.create_task" title="asyncio.loop.create_task"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.create_task()</span></code></a></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">tg</span><span class="p">:</span>
+        <span class="n">task1</span> <span class="o">=</span> <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">some_coro</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+        <span class="n">task2</span> <span class="o">=</span> <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">another_coro</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both tasks have completed now: </span><span class="si">{</span><span class="n">task1</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">task2</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="untranslated">The <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code> statement will wait for all tasks in the group to finish.
+While waiting, new tasks may still be added to the group
+(for example, by passing <code class="docutils literal notranslate"><span class="pre">tg</span></code> into one of the coroutines
+and calling <code class="docutils literal notranslate"><span class="pre">tg.create_task()</span></code> in that coroutine).
+Once the last task has finished and the <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code> block is exited,
+no new tasks may be added to the group.</p>
+<p class="translated">当首次有任何属于分组的任务因 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 以外的异常而失败时，分组中的剩余任务将被取消。 在此之后将无法添加更多任务到该分组中。在这种情况下，如果 <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code> 语句体仍然为激活状态（即 <a class="reference internal" href="../reference/datamodel.html#object.__aexit__" title="object.__aexit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code></a> 尚未被调用），则直接包含 <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code> 语句的任务也会被取消。结果 <code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code> 将中断一个 <code class="docutils literal notranslate"><span class="pre">await</span></code>，但它将不会跳出包含的 <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code> 语句。</p>
+<p class="translated">一旦所有任务被完成，如果有任何任务因 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 以外的异常而失败，这些异常会被组合在 <a class="reference internal" href="exceptions.html#ExceptionGroup" title="ExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ExceptionGroup</span></code></a> 或 <a class="reference internal" href="exceptions.html#BaseExceptionGroup" title="BaseExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseExceptionGroup</span></code></a> 中（选择其中较适合的一个；参见其文档）并将随后引发。</p>
+<p class="translated">两个基础异常会被特别对待：如果有任何任务因 <a class="reference internal" href="exceptions.html#KeyboardInterrupt" title="KeyboardInterrupt"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code></a> 或 <a class="reference internal" href="exceptions.html#SystemExit" title="SystemExit"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemExit</span></code></a> 而失败，任务分组仍然会取消剩余的任务并等待它们，但随后初始 <code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code> 或 <code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemExit</span></code> 而不是 <a class="reference internal" href="exceptions.html#ExceptionGroup" title="ExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ExceptionGroup</span></code></a> 或 <a class="reference internal" href="exceptions.html#BaseExceptionGroup" title="BaseExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseExceptionGroup</span></code></a> 会被重新引发。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code> 语句体因异常而退出（这样将调用 <a class="reference internal" href="../reference/datamodel.html#object.__aexit__" title="object.__aexit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code></a> 并附带一个异常），此种情况会与有任务失败时一样对待：剩余任务将被取消然后被等待，而非取消类异常会被加入到一个异常分组并被引发。传入到 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code> 的异常，除了 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 以外，也都会被包括在该异常分组中。同样的特殊对待也适用于上一段所说的 <a class="reference internal" href="exceptions.html#KeyboardInterrupt" title="KeyboardInterrupt"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code></a> 和 <a class="reference internal" href="exceptions.html#SystemExit" title="SystemExit"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemExit</span></code></a>.</p>
+<p class="translated">对于任务组应当注意不要将用于“唤醒”其 <a class="reference internal" href="../reference/datamodel.html#object.__aexit__" title="object.__aexit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code></a> 的内部取消请求与其他地方对其运行的任务提出的取消请求相混淆。 具体来说，当一个任务组在语法上嵌套于另一个任务组中，而两个任务组的某个子任务同时发生异常时，内层的任务组将处理其异常，然后外层的任务组将收到另一个取消请求并处理它自己的异常。</p>
+<p class="translated">对于任务组在外部被取消同时必须引发 <a class="reference internal" href="exceptions.html#ExceptionGroup" title="ExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ExceptionGroup</span></code></a> 的情况，它将调用父任务的 <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancel()</span></code></a> 方法。这样可以确保 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 会在下一次 <a class="reference internal" href="../reference/expressions.html#await"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">await</span></code></a> 时被引发，因此取消操作不会丢失。</p>
+<p class="translated">任务组将保留 <a class="reference internal" href="#asyncio.Task.cancelling" title="asyncio.Task.cancelling"><code class="xref py py-meth docutils literal notranslate"><span class="pre">asyncio.Task.cancelling()</span></code></a> 所报告的取消次数。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>改进了同时处理内部和外部取消操作以及正确保留取消计数的功能。</p>
+</div>
+<section id="terminating-a-task-group">
+<h3 class="untranslated">Terminating a task group<a class="headerlink" href="#terminating-a-task-group" title="Link to this heading">¶</a></h3>
+<p class="untranslated">While terminating a task group is not natively supported by the standard
+library, termination can be achieved by adding an exception-raising task
+to the task group and ignoring the raised exception:</p>
+<div class="untranslated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">asyncio</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskGroup</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TerminateTaskGroup</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised to terminate a task group.&quot;&quot;&quot;</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">force_terminate_task_group</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Used to force termination of a task group.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="n">TerminateTaskGroup</span><span class="p">()</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">job</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">sleep_time</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Task </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s1">: start&#39;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Task </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s1">: done&#39;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">group</span><span class="p">:</span>
+            <span class="c1"># spawn some tasks</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">job</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">job</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+            <span class="c1"># sleep for 1 second</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># add an exception-raising task to force the group to terminate</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">force_terminate_task_group</span><span class="p">())</span>
+    <span class="k">except</span><span class="o">*</span> <span class="n">TerminateTaskGroup</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="untranslated">Expected output:</p>
+<div class="untranslated highlight-text notranslate"><div class="highlight"><pre><span></span>Task 1: start
+Task 2: start
+Task 1: done
+</pre></div>
+</div>
+</section>
+</section>
+<section id="sleeping">
+<h2 class="translated"><a class="toc-backref" href="#id8" role="doc-backlink">休眠</a><a class="headerlink" href="#sleeping" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.sleep">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.sleep" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">阻塞 <em>delay</em> 指定的秒数。</p>
+<p class="translated">如果指定了 <em>result</em>，则当协程完成时将其返回给调用者。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">sleep()</span></code> 总是会挂起当前任务，以允许其他任务运行。</p>
+<p class="translated">将 delay 设为 0 将提供一个经优化的路径以允许其他任务运行。这可供长期间运行的函数使用以避免在函数调用的全过程中阻塞事件循环。</p>
+<p class="translated" id="asyncio-example-sleep">以下协程示例运行 5 秒，每秒显示一次当前日期:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dt</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">display_date</span><span class="p">():</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mf">5.0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">display_date</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>如果 <em>delay</em> 为 <a class="reference internal" href="math.html#math.nan" title="math.nan"><code class="xref py py-data docutils literal notranslate"><span class="pre">nan</span></code></a> 则会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="running-tasks-concurrently">
+<h2 class="translated"><a class="toc-backref" href="#id9" role="doc-backlink">并发地运行任务</a><a class="headerlink" href="#running-tasks-concurrently" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.gather">
+<em class="property"><span class="pre">awaitable</span> </em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">gather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">aws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_exceptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.gather" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><em>并发</em> 运行 <em>aws</em> 序列中的 <a class="reference internal" href="#asyncio-awaitables"><span class="std std-ref">可等待对象</span></a>。</p>
+<p class="translated">如果 <em>aws</em> 中的某个可等待对象为协程，它将自动被作为一个任务调度。</p>
+<p class="translated">如果所有可等待对象都成功完成，结果将是一个由所有返回值聚合而成的列表。结果值的顺序与 <em>aws</em> 中可等待对象的顺序一致。</p>
+<p class="translated">如果 <em>return_exceptions</em> 为 <code class="docutils literal notranslate"><span class="pre">False</span></code> (默认)，所引发的首个异常会立即传播给等待 <code class="docutils literal notranslate"><span class="pre">gather()</span></code> 的任务。<em>aws</em> 序列中的其他可等待对象 <strong>不会被取消</strong> 并将继续运行。</p>
+<p class="translated">如果 <em>return_exceptions</em> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，异常会和成功的结果一样处理，并聚合至结果列表。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">gather()</span></code> <em>被取消</em>，所有被提交 (尚未完成) 的可等待对象也会 <em>被取消</em>。</p>
+<p class="translated">如果 <em>aws</em> 序列中的任一 Task 或 Future 对象 <em>被取消</em>，它将被当作引发了 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 一样处理 -- 在此情况下 <code class="docutils literal notranslate"><span class="pre">gather()</span></code> 调用 <strong>不会</strong> 被取消。这是为了防止一个已提交的 Task/Future 被取消导致其他 Tasks/Future 也被取消。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">一个创建、并发地运行任务并等待它们完成的新选择是 <a class="reference internal" href="#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.TaskGroup</span></code></a>。 <em>TaskGroup</em> 针对嵌套子任务的调度提供比 <em>gather</em> 更强的安全保证：如果一个任务（或子任务，即由某个任务调度的任务）引发了异常，<em>TaskGroup</em> 将取消剩余的已排期任务，而 <em>gather</em> 不会这样做。</p>
+</div>
+<p class="translated" id="asyncio-example-gather">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">factorial</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">number</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Compute factorial(</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">), currently i=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">*=</span> <span class="n">i</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: factorial(</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># *并发地* 调度这三次调用：</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">factorial</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">factorial</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">factorial</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+
+<span class="c1"># 预期的输出：</span>
+<span class="c1">#</span>
+<span class="c1">#     Task A: Compute factorial(2), currently i=2...</span>
+<span class="c1">#     Task B: Compute factorial(3), currently i=2...</span>
+<span class="c1">#     Task C: Compute factorial(4), currently i=2...</span>
+<span class="c1">#     Task A: factorial(2) = 2</span>
+<span class="c1">#     Task B: Compute factorial(3), currently i=3...</span>
+<span class="c1">#     Task C: Compute factorial(4), currently i=3...</span>
+<span class="c1">#     Task B: factorial(3) = 6</span>
+<span class="c1">#     Task C: Compute factorial(4), currently i=4...</span>
+<span class="c1">#     Task C: factorial(4) = 24</span>
+<span class="c1">#     [2, 6, 24]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果 <em>return_exceptions</em> 为假值，则在 gather() 被标记为完成后取消它将不会取消任何已提交的可等待对象。 例如，在将一个异常传播给调用者之后，gather 可被标记为已完成，因此，在从 gather 捕获一个（由可等待对象所引发的）异常之后调用 <code class="docutils literal notranslate"><span class="pre">gather.cancel()</span></code> 将不会取消任何其他可等待对象。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>如果 <em>gather</em> 本身被取消，则无论 <em>return_exceptions</em> 取值为何，取消都会被传播。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 3.10 版本弃用: </span>如果未提供位置参数或者并非所有位置参数均为 Future 类对象并且没有正在运行的事件循环则会发出弃用警告。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="eager-task-factory">
+<span id="id2"></span><h2 class="translated"><a class="toc-backref" href="#id10" role="doc-backlink">主动任务工厂</a><a class="headerlink" href="#eager-task-factory" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.eager_task_factory">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">eager_task_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coro</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.eager_task_factory" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于主动任务执行的任务工厂</p>
+<p class="translated">当使用这个工厂函数时 (通过 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.set_task_factory" title="asyncio.loop.set_task_factory"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.set_task_factory(asyncio.eager_task_factory)</span></code></a>)，协程将在 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 被构造时同步开始执行。仅当任务面临阻塞时，它们才会被调度到事件循环上。这将避免可同步完成的协程被调度到事件循环所带来的开销，从而可以达成性能提升。</p>
+<p class="translated">此特性会带来好处的一个常见例子是应用了缓存或记忆功能以便在可能的情况避免实际 I/O 的协程。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">协程的就地执行是一项语义改变。如果协程返回或引发异常，任务将永远不会被调度到事件循环上。如果协程的执行发生阻塞，任务将会被调度到事件循环上。这项改变可能会向现有应用程序引入行为变化。例如，应用程序的任务执行顺序可能会发生改变。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.create_eager_task_factory">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">create_eager_task_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">custom_task_constructor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.create_eager_task_factory" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个主动型任务工厂，类似于 <a class="reference internal" href="#asyncio.eager_task_factory" title="asyncio.eager_task_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">eager_task_factory()</span></code></a>，在创建新任务时使用所提供的 <em>custom_task_constructor</em> 而不是默认的 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a>。</p>
+<p class="translated"><em>custom_task_constructor</em> 必须是一个 <em>可调用对象</em>，其签名与 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task.__init__</span></code></a> 的签名相匹配。该可调用对象必须返回一个兼容 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Task</span></code></a> 的对象。</p>
+<p class="translated">此函数返回一个 <em>可调用对象</em>，将通过 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.set_task_factory" title="asyncio.loop.set_task_factory"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.set_task_factory(factory)</span></code></a>) 被用作一个事件循环的任务工厂。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="shielding-from-cancellation">
+<h2 class="translated"><a class="toc-backref" href="#id11" role="doc-backlink">屏蔽取消操作</a><a class="headerlink" href="#shielding-from-cancellation" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.shield">
+<em class="property"><span class="pre">awaitable</span> </em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">shield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.shield" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">保护一个 <a class="reference internal" href="#asyncio-awaitables"><span class="std std-ref">可等待对象</span></a> 防止其被 <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">取消</span></code></a>。</p>
+<p class="translated">如果 <em>aw</em> 是一个协程，它将自动被作为任务调度。</p>
+<p class="translated">以下语句:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">something</span><span class="p">())</span>
+<span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">shield</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">相当于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated"><em>不同之处</em> 在于如果包含它的协程被取消，在 <code class="docutils literal notranslate"><span class="pre">something()</span></code> 中运行的任务不会被取消。从 <code class="docutils literal notranslate"><span class="pre">something()</span></code> 的角度看来，取消操作并没有发生。然而其调用者已被取消，因此 &quot;await&quot; 表达式仍然会引发 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a>。</p>
+<p class="translated">如果通过其他方式取消 <code class="docutils literal notranslate"><span class="pre">something()</span></code> (例如在其内部操作) 则 <code class="docutils literal notranslate"><span class="pre">shield()</span></code> 也会取消。</p>
+<p class="translated">如果希望完全忽略取消操作 (不推荐) 则 <code class="docutils literal notranslate"><span class="pre">shield()</span></code> 函数需要配合一个 try/except 代码段，如下所示:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">something</span><span class="p">())</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">shield</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">CancelledError</span><span class="p">:</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">重要</p>
+<p class="translated">保存一个传给此函数的任务的引用，以避免任务在执行过程中消失。事件循环将只保留对任务的弱引用。 未在其他地方被引用的任务可能在任何时候被作为垃圾回收，即使是在它被完成之前。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 3.10 版本弃用: </span>如果 <em>aw</em> 不是 Future 类对象并且没有正在运行的事件循环则会发出弃用警告。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="timeouts">
+<h2 class="translated"><a class="toc-backref" href="#id12" role="doc-backlink">超时</a><a class="headerlink" href="#timeouts" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.timeout">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">timeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.timeout" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个可被用于限制等待某个操作所耗费时间的 <a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">异步上下文管理器</span></a>。</p>
+<p class="translated"><em>delay</em> 可以为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，或是一个表示等待秒数的浮点数/整数。如果 <em>delay</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，将不会应用时间限制；如果当创建上下文管理器时无法确定延时则此设置将很适用。</p>
+<p class="translated">在两种情况下，该上下文管理器都可以在创建之后使用 <a class="reference internal" href="#asyncio.Timeout.reschedule" title="asyncio.Timeout.reschedule"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Timeout.reschedule()</span></code></a> 来重新安排计划。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">long_running_task</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">long_running_task</span></code> 耗费 10 秒以上完成，该上下文管理器将取消当前任务并在内部处理所引发的 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a>，将其转化为可被捕获和处理的 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated"><a class="reference internal" href="#asyncio.timeout" title="asyncio.timeout"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout()</span></code></a> 上下文管理器负责将 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.CancelledError</span></code></a> 转化为 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>，这意味着 <code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code> 只能在该上下文管理器 <em>之外</em> 被捕获。</p>
+</div>
+<p class="translated">捕获 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a> 的示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">long_running_task</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The long operation timed out, but we&#39;ve handled it.&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This statement will run regardless.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#asyncio.timeout" title="asyncio.timeout"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout()</span></code></a> 所产生的上下文管理器可以被重新调整到不同的终止点并执行检查。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.Timeout">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">Timeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">when</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Timeout" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个用于撤销已过期协程的 <a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">异步上下文管理器</span></a>。</p>
+<p class="translated">建议使用 <a class="reference internal" href="#asyncio.timeout" title="asyncio.timeout"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout()</span></code></a> 或 <a class="reference internal" href="#asyncio.timeout_at" title="asyncio.timeout_at"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout_at()</span></code></a> 而不是直接实例化 <code class="xref py py-class docutils literal notranslate"><span class="pre">Timeout</span></code>。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">when</span></code> 应当是一个指明上下文将要过期的绝对时间，由事件循环的时钟来计时。</p>
+<ul class="simple">
+<li><p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">when</span></code> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则超时将永远不会被触发。</p></li>
+<li><p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">&lt;</span> <span class="pre">loop.time()</span></code>，则超时将在事件循环的下一次迭代中被触发。</p></li>
+</ul>
+<blockquote>
+<div><dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Timeout.when">
+<span class="sig-name descname"><span class="pre">when</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="functions.html#float" title="float"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="constants.html#None" title="None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#asyncio.Timeout.when" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前终止点，或者如果未设置当前终止点则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Timeout.reschedule">
+<span class="sig-name descname"><span class="pre">reschedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="functions.html#float" title="float"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="constants.html#None" title="None"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Timeout.reschedule" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">重新安排超时。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Timeout.expired">
+<span class="sig-name descname"><span class="pre">expired</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="functions.html#bool" title="bool"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#asyncio.Timeout.expired" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回上下文管理器是否已超出时限（过期）。</p>
+</dd></dl>
+
+</div></blockquote>
+</dd></dl>
+
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># 当开始时我们并不知道超时值，所以我们传入 ``None``。</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+            <span class="c1"># 现在我们知道超时值了，所以我们将它重新加入计划任务。</span>
+            <span class="n">new_deadline</span> <span class="o">=</span> <span class="n">get_running_loop</span><span class="p">()</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span>
+            <span class="n">cm</span><span class="o">.</span><span class="n">reschedule</span><span class="p">(</span><span class="n">new_deadline</span><span class="p">)</span>
+
+            <span class="k">await</span> <span class="n">long_running_task</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">cm</span><span class="o">.</span><span class="n">expired</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Looks like we haven&#39;t finished on time.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">超时上下文管理器可以被安全地嵌套。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.timeout_at">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">timeout_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">when</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.timeout_at" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#asyncio.timeout" title="asyncio.timeout"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout()</span></code></a>，不同之处在于 <em>when</em> 是停止等待的绝对时间，或者为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">get_running_loop</span><span class="p">()</span>
+    <span class="n">deadline</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mi">20</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout_at</span><span class="p">(</span><span class="n">deadline</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">long_running_task</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The long operation timed out, but we&#39;ve handled it.&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This statement will run regardless.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.wait_for">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">wait_for</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.wait_for" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">等待 <em>aw</em> <a class="reference internal" href="#asyncio-awaitables"><span class="std std-ref">可等待对象</span></a> 完成，指定 timeout 秒数后超时。</p>
+<p class="translated">如果 <em>aw</em> 是一个协程，它将自动被作为任务调度。</p>
+<p class="translated"><em>timeout</em> 可以为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，也可以为 float 或 int 型数值表示的等待秒数。如果 <em>timeout</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则等待直到完成。</p>
+<p class="translated">如果发生超时，将取消任务并引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。</p>
+<p class="translated">要避免任务 <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">取消</span></code></a>，可以加上 <a class="reference internal" href="#asyncio.shield" title="asyncio.shield"><code class="xref py py-func docutils literal notranslate"><span class="pre">shield()</span></code></a>。</p>
+<p class="translated">此函数将等待直到 Future 确实被取消，所以总等待时间可能超过 <em>timeout</em>。如果在取消期间发生了异常，异常将会被传播。</p>
+<p class="translated">如果等待被取消，则 <em>aw</em> 指定的对象也会被取消。</p>
+<p class="translated" id="asyncio-example-waitfor">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">eternity</span><span class="p">():</span>
+    <span class="c1"># 休眠一小时</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;yay!&#39;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 等待至多 1 秒</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">eternity</span><span class="p">(),</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;timeout!&#39;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+
+<span class="c1"># 预期的输出：</span>
+<span class="c1">#</span>
+<span class="c1">#     timeout!</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>当 <em>aw</em> 由于超时被取消时，<code class="docutils literal notranslate"><span class="pre">wait_for</span></code> 会等待 <em>aw</em> 被取消。在之前版本中，它会立即引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a> 而不是 <a class="reference internal" href="asyncio-exceptions.html#asyncio.TimeoutError" title="asyncio.TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">asyncio.TimeoutError</span></code></a>。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="waiting-primitives">
+<h2 class="translated"><a class="toc-backref" href="#id13" role="doc-backlink">等待原语</a><a class="headerlink" href="#waiting-primitives" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.wait">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aws</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ALL_COMPLETED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.wait" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">并发地运行 <em>aws</em> 可迭代对象中的 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 和 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 实例并进入阻塞状态直到满足 <em>return_when</em> 所指定的条件。</p>
+<p class="translated"><em>aws</em> 可迭代对象必须不为空。</p>
+<p class="translated">返回两个 Task/Future 集合: <code class="docutils literal notranslate"><span class="pre">(done,</span> <span class="pre">pending)</span></code>。</p>
+<p class="translated">用法:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">done</span><span class="p">,</span> <span class="n">pending</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">aws</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">如指定 <em>timeout</em> (float 或 int 类型) 则它将被用于控制返回之前等待的最长秒数。</p>
+<p class="translated">请注意此函数不会引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。当超时发生时尚未完成的 Future 或 Task 会在设定的秒数后被直接返回。</p>
+<p class="translated"><em>return_when</em> 指定此函数应在何时返回。它必须为以下常数之一：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">常量</p></th>
+<th class="head"><p class="translated">描述</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="py data">
+<dt class="sig sig-object py" id="asyncio.FIRST_COMPLETED">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">FIRST_COMPLETED</span></span><a class="headerlink" href="#asyncio.FIRST_COMPLETED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">函数将在任意可等待对象结束或取消时返回。</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="py data">
+<dt class="sig sig-object py" id="asyncio.FIRST_EXCEPTION">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">FIRST_EXCEPTION</span></span><a class="headerlink" href="#asyncio.FIRST_EXCEPTION" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">该函数将在任何 future 对象由于引发异常而结束时返回。如果没有任何 future 对象引发异常，则其等价于 <a class="reference internal" href="#asyncio.ALL_COMPLETED" title="asyncio.ALL_COMPLETED"><code class="xref py py-const docutils literal notranslate"><span class="pre">ALL_COMPLETED</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><dl class="py data">
+<dt class="sig sig-object py" id="asyncio.ALL_COMPLETED">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">ALL_COMPLETED</span></span><a class="headerlink" href="#asyncio.ALL_COMPLETED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated">函数将在所有可等待对象结束或取消时返回。</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated">与 <a class="reference internal" href="#asyncio.wait_for" title="asyncio.wait_for"><code class="xref py py-func docutils literal notranslate"><span class="pre">wait_for()</span></code></a> 不同，<code class="docutils literal notranslate"><span class="pre">wait()</span></code> 在超时发生时不会取消可等待对象。</p>
+<p class="untranslated">If <code class="docutils literal notranslate"><span class="pre">wait()</span></code> is cancelled, the futures in <em>aws</em> are not cancelled
+and continue to run.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>直接向 <code class="docutils literal notranslate"><span class="pre">wait()</span></code> 传入协程对象是被禁止的。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>增加了对产生任务的生成器的支持。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.as_completed">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">as_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aws</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.as_completed" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">并发地运行 <em>aws</em> 可迭代对象中的 <a class="reference internal" href="#asyncio-awaitables"><span class="std std-ref">可等待对象</span></a>。 返回的对象可以被迭代以获取可等待对象结束时的结果。</p>
+<p class="translated">由 <code class="docutils literal notranslate"><span class="pre">as_completed()</span></code> 返回的对象可作为 <a class="reference internal" href="../glossary.html#term-asynchronous-iterator"><span class="xref std std-term">asynchronous iterator</span></a> 或普通的 <a class="reference internal" href="../glossary.html#term-iterator"><span class="xref std std-term">iterator</span></a> 被迭代。当使用异步迭代时，原来提供的可等待对象如果为 Task 或 Future 对象则会被产出。 这样可以更容易地将之前加入计划的任务与其结果进行对应。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ipv4_connect</span> <span class="o">=</span> <span class="n">create_task</span><span class="p">(</span><span class="n">open_connection</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">))</span>
+<span class="n">ipv6_connect</span> <span class="o">=</span> <span class="n">create_task</span><span class="p">(</span><span class="n">open_connection</span><span class="p">(</span><span class="s2">&quot;::1&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">))</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">ipv4_connect</span><span class="p">,</span> <span class="n">ipv6_connect</span><span class="p">]</span>
+
+<span class="k">async</span> <span class="k">for</span> <span class="n">earliest_connect</span> <span class="ow">in</span> <span class="n">as_completed</span><span class="p">(</span><span class="n">tasks</span><span class="p">):</span>
+    <span class="c1"># earliest_connect 已完成。要获取结果可通过等待它</span>
+    <span class="c1"># 或是调用 earliest_connect.result()</span>
+    <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">earliest_connect</span>
+
+    <span class="k">if</span> <span class="n">earliest_connect</span> <span class="ow">is</span> <span class="n">ipv6_connect</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IPv6 connection established.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IPv4 connection established.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">在异步迭代期间，将为不属于 Task 或 Future 对象的可等待对象产出隐式创建的任务。</p>
+<p class="translated">当被用作普通的迭代器时，每次迭代将产出一个返回结果的新协程或是引发下一个完成的等待对象对应的异常。此模式将与 Python 3.13 之前的版本保持兼容:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ipv4_connect</span> <span class="o">=</span> <span class="n">create_task</span><span class="p">(</span><span class="n">open_connection</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">))</span>
+<span class="n">ipv6_connect</span> <span class="o">=</span> <span class="n">create_task</span><span class="p">(</span><span class="n">open_connection</span><span class="p">(</span><span class="s2">&quot;::1&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">))</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">ipv4_connect</span><span class="p">,</span> <span class="n">ipv6_connect</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">next_connect</span> <span class="ow">in</span> <span class="n">as_completed</span><span class="p">(</span><span class="n">tasks</span><span class="p">):</span>
+    <span class="c1"># next_connect 不是原始 Task 对象之一。</span>
+    <span class="c1"># 它必须被等待以获取结果值或是引发</span>
+    <span class="c1"># 接下来要结束的可等待对象的异常。</span>
+    <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">next_connect</span>
+</pre></div>
+</div>
+<p class="translated">如果在所有可等待对象完成之前达到超时限制则会引发 <a class="reference internal" href="exceptions.html#TimeoutError" title="TimeoutError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TimeoutError</span></code></a>。这将在异步迭代期间由 <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">for</span></code> 循环引发或是在普通迭代期间由所产出的协程引发。</p>
+<p class="untranslated"><code class="docutils literal notranslate"><span class="pre">as_completed()</span></code> does not cancel the tasks running the supplied
+awaitables: if a timeout occurs or the iteration is cancelled, the
+remaining tasks continue to run.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>移除了 <em>loop</em> 形参。</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 3.10 版本弃用: </span>如果 <em>aws</em> 可迭代对象中的可等待对象不全为 Future 类对象并且没有正在运行的事件循环则会发出弃用警告。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>增加了对产生任务的生成器的支持。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>该结果现在可被用作 <a class="reference internal" href="../glossary.html#term-asynchronous-iterator"><span class="xref std std-term">asynchronous iterator</span></a> 或是普通的 <a class="reference internal" href="../glossary.html#term-iterator"><span class="xref std std-term">iterator</span></a> (在之前它只是普通的迭代器)。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="running-in-threads">
+<h2 class="translated"><a class="toc-backref" href="#id14" role="doc-backlink">在线程中运行</a><a class="headerlink" href="#running-in-threads" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.to_thread">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">to_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.to_thread" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在不同的线程中异步地运行函数 <em>func</em>。</p>
+<p class="translated">向此函数提供的任何 *args 和 **kwargs 会被直接传给 <em>func</em>。并且，当前 <a class="reference internal" href="contextvars.html#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">contextvars.Context</span></code></a> 会被传播，允许在不同的线程中访问来自事件循环的上下文变量。</p>
+<p class="translated">返回一个可被等待以获取 <em>func</em> 的最终结果的协程。</p>
+<p class="translated">这个协程函数主要是用于执行在其他情况下会阻塞事件循环的 IO 密集型函数/方法。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">blocking_io</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;start blocking_io at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># 请注意 time.sleep() 可被替换为任意一种</span>
+    <span class="c1"># 阻塞式 IO 密集型操作，例如文件操作。</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;blocking_io complete at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;started main at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">blocking_io</span><span class="p">),</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;finished main at </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%X</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+
+<span class="c1"># 预期的输出：</span>
+<span class="c1">#</span>
+<span class="c1"># started main at 19:50:53</span>
+<span class="c1"># start blocking_io at 19:50:53</span>
+<span class="c1"># blocking_io complete at 19:50:54</span>
+<span class="c1"># finished main at 19:50:54</span>
+</pre></div>
+</div>
+<p class="translated">在任何协程中直接调用 <code class="docutils literal notranslate"><span class="pre">blocking_io()</span></code> 将会在调用期间阻塞事件循环，导致额外的 1 秒运行时间。但是，通过改用 <code class="docutils literal notranslate"><span class="pre">asyncio.to_thread()</span></code>，我们可以在单独的线程中运行它从而不会阻塞事件循环。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">由于 <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a> 的存在，<code class="docutils literal notranslate"><span class="pre">asyncio.to_thread()</span></code> 通常只能被用来将 IO 密集型函数变为非阻塞的。但是，对于会释放 GIL 的扩展模块或无此限制的替代性 Python 实现来说，<code class="docutils literal notranslate"><span class="pre">asyncio.to_thread()</span></code> 也可被用于 CPU 密集型函数。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="scheduling-from-other-threads">
+<h2 class="translated"><a class="toc-backref" href="#id15" role="doc-backlink">跨线程调度</a><a class="headerlink" href="#scheduling-from-other-threads" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.run_coroutine_threadsafe">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">run_coroutine_threadsafe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coro</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.run_coroutine_threadsafe" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">向指定事件循环提交一个协程。（线程安全）</p>
+<p class="translated">返回一个 <a class="reference internal" href="concurrent.futures.html#concurrent.futures.Future" title="concurrent.futures.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.Future</span></code></a> 以等待来自其他 OS 线程的结果。</p>
+<p class="translated">此函数应该从另一个 OS 线程中调用，而非事件循环运行所在线程。示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">in_thread</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># 运行一些阻塞 IO</span>
+    <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;example.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;hello world&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 创建一个协程</span>
+    <span class="n">coro</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># 将协程提交给给定的循环</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run_coroutine_threadsafe</span><span class="p">(</span><span class="n">coro</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+
+    <span class="c1"># 使用可选的 timeout 参数等待结果</span>
+    <span class="k">assert</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">amain</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># 获取正在运行的循环</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+
+    <span class="c1"># 在线程中运行一些东西</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">in_thread</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">也有可能反过来运行。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loop_in_thread</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">]:</span>
+    <span class="n">loop_fut</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">Future</span><span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">]()</span>
+    <span class="n">stop_event</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loop_fut</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">())</span>
+        <span class="k">await</span> <span class="n">stop_event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">tpe</span><span class="p">:</span>
+        <span class="n">complete_fut</span> <span class="o">=</span> <span class="n">tpe</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">main</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">fut</span> <span class="ow">in</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">as_completed</span><span class="p">((</span><span class="n">loop_fut</span><span class="p">,</span> <span class="n">complete_fut</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">fut</span> <span class="ow">is</span> <span class="n">loop_fut</span><span class="p">:</span>
+                <span class="n">loop</span> <span class="o">=</span> <span class="n">loop_fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">loop</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">loop</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="n">stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+<span class="c1"># 在另一线程中创建循环</span>
+<span class="k">with</span> <span class="n">loop_in_thread</span><span class="p">()</span> <span class="k">as</span> <span class="n">loop</span><span class="p">:</span>
+    <span class="c1"># 创建一个协程</span>
+    <span class="n">coro</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># 将协程提交至给定的循环</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run_coroutine_threadsafe</span><span class="p">(</span><span class="n">coro</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+
+    <span class="c1"># 附带可选的超时参数等待结果</span>
+    <span class="k">assert</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p class="translated">如果在协程内产生了异常，将会通知返回的 Future 对象。它也可被用来取消事件循环中的任务:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The coroutine took too long, cancelling the task...&#39;</span><span class="p">)</span>
+    <span class="n">future</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The coroutine raised an exception: </span><span class="si">{</span><span class="n">exc</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The coroutine returned: </span><span class="si">{</span><span class="n">result</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">参见 <a class="reference internal" href="asyncio-dev.html#asyncio-multithreading"><span class="std std-ref">concurrency and multithreading</span></a> 部分的文档。</p>
+<p class="translated">不同于其他 asyncio 函数，此函数要求显式地传入 <em>loop</em> 参数。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.1.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="introspection">
+<h2 class="translated"><a class="toc-backref" href="#id16" role="doc-backlink">内省</a><a class="headerlink" href="#introspection" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.current_task">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">current_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.current_task" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回当前运行的 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 实例，如果没有正在运行的任务则返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">如果 <em>loop</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 则会使用 <a class="reference internal" href="asyncio-eventloop.html#asyncio.get_running_loop" title="asyncio.get_running_loop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_running_loop()</span></code></a> 获取当前事件循环。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.all_tasks">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">all_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.all_tasks" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回事件循环所运行的未完成的 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 对象的集合。</p>
+<p class="translated">如果 <em>loop</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则会使用 <a class="reference internal" href="asyncio-eventloop.html#asyncio.get_running_loop" title="asyncio.get_running_loop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_running_loop()</span></code></a> 获取当前事件循环。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.iscoroutine">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">iscoroutine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.iscoroutine" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 <em>obj</em> 是一个协程对象则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="task-object">
+<span id="asyncio-task-obj"></span><h2 class="translated"><a class="toc-backref" href="#id17" role="doc-backlink">Task 对象</a><a class="headerlink" href="#task-object" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="asyncio.Task">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coro</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eager_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个运行 Python <a class="reference internal" href="#coroutine"><span class="std std-ref">协程</span></a> 的 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future-like</span></code></a> 对象。 非线程安全。</p>
+<p class="translated">Task 对象被用来在事件循环中运行协程。如果一个协程在等待一个 Future 对象，Task 对象会挂起该协程的执行并等待该 Future 对象完成。当该 Future 对象 <em>完成</em>，被打包的协程将恢复执行。</p>
+<p class="translated">事件循环使用协同日程调度：一个事件循环每次运行一个 Task 对象。而一个 Task 对象会等待一个 Future 对象完成，该事件循环会运行其他 Task、回调或执行 IO 操作。</p>
+<p class="translated">使用高层级的 <a class="reference internal" href="#asyncio.create_task" title="asyncio.create_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.create_task()</span></code></a> 函数来创建 Task 对象，也可用低层级的 <a class="reference internal" href="asyncio-eventloop.html#asyncio.loop.create_task" title="asyncio.loop.create_task"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loop.create_task()</span></code></a> 或 <a class="reference internal" href="asyncio-future.html#asyncio.ensure_future" title="asyncio.ensure_future"><code class="xref py py-func docutils literal notranslate"><span class="pre">ensure_future()</span></code></a> 函数。不建议手动实例化 Task 对象。</p>
+<p class="untranslated">To cancel a running Task use the <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancel()</span></code></a> method.  Calling it
+will cause the Task to throw a <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> exception into
+the wrapped coroutine.  If a coroutine is awaiting on a Future
+object during cancellation, the Future object will be cancelled.</p>
+<p class="translated"><a class="reference internal" href="#asyncio.Task.cancelled" title="asyncio.Task.cancelled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancelled()</span></code></a> 可被用来检测 Task 对象是否被取消。如果打包的协程没有抑制 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 异常并且确实被取消，该方法将返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+<p class="translated"><a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Task</span></code></a> 从 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 继承了其除 <a class="reference internal" href="asyncio-future.html#asyncio.Future.set_result" title="asyncio.Future.set_result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.set_result()</span></code></a> 和 <a class="reference internal" href="asyncio-future.html#asyncio.Future.set_exception" title="asyncio.Future.set_exception"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.set_exception()</span></code></a> 以外的所有 API。</p>
+<p class="translated">可选的仅限关键字参数 <em>context</em> 允许指定自定义的 <a class="reference internal" href="contextvars.html#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">contextvars.Context</span></code></a> 供 <em>coro</em> 运行。 如果未提供 <em>context</em>，Task 将拷贝当前上下文并随后在拷贝的上下文中运行其协程。</p>
+<p class="translated">可选的仅限关键字参数 <em>eager_start</em> 允许在任务创建时主动开始 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Task</span></code></a> 的执行。如果设为 <code class="docutils literal notranslate"><span class="pre">True</span></code> 并且事件循环正在运行，任务将立即开始执行协程，直到该协程第一次阻塞。 如果协程未发生阻塞即返回或引发异常，任务将主动结束并将跳过向事件循环添加计划任务。</p>
+<p class="untranslated">Tasks are <a class="reference internal" href="typing.html#generics"><span class="std std-ref">generic</span></a> over the return type of their wrapped
+coroutines.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>加入对 <a class="reference internal" href="contextvars.html#module-contextvars" title="contextvars: Context Variables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextvars</span></code></a> 模块的支持。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>增加了 <em>name</em> 形参。</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 3.10 版本弃用: </span>如果未指定 <em>loop</em> 并且没有正在运行的事件循环则会发出弃用警告。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>增加了 <em>context</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>增加了 <em>eager_start</em> 形参。</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.done">
+<span class="sig-name descname"><span class="pre">done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.done" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 Task 对象 <em>已完成</em> 则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+<p class="translated">当 Task 所封包的协程返回一个值、引发一个异常或 Task 本身被取消时，则会被认为 <em>已完成</em>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.result" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回 Task 的结果。</p>
+<p class="translated">如果 Task 对象 <em>已完成</em>，其封包的协程的结果会被返回 (或者当协程引发异常时，该异常会被重新引发。)</p>
+<p class="translated">如果 Task 对象 <em>被取消</em>，此方法会引发一个 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 异常。</p>
+<p class="translated">如果 Task 对象的结果还不可用，此方法会引发一个 <a class="reference internal" href="asyncio-exceptions.html#asyncio.InvalidStateError" title="asyncio.InvalidStateError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidStateError</span></code></a> 异常。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.exception">
+<span class="sig-name descname"><span class="pre">exception</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.exception" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回 Task 对象的异常。</p>
+<p class="translated">如果所封包的协程引发了一个异常，该异常将被返回。如果所封包的协程正常返回则该方法将返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">如果 Task 对象 <em>被取消</em>，此方法会引发一个 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 异常。</p>
+<p class="translated">如果 Task 对象尚未 <em>完成</em>，此方法将引发一个 <a class="reference internal" href="asyncio-exceptions.html#asyncio.InvalidStateError" title="asyncio.InvalidStateError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidStateError</span></code></a> 异常。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.add_done_callback">
+<span class="sig-name descname"><span class="pre">add_done_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.add_done_callback" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">添加一个回调，将在 Task 对象 <em>完成</em> 时被运行。</p>
+<p class="translated">此方法应该仅在低层级的基于回调的代码中使用。</p>
+<p class="translated">要了解更多细节请查看 <a class="reference internal" href="asyncio-future.html#asyncio.Future.add_done_callback" title="asyncio.Future.add_done_callback"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.add_done_callback()</span></code></a> 的文档。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.remove_done_callback">
+<span class="sig-name descname"><span class="pre">remove_done_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.remove_done_callback" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从回调列表中移除 <em>callback</em> 。</p>
+<p class="translated">此方法应该仅在低层级的基于回调的代码中使用。</p>
+<p class="translated">要了解更多细节请查看 <a class="reference internal" href="asyncio-future.html#asyncio.Future.remove_done_callback" title="asyncio.Future.remove_done_callback"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.remove_done_callback()</span></code></a> 的文档。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.get_stack">
+<span class="sig-name descname"><span class="pre">get_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.get_stack" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回此 Task 对象的栈框架列表。</p>
+<p class="translated">如果所封包的协程未完成，这将返回其挂起所在的栈。如果协程已成功完成或被取消，这将返回一个空列表。如果协程被一个异常终止，这将返回回溯框架列表。</p>
+<p class="translated">框架总是按从旧到新排序。</p>
+<p class="translated">每个被挂起的协程只返回一个栈框架。</p>
+<p class="translated">可选的 <em>limit</em> 参数指定返回框架的数量上限；默认返回所有框架。返回列表的顺序要看是返回一个栈还是一个回溯：栈返回最新的框架，回溯返回最旧的框架。(这与 traceback 模块的行为保持一致。)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.print_stack">
+<span class="sig-name descname"><span class="pre">print_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.print_stack" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">打印此 Task 对象的栈或回溯。</p>
+<p class="translated">此方法产生的输出类似于 traceback 模块通过 <a class="reference internal" href="#asyncio.Task.get_stack" title="asyncio.Task.get_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_stack()</span></code></a> 所获取的框架。</p>
+<p class="translated"><em>limit</em> 参数会直接传递给 <a class="reference internal" href="#asyncio.Task.get_stack" title="asyncio.Task.get_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_stack()</span></code></a>。</p>
+<p class="translated"><em>file</em> 参数是输出所写入的 I/O 流；在默认情况下输出会写入到 <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.get_coro">
+<span class="sig-name descname"><span class="pre">get_coro</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.get_coro" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回由 <a class="reference internal" href="#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 包装的协程对象。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">这对于已经主动完成的任务将返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。参见 <a class="reference internal" href="#eager-task-factory"><span class="std std-ref">主动任务工厂</span></a>。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>新增加的主动任务执行意味着结果可能为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.get_context">
+<span class="sig-name descname"><span class="pre">get_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.get_context" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回关联到该任务的 <a class="reference internal" href="contextvars.html#contextvars.Context" title="contextvars.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">contextvars.Context</span></code></a> 对象。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.get_name">
+<span class="sig-name descname"><span class="pre">get_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.get_name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回 Task 的名称。</p>
+<p class="translated">如果没有一个 Task 名称被显式地赋值，默认的 asyncio Task 实现会在实例化期间生成一个默认名称。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.set_name">
+<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.set_name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">设置 Task 的名称。</p>
+<p class="translated"><em>value</em> 参数可以为任意对象，它随后会被转换为字符串。</p>
+<p class="translated">在默认的 Task 实现中，名称将在 Task 对象的 <a class="reference internal" href="functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 输出中可见。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.cancel">
+<span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.cancel" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">请求取消 Task 对象。</p>
+<p class="translated">如果该 Task 已经 <em>完成</em> 或 <em>取消</em>，则返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>，否则，将返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+<p class="translated">该方法将安排在下一轮事件循环中将 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 异常抛出给被封包的协程。</p>
+<p class="translated">协程随后将有机会进行清理甚至通过 <a class="reference internal" href="../reference/compound_stmts.html#try"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">try</span></code></a> ... ... <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">CancelledError</span></code> ... <a class="reference internal" href="../reference/compound_stmts.html#finally"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">finally</span></code></a> 代码块抑制异常来拒绝请求。因此，不同于 <a class="reference internal" href="asyncio-future.html#asyncio.Future.cancel" title="asyncio.Future.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.cancel()</span></code></a>, <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Task.cancel()</span></code></a> 不保证 Task 会被取消，虽然完全抑制撤销并不常见也很不建议这样做。 但是如果协程决定要抑制撤销，那么它需要在捕获异常之外还调用 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Task.uncancel()</span></code></a>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>增加了 <em>msg</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">msg</span></code> 形参将从被取消的任务传播到其等待方。</p>
+</div>
+<p class="translated" id="asyncio-example-task-cancel">以下示例演示了协程是如何侦听取消请求的:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_me</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cancel_me(): before sleep&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># 等待 1 小时</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cancel_me(): cancel sleep&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cancel_me(): after sleep&#39;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 创建一个 &quot;cancel_me&quot; 任务</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">cancel_me</span><span class="p">())</span>
+
+    <span class="c1"># 等待 1 秒</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">task</span>
+    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;main(): cancel_me is cancelled now&quot;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+
+<span class="c1"># 预期的输出：</span>
+<span class="c1">#</span>
+<span class="c1">#     cancel_me(): before sleep</span>
+<span class="c1">#     cancel_me(): cancel sleep</span>
+<span class="c1">#     cancel_me(): after sleep</span>
+<span class="c1">#     main(): cancel_me is cancelled now</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.cancelled">
+<span class="sig-name descname"><span class="pre">cancelled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.cancelled" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果 Task 对象 <em>被取消</em> 则返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+<p class="translated">当使用 <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancel()</span></code></a> 发出取消请求时 Task 会被 <em>取消</em>，其封包的协程将传播被抛入的 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 异常。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.uncancel">
+<span class="sig-name descname"><span class="pre">uncancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.uncancel" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">递减对此任务的取消请求计数。</p>
+<p class="translated">返回剩余的取消请求数量。</p>
+<p class="translated">请注意一旦被取消的任务执行完成，继续调用 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uncancel()</span></code></a> 将是无效的。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+<p class="translated">此方法是供 asyncio 内部使用而不应被最终用户代码所使用。特别地，在一个 Task 成功地保持未取消状态的时候使用，这可以允许结构化的并发元素如 <a class="reference internal" href="#taskgroups"><span class="std std-ref">任务组</span></a> 和 <a class="reference internal" href="#asyncio.timeout" title="asyncio.timeout"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.timeout()</span></code></a> 继续运行，将取消操作隔离在相应的结构化代码块中。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_request_with_timeout</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># 受超时影响的结构块：</span>
+            <span class="k">await</span> <span class="n">make_request</span><span class="p">()</span>
+            <span class="k">await</span> <span class="n">make_another_request</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+        <span class="n">log</span><span class="p">(</span><span class="s2">&quot;There was a timeout&quot;</span><span class="p">)</span>
+    <span class="c1"># 不受超时影响的外层代码：</span>
+    <span class="k">await</span> <span class="n">unrelated_code</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">带有 <code class="docutils literal notranslate"><span class="pre">make_request()</span></code> 和 <code class="docutils literal notranslate"><span class="pre">make_another_request()</span></code> 的代码块可能因超时而被取消，而 <code class="docutils literal notranslate"><span class="pre">unrelated_code()</span></code> 应当在超时的情况下继续运行。这是通过 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uncancel()</span></code></a> 实现的。  <a class="reference internal" href="#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskGroup</span></code></a> 上下文管理器也会以类似的方式来使用 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-func docutils literal notranslate"><span class="pre">uncancel()</span></code></a>。</p>
+<p class="translated">如果最终用户代码出于某种原因通过捕获 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 抑制撤销操作，那么它需要调用此方法来移除撤销状态。</p>
+<p class="translated">当该方法将取消计数递减至零，该方法会检查之前的 <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancel()</span></code></a> 调用是否已安排将 <a class="reference internal" href="asyncio-exceptions.html#asyncio.CancelledError" title="asyncio.CancelledError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CancelledError</span></code></a> 抛出到任务中。如果尚未抛出，则该安排将被撤销（通过重置内部的 <code class="docutils literal notranslate"><span class="pre">_must_cancel</span></code> 旗标）。</p>
+</dd></dl>
+
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.13 版本发生变更: </span>更改为在到达零值时撤回待处理的取消请求。</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="asyncio.Task.cancelling">
+<span class="sig-name descname"><span class="pre">cancelling</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.Task.cancelling" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回对此 Task 的挂起请求次数，即对 <a class="reference internal" href="#asyncio.Task.cancel" title="asyncio.Task.cancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancel()</span></code></a> 的调用次数减去 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uncancel()</span></code></a> 的调用次数。</p>
+<p class="translated">请注意如果该数字大于零但相应 Task 仍在执行，<a class="reference internal" href="#asyncio.Task.cancelled" title="asyncio.Task.cancelled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cancelled()</span></code></a> 仍将返回 <code class="docutils literal notranslate"><span class="pre">False</span></code>。这是因为该数字可通过调用 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uncancel()</span></code></a> 来减少，这会导致任务在取消请求降到零时尚未被取消。</p>
+<p class="translated">此方法是供 asyncio 内部使用而不应被最终用户代码所使用。请参阅 <a class="reference internal" href="#asyncio.Task.uncancel" title="asyncio.Task.uncancel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uncancel()</span></code></a> 了解详情。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">协程与任务</a><ul>
+<li><a class="reference internal" href="#coroutines">协程</a></li>
+<li><a class="reference internal" href="#awaitables">可等待对象</a></li>
+<li><a class="reference internal" href="#creating-tasks">创建任务</a></li>
+<li><a class="reference internal" href="#task-cancellation">任务取消</a></li>
+<li><a class="reference internal" href="#task-groups">任务组</a><ul>
+<li><a class="reference internal" href="#terminating-a-task-group">Terminating a task group</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sleeping">休眠</a></li>
+<li><a class="reference internal" href="#running-tasks-concurrently">并发地运行任务</a></li>
+<li><a class="reference internal" href="#eager-task-factory">主动任务工厂</a></li>
+<li><a class="reference internal" href="#shielding-from-cancellation">屏蔽取消操作</a></li>
+<li><a class="reference internal" href="#timeouts">超时</a></li>
+<li><a class="reference internal" href="#waiting-primitives">等待原语</a></li>
+<li><a class="reference internal" href="#running-in-threads">在线程中运行</a></li>
+<li><a class="reference internal" href="#scheduling-from-other-threads">跨线程调度</a></li>
+<li><a class="reference internal" href="#introspection">内省</a></li>
+<li><a class="reference internal" href="#task-object">Task 对象</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-runner.html"
+                          title="上一章">运行器</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-stream.html"
+                          title="下一章">流</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-task.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-task.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-task.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-stream.html" title="流"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-runner.html" title="运行器"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">协程与任务</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

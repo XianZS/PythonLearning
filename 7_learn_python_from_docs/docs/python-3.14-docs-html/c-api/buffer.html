@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="缓冲协议" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/buffer.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="在 Python 中可使用一些对象来包装对底层内存数组或称 缓冲 的访问。此类对象包括内置的 bytes 和 bytearray 以及一些如 array.array 这样的扩展类型。第三方库也可能会为了特殊的目的而定义它们自己的类型，例如用于图像处理和数值分析等。 虽然这些类型各有不同的语义，但它们有一个共同特征：由可能较大的内存缓冲区支撑。在某些情况下，我们希望能直接访问该缓冲区，而无需中..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_buffer_c47edc5d.png" />
+<meta property="og:image:alt" content="在 Python 中可使用一些对象来包装对底层内存数组或称 缓冲 的访问。此类对象包括内置的 bytes 和 bytearray 以及一些如 array.array 这样的扩展类型。第三方库也可能会为了特殊的目的而定义它们自己的类型，例如用于图像处理和数值分析等。 虽然这些类型各有不同的语义，但它们有一个共同特征：由可能较大的内存缓冲区支撑。在某些情况下，我们希望能直接访问该缓冲区，而无需中..." />
+<meta name="description" content="在 Python 中可使用一些对象来包装对底层内存数组或称 缓冲 的访问。此类对象包括内置的 bytes 和 bytearray 以及一些如 array.array 这样的扩展类型。第三方库也可能会为了特殊的目的而定义它们自己的类型，例如用于图像处理和数值分析等。 虽然这些类型各有不同的语义，但它们有一个共同特征：由可能较大的内存缓冲区支撑。在某些情况下，我们希望能直接访问该缓冲区，而无需中..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>缓冲协议 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="具体的对象层" href="concrete.html" />
+    <link rel="prev" title="迭代器协议" href="iter.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/buffer.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">缓冲协议</a><ul>
+<li><a class="reference internal" href="#buffer-structure">缓冲区结构</a></li>
+<li><a class="reference internal" href="#buffer-request-types">缓冲区请求的类型</a><ul>
+<li><a class="reference internal" href="#request-independent-fields">与请求无关的字段</a></li>
+<li><a class="reference internal" href="#readonly-format">只读，格式</a></li>
+<li><a class="reference internal" href="#shape-strides-suboffsets">形状，步幅，子偏移量</a></li>
+<li><a class="reference internal" href="#contiguity-requests">连续性的请求</a></li>
+<li><a class="reference internal" href="#compound-requests">复合请求</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#complex-arrays">复杂数组</a><ul>
+<li><a class="reference internal" href="#numpy-style-shape-and-strides">NumPy-风格：形状和步幅</a></li>
+<li><a class="reference internal" href="#pil-style-shape-strides-and-suboffsets">PIL-风格：形状，步幅和子偏移量</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#buffer-related-functions">缓冲区相关函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="iter.html"
+                          title="上一章">迭代器协议</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="concrete.html"
+                          title="下一章">具体的对象层</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/buffer.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/buffer.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/buffer.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="concrete.html" title="具体的对象层"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="iter.html" title="迭代器协议"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="abstract.html" accesskey="U">抽象对象层</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">缓冲协议</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="buffer-protocol">
+<span id="bufferobjects"></span><span id="index-0"></span><h1 class="translated">缓冲协议<a class="headerlink" href="#buffer-protocol" title="Link to this heading">¶</a></h1>
+<p class="translated">在 Python 中可使用一些对象来包装对底层内存数组或称 <em>缓冲</em> 的访问。此类对象包括内置的 <a class="reference internal" href="../library/stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 和 <a class="reference internal" href="../library/stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a> 以及一些如 <a class="reference internal" href="../library/array.html#array.array" title="array.array"><code class="xref py py-class docutils literal notranslate"><span class="pre">array.array</span></code></a> 这样的扩展类型。第三方库也可能会为了特殊的目的而定义它们自己的类型，例如用于图像处理和数值分析等。</p>
+<p class="translated">虽然这些类型各有不同的语义，但它们有一个共同特征：由可能较大的内存缓冲区支撑。在某些情况下，我们希望能直接访问该缓冲区，而无需中间复制。</p>
+<p class="translated">Python 以 <a class="reference internal" href="#bufferobjects"><span class="std std-ref">缓冲区协议</span></a> 的形式在 C 和 Python 层级上提供这样的功能。此协议包括两个方面：</p>
+<ul class="simple" id="index-1">
+<li><p class="translated">在生产者方面，一个类型可以导出一个“缓冲区接口”，它允许将该类型的所有对象对外暴露有关其下层缓冲区的信息。此接口的描述参见 <a class="reference internal" href="typeobj.html#buffer-structs"><span class="std std-ref">缓冲区对象结构体</span></a> 一节；Python 层级参见 <a class="reference internal" href="../reference/datamodel.html#python-buffer-protocol"><span class="std std-ref">模拟缓冲区类型</span></a>。</p></li>
+<li><p class="translated">在消费者方面，有几种方式可被用于获得指向一个对象的原始底层数据的指针（例如一个方法的形参）。Python 层级参见类 <a class="reference internal" href="../library/stdtypes.html#memoryview" title="memoryview"><code class="xref py py-class docutils literal notranslate"><span class="pre">memoryview</span></code></a> 视图。</p></li>
+</ul>
+<p class="translated">一些简单的对象例如 <a class="reference internal" href="../library/stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 和 <a class="reference internal" href="../library/stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a> 会以面向字节的形式公开它们的底层缓冲区。 也可能会用其他形式；例如 <a class="reference internal" href="../library/array.html#array.array" title="array.array"><code class="xref py py-class docutils literal notranslate"><span class="pre">array.array</span></code></a> 所公开的元素可以是多字节值。</p>
+<p class="translated">缓冲区接口的消费者的一个例子是文件对象的 <a class="reference internal" href="../library/io.html#io.BufferedIOBase.write" title="io.BufferedIOBase.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 方法：任何可以输出为一系列字节流的对象都可以被写入文件。然而 <code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code> 只需要对传入对象内容的只读权限，其他的方法如 <a class="reference internal" href="../library/io.html#io.BufferedIOBase.readinto" title="io.BufferedIOBase.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a> 需要对参数内容的写入权限。 缓冲区接口使得对象可以选择性地允许或拒绝读写或只读缓冲区的导出。</p>
+<p class="translated">对于缓冲区接口的使用者而言，有两种方式来获取一个目的对象的缓冲：</p>
+<ul class="simple">
+<li><p class="translated">使用正确的参数来调用 <a class="reference internal" href="#c.PyObject_GetBuffer" title="PyObject_GetBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetBuffer()</span></code></a> 函数；</p></li>
+<li><p class="translated">调用 <a class="reference internal" href="arg.html#c.PyArg_ParseTuple" title="PyArg_ParseTuple"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyArg_ParseTuple()</span></code></a> (或其同级函数之一) 并传入 <code class="docutils literal notranslate"><span class="pre">y*</span></code>, <code class="docutils literal notranslate"><span class="pre">w*</span></code> 或 <code class="docutils literal notranslate"><span class="pre">s*</span></code> <a class="reference internal" href="arg.html#arg-parsing"><span class="std std-ref">格式代码</span></a> 中的一个。</p></li>
+</ul>
+<p class="translated">在这两种情况下，当不再需要缓冲区时必须调用 <a class="reference internal" href="#c.PyBuffer_Release" title="PyBuffer_Release"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyBuffer_Release()</span></code></a>。如果没有这样做，可能会导致各种问题，例如资源泄漏。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12: </span>现在可在 Python 中使用缓冲区协议，参见 <a class="reference internal" href="../reference/datamodel.html#python-buffer-protocol"><span class="std std-ref">模拟缓冲区类型</span></a> 和 <a class="reference internal" href="../library/stdtypes.html#memoryview" title="memoryview"><code class="xref py py-class docutils literal notranslate"><span class="pre">memoryview</span></code></a>。</p>
+</div>
+<section id="buffer-structure">
+<span id="id1"></span><h2 class="translated">缓冲区结构<a class="headerlink" href="#buffer-structure" title="Link to this heading">¶</a></h2>
+<p class="translated">缓冲区结构（或者简单地称为 &quot;buffers&quot;）对于将二进制数据从另一个对象公开给 Python 程序员非常有用。它们还可以用作零拷贝切片机制。使用它们引用内存块的能力，可以很容易地将任何数据公开给 Python 程序员。内存可以是 C 扩展中的一个大的常量数组，也可以是在传递到操作系统库之前用于操作的原始内存块，或者可以用来传递本机内存格式的结构化数据。</p>
+<p class="translated">与 Python 解释器公开的大多数数据类型不同，缓冲区不是 <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyObject</span></code></a> 指针而是简单的 C 结构。这使得它们可以非常简单地创建和复制。当需要为缓冲区加上泛型包装器时，可以创建一个 <a class="reference internal" href="memoryview.html#memoryview-objects"><span class="std std-ref">内存视图</span></a> 对象。</p>
+<p class="translated">有关如何编写并导出对象的简短说明，请参阅 <a class="reference internal" href="typeobj.html#buffer-structs"><span class="std std-ref">缓冲区对象结构</span></a>。要获取缓冲区对象，请参阅 函数 <a class="reference internal" href="#c.PyObject_GetBuffer" title="PyObject_GetBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetBuffer()</span></code></a>。</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.Py_buffer">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Py_buffer</span></span></span><a class="headerlink" href="#c.Py_buffer" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> （包括所有成员） 自 3.11 版起.</em><dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.buf">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">buf</span></span></span><a class="headerlink" href="#c.Py_buffer.buf" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">指向由缓冲区字段描述的逻辑结构开始的指针。这可以是导出程序底层物理内存块中的任何位置。例如，使用负的 <a class="reference internal" href="#c.Py_buffer.strides" title="Py_buffer.strides"><code class="xref c c-member docutils literal notranslate"><span class="pre">strides</span></code></a> 值可能指向内存块的末尾。</p>
+<p class="translated">对于 <a class="reference internal" href="../glossary.html#term-contiguous"><span class="xref std std-term">contiguous</span></a> (邻接) 数组，值指向内存块的开头。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.obj">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">obj</span></span></span><a class="headerlink" href="#c.Py_buffer.obj" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">对导出对象的新引用。该引用由消费方拥有，并由 <a class="reference internal" href="#c.PyBuffer_Release" title="PyBuffer_Release"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyBuffer_Release()</span></code></a> 自动释放（即引用计数递减）并设置为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。该字段相当于任何标准 C-API 函数的返回值。</p>
+<p class="translated">作为一种特殊情况，对于由 <a class="reference internal" href="memoryview.html#c.PyMemoryView_FromBuffer" title="PyMemoryView_FromBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMemoryView_FromBuffer()</span></code></a> 或 <a class="reference internal" href="#c.PyBuffer_FillInfo" title="PyBuffer_FillInfo"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyBuffer_FillInfo()</span></code></a> 包装的 <em>临时</em> 缓冲区，此字段为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。通常，导出对象不得使用此方案。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.len">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">len</span></span></span><a class="headerlink" href="#c.Py_buffer.len" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated"><code class="docutils literal notranslate"><span class="pre">product(shape)</span> <span class="pre">*</span> <span class="pre">itemsize</span></code>。对于连续数组，这是基础内存块的长度。对于非连续数组，它是逻辑结构复制到连续表示形式时将具有的长度。</p>
+<p class="translated">仅当缓冲区是通过保证连续性的请求获取时，访问 <code class="docutils literal notranslate"><span class="pre">((char</span> <span class="pre">*)buf)[0]</span> <span class="pre">up</span> <span class="pre">to</span> <span class="pre">((char</span> <span class="pre">*)buf)[len-1]</span></code> 才有效。在大多数情况下，此类请求将为 <a class="reference internal" href="#c.PyBUF_SIMPLE" title="PyBUF_SIMPLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_SIMPLE</span></code></a> 或 <a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code></a>。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.readonly">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">readonly</span></span></span><a class="headerlink" href="#c.Py_buffer.readonly" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">缓冲区是否为只读的指示器。此字段由 <a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code></a> 标志控制。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.itemsize">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">itemsize</span></span></span><a class="headerlink" href="#c.Py_buffer.itemsize" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">单个元素的项大小（以字节为单位）。与 <a class="reference internal" href="../library/struct.html#struct.calcsize" title="struct.calcsize"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> 调用非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> <a class="reference internal" href="#c.Py_buffer.format" title="Py_buffer.format"><code class="xref c c-member docutils literal notranslate"><span class="pre">format</span></code></a> 的值相同。</p>
+<p class="translated">重要例外：如果使用者请求的缓冲区没有 <a class="reference internal" href="#c.PyBUF_FORMAT" title="PyBUF_FORMAT"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_FORMAT</span></code></a> 标志，<a class="reference internal" href="#c.Py_buffer.format" title="Py_buffer.format"><code class="xref c c-member docutils literal notranslate"><span class="pre">format</span></code></a> 将设置为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，但 <a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a> 仍具有原始格式的值。</p>
+<p class="translated">如果 <a class="reference internal" href="#c.Py_buffer.shape" title="Py_buffer.shape"><code class="xref c c-member docutils literal notranslate"><span class="pre">shape</span></code></a> 存在，则等式 <code class="docutils literal notranslate"><span class="pre">product(shape)</span> <span class="pre">*</span> <span class="pre">itemsize</span> <span class="pre">==</span> <span class="pre">len</span></code> 仍然成立，使用者可以使用 <a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a> 来导航缓冲区。</p>
+<p class="translated">如果 <a class="reference internal" href="#c.Py_buffer.shape" title="Py_buffer.shape"><code class="xref c c-member docutils literal notranslate"><span class="pre">shape</span></code></a> 由于 <a class="reference internal" href="#c.PyBUF_SIMPLE" title="PyBUF_SIMPLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_SIMPLE</span></code></a> 或 <a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code></a> 请求而为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则使用者必须忽略 <a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a>，并假设 <code class="docutils literal notranslate"><span class="pre">itemsize</span> <span class="pre">==</span> <span class="pre">1</span></code>。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.format">
+<span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">format</span></span></span><a class="headerlink" href="#c.Py_buffer.format" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">以 <a class="reference internal" href="../library/struct.html#module-struct" title="struct: Interpret bytes as packed binary data."><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> 模块风格语法表示的 <em>NULL</em> 结尾字符串，描述单个条目的内容。如果这是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，将假定为 <code class="docutils literal notranslate"><span class="pre">&quot;B&quot;</span></code> (无符号字节型)。</p>
+<p class="translated">此字段由 <a class="reference internal" href="#c.PyBUF_FORMAT" title="PyBUF_FORMAT"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_FORMAT</span></code></a> 标志控制。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.ndim">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ndim</span></span></span><a class="headerlink" href="#c.Py_buffer.ndim" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">内存表示为 n 维数组形式对应的维度数。如果为 <code class="docutils literal notranslate"><span class="pre">0</span></code>，则 <a class="reference internal" href="#c.Py_buffer.buf" title="Py_buffer.buf"><code class="xref c c-member docutils literal notranslate"><span class="pre">buf</span></code></a> 指向表示标量的单个条目。 在这种情况下，<a class="reference internal" href="#c.Py_buffer.shape" title="Py_buffer.shape"><code class="xref c c-member docutils literal notranslate"><span class="pre">shape</span></code></a>, <a class="reference internal" href="#c.Py_buffer.strides" title="Py_buffer.strides"><code class="xref c c-member docutils literal notranslate"><span class="pre">strides</span></code></a> 和 <a class="reference internal" href="#c.Py_buffer.suboffsets" title="Py_buffer.suboffsets"><code class="xref c c-member docutils literal notranslate"><span class="pre">suboffsets</span></code></a> 必须为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。最大维度数由 <a class="reference internal" href="#c.PyBUF_MAX_NDIM" title="PyBUF_MAX_NDIM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_MAX_NDIM</span></code></a> 给出。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.shape">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">shape</span></span></span><a class="headerlink" href="#c.Py_buffer.shape" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">一个类型为 <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><code class="xref c c-type docutils literal notranslate"><span class="pre">Py_ssize_t</span></code></a>、长度为 <a class="reference internal" href="#c.Py_buffer.ndim" title="Py_buffer.ndim"><code class="xref c c-member docutils literal notranslate"><span class="pre">ndim</span></code></a> 的数组，表示作为 n 维数组的内存形状。请注意，<code class="docutils literal notranslate"><span class="pre">shape[0]</span> <span class="pre">*</span> <span class="pre">...</span> <span class="pre">*</span> <span class="pre">shape[ndim-1]</span> <span class="pre">*</span> <span class="pre">itemsize</span></code> 必须等于 <a class="reference internal" href="#c.Py_buffer.len" title="Py_buffer.len"><code class="xref c c-member docutils literal notranslate"><span class="pre">len</span></code></a> 的值。</p>
+<p class="translated">Shape 形状数组中的值被限定在 <code class="docutils literal notranslate"><span class="pre">shape[n]</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>。<code class="docutils literal notranslate"><span class="pre">shape[n]</span> <span class="pre">==</span> <span class="pre">0</span></code> 这一情形需要特别注意。更多信息请参阅 链接 <a class="reference internal" href="#complex-arrays">complex arrays</a>。</p>
+<p class="translated">shape 数组对于使用者来说是只读的。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.strides">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">strides</span></span></span><a class="headerlink" href="#c.Py_buffer.strides" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">一个类型为 <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><code class="xref c c-type docutils literal notranslate"><span class="pre">Py_ssize_t</span></code></a>、长度为 <a class="reference internal" href="#c.Py_buffer.ndim" title="Py_buffer.ndim"><code class="xref c c-member docutils literal notranslate"><span class="pre">ndim</span></code></a> 的数组，给出要跳过的字节数以获取每个维度中的新元素。</p>
+<p class="translated">Stride 步幅数组中的值可以为任何整数。对于常规数组，步幅通常为正数，但是使用者必须能够处理 <code class="docutils literal notranslate"><span class="pre">strides[n]</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> 的情况。更多信息请参阅 <a class="reference internal" href="#complex-arrays">complex arrays</a>。</p>
+<p class="translated">strides 数组对于使用者来说是只读的。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.suboffsets">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">suboffsets</span></span></span><a class="headerlink" href="#c.Py_buffer.suboffsets" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">一个长度为 <a class="reference internal" href="#c.Py_buffer.ndim" title="Py_buffer.ndim"><code class="xref c c-member docutils literal notranslate"><span class="pre">ndim</span></code></a> 类型为 <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><code class="xref c c-type docutils literal notranslate"><span class="pre">Py_ssize_t</span></code></a> 的数组。如果 <code class="docutils literal notranslate"><span class="pre">suboffsets[n]</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>，则第 n 维存储的是指针，suboffset 值决定了解除引用时要给指针增加多少字节的偏移。suboffset 为负值，则表示不应解除引用（在连续内存块中移动）。</p>
+<p class="translated">如果所有子偏移均为负（即无需取消引用），则此字段必须为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (默认值)。</p>
+<p class="translated">Python Imaging Library (PIL) 中使用了这种类型的数组表达方式。请参阅 <a class="reference internal" href="#complex-arrays">complex arrays</a> 来了解如何从这样一个数组中访问元素。</p>
+<p class="translated">suboffsets 数组对于使用者来说是只读的。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.Py_buffer.internal">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">internal</span></span></span><a class="headerlink" href="#c.Py_buffer.internal" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">供输出对象内部使用。比如可能被输出程序重组为一个整数，用于存储一个标志，标明在缓冲区释放时是否必须释放 shape、strides 和 suboffsets 数组。消费者程序 <em>不得</em> 修改该值。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">常量：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_MAX_NDIM">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_MAX_NDIM</span></span></span><a class="headerlink" href="#c.PyBUF_MAX_NDIM" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">内存表示的最大维度数。导出程序必须遵守这个限制，多维缓冲区的使用者应该能够处理最多 <code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_MAX_NDIM</span></code> 个维度。 目前设置为 64。</p>
+</dd></dl>
+
+</section>
+<section id="buffer-request-types">
+<span id="id2"></span><h2 class="translated">缓冲区请求的类型<a class="headerlink" href="#buffer-request-types" title="Link to this heading">¶</a></h2>
+<p class="translated">通常，通过 <a class="reference internal" href="#c.PyObject_GetBuffer" title="PyObject_GetBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetBuffer()</span></code></a> 向输出对象发送缓冲区请求，即可获得缓冲区。由于内存的逻辑结构复杂，可能会有很大差异，缓冲区使用者可用 <em>flags</em> 参数指定其能够处理的缓冲区具体类型。</p>
+<p class="translated">所有 <a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><code class="xref c c-type docutils literal notranslate"><span class="pre">Py_buffer</span></code></a> 字段均由请求类型无歧义地定义。</p>
+<section id="request-independent-fields">
+<h3 class="translated">与请求无关的字段<a class="headerlink" href="#request-independent-fields" title="Link to this heading">¶</a></h3>
+<p class="translated">以下字段不会被 <em>flags</em> 影响，并且必须总是用正确的值填充：<a class="reference internal" href="#c.Py_buffer.obj" title="Py_buffer.obj"><code class="xref c c-member docutils literal notranslate"><span class="pre">obj</span></code></a>、<a class="reference internal" href="#c.Py_buffer.buf" title="Py_buffer.buf"><code class="xref c c-member docutils literal notranslate"><span class="pre">buf</span></code></a> 字段、<a class="reference internal" href="#c.Py_buffer.len" title="Py_buffer.len"><code class="xref c c-member docutils literal notranslate"><span class="pre">len</span></code></a> 字段、<a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a> 和 <a class="reference internal" href="#c.Py_buffer.ndim" title="Py_buffer.ndim"><code class="xref c c-member docutils literal notranslate"><span class="pre">ndim</span></code></a>。</p>
+</section>
+<section id="readonly-format">
+<h3 class="translated">只读，格式<a class="headerlink" href="#readonly-format" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_WRITABLE">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_WRITABLE</span></span></span><a class="headerlink" href="#c.PyBUF_WRITABLE" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">控制 <a class="reference internal" href="#c.Py_buffer.readonly" title="Py_buffer.readonly"><code class="xref c c-member docutils literal notranslate"><span class="pre">readonly</span></code></a> 字段。如果设置了，输出程序必须提供一个可写的缓冲区，否则将报告失败。 在其他情况下，输出程序可以提供一个只读或可写的缓冲区，但该选择必须对所有消费者程序保持一致。例如，可以使用 <span class="c-expr sig sig-inline c"><a class="reference internal" href="#c.PyBUF_SIMPLE" title="PyBUF_SIMPLE"><span class="n">PyBUF_SIMPLE</span></a><span class="w"> </span><span class="o">|</span><span class="w"> </span><a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><span class="n">PyBUF_WRITABLE</span></a></span> 来请求一个简单的可写缓冲区。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_WRITEABLE">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_WRITEABLE</span></span></span><a class="headerlink" href="#c.PyBUF_WRITEABLE" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="untranslated">This is an alias to <a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code></a>.</p>
+<div class="versionchanged soft-deprecated">
+<p><span class="versionmodified soft-deprecated">自 3.13 版起已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated">Soft deprecated</a> 状态.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_FORMAT">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_FORMAT</span></span></span><a class="headerlink" href="#c.PyBUF_FORMAT" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">控制 <a class="reference internal" href="#c.Py_buffer.format" title="Py_buffer.format"><code class="xref c c-member docutils literal notranslate"><span class="pre">format</span></code></a> 字段。如果设置，则必须正确填写此字段。其他情况下，此字段必须为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+</dd></dl>
+
+</div></blockquote>
+<p class="translated"><a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code></a> 可以和下一节的所有标志联用。由于 <a class="reference internal" href="#c.PyBUF_SIMPLE" title="PyBUF_SIMPLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_SIMPLE</span></code></a> 定义为 0，所以 <code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code> 可以作为一个独立的标志，用于请求一个简单的可写缓冲区。</p>
+<p class="translated"><a class="reference internal" href="#c.PyBUF_FORMAT" title="PyBUF_FORMAT"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_FORMAT</span></code></a> 必须与除 <a class="reference internal" href="#c.PyBUF_SIMPLE" title="PyBUF_SIMPLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_SIMPLE</span></code></a> 之外的任何标志执行 | 运算，因为后者已隐含了格式 <code class="docutils literal notranslate"><span class="pre">B</span></code> (无符号字节型)。 <code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_FORMAT</span></code> 不可单独使用。</p>
+</section>
+<section id="shape-strides-suboffsets">
+<h3 class="translated">形状，步幅，子偏移量<a class="headerlink" href="#shape-strides-suboffsets" title="Link to this heading">¶</a></h3>
+<p class="translated">控制内存逻辑结构的标志按照复杂度的递减顺序列出。注意，每个标志包含它下面的所有标志。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">请求</p></th>
+<th class="head"><p class="translated">形状</p></th>
+<th class="head"><p class="translated">步幅</p></th>
+<th class="head"><p class="translated">子偏移量</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_INDIRECT">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_INDIRECT</span></span></span><a class="headerlink" href="#c.PyBUF_INDIRECT" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">如果需要的话</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_STRIDES">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_STRIDES</span></span></span><a class="headerlink" href="#c.PyBUF_STRIDES" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_ND">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_ND</span></span></span><a class="headerlink" href="#c.PyBUF_ND" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_SIMPLE">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_SIMPLE</span></span></span><a class="headerlink" href="#c.PyBUF_SIMPLE" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="contiguity-requests">
+<span id="index-2"></span><h3 class="translated">连续性的请求<a class="headerlink" href="#contiguity-requests" title="Link to this heading">¶</a></h3>
+<p class="translated">可以显式地请求 C 或 Fortran <a class="reference internal" href="../glossary.html#term-contiguous"><span class="xref std std-term">连续</span></a>，不管有没有步幅信息。若没有步幅信息，则缓冲区必须是 C-连续的。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">请求</p></th>
+<th class="head"><p class="translated">形状</p></th>
+<th class="head"><p class="translated">步幅</p></th>
+<th class="head"><p class="translated">子偏移量</p></th>
+<th class="head"><p class="translated">邻接</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_C_CONTIGUOUS">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_C_CONTIGUOUS</span></span></span><a class="headerlink" href="#c.PyBUF_C_CONTIGUOUS" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">C</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_F_CONTIGUOUS">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_F_CONTIGUOUS</span></span></span><a class="headerlink" href="#c.PyBUF_F_CONTIGUOUS" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">F</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_ANY_CONTIGUOUS">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_ANY_CONTIGUOUS</span></span></span><a class="headerlink" href="#c.PyBUF_ANY_CONTIGUOUS" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">C 或 F</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="#c.PyBUF_ND" title="PyBUF_ND"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_ND</span></code></a></p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">C</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="compound-requests">
+<h3 class="translated">复合请求<a class="headerlink" href="#compound-requests" title="Link to this heading">¶</a></h3>
+<p class="translated">所有可能的请求都由上一节中某些标志的组合完全定义。为方便起见，缓冲区协议提供常用的组合作为单个标志。</p>
+<p class="translated">在下表中，<em>U</em> 代表连续性未定义。消费者程序必须调用 <a class="reference internal" href="#c.PyBuffer_IsContiguous" title="PyBuffer_IsContiguous"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyBuffer_IsContiguous()</span></code></a> 以确定连续性。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">请求</p></th>
+<th class="head"><p class="translated">形状</p></th>
+<th class="head"><p class="translated">步幅</p></th>
+<th class="head"><p class="translated">子偏移量</p></th>
+<th class="head"><p class="translated">邻接</p></th>
+<th class="head"><p class="translated">只读</p></th>
+<th class="head"><p class="translated">format</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_FULL">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_FULL</span></span></span><a class="headerlink" href="#c.PyBUF_FULL" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">如果需要的话</p></td>
+<td><p class="translated">U</p></td>
+<td><p class="translated">0</p></td>
+<td><p class="translated">是</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_FULL_RO">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_FULL_RO</span></span></span><a class="headerlink" href="#c.PyBUF_FULL_RO" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">如果需要的话</p></td>
+<td><p class="translated">U</p></td>
+<td><p class="translated">1 或 0</p></td>
+<td><p class="translated">是</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_RECORDS">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_RECORDS</span></span></span><a class="headerlink" href="#c.PyBUF_RECORDS" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">U</p></td>
+<td><p class="translated">0</p></td>
+<td><p class="translated">是</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_RECORDS_RO">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_RECORDS_RO</span></span></span><a class="headerlink" href="#c.PyBUF_RECORDS_RO" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">U</p></td>
+<td><p class="translated">1 或 0</p></td>
+<td><p class="translated">是</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_STRIDED">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_STRIDED</span></span></span><a class="headerlink" href="#c.PyBUF_STRIDED" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">U</p></td>
+<td><p class="translated">0</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_STRIDED_RO">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_STRIDED_RO</span></span></span><a class="headerlink" href="#c.PyBUF_STRIDED_RO" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">U</p></td>
+<td><p class="translated">1 或 0</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_CONTIG">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_CONTIG</span></span></span><a class="headerlink" href="#c.PyBUF_CONTIG" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">C</p></td>
+<td><p class="translated">0</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PyBUF_CONTIG_RO">
+<span class="sig-name descname"><span class="n"><span class="pre">PyBUF_CONTIG_RO</span></span></span><a class="headerlink" href="#c.PyBUF_CONTIG_RO" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em></dd></dl>
+
+</td>
+<td><p class="translated">是</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">NULL</p></td>
+<td><p class="translated">C</p></td>
+<td><p class="translated">1 或 0</p></td>
+<td><p class="translated">NULL</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="complex-arrays">
+<h2 class="translated">复杂数组<a class="headerlink" href="#complex-arrays" title="Link to this heading">¶</a></h2>
+<section id="numpy-style-shape-and-strides">
+<h3 class="translated">NumPy-风格：形状和步幅<a class="headerlink" href="#numpy-style-shape-and-strides" title="Link to this heading">¶</a></h3>
+<p class="translated">NumPy 风格数组的逻辑结构由 <a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a>、<a class="reference internal" href="#c.Py_buffer.ndim" title="Py_buffer.ndim"><code class="xref c c-member docutils literal notranslate"><span class="pre">ndim</span></code></a>、<a class="reference internal" href="#c.Py_buffer.shape" title="Py_buffer.shape"><code class="xref c c-member docutils literal notranslate"><span class="pre">shape</span></code></a> 和 <a class="reference internal" href="#c.Py_buffer.strides" title="Py_buffer.strides"><code class="xref c c-member docutils literal notranslate"><span class="pre">strides</span></code></a> 定义。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">ndim</span> <span class="pre">==</span> <span class="pre">0</span></code>，<a class="reference internal" href="#c.Py_buffer.buf" title="Py_buffer.buf"><code class="xref c c-member docutils literal notranslate"><span class="pre">buf</span></code></a> 指向的内存位置被解释为大小为 <a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a> 的标量。这时，<a class="reference internal" href="#c.Py_buffer.shape" title="Py_buffer.shape"><code class="xref c c-member docutils literal notranslate"><span class="pre">shape</span></code></a> 和 <a class="reference internal" href="#c.Py_buffer.strides" title="Py_buffer.strides"><code class="xref c c-member docutils literal notranslate"><span class="pre">strides</span></code></a> 都为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">如果 <a class="reference internal" href="#c.Py_buffer.strides" title="Py_buffer.strides"><code class="xref c c-member docutils literal notranslate"><span class="pre">strides</span></code></a> 为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，则数组将被解释为一个标准的 n 维 C 语言数组。否则，消费者程序必须按如下方式访问 n 维数组：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">strides</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">indices</span><span class="p">[</span><span class="n">n</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">strides</span><span class="p">[</span><span class="n">n</span><span class="mi">-1</span><span class="p">];</span>
+<span class="n">item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="k">typeof</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">);</span>
+</pre></div>
+</div>
+<p class="translated">如上所述，<a class="reference internal" href="#c.Py_buffer.buf" title="Py_buffer.buf"><code class="xref c c-member docutils literal notranslate"><span class="pre">buf</span></code></a> 可以指向实际内存块中的任意位置。输出者程序可以用该函数检查缓冲区的有效性。</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">verify_structure</span><span class="p">(</span><span class="n">memlen</span><span class="p">,</span> <span class="n">itemsize</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;验证形参代表已分配内存范围内一个可用的数组：</span>
+<span class="sd">           char *mem: 物理内存块的起始</span>
+<span class="sd">           memlen: 物理内存块的长度</span>
+<span class="sd">           offset: (char *)buf - mem</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="o">%</span> <span class="n">itemsize</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">offset</span><span class="o">+</span><span class="n">itemsize</span> <span class="o">&gt;</span> <span class="n">memlen</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="o">%</span> <span class="n">itemsize</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">strides</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">shape</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">strides</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">imin</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">strides</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+               <span class="k">if</span> <span class="n">strides</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">imax</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">strides</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+               <span class="k">if</span> <span class="n">strides</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">offset</span><span class="o">+</span><span class="n">imin</span> <span class="ow">and</span> <span class="n">offset</span><span class="o">+</span><span class="n">imax</span><span class="o">+</span><span class="n">itemsize</span> <span class="o">&lt;=</span> <span class="n">memlen</span>
+</pre></div>
+</div>
+</section>
+<section id="pil-style-shape-strides-and-suboffsets">
+<h3 class="translated">PIL-风格：形状，步幅和子偏移量<a class="headerlink" href="#pil-style-shape-strides-and-suboffsets" title="Link to this heading">¶</a></h3>
+<p class="translated">除了常规项之外，PIL 风格的数组还可以包含指针，必须跟随这些指针才能到达维度的下一个元素。 例如，常规的三维 C 语言数组 <code class="docutils literal notranslate"><span class="pre">char</span> <span class="pre">v[2][2][3]</span></code> 可以看作是一个指向 2 个二维数组的 2 个指针: <code class="docutils literal notranslate"><span class="pre">char</span> <span class="pre">(*v[2])[2][3]</span></code>。 在子偏移表示中，这两个指针可以嵌入在 <a class="reference internal" href="#c.Py_buffer.buf" title="Py_buffer.buf"><code class="xref c c-member docutils literal notranslate"><span class="pre">buf</span></code></a> 的开头，指向两个可以位于内存任何位置的 <code class="docutils literal notranslate"><span class="pre">char</span> <span class="pre">x[2][3]</span></code> 数组。</p>
+<p class="translated">这是一个函数，当存在非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 的步长和子偏移量时，它返回一个指向 N 维索引所指向的 N 维数组中元素的指针</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">get_item_pointer</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">ndim</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">Py_ssize_t</span><span class="w"> </span><span class="o">*</span><span class="n">strides</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">Py_ssize_t</span><span class="w"> </span><span class="o">*</span><span class="n">suboffsets</span><span class="p">,</span><span class="w"> </span><span class="n">Py_ssize_t</span><span class="w"> </span><span class="o">*</span><span class="n">indices</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ndim</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">pointer</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">strides</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">suboffsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">pointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="kt">char</span><span class="o">**</span><span class="p">)</span><span class="n">pointer</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">suboffsets</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">pointer</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="buffer-related-functions">
+<h2 class="translated">缓冲区相关函数<a class="headerlink" href="#buffer-related-functions" title="Link to this heading">¶</a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_CheckBuffer">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_CheckBuffer</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">obj</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_CheckBuffer" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">如果 <em>obj</em> 支持缓冲区接口，则返回 <code class="docutils literal notranslate"><span class="pre">1</span></code>，否则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。返回 <code class="docutils literal notranslate"><span class="pre">1</span></code> 时不保证 <a class="reference internal" href="#c.PyObject_GetBuffer" title="PyObject_GetBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetBuffer()</span></code></a> 一定成功。本函数一定调用成功。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_GetBuffer">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_GetBuffer</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">exporter</span></span>, <a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">view</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_GetBuffer" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">向 <em>exporter</em> 发送请求以按照 <em>flags</em> 指定的内容填充 <em>view</em>。如果 exporter 无法提供要求类型的缓冲区，则它必须引发 <a class="reference internal" href="../library/exceptions.html#BufferError" title="BufferError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BufferError</span></code></a>，将 <code class="docutils literal notranslate"><span class="pre">view-&gt;obj</span></code> 设为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>。</p>
+<p class="translated">成功时，填充 <em>view</em>，将 <code class="docutils literal notranslate"><span class="pre">view-&gt;obj</span></code> 设为对 <em>exporter</em> 的新引用，并返回 0。 当链式缓冲区提供程序将请求重定向到一个对象时，<code class="docutils literal notranslate"><span class="pre">view-&gt;obj</span></code>  可以引用该对象而不是 <em>exporter</em> (参见 <a class="reference internal" href="typeobj.html#buffer-structs"><span class="std std-ref">缓冲区对象结构</span></a>)。</p>
+<p class="translated">对 <a class="reference internal" href="#c.PyObject_GetBuffer" title="PyObject_GetBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetBuffer()</span></code></a> 的成功调用必须与对 <a class="reference internal" href="#c.PyBuffer_Release" title="PyBuffer_Release"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyBuffer_Release()</span></code></a> 的调用配对，类似于 <code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">free()</span></code>。因此，消费者程序用完缓冲区后，必须恰好调用一次 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyBuffer_Release()</span></code> 函数。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_Release">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_Release</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">view</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_Release" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">释放缓冲区 <em>view</em> 并释放对视图的支持对象 <code class="docutils literal notranslate"><span class="pre">view-&gt;obj</span></code> 的 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">strong reference</span></a> (即递减引用计数)。 该函数必须在缓冲区不再使用时调用，否则可能会发生引用泄漏。</p>
+<p class="translated">若该函数针对的缓冲区不是通过 <a class="reference internal" href="#c.PyObject_GetBuffer" title="PyObject_GetBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_GetBuffer()</span></code></a> 获得的，将会出错。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_SizeFromFormat">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_SizeFromFormat</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_SizeFromFormat" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">从 <a class="reference internal" href="#c.Py_buffer.format" title="Py_buffer.format"><code class="xref c c-member docutils literal notranslate"><span class="pre">format</span></code></a> 返回隐含的 <a class="reference internal" href="#c.Py_buffer.itemsize" title="Py_buffer.itemsize"><code class="xref c c-member docutils literal notranslate"><span class="pre">itemsize</span></code></a>。 如果出错，则引发异常并返回 -1。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_IsContiguous">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_IsContiguous</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">view</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_IsContiguous" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">如果 <em>view</em> 定义的内存是 C 风格 (<em>order</em> 为 <code class="docutils literal notranslate"><span class="pre">'C'</span></code>) 或 Fortran 风格 (<em>order</em> 为 <code class="docutils literal notranslate"><span class="pre">'F'</span></code>) <a class="reference internal" href="../glossary.html#term-contiguous"><span class="xref std std-term">contiguous</span></a> 或其中之一 (<em>order</em> 是 <code class="docutils literal notranslate"><span class="pre">'A'</span></code>)，则返回 <code class="docutils literal notranslate"><span class="pre">1</span></code>。否则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。该函数总会成功。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_GetPointer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_GetPointer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">view</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">indices</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_GetPointer" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">获取给定 <em>view</em> 内的 <em>indices</em> 所指向的内存区域。<em>indices</em> 必须指向一个 <code class="docutils literal notranslate"><span class="pre">view-&gt;ndim</span></code> 索引的数组。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_FromContiguous">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_FromContiguous</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">view</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">len</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">fort</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_FromContiguous" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">从 <em>buf</em> 复制连续的 <em>len</em> 字节到 <em>view</em>。 <em>fort</em> 可以是 <code class="docutils literal notranslate"><span class="pre">'C'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'F'</span></code> (对应于 C 风格或 Fortran 风格的顺序)。 成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>，错误时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_ToContiguous">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_ToContiguous</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">src</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">len</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_ToContiguous" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">从 <em>src</em> 复制 <em>len</em> 字节到 <em>buf</em> ，成为连续字节串的形式。<em>order</em> 可以是 <code class="docutils literal notranslate"><span class="pre">'C'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'F'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'A'</span></code> (对应于 C 风格、Fortran 风格的顺序或其中任意一种)。成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>，出错时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>。</p>
+<p class="translated">如果 <em>len</em> != <em>src-&gt;len</em> 则此函数将报错。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyObject_CopyData">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyObject_CopyData</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">dest</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">src</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyObject_CopyData" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">将数据从 <em>src</em> 拷贝到 <em>dest</em> 缓冲区。可以在 C 风格或 Fortran 风格的缓冲区之间进行转换。</p>
+<p class="translated">成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>，出错时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_FillContiguousStrides">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_FillContiguousStrides</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndims</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shape</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">strides</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">itemsize</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_FillContiguousStrides" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">用给定形状的 <a class="reference internal" href="../glossary.html#term-contiguous"><span class="xref std std-term">contiguous</span></a> 字节串数组 (如果 <em>order</em> 为 <code class="docutils literal notranslate"><span class="pre">'C'</span></code> 则为 C 风格，如果 <em>order</em> 为 <code class="docutils literal notranslate"><span class="pre">'F'</span></code> 则为 Fortran 风格) 来填充 <em>strides</em> 数组，每个元素具有给定的字节数。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyBuffer_FillInfo">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyBuffer_FillInfo</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.Py_buffer" title="Py_buffer"><span class="n"><span class="pre">Py_buffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">view</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">exporter</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">len</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">readonly</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyBuffer_FillInfo" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.11 版起.</em><p class="translated">处理导出程序的缓冲区请求，该导出程序要公开大小为 <em>len</em> 的 <em>buf</em> ，并根据 <em>readonly</em> 设置可写性。<em>buf</em> 被解释为一个无符号字节序列。</p>
+<p class="translated">参数 <em>flags</em> 表示请求的类型。该函数总是按照 <em>flags</em> 指定的内容填入 <em>view</em>，除非 <em>buf</em> 设为只读，并且 <em>flags</em> 中设置了 <a class="reference internal" href="#c.PyBUF_WRITABLE" title="PyBUF_WRITABLE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyBUF_WRITABLE</span></code></a> 标志。</p>
+<p class="translated">成功时，将 <code class="docutils literal notranslate"><span class="pre">view-&gt;obj</span></code> 设为对 <em>exporter</em> 的新引用并返回 0。否则，引发 <a class="reference internal" href="../library/exceptions.html#BufferError" title="BufferError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BufferError</span></code></a>，将 <code class="docutils literal notranslate"><span class="pre">view-&gt;obj</span></code> 设为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>；</p>
+<p class="translated">如果此函数用作 <a class="reference internal" href="typeobj.html#buffer-structs"><span class="std std-ref">getbufferproc</span></a> 的一部分，则 <em>exporter</em> 必须设置为导出对象，并且必须在未修改的情况下传递 <em>flags</em>。否则，<em>exporter</em> 必须是 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">缓冲协议</a><ul>
+<li><a class="reference internal" href="#buffer-structure">缓冲区结构</a></li>
+<li><a class="reference internal" href="#buffer-request-types">缓冲区请求的类型</a><ul>
+<li><a class="reference internal" href="#request-independent-fields">与请求无关的字段</a></li>
+<li><a class="reference internal" href="#readonly-format">只读，格式</a></li>
+<li><a class="reference internal" href="#shape-strides-suboffsets">形状，步幅，子偏移量</a></li>
+<li><a class="reference internal" href="#contiguity-requests">连续性的请求</a></li>
+<li><a class="reference internal" href="#compound-requests">复合请求</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#complex-arrays">复杂数组</a><ul>
+<li><a class="reference internal" href="#numpy-style-shape-and-strides">NumPy-风格：形状和步幅</a></li>
+<li><a class="reference internal" href="#pil-style-shape-strides-and-suboffsets">PIL-风格：形状，步幅和子偏移量</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#buffer-related-functions">缓冲区相关函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="iter.html"
+                          title="上一章">迭代器协议</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="concrete.html"
+                          title="下一章">具体的对象层</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/buffer.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/buffer.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/buffer.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="concrete.html" title="具体的对象层"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="iter.html" title="迭代器协议"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="abstract.html" >抽象对象层</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">缓冲协议</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

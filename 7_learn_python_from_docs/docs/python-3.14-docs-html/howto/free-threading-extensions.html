@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="自由线程的 C API 扩展支持" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/free-threading-extensions.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="从 3.13 发布版开始，CPython 通过名为 free threading 的配置引入了对于运行时禁用 global interpreter lock(GIL) 的支持。这份文档描述了如何调整 C API 扩展以支持自由线程。 在 C 中识别自由线程构建: CPython C API 提供了 Py_GIL_DISABLED 宏，它在自由线程构建中被定义为 1 ，而在常规构建中未被定义。..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_free-threading-extensions_a88d7d42.png" />
+<meta property="og:image:alt" content="从 3.13 发布版开始，CPython 通过名为 free threading 的配置引入了对于运行时禁用 global interpreter lock(GIL) 的支持。这份文档描述了如何调整 C API 扩展以支持自由线程。 在 C 中识别自由线程构建: CPython C API 提供了 Py_GIL_DISABLED 宏，它在自由线程构建中被定义为 1 ，而在常规构建中未被定义。..." />
+<meta name="description" content="从 3.13 发布版开始，CPython 通过名为 free threading 的配置引入了对于运行时禁用 global interpreter lock(GIL) 的支持。这份文档描述了如何调整 C API 扩展以支持自由线程。 在 C 中识别自由线程构建: CPython C API 提供了 Py_GIL_DISABLED 宏，它在自由线程构建中被定义为 1 ，而在常规构建中未被定义。..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>自由线程的 C API 扩展支持 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="远程调试附加协议" href="remote_debugging.html" />
+    <link rel="prev" title="Python 对自由线程的支持" href="free-threading-python.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/free-threading-extensions.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">自由线程的 C API 扩展支持</a><ul>
+<li><a class="reference internal" href="#identifying-the-free-threaded-build-in-c">在 C 中识别自由线程构建</a></li>
+<li><a class="reference internal" href="#module-initialization">模块初始化</a><ul>
+<li><a class="reference internal" href="#multi-phase-initialization">多阶段初始化</a></li>
+<li><a class="reference internal" href="#single-phase-initialization">单阶段初始化</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#general-api-guidelines">通用 API 指南</a><ul>
+<li><a class="reference internal" href="#container-thread-safety">容器相关的线程安全</a><ul>
+<li><a class="reference internal" href="#pydict-next"><code class="docutils literal notranslate"><span class="pre">PyDict_Next</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#borrowed-references">借入引用</a></li>
+<li><a class="reference internal" href="#memory-allocation-apis">内存分配 API</a></li>
+<li><a class="reference internal" href="#thread-state-and-gil-apis">线程状态与 GIL API</a></li>
+<li><a class="reference internal" href="#protecting-internal-extension-state">保护内部扩展状态</a></li>
+<li><a class="reference internal" href="#critical-sections">临界区</a><ul>
+<li><a class="reference internal" href="#what-are-critical-sections">什么是临界区？</a></li>
+<li><a class="reference internal" href="#using-critical-sections">使用临界区</a></li>
+<li><a class="reference internal" href="#how-critical-sections-work">临界区如何运作</a></li>
+<li><a class="reference internal" href="#deadlock-avoidance">避免死锁</a></li>
+<li><a class="reference internal" href="#important-considerations">重要考量</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building-extensions-for-the-free-threaded-build">为自由线程构建进行扩展构建</a><ul>
+<li><a class="reference internal" href="#limited-c-api-and-stable-abi">受限的 C API 与稳定 ABI</a></li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="free-threading-python.html"
+                          title="上一章">Python 对自由线程的支持</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="remote_debugging.html"
+                          title="下一章">远程调试附加协议</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/free-threading-extensions.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/free-threading-extensions.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/free-threading-extensions.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="remote_debugging.html" title="远程调试附加协议"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="free-threading-python.html" title="Python 对自由线程的支持"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">自由线程的 C API 扩展支持</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="c-api-extension-support-for-free-threading">
+<span id="freethreading-extensions-howto"></span><h1 class="translated">自由线程的 C API 扩展支持<a class="headerlink" href="#c-api-extension-support-for-free-threading" title="Link to this heading">¶</a></h1>
+<p class="translated">从 3.13 发布版开始，CPython 通过名为 <a class="reference internal" href="../glossary.html#term-free-threading"><span class="xref std std-term">free threading</span></a> 的配置引入了对于运行时禁用 <a class="reference internal" href="../glossary.html#term-global-interpreter-lock"><span class="xref std std-term">global interpreter lock</span></a> (GIL) 的支持。这份文档描述了如何调整 C API 扩展以支持自由线程。</p>
+<section id="identifying-the-free-threaded-build-in-c">
+<h2 class="translated">在 C 中识别自由线程构建<a class="headerlink" href="#identifying-the-free-threaded-build-in-c" title="Link to this heading">¶</a></h2>
+<p class="translated">CPython C API 提供了 <code class="docutils literal notranslate"><span class="pre">Py_GIL_DISABLED</span></code> 宏，它在自由线程构建中被定义为 <code class="docutils literal notranslate"><span class="pre">1</span></code>，而在常规构建中未被定义。你可以使用它让代码仅在自由线程构建中运行:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef Py_GIL_DISABLED</span>
+<span class="cm">/* 仅在自由线程构建版中运行的代码 */</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">在 Windows 上，该宏不会被自动定义，而必须在构建时向编译器指明。 <a class="reference internal" href="../library/sysconfig.html#sysconfig.get_config_var" title="sysconfig.get_config_var"><code class="xref py py-func docutils literal notranslate"><span class="pre">sysconfig.get_config_var()</span></code></a> 函数可被用来确定当前运行的解释器是否定义了该宏。</p>
+</div>
+</section>
+<section id="module-initialization">
+<h2 class="translated">模块初始化<a class="headerlink" href="#module-initialization" title="Link to this heading">¶</a></h2>
+<p class="translated">扩展模块需要明确指明它们支持在禁用 GIL 的情况下运行；否则导入扩展模块时会引发警告，并在运行时启用 GIL。</p>
+<p class="translated">取决于扩展使用多阶段还是单阶段初始化，有两种方式指明扩展模块支持在 GIL 禁用的情况下运行。</p>
+<section id="multi-phase-initialization">
+<h3 class="translated">多阶段初始化<a class="headerlink" href="#multi-phase-initialization" title="Link to this heading">¶</a></h3>
+<p class="untranslated">Extensions that use multi-phase initialization (i.e.,
+<a class="reference internal" href="../c-api/extension-modules.html#c.PyModuleDef_Init" title="PyModuleDef_Init"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModuleDef_Init()</span></code></a>) should add a <a class="reference internal" href="../c-api/module.html#c.Py_mod_gil" title="Py_mod_gil"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_gil</span></code></a> slot in the
+module definition.  If your extension supports older versions of CPython,
+you should guard the slot with a <a class="reference internal" href="../c-api/apiabiversion.html#c.PY_VERSION_HEX" title="PY_VERSION_HEX"><code class="xref c c-data docutils literal notranslate"><span class="pre">PY_VERSION_HEX</span></code></a> check.</p>
+<div class="untranslated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">PyModuleDef_Slot</span><span class="w"> </span><span class="n">module_slots</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="cp">#if PY_VERSION_HEX &gt;= 0x030D0000</span>
+<span class="w">    </span><span class="p">{</span><span class="n">Py_mod_gil</span><span class="p">,</span><span class="w"> </span><span class="n">Py_MOD_GIL_NOT_USED</span><span class="p">},</span>
+<span class="cp">#endif</span>
+<span class="w">    </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">PyModuleDef</span><span class="w"> </span><span class="n">moduledef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PyModuleDef_HEAD_INIT</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">m_slots</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">module_slots</span><span class="p">,</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="single-phase-initialization">
+<h3 class="translated">单阶段初始化<a class="headerlink" href="#single-phase-initialization" title="Link to this heading">¶</a></h3>
+<p class="untranslated">Extensions that use single-phase initialization (i.e.,
+<a class="reference internal" href="../c-api/module.html#c.PyModule_Create" title="PyModule_Create"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_Create()</span></code></a>) should call <a class="reference internal" href="../c-api/module.html#c.PyUnstable_Module_SetGIL" title="PyUnstable_Module_SetGIL"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnstable_Module_SetGIL()</span></code></a> to
+indicate that they support running with the GIL disabled.  The function is
+only defined in the free-threaded build, so you should guard the call with
+<code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">Py_GIL_DISABLED</span></code> to avoid compilation errors in the regular build.</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">PyModuleDef</span><span class="w"> </span><span class="n">moduledef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PyModuleDef_HEAD_INIT</span><span class="p">,</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">};</span>
+
+<span class="n">PyMODINIT_FUNC</span>
+<span class="nf">PyInit_mymodule</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyModule_Create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">moduledef</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="cp">#ifdef Py_GIL_DISABLED</span>
+<span class="w">    </span><span class="n">PyUnstable_Module_SetGIL</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="n">Py_MOD_GIL_NOT_USED</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="general-api-guidelines">
+<h2 class="translated">通用 API 指南<a class="headerlink" href="#general-api-guidelines" title="Link to this heading">¶</a></h2>
+<p class="translated">大多数 C API 是线程安全的，但是也存在例外。</p>
+<ul class="simple">
+<li><p class="translated"><strong>结构字段</strong>：如果 Python C API 对象或结构的字段可能被并行修改，那么直接访问这些字段不是线程安全的。</p></li>
+<li><p class="translated"><strong>宏</strong>: 访问器宏如 <a class="reference internal" href="../c-api/list.html#c.PyList_GET_ITEM" title="PyList_GET_ITEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyList_GET_ITEM</span></code></a>, <a class="reference internal" href="../c-api/list.html#c.PyList_SET_ITEM" title="PyList_SET_ITEM"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyList_SET_ITEM</span></code></a>，以及 <a class="reference internal" href="../c-api/sequence.html#c.PySequence_Fast_GET_SIZE" title="PySequence_Fast_GET_SIZE"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PySequence_Fast_GET_SIZE</span></code></a> 这样使用由 <a class="reference internal" href="../c-api/sequence.html#c.PySequence_Fast" title="PySequence_Fast"><code class="xref c c-func docutils literal notranslate"><span class="pre">PySequence_Fast()</span></code></a> 返回的对象的宏不会进行任何错误检查或加锁。当容器对象可能被并行修改时这些宏不是线程安全的。</p></li>
+<li><p class="translated"><strong>借入引用</strong>：返回 <a class="reference internal" href="../glossary.html#term-borrowed-reference"><span class="xref std std-term">借入引用</span></a> 的  C API 函数如果引用内容可能被并行修改，那么它不是线程安全的。详见 <a class="reference internal" href="#id2"><span class="std std-ref">借入引用</span></a>。</p></li>
+</ul>
+<section id="container-thread-safety">
+<h3 class="translated">容器相关的线程安全<a class="headerlink" href="#container-thread-safety" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="../c-api/list.html#c.PyListObject" title="PyListObject"><code class="xref c c-struct docutils literal notranslate"><span class="pre">PyListObject</span></code></a>, <a class="reference internal" href="../c-api/dict.html#c.PyDictObject" title="PyDictObject"><code class="xref c c-struct docutils literal notranslate"><span class="pre">PyDictObject</span></code></a> 及 <a class="reference internal" href="../c-api/set.html#c.PySetObject" title="PySetObject"><code class="xref c c-struct docutils literal notranslate"><span class="pre">PySetObject</span></code></a> 等容器在自由线程构建中执行内部上锁机制，例如 <a class="reference internal" href="../c-api/list.html#c.PyList_Append" title="PyList_Append"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_Append()</span></code></a> 在追加对象前会对列表上锁。</p>
+<section id="pydict-next">
+<span id="id1"></span><h4 class="translated"><code class="docutils literal notranslate"><span class="pre">PyDict_Next</span></code><a class="headerlink" href="#pydict-next" title="Link to this heading">¶</a></h4>
+<p class="translated">一个值得注意的例外是 <a class="reference internal" href="../c-api/dict.html#c.PyDict_Next" title="PyDict_Next"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_Next()</span></code></a>，它不会锁定字典。在迭代字典时如果该字典可能被并发地修改那么你应当使用 <a class="reference internal" href="../c-api/synchronization.html#c.Py_BEGIN_CRITICAL_SECTION" title="Py_BEGIN_CRITICAL_SECTION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION</span></code></a> 来保护它:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">Py_BEGIN_CRITICAL_SECTION</span><span class="p">(</span><span class="n">dict</span><span class="p">);</span>
+<span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">;</span>
+<span class="n">Py_ssize_t</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">PyDict_Next</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pos</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">value</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+<span class="n">Py_END_CRITICAL_SECTION</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="borrowed-references">
+<h2 class="translated">借入引用<a class="headerlink" href="#borrowed-references" title="Link to this heading">¶</a></h2>
+<p class="translated" id="id2">有些 C API 函数返回 <a class="reference internal" href="../glossary.html#term-borrowed-reference"><span class="xref std std-term">borrowed references</span></a>。如果引用内容可能被并行修改，那么这些 API 不是线程安全的。例如，如果列表可能被并行修改，那么使用 <a class="reference internal" href="../c-api/list.html#c.PyList_GetItem" title="PyList_GetItem"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_GetItem()</span></code></a> 是不安全的。</p>
+<p class="translated">下表列出了一些返回借入引用的 API 及它们返回 <a class="reference internal" href="../glossary.html#term-strong-reference"><span class="xref std std-term">强引用</span></a> 的替代版本。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">借入引用 API</p></th>
+<th class="head"><p class="translated">强引用 API</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="../c-api/list.html#c.PyList_GetItem" title="PyList_GetItem"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_GetItem()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/list.html#c.PyList_GetItemRef" title="PyList_GetItemRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_GetItemRef()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="../c-api/list.html#c.PyList_GET_ITEM" title="PyList_GET_ITEM"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_GET_ITEM()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/list.html#c.PyList_GetItemRef" title="PyList_GetItemRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_GetItemRef()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItem" title="PyDict_GetItem"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItem()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItemRef" title="PyDict_GetItemRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItemRef()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItemWithError" title="PyDict_GetItemWithError"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItemWithError()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItemRef" title="PyDict_GetItemRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItemRef()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItemString" title="PyDict_GetItemString"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItemString()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItemStringRef" title="PyDict_GetItemStringRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItemStringRef()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_SetDefault" title="PyDict_SetDefault"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_SetDefault()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_SetDefaultRef" title="PyDict_SetDefaultRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_SetDefaultRef()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="../c-api/dict.html#c.PyDict_Next" title="PyDict_Next"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_Next()</span></code></a></p></td>
+<td><p class="translated">无 (参见 <a class="reference internal" href="#pydict-next"><span class="std std-ref">PyDict_Next</span></a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p class="untranslated"><a class="reference internal" href="../c-api/weakref.html#c.PyWeakref_GetObject" title="PyWeakref_GetObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyWeakref_GetObject()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/weakref.html#c.PyWeakref_GetRef" title="PyWeakref_GetRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyWeakref_GetRef()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="untranslated"><a class="reference internal" href="../c-api/weakref.html#c.PyWeakref_GET_OBJECT" title="PyWeakref_GET_OBJECT"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyWeakref_GET_OBJECT()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/weakref.html#c.PyWeakref_GetRef" title="PyWeakref_GetRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyWeakref_GetRef()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><a class="reference internal" href="../c-api/import.html#c.PyImport_AddModule" title="PyImport_AddModule"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyImport_AddModule()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/import.html#c.PyImport_AddModuleRef" title="PyImport_AddModuleRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyImport_AddModuleRef()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><a class="reference internal" href="../c-api/cell.html#c.PyCell_GET" title="PyCell_GET"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyCell_GET()</span></code></a></p></td>
+<td><p class="translated"><a class="reference internal" href="../c-api/cell.html#c.PyCell_Get" title="PyCell_Get"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyCell_Get()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated">返回借用引用的 API 不一定都有问题。例如，<a class="reference internal" href="../c-api/tuple.html#c.PyTuple_GetItem" title="PyTuple_GetItem"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyTuple_GetItem()</span></code></a> 是安全的，因为元组是不可变的。同样，上述 API 的使用不一定都有问题。例如，<a class="reference internal" href="../c-api/dict.html#c.PyDict_GetItem" title="PyDict_GetItem"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_GetItem()</span></code></a> 通常用于解析函数调用中的关键字参数字典；这些关键字参数字典实际上是私有（其他线程无法访问）的，因此在这种情况下使用借入引用是安全的。</p>
+<p class="translated">上述函数中有的是在 Python 3.13 中添加的。在旧 Python 版本上您可以使用提供这些函数实现的 <a class="reference external" href="https://github.com/python/pythoncapi-compat">pythoncapi-compat</a> 包。</p>
+</section>
+<section id="memory-allocation-apis">
+<span id="free-threaded-memory-allocation"></span><h2 class="translated">内存分配 API<a class="headerlink" href="#memory-allocation-apis" title="Link to this heading">¶</a></h2>
+<p class="translated">Python 的内存管理 C API 提供了三个不同 <a class="reference internal" href="../c-api/memory.html#id1"><span class="std std-ref">分配域</span></a> 的函数：&quot;raw&quot;, &quot;mem&quot; 和 &quot;object&quot;。为了保证线程安全，自由线程构建版要求只有 Python 对象使用 object 域来分配，并且所有 Python 对象都使用该域来分配。这不同于之前的 Python 版本，当时这只是一个最佳实践而不是硬性要求。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">搜索 <a class="reference internal" href="../c-api/memory.html#c.PyObject_Malloc" title="PyObject_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code></a> 在您的扩展中的使用，并检查分配的内存是否用于 Python 对象。使用 <a class="reference internal" href="../c-api/memory.html#c.PyMem_Malloc" title="PyMem_Malloc"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMem_Malloc()</span></code></a> 来分配缓冲区，而不是 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_Malloc()</span></code>。</p>
+</div>
+</section>
+<section id="thread-state-and-gil-apis">
+<h2 class="translated">线程状态与 GIL API<a class="headerlink" href="#thread-state-and-gil-apis" title="Link to this heading">¶</a></h2>
+<p class="translated">Python 提供了一系列函数和宏来管理线程状态和 GIL，例如：</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="../c-api/threads.html#c.PyGILState_Ensure" title="PyGILState_Ensure"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyGILState_Ensure()</span></code></a> 与 <a class="reference internal" href="../c-api/threads.html#c.PyGILState_Release" title="PyGILState_Release"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyGILState_Release()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="../c-api/threads.html#c.PyEval_SaveThread" title="PyEval_SaveThread"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyEval_SaveThread()</span></code></a> 与 <a class="reference internal" href="../c-api/threads.html#c.PyEval_RestoreThread" title="PyEval_RestoreThread"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyEval_RestoreThread()</span></code></a></p></li>
+<li><p class="translated"><a class="reference internal" href="../c-api/threads.html#c.Py_BEGIN_ALLOW_THREADS" title="Py_BEGIN_ALLOW_THREADS"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_ALLOW_THREADS</span></code></a> 与 <a class="reference internal" href="../c-api/threads.html#c.Py_END_ALLOW_THREADS" title="Py_END_ALLOW_THREADS"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_END_ALLOW_THREADS</span></code></a></p></li>
+</ul>
+<p class="untranslated">These functions should still be used in the free-threaded build to manage
+thread state even when the <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a> is disabled.  For example, if you
+create a thread outside of Python, you must call <a class="reference internal" href="../c-api/threads.html#c.PyGILState_Ensure" title="PyGILState_Ensure"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyGILState_Ensure()</span></code></a>
+before calling into the Python API to ensure that the thread has a valid
+Python thread state.</p>
+<p class="translated">你应该继续在阻塞操作（如输入/输出或获取锁）前调用 <a class="reference internal" href="../c-api/threads.html#c.PyEval_SaveThread" title="PyEval_SaveThread"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyEval_SaveThread()</span></code></a> 或 <a class="reference internal" href="../c-api/threads.html#c.Py_BEGIN_ALLOW_THREADS" title="Py_BEGIN_ALLOW_THREADS"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_ALLOW_THREADS</span></code></a>，以允许其他线程运行 <a class="reference internal" href="../glossary.html#term-garbage-collection"><span class="xref std std-term">循环垃圾回收器</span></a>。</p>
+</section>
+<section id="protecting-internal-extension-state">
+<h2 class="translated">保护内部扩展状态<a class="headerlink" href="#protecting-internal-extension-state" title="Link to this heading">¶</a></h2>
+<p class="translated">您的扩展可能有以前受 GIL 保护的内部状态。您可能需要上锁来保护内部状态。具体方法取决于您的扩展，但一些常见的模式包括：</p>
+<ul class="simple">
+<li><p class="translated"><strong>缓存</strong>：全局缓存是共享状态的常见来源。如果缓存对性能并不重要，可考虑使用锁来保护缓存，或在自由线程构建中禁用缓存。</p></li>
+<li><p class="translated"><strong>全局状态</strong>：全局状态可能需要用锁保护或移至线程本地存储。C11 和 C++11 提供了 <code class="docutils literal notranslate"><span class="pre">thread_local</span></code> 或 <code class="docutils literal notranslate"><span class="pre">_Thread_local</span></code> 用于 <a class="reference external" href="https://en.cppreference.com/w/c/language/storage_duration">线程本地存储</a>。</p></li>
+</ul>
+</section>
+<section id="critical-sections">
+<h2 class="translated">临界区<a class="headerlink" href="#critical-sections" title="Link to this heading">¶</a></h2>
+<p class="translated" id="id3">在自由线程构建中，CPython 提供了一种称为“临界区”的机制来保护原本由 GIL 保护的数据。虽然扩展作者可能不会直接与内部临界区实现交互，但在使用某些 C API 函数或在自由线程构建中管理共享状态时，理解它们的行为是至关重要的。</p>
+<section id="what-are-critical-sections">
+<h3 class="translated">什么是临界区？<a class="headerlink" href="#what-are-critical-sections" title="Link to this heading">¶</a></h3>
+<p class="translated">从概念上讲，临界区充当建立在简单互斥锁之上的死锁避免层。每个线程维护一个活动临界区堆栈。当线程需要获取与临界区相关的锁时（例如，隐式调用线程安全的 C API 函数时，如 <a class="reference internal" href="../c-api/dict.html#c.PyDict_SetItem" title="PyDict_SetItem"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyDict_SetItem()</span></code></a>，或显式使用宏），它会尝试获取底层互斥锁。</p>
+</section>
+<section id="using-critical-sections">
+<h3 class="translated">使用临界区<a class="headerlink" href="#using-critical-sections" title="Link to this heading">¶</a></h3>
+<p class="translated">使用临界区的主要 API 有：</p>
+<ul class="simple">
+<li><p class="translated"><a class="reference internal" href="../c-api/synchronization.html#c.Py_BEGIN_CRITICAL_SECTION" title="Py_BEGIN_CRITICAL_SECTION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION</span></code></a> 和 <a class="reference internal" href="../c-api/synchronization.html#c.Py_END_CRITICAL_SECTION" title="Py_END_CRITICAL_SECTION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_END_CRITICAL_SECTION</span></code></a> - 用于锁定单个对象</p></li>
+<li><p class="translated"><a class="reference internal" href="../c-api/synchronization.html#c.Py_BEGIN_CRITICAL_SECTION2" title="Py_BEGIN_CRITICAL_SECTION2"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION2</span></code></a> 和 <a class="reference internal" href="../c-api/synchronization.html#c.Py_END_CRITICAL_SECTION2" title="Py_END_CRITICAL_SECTION2"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_END_CRITICAL_SECTION2</span></code></a> - 用于同时锁定两个对象</p></li>
+</ul>
+<p class="translated">这些宏必须成对使用，并且必须出现在同一个 C 作用域中，因为它们建立了一个新的局部作用域。这些宏在非自由线程构建中是无操作的，因此可以安全地将它们添加到需要支持两种构建类型的代码中。</p>
+<p class="translated">临界区的一个常见用途是在访问对象的内部属性时锁定对象。例如，如果扩展类型有一个内部计数字段，你可以在读取或写入该字段时使用临界区:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// 读取计数，返回对内部计数值的新引用</span>
+<span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">;</span>
+<span class="n">Py_BEGIN_CRITICAL_SECTION</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Py_NewRef</span><span class="p">(</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">);</span>
+<span class="n">Py_END_CRITICAL_SECTION</span><span class="p">();</span>
+<span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+
+<span class="c1">// 写入计数，消耗来自 new_count 的引用</span>
+<span class="n">Py_BEGIN_CRITICAL_SECTION</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="n">obj</span><span class="o">-&gt;</span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_count</span><span class="p">;</span>
+<span class="n">Py_END_CRITICAL_SECTION</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="how-critical-sections-work">
+<h3 class="translated">临界区如何运作<a class="headerlink" href="#how-critical-sections-work" title="Link to this heading">¶</a></h3>
+<p class="translated">与传统锁不同，临界区不能保证在其整个持续时间内的独占访问。如果线程在持有临界区时阻塞（例如，通过获取另一个锁或执行 I/O），则临界区被暂时挂起——所有锁被释放——然后在阻塞操作完成时恢复。</p>
+<p class="translated">此行为类似于当线程执行阻塞型调用时 GIL 的行为。主要的区别在于：</p>
+<ul class="simple">
+<li><p class="translated">临界区的运作是基于每个对象的而不是全局的</p></li>
+<li><p class="translated">临界区在每个线程内遵循栈纪律（&quot;begin&quot; 和 &quot;end&quot; 宏强制执行此纪律，因为它们必须成对出现并位于相同作用域中）</p></li>
+<li><p class="translated">临界区会针对潜在的阻塞型操作自动释放和重新获取锁</p></li>
+</ul>
+</section>
+<section id="deadlock-avoidance">
+<h3 class="translated">避免死锁<a class="headerlink" href="#deadlock-avoidance" title="Link to this heading">¶</a></h3>
+<p class="translated">临界区通过两种方式帮助避免死锁：</p>
+<ol class="arabic simple">
+<li><p class="translated">如果一个线程试图获取某个已被其他线程持有的锁，它会先挂起该线程的所有临界区，暂时释放它们的锁。</p></li>
+<li><p class="translated">当阻塞型操作完成时，只有最顶端的临界区会被首先重新获取</p></li>
+</ol>
+<p class="translated">这意味着你不能依赖嵌套的临界区来同时锁定多个对象，因为内层的临界区可能挂起外层的临界区。作为替代，请使用 <a class="reference internal" href="../c-api/synchronization.html#c.Py_BEGIN_CRITICAL_SECTION2" title="Py_BEGIN_CRITICAL_SECTION2"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION2</span></code></a> 来同时锁定两个对象。</p>
+<p class="translated">请注意上面描述的锁只是基于 <a class="reference internal" href="../c-api/synchronization.html#c.PyMutex" title="PyMutex"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code></a> 的锁。临界区实现并不知道或影响其他正在使用的锁定机制，比如 POSIX 互斥锁。 还要注意当任何 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code> 发生阻塞并导致临界区被挂起时，只有属于临界区一部分的互斥锁才会被释放。如果 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyMutex</span></code> 在没有临界区的情况下使用，它将不会被释放，因此不会得到同样的死锁避免。</p>
+</section>
+<section id="important-considerations">
+<h3 class="translated">重要考量<a class="headerlink" href="#important-considerations" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p class="translated">临界区可以暂时释放它们的锁，允许其他线程修改受保护的数据。在进行可能阻塞的操作之后，要谨慎地假设数据的状态。</p></li>
+<li><p class="translated">因为锁可以暂时释放（挂起），所以进入临界区并不能保证在整个临界区期间对受保护资源的独占访问。如果临界区内的代码调用另一个阻塞函数（例如，获取另一个锁、执行阻塞 I/O），则该线程通过临界区持有的所有锁将被释放。这类似于在阻塞调用期间释放 GIL 的方式。</p></li>
+<li><p class="translated">在任何给定时间，只有与最近进入（最顶部）的临界区相关的锁才能保证被持有。外部嵌套临界区的锁可能已经挂起。</p></li>
+<li><p class="translated">使用这些 API 最多可以同时锁定两个对象。如果你需要锁定更多的对象，你需要调整你的代码。</p></li>
+<li><p class="translated">虽然如果你尝试锁定同一个对象两次，临界区不会死锁，但是对于这种用例，它们的效率不如专门构建的可重入锁。</p></li>
+<li><p class="translated">当使用 <a class="reference internal" href="../c-api/synchronization.html#c.Py_BEGIN_CRITICAL_SECTION2" title="Py_BEGIN_CRITICAL_SECTION2"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_BEGIN_CRITICAL_SECTION2</span></code></a> 时，对象的顺序不影响正确性（实现处理死锁避免），但始终以一致的顺序锁定对象是良好的实践。</p></li>
+<li><p class="translated">请记住，临界区宏主要用于保护对 <em>Python 对象</em> 的访问，这些对象可能涉及易受上述死锁场景影响的内部 CPython 操作。为了保护纯粹的内部扩展状态，标准互斥体或其他同步原语可能更合适。</p></li>
+</ul>
+</section>
+</section>
+<section id="building-extensions-for-the-free-threaded-build">
+<h2 class="translated">为自由线程构建进行扩展构建<a class="headerlink" href="#building-extensions-for-the-free-threaded-build" title="Link to this heading">¶</a></h2>
+<p class="translated">C API 扩展需要专门为自由线程构建进行构建。构建的 wheel、共享库和二进制文件用后缀 <code class="docutils literal notranslate"><span class="pre">t</span></code> 指示。</p>
+<ul class="simple">
+<li><p class="untranslated"><a class="reference external" href="https://github.com/pypa/manylinux">pypa/manylinux</a> supports the
+free-threaded build, with the <code class="docutils literal notranslate"><span class="pre">t</span></code> suffix, such as <code class="docutils literal notranslate"><span class="pre">python3.14t</span></code>.</p></li>
+<li><p class="untranslated"><a class="reference external" href="https://github.com/pypa/cibuildwheel">pypa/cibuildwheel</a> supports
+building wheels for the free-threaded build of Python 3.14 and newer.</p></li>
+</ul>
+<section id="limited-c-api-and-stable-abi">
+<h3 class="translated">受限的 C API 与稳定 ABI<a class="headerlink" href="#limited-c-api-and-stable-abi" title="Link to this heading">¶</a></h3>
+<p class="translated">自由线程构建目前不支持 <a class="reference internal" href="../c-api/stable.html#limited-c-api"><span class="std std-ref">受限 C API</span></a> 或稳定 ABI。如果当前您使用 <a class="reference external" href="https://setuptools.pypa.io/en/latest/setuptools.html">setuptools</a> 来构建您的扩展，并且设置了 <code class="docutils literal notranslate"><span class="pre">py_limited_api=True</span></code>，您可以使用 <code class="docutils literal notranslate"><span class="pre">py_limited_api=not</span> <span class="pre">sysconfig.get_config_var(&quot;Py_GIL_DISABLED&quot;)</span></code> 在使用自由线程构建进行构建时不使用受限 API。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">您需要为自由线程构建单独构建 wheel。如果您当前使用稳定 ABI，则可以继续构建适用于多个非自由线程 Python 版本的单个 wheel。</p>
+</div>
+</section>
+<section id="windows">
+<h3 class="translated">Windows<a class="headerlink" href="#windows" title="Link to this heading">¶</a></h3>
+<p class="translated">由于 Windows 官方安装程序的限制，从源代码构建扩展时需要手动定义 <code class="docutils literal notranslate"><span class="pre">Py_GIL_DISABLED=1</span></code>。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<p class="translated"><a class="reference external" href="https://py-free-threading.github.io/porting/">Porting Extension Modules to Support Free-Threading</a>: 一份由社区维护的针对扩展开发者的移植指南。</p>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">自由线程的 C API 扩展支持</a><ul>
+<li><a class="reference internal" href="#identifying-the-free-threaded-build-in-c">在 C 中识别自由线程构建</a></li>
+<li><a class="reference internal" href="#module-initialization">模块初始化</a><ul>
+<li><a class="reference internal" href="#multi-phase-initialization">多阶段初始化</a></li>
+<li><a class="reference internal" href="#single-phase-initialization">单阶段初始化</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#general-api-guidelines">通用 API 指南</a><ul>
+<li><a class="reference internal" href="#container-thread-safety">容器相关的线程安全</a><ul>
+<li><a class="reference internal" href="#pydict-next"><code class="docutils literal notranslate"><span class="pre">PyDict_Next</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#borrowed-references">借入引用</a></li>
+<li><a class="reference internal" href="#memory-allocation-apis">内存分配 API</a></li>
+<li><a class="reference internal" href="#thread-state-and-gil-apis">线程状态与 GIL API</a></li>
+<li><a class="reference internal" href="#protecting-internal-extension-state">保护内部扩展状态</a></li>
+<li><a class="reference internal" href="#critical-sections">临界区</a><ul>
+<li><a class="reference internal" href="#what-are-critical-sections">什么是临界区？</a></li>
+<li><a class="reference internal" href="#using-critical-sections">使用临界区</a></li>
+<li><a class="reference internal" href="#how-critical-sections-work">临界区如何运作</a></li>
+<li><a class="reference internal" href="#deadlock-avoidance">避免死锁</a></li>
+<li><a class="reference internal" href="#important-considerations">重要考量</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building-extensions-for-the-free-threaded-build">为自由线程构建进行扩展构建</a><ul>
+<li><a class="reference internal" href="#limited-c-api-and-stable-abi">受限的 C API 与稳定 ABI</a></li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="free-threading-python.html"
+                          title="上一章">Python 对自由线程的支持</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="remote_debugging.html"
+                          title="下一章">远程调试附加协议</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/free-threading-extensions.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/free-threading-extensions.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/free-threading-extensions.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="remote_debugging.html" title="远程调试附加协议"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="free-threading-python.html" title="Python 对自由线程的支持"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">自由线程的 C API 扩展支持</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

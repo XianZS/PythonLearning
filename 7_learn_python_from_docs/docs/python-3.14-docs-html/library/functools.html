@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="functools —— 高阶函数，以及可调用对象上的操作" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/functools.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/functools.py functools 模块针对高阶函数：即处理或返回其他函数的函数。 总的来说，任何可调用对象均可被作为此模块所处理的函数。 functools 模块定义了下列函数：module defines the following functions: partial 对象: partial 对象是由 partial() 创建的可调用对象。它们具有三个只读属..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_functools_c4910c2d.png" />
+<meta property="og:image:alt" content="源代码: Lib/functools.py functools 模块针对高阶函数：即处理或返回其他函数的函数。 总的来说，任何可调用对象均可被作为此模块所处理的函数。 functools 模块定义了下列函数：module defines the following functions: partial 对象: partial 对象是由 partial() 创建的可调用对象。它们具有三个只读属..." />
+<meta name="description" content="源代码: Lib/functools.py functools 模块针对高阶函数：即处理或返回其他函数的函数。 总的来说，任何可调用对象均可被作为此模块所处理的函数。 functools 模块定义了下列函数：module defines the following functions: partial 对象: partial 对象是由 partial() 创建的可调用对象。它们具有三个只读属..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>functools —— 高阶函数，以及可调用对象上的操作 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="operator --- 标准运算符对应函数" href="operator.html" />
+    <link rel="prev" title="itertools --- 为高效循环创建迭代器的函数" href="itertools.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/functools.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> —— 高阶函数，以及可调用对象上的操作</a><ul>
+<li><a class="reference internal" href="#partial-objects"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code> 对象</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="itertools.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">itertools</span></code> --- 为高效循环创建迭代器的函数</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="operator.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operator</span></code> --- 标准运算符对应函数</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/functools.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/functools.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/functools.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="operator.html" title="operator --- 标准运算符对应函数"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="itertools.html" title="itertools --- 为高效循环创建迭代器的函数"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="functional.html" accesskey="U">函数式编程模块</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> —— 高阶函数，以及可调用对象上的操作</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-functools">
+<span id="functools-higher-order-functions-and-operations-on-callable-objects"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> —— 高阶函数，以及可调用对象上的操作<a class="headerlink" href="#module-functools" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/functools.py">Lib/functools.py</a></p>
+<hr class="docutils" />
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> 模块针对高阶函数：即处理或返回其他函数的函数。 总的来说，任何可调用对象均可被作为此模块所处理的函数。</p>
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> 模块定义了下列函数：module defines the following functions:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.cache">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.cache" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">简单轻量级未绑定函数缓存。有时称为 <a class="reference external" href="https://en.wikipedia.org/wiki/Memoization">&quot;memoize&quot;</a>.</p>
+<p class="untranslated">Returns the same as <code class="docutils literal notranslate"><span class="pre">lru_cache(maxsize=None)</span></code>, creating a thin
+wrapper around a dictionary lookup for the function arguments.  Because it
+never needs to evict old values, this is smaller and faster than
+<a class="reference internal" href="#functools.lru_cache" title="functools.lru_cache"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;lru_cache</span></code></a> with a size limit.</p>
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@cache</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">n</span> <span class="k">else</span> <span class="mi">1</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>   <span class="c1"># 不预先缓存结果，执行 11 次递归调用</span>
+<span class="mi">3628800</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>    <span class="c1"># 不执行新的调用，只返回缓存的结果</span>
+<span class="mi">120</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>   <span class="c1"># 执行两次新的递归调用，factorial(10) 已被缓存</span>
+<span class="mi">479001600</span>
+</pre></div>
+</div>
+<p class="translated">该缓存是线程安全的，因此被包装的函数可在多线程中使用。这意味着下层的数据结构将在并发更新期间保持一致性。</p>
+<p class="translated">如果另一个线程在初始调用完成并被缓存之前执行了额外的调用，则被包装的函数可能会被多次调用。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.cached_property">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.cached_property" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">Transform a method of a class into a property whose value is computed once
+and then cached as a normal attribute for the life of the instance. Similar
+to <a class="reference internal" href="functions.html#property" title="property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;property</span></code></a>, with the addition of caching. Useful for expensive
+computed properties of instances that are otherwise effectively immutable.</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DataSet</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_of_numbers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sequence_of_numbers</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="untranslated">The mechanics of <a class="reference internal" href="#functools.cached_property" title="functools.cached_property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;cached_property</span></code></a> are somewhat different from
+<a class="reference internal" href="functions.html#property" title="property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;property</span></code></a>.  A regular property blocks attribute writes unless a
+setter is defined. In contrast, a <em>cached_property</em> allows writes.</p>
+<p class="translated"><em>cached_property</em> 装饰器仅在执行查找且不存在同名属性时才会运行。当运行时，<em>cached_property</em> 会写入同名的属性。 后续的属性读取和写入操作会优先于 <em>cached_property</em> 方法，其行为就像普通的属性一样。</p>
+<p class="translated">缓存的值可通过删除该属性来清空。这允许 <em>cached_property</em> 方法再次运行。</p>
+<p class="translated"><em>cached_property</em> 不能防止在多线程使用中可能出现的竞争条件。getter 函数可以在同一实例上多次运行，最后一次运行将设置缓存值。 如果缓存的特征属性是幂等的或者对于在同一实例上多次运行是无害的，那就没有问题。如果需要进行同步，请在被装饰的 getter 函数内部或在缓存的特征属性访问外部实现必要的锁定操作。</p>
+<p class="translated">注意，这个装饰器会影响 <span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0412/"><strong>PEP 412</strong></a> 键共享字典的操作。这意味着相应的字典实例可能占用比通常时更多的空间。</p>
+<p class="translated">而且，这个装饰器要求每个实例上的 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 是可变的映射。这意味着它将不适用于某些类型，例如元类（因为类型实例上的 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 属性是类命名空间的只读代理），以及那些指定了 <code class="docutils literal notranslate"><span class="pre">__slots__</span></code> 但未包括 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 作为所定义的空位之一的类（因为这样的类根本没有提供 <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> 属性）。</p>
+<p class="untranslated">If a mutable mapping is not available or if space-efficient key sharing is
+desired, an effect similar to <a class="reference internal" href="#functools.cached_property" title="functools.cached_property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;cached_property</span></code></a> can also be achieved by
+stacking <a class="reference internal" href="functions.html#property" title="property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;property</span></code></a> on top of <a class="reference internal" href="#functools.lru_cache" title="functools.lru_cache"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;lru_cache</span></code></a>. See
+<a class="reference internal" href="../faq/programming.html#faq-cache-method-calls"><span class="std std-ref">我该如何缓存方法调用？</span></a> for more details on how this differs from <code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;cached_property</span></code>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>Prior to Python 3.12, <code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;cached_property</span></code> included an undocumented lock to
+ensure that in multi-threaded usage the getter function was guaranteed to
+run only once per instance. However, the lock was per-property, not
+per-instance, which could result in unacceptably high lock contention. In
+Python 3.12+ this locking is removed.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.cmp_to_key">
+<span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">cmp_to_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.cmp_to_key" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将旧式的比较函数转换为新式的 <a class="reference internal" href="../glossary.html#term-key-function"><span class="xref std std-term">key function</span></a>。在类似于 <a class="reference internal" href="functions.html#sorted" title="sorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a>, <a class="reference internal" href="functions.html#min" title="min"><code class="xref py py-func docutils literal notranslate"><span class="pre">min()</span></code></a>, <a class="reference internal" href="functions.html#max" title="max"><code class="xref py py-func docutils literal notranslate"><span class="pre">max()</span></code></a>, <a class="reference internal" href="heapq.html#heapq.nlargest" title="heapq.nlargest"><code class="xref py py-func docutils literal notranslate"><span class="pre">heapq.nlargest()</span></code></a>, <a class="reference internal" href="heapq.html#heapq.nsmallest" title="heapq.nsmallest"><code class="xref py py-func docutils literal notranslate"><span class="pre">heapq.nsmallest()</span></code></a>, <a class="reference internal" href="itertools.html#itertools.groupby" title="itertools.groupby"><code class="xref py py-func docutils literal notranslate"><span class="pre">itertools.groupby()</span></code></a> 等函数的 <cite>key</cite> 参数中使用。 此函数主要用作将 Python 2 程序转换至新版的转换工具，以保持对比较函数的兼容。</p>
+<p class="translated">比较函数是任何接受两个参数，比较它们，并在结果为小于时返回负数，等于时返回零，大于时返回正数的可调用对象。键函数是接受一个参数并返回另一值的可调用对象，返回值在排序时被用作键。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nb">sorted</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">cmp_to_key</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">strcoll</span><span class="p">))</span>  <span class="c1"># 感知语言区域的排序设置</span>
+</pre></div>
+</div>
+<p class="translated">有关排序示例和简要排序教程，请参阅 <a class="reference internal" href="../howto/sorting.html#sortinghowto"><span class="std std-ref">排序的技术</span></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.lru_cache">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">lru_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.lru_cache" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">lru_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p class="translated">一个为函数提供缓存功能的装饰器，缓存 <em>maxsize</em> 组传入参数，在下次以相同参数调用时直接返回上一次的结果。用以节约高开销或 I/O 函数的调用时间。</p>
+<p class="translated">该缓存是线程安全的，因此被包装的函数可在多线程中使用。这意味着下层的数据结构将在并发更新期间保持一致性。</p>
+<p class="translated">如果另一个线程在初始调用完成并被缓存之前执行了额外的调用，则被包装的函数可能会被多次调用。</p>
+<p class="translated">由于使用字典来缓存结果，因此传给该函数的位置和关键字参数必须为 <a class="reference internal" href="../glossary.html#term-hashable"><span class="xref std std-term">hashable</span></a>。</p>
+<p class="translated">不同的参数模式可能会被视为具有单独缓存项的不同调用。例如，<code class="docutils literal notranslate"><span class="pre">f(a=1,</span> <span class="pre">b=2)</span></code> 和 <code class="docutils literal notranslate"><span class="pre">f(b=2,</span> <span class="pre">a=1)</span></code> 因其关键字参数顺序不同而可能会具有两个单独的缓存项。</p>
+<p class="translated">如果指定了 <em>user_function</em>，它必须是一个可调用对象。这允许 <em>lru_cache</em> 装饰器被直接应用于一个用户自定义函数，让 <em>maxsize</em> 保持其默认值 128:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@lru_cache</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_vowels</span><span class="p">(</span><span class="n">sentence</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sentence</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">vowel</span><span class="p">)</span> <span class="k">for</span> <span class="n">vowel</span> <span class="ow">in</span> <span class="s1">&#39;AEIOUaeiou&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">如果 <em>maxsize</em> 设为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，LRU 特性将被禁用且缓存可无限增长。</p>
+<p class="translated">如果 <em>typed</em> 被设置为 true，不同类型的函数参数将被分别缓存。如果 <em>typed</em> 为 false ，实现通常会将它们视为等价的调用，只缓存一个结果。（有些类型，如 <em>str</em> 和 <em>int</em>，即使 <em>typed</em> 为 false，也可能被分开缓存。）</p>
+<p class="translated">请注意，类型的特殊性只适用于函数的直接参数而不是它们的内容。 标量参数 <code class="docutils literal notranslate"><span class="pre">Decimal(42)</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Fraction(42)</span></code> 会被视为具有不同结果的不同调用。 相比之下，元组参数 <code class="docutils literal notranslate"><span class="pre">('answer',</span> <span class="pre">Decimal(42))</span></code> 和 <code class="docutils literal notranslate"><span class="pre">('answer',</span> <span class="pre">Fraction(42))</span></code> 则会被视为是等同的。</p>
+<p class="translated">被包装的函数配有一个 <code class="xref py py-func docutils literal notranslate"><span class="pre">cache_parameters()</span></code> 函数，它返回一个新的 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 用来显示 <em>maxsize</em> 和 <em>typed</em> 的值。这只是出于显示信息的目的。改变这些值没有任何效果。</p>
+<p class="translated" id="functools.lru_cache.cache_info">为了帮助衡量缓存的有效性以及调整 <em>maxsize</em> 形参，被包装的函数会带有一个 <code class="xref py py-func docutils literal notranslate"><span class="pre">cache_info()</span></code> 函数，它返回一个 <a class="reference internal" href="../glossary.html#term-named-tuple"><span class="xref std std-term">named tuple</span></a> 以显示 <em>hits</em>、 <em>misses</em>、 <em>maxsize</em> 和 <em>currsize</em>。</p>
+<p class="translated" id="functools.lru_cache.cache_clear">该装饰器也提供了一个用于清理/使缓存失效的函数 <code class="xref py py-func docutils literal notranslate"><span class="pre">cache_clear()</span></code>。</p>
+<p class="translated">原始的未经装饰的函数可以通过 <code class="xref py py-attr docutils literal notranslate"><span class="pre">__wrapped__</span></code> 属性访问。它可以用于检查、绕过缓存，或使用不同的缓存再次装饰原始函数。</p>
+<p class="translated">缓存会保持对参数和返回值的引用，直到它们结束生命期退出缓存或者直到缓存被清空。</p>
+<p class="translated">如果一个方法被缓存，则 <code class="docutils literal notranslate"><span class="pre">self</span></code> 实例参数会被包括在缓存中。请参阅 <a class="reference internal" href="../faq/programming.html#faq-cache-method-calls"><span class="std std-ref">我该如何缓存方法调用？</span></a></p>
+<p class="translated"><a class="reference external" href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_(LRU)">LRU (least recently used) 缓存</a> 在最近的调用是即将到来的调用的最佳预测值时性能最好 (例如，新闻服务器上的最热门文章倾向于每天发生变化)。 缓存的大小限制可确保缓存不会在长期运行的进程如 web 服务器上无限制地增长。</p>
+<p class="translated">一般来说，LRU 缓存只应在你需要重复使用先前计算的值时使用。 因此，缓存有附带影响的函数、每次调用都需要创建不同的可变对象的函数（如生成器和异步函数）或不纯的函数如 time() 或 random() 等是没有意义的。</p>
+<p class="translated">静态 Web 内容的 LRU 缓存示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_pep</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="s1">&#39;Retrieve text of a Python Enhancement Proposal&#39;</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;https://peps.python.org/pep-</span><span class="si">{</span><span class="n">num</span><span class="si">:</span><span class="s1">04d</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;Not Found&#39;</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">290</span><span class="p">,</span> <span class="mi">308</span><span class="p">,</span> <span class="mi">320</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">218</span><span class="p">,</span> <span class="mi">320</span><span class="p">,</span> <span class="mi">279</span><span class="p">,</span> <span class="mi">289</span><span class="p">,</span> <span class="mi">320</span><span class="p">,</span> <span class="mi">9991</span><span class="p">:</span>
+<span class="o">...</span>     <span class="n">pep</span> <span class="o">=</span> <span class="n">get_pep</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="o">...</span>     <span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pep</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">get_pep</span><span class="o">.</span><span class="n">cache_info</span><span class="p">()</span>
+<span class="n">CacheInfo</span><span class="p">(</span><span class="n">hits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">misses</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">maxsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">currsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">以下是使用缓存通过 <a class="reference external" href="https://zh.wikipedia.org/wiki/动态规划">动态规划</a> 计算 <a class="reference external" href="https://zh.wikipedia.org/wiki/斐波那契数列">斐波那契数列</a> 的例子:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">)]</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">55</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">144</span><span class="p">,</span> <span class="mi">233</span><span class="p">,</span> <span class="mi">377</span><span class="p">,</span> <span class="mi">610</span><span class="p">]</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fib</span><span class="o">.</span><span class="n">cache_info</span><span class="p">()</span>
+<span class="n">CacheInfo</span><span class="p">(</span><span class="n">hits</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">misses</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">currsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>添加 <em>typed</em> 选项。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>添加了 <em>user_function</em> 选项。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>增加了 <code class="xref py py-func docutils literal notranslate"><span class="pre">cache_parameters()</span></code> 函数</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.total_ordering">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">total_ordering</span></span><a class="headerlink" href="#functools.total_ordering" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">给定一个声明一个或多个全比较排序方法的类，这个类装饰器实现剩余的方法。这减轻了指定所有可能的全比较操作的工作。</p>
+<p class="translated">该类必须定义以下比较方法之一：<a class="reference internal" href="../reference/datamodel.html#object.__lt__" title="object.__lt__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__lt__()</span></code></a> (小于) 、<a class="reference internal" href="../reference/datamodel.html#object.__le__" title="object.__le__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__le__()</span></code></a> (小于等于)、<a class="reference internal" href="../reference/datamodel.html#object.__gt__" title="object.__gt__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__gt__()</span></code></a> (大于) 或 <a class="reference internal" href="../reference/datamodel.html#object.__ge__" title="object.__ge__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__ge__()</span></code></a> (大于等于)。此外，该类还应提供 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> (等于) 方法。</p>
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@total_ordering</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Student</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_valid_operand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;lastname&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;firstname&quot;</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_operand</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lastname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstname</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="o">==</span>
+                <span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">lastname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">firstname</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_operand</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lastname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstname</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="o">&lt;</span>
+                <span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">lastname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">firstname</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">虽然此装饰器使得创建具有良好行为的完全有序类型变得非常容易，但它 <em>确实</em> 是以执行速度更缓慢和派生比较方法的堆栈回溯更复杂为代价的。 如果性能基准测试表明这是特定应用的瓶颈所在，则改为实现全部六个富比较方法应该会轻松提升速度。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">这个装饰器不会尝试重写类 <em>或其上级类</em> 中已经被声明的方法。这意味着如果某个上级类定义了比较运算符，则 <em>total_ordering</em> 将不会再次实现它，即使原方法是抽象方法。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>现在已支持从未识别类型的下层比较函数返回 <code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code>。</p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="functools.Placeholder">
+<span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">Placeholder</span></span><a class="headerlink" href="#functools.Placeholder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个单例对象，在调用 <a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code></a> 和 <a class="reference internal" href="#functools.partialmethod" title="functools.partialmethod"><code class="xref py py-func docutils literal notranslate"><span class="pre">partialmethod()</span></code></a> 时被用作给位置参数保留位置的哨兵值。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.partial">
+<span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">partial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">keywords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.partial" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个新的 <a class="reference internal" href="#partial-objects"><span class="std std-ref">部分对象</span></a>，当被调用时其行为类似于 <em>func</em> 附带位置参数 <em>args</em> 和关键字参数 <em>keywords</em> 被调用。如果为调用提供了更多的参数，它们会被附加到 <em>args</em>。如果提供了额外的关键字参数，它们会扩展并重写 <em>keywords</em>。大致等价于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">partial</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">newfunc</span><span class="p">(</span><span class="o">*</span><span class="n">more_args</span><span class="p">,</span> <span class="o">**</span><span class="n">more_keywords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">more_args</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">keywords</span> <span class="o">|</span> <span class="n">more_keywords</span><span class="p">))</span>
+    <span class="n">newfunc</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+    <span class="n">newfunc</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="n">newfunc</span><span class="o">.</span><span class="n">keywords</span> <span class="o">=</span> <span class="n">keywords</span>
+    <span class="k">return</span> <span class="n">newfunc</span>
+</pre></div>
+</div>
+<p class="translated"><code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code> 被用于部分函数应用，它“冻结”一部分函数的参数和/或关键字从而得到一个具有简化签名的新对象。 例如，<a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code></a> 可被用来创建一个行为类似于 <a class="reference internal" href="functions.html#int" title="int"><code class="xref py py-func docutils literal notranslate"><span class="pre">int()</span></code></a> 函数的可调用对象，其中 <em>base</em> 参数默认值为 <code class="docutils literal notranslate"><span class="pre">2</span></code>:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">basetwo</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basetwo</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s1">&#39;Convert base 2 string to an int.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basetwo</span><span class="p">(</span><span class="s1">&#39;10010&#39;</span><span class="p">)</span>
+<span class="go">18</span>
+</pre></div>
+</div>
+<p class="translated">如果 <a class="reference internal" href="#functools.Placeholder" title="functools.Placeholder"><code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code></a> 哨兵出现在 <em>args</em> 中，它们将在调用 <code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code> 时首先被填充。 这使得通过调用 <code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code> 来预先填充任何位置参数成为可能；如果没有 <code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code>，则只能预填充选定数量的前导位置参数。</p>
+<p class="translated">如果有任何 <code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code> 哨兵存在，则必须在调用时填充所有哨兵：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">say_to_world</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">Placeholder</span><span class="p">,</span> <span class="n">Placeholder</span><span class="p">,</span> <span class="s2">&quot;world!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">say_to_world</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="s1">&#39;dear&#39;</span><span class="p">)</span>
+<span class="go">Hello dear world!</span>
+</pre></div>
+</div>
+<p class="translated">调用 <code class="docutils literal notranslate"><span class="pre">say_to_world('Hello')</span></code> 会引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>，因为只提供了一个位置参数，但有两个必须填充的占位符。</p>
+<p class="untranslated">If <code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code> is applied to an existing
+<a class="reference internal" href="#partial-objects"><span class="std std-ref">partial object</span></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code> sentinels of the
+input object are filled in with new positional arguments.
+A placeholder can be retained by inserting a new
+<code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code> sentinel to the place held by a previous <code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code>:</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span><span class="p">,</span> <span class="n">Placeholder</span> <span class="k">as</span> <span class="n">_</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">replace</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Hello, dear dear world!&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">&#39; dear&#39;</span><span class="p">)</span>
+<span class="go">&#39;Hello, world!&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_dear</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">remove</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="s1">&#39; dear&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_dear</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="go">&#39;Hello, world!&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_first_dear</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">remove_dear</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_first_dear</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="go">&#39;Hello, dear world!&#39;</span>
+</pre></div>
+</div>
+<p class="translated"><code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code> 不能作为关键字参数传递给 <code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>增加了对位置参数 <a class="reference internal" href="#functools.Placeholder" title="functools.Placeholder"><code class="xref py py-data docutils literal notranslate"><span class="pre">Placeholder</span></code></a> 的支持。</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="functools.partialmethod">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">partialmethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">keywords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.partialmethod" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个新的 <a class="reference internal" href="#functools.partialmethod" title="functools.partialmethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">partialmethod</span></code></a> 描述器，其行为类似 <a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 但它被设计用作方法定义而非直接用作可调用对象。</p>
+<p class="translated"><em>func</em> 必须是一个 <a class="reference internal" href="../glossary.html#term-descriptor"><span class="xref std std-term">descriptor</span></a> 或可调用对象（同属两者的对象例如普通函数会被当作描述器来处理）。</p>
+<p class="translated">当 <em>func</em> 是一个描述器（例如普通 Python 函数，<a class="reference internal" href="functions.html#classmethod" title="classmethod"><code class="xref py py-func docutils literal notranslate"><span class="pre">classmethod()</span></code></a>、 <a class="reference internal" href="functions.html#staticmethod" title="staticmethod"><code class="xref py py-func docutils literal notranslate"><span class="pre">staticmethod()</span></code></a>、 <a class="reference internal" href="abc.html#abc.abstractmethod" title="abc.abstractmethod"><code class="xref py py-func docutils literal notranslate"><span class="pre">abstractmethod()</span></code></a> 或其他 <a class="reference internal" href="#functools.partialmethod" title="functools.partialmethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">partialmethod</span></code></a> 的实例）时，对 <code class="docutils literal notranslate"><span class="pre">__get__</span></code> 的调用会被委托给底层的描述器，并会返回一个适当的 <a class="reference internal" href="#partial-objects"><span class="std std-ref">部分对象</span></a> 作为结果。</p>
+<p class="translated">当 <em>func</em> 是一个非描述器类可调用对象时，则会动态创建一个适当的绑定方法。当用作方法时其行为类似普通 Python 函数：将会插入 <em>self</em> 参数作为第一个位置参数，其位置甚至会处于提供给 <a class="reference internal" href="#functools.partialmethod" title="functools.partialmethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">partialmethod</span></code></a> 构造器的 <em>args</em> 和 <em>keywords</em> 之前。</p>
+<p class="translated">示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Cell</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">_alive</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alive</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">_alive</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">set_alive</span> <span class="o">=</span> <span class="n">partialmethod</span><span class="p">(</span><span class="n">set_state</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">set_dead</span> <span class="o">=</span> <span class="n">partialmethod</span><span class="p">(</span><span class="n">set_state</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">alive</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">set_alive</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">alive</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.reduce">
+<span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#functools.reduce" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将两个参数的 <em>function</em> 从左至右累积地应用到 <em>iterable</em> 的条目，以便将该可迭代对象缩减为单个值。 例如，<code class="docutils literal notranslate"><span class="pre">reduce(lambda</span> <span class="pre">x,</span> <span class="pre">y:</span> <span class="pre">x+y,</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5])</span></code> 就是计算 <code class="docutils literal notranslate"><span class="pre">((((1+2)+3)+4)+5)</span></code>。 左边的参数 <em>x</em> 是累积的值而右边的参数 <em>y</em> 则是来自 <em>iterable</em> 的更新值。如果存在可选项 <em>initial</em>，它会被放在参与计算的可迭代对象的条目之前，并在可迭代对象为空时作为默认值。如果未给出 <em>initial</em> 并且 <em>iterable</em> 仅包含一个条目，则将返回第一项。</p>
+<p class="translated">大致相当于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_missing</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">reduce</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">initial_missing</span><span class="p">):</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">initial</span> <span class="ow">is</span> <span class="n">initial_missing</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">initial</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p class="translated">请参阅 <a class="reference internal" href="itertools.html#itertools.accumulate" title="itertools.accumulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">itertools.accumulate()</span></code></a> 了解有关可产生所有中间值的迭代器。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>现在支持 <em>initial</em> 作为关键字参数。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.singledispatch">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">singledispatch</span></span><a class="headerlink" href="#functools.singledispatch" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将一个函数转换为 <a class="reference internal" href="../glossary.html#term-single-dispatch"><span class="xref std std-term">单分派</span></a> <a class="reference internal" href="../glossary.html#term-generic-function"><span class="xref std std-term">generic function</span></a>。</p>
+<p class="translated">要定义一个泛型函数，用装饰器 <code class="docutils literal notranslate"><span class="pre">&#64;singledispatch</span></code> 来装饰它。当使用 <code class="docutils literal notranslate"><span class="pre">&#64;singledispatch</span></code> 定义一个函数时，请注意调度发生在第一个参数的类型上:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">singledispatch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@singledispatch</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">fun</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Let me just say,&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated" id="functools.singledispatch.register">要将重载的实现添加到函数中，请使用泛型函数的 <code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code> 属性，它可以被用作装饰器。 对于带有类型标注的函数，该装饰器将自动推断第一个参数的类型:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Strength in numbers, eh?&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enumerate this:&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">还可以使用 <a class="reference internal" href="typing.html#typing.Union" title="typing.Union"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Union</span></code></a>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Strength in numbers, eh?&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enumerate this:&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p class="translated">对于不使用类型标注的代码，可以将适当的类型参数显式地传给装饰器本身:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Better than complicated.&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p class="translated">对于在多项集类型 (例如 <code class="docutils literal notranslate"><span class="pre">list</span></code>) 上分派，但希望对多项集中的项设置类型提示 (例如 <code class="docutils literal notranslate"><span class="pre">list[int]</span></code>) 的代码，分派类型应当被显式地传给装饰器本身并将类型提示放在函数定义中:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enumerate this:&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">当运行时函数将在一个列表的实例上分派而不管列表中包含的类型是什么，也就是说 <code class="docutils literal notranslate"><span class="pre">[1,2,3]</span></code> 将以与 <code class="docutils literal notranslate"><span class="pre">[&quot;foo&quot;,</span> <span class="pre">&quot;bar&quot;,</span> <span class="pre">]</span></code> 相同的方式分派。在本例中提供的标注仅针对静态类型检查器而在运行时没有影响。</p>
+</div>
+<p class="translated">要启用注册 <a class="reference internal" href="../glossary.html#term-lambda"><span class="xref std std-term">lambda</span></a> 和现有的函数，也可以使用 <a class="reference internal" href="#functools.singledispatch.register" title="functools.singledispatch.register"><code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code></a> 属性的函数形式:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">nothing</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing.&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">nothing</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#functools.singledispatch.register" title="functools.singledispatch.register"><code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code></a> 属性会返回未被装饰的函数。 这将启用装饰器栈、<a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickling</span></code></a>，并为每个变体单独创建单元测试:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<span class="gp">... </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Decimal</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">fun_num</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Half of your number:&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">arg</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun_num</span> <span class="ow">is</span> <span class="n">fun</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p class="translated">在调用时，泛型函数会根据第一个参数的类型进行分派:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
+<span class="go">Hello, world.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">(</span><span class="s2">&quot;test.&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Let me just say, test.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Strength in numbers, eh? 42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">([</span><span class="s1">&#39;spam&#39;</span><span class="p">,</span> <span class="s1">&#39;spam&#39;</span><span class="p">,</span> <span class="s1">&#39;eggs&#39;</span><span class="p">,</span> <span class="s1">&#39;spam&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Enumerate this:</span>
+<span class="go">0 spam</span>
+<span class="go">1 spam</span>
+<span class="go">2 eggs</span>
+<span class="go">3 spam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="go">Nothing.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">(</span><span class="mf">1.23</span><span class="p">)</span>
+<span class="go">0.615</span>
+</pre></div>
+</div>
+<p class="translated">在没有针对特定类型的已注册实现的情况下，会使用其方法解析顺序来查找更通用的实现。使用 <code class="docutils literal notranslate"><span class="pre">&#64;singledispatch</span></code> 装饰的原始函数将为基本的 <a class="reference internal" href="functions.html#object" title="object"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> 类型进行注册，这意味着它将在找不到更好的实现时被使用。</p>
+<p class="translated">如果一个实现被注册到 <a class="reference internal" href="../glossary.html#term-abstract-base-class"><span class="xref std std-term">abstract base class</span></a>，则基类的虚拟子类将被分派到该实现:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@fun</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Keys &amp; Values&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;=&gt;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">})</span>
+<span class="go">a =&gt; b</span>
+</pre></div>
+</div>
+<p class="translated">要检查泛型函数将为给定的类型选择哪个实现，请使用 <code class="docutils literal notranslate"><span class="pre">dispatch()</span></code> 属性:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<span class="go">&lt;function fun_num at 0x1035a2840&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>    <span class="c1"># 注：默认实现</span>
+<span class="go">&lt;function fun at 0x103fe0000&gt;</span>
+</pre></div>
+</div>
+<p class="translated">要访问所有已注册实现，请使用只读的 <code class="docutils literal notranslate"><span class="pre">registry</span></code> 属性:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">dict_keys([&lt;class &#39;NoneType&#39;&gt;, &lt;class &#39;int&#39;&gt;, &lt;class &#39;object&#39;&gt;,</span>
+<span class="go">          &lt;class &#39;decimal.Decimal&#39;&gt;, &lt;class &#39;list&#39;&gt;,</span>
+<span class="go">          &lt;class &#39;float&#39;&gt;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+<span class="go">&lt;function fun_num at 0x1035a2840&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span>
+<span class="go">&lt;function fun at 0x103fe0000&gt;</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span><a class="reference internal" href="#functools.singledispatch.register" title="functools.singledispatch.register"><code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code></a> 属性现在支持使用类型注解。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span><a class="reference internal" href="#functools.singledispatch.register" title="functools.singledispatch.register"><code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code></a> 属性现在支持 <a class="reference internal" href="typing.html#typing.Union" title="typing.Union"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Union</span></code></a> 作为类型注解。</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="functools.singledispatchmethod">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">singledispatchmethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.singledispatchmethod" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将一个方法转换为 <a class="reference internal" href="../glossary.html#term-single-dispatch"><span class="xref std std-term">单分派</span></a> <a class="reference internal" href="../glossary.html#term-generic-function"><span class="xref std std-term">generic function</span></a>。</p>
+<p class="translated">要定义一个泛型方法，请用 <code class="docutils literal notranslate"><span class="pre">&#64;singledispatchmethod</span></code> 装饰器来装饰它。当定义使用 <code class="docutils literal notranslate"><span class="pre">&#64;singledispatchmethod</span></code> 的方法时，请注意操作将针对第一个非 <em>self</em> 或非 <em>cls</em> 参数的类型:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Negator</span><span class="p">:</span>
+    <span class="nd">@singledispatchmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">neg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Cannot negate a&quot;</span><span class="p">)</span>
+
+    <span class="nd">@neg</span><span class="o">.</span><span class="n">register</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">arg</span>
+
+    <span class="nd">@neg</span><span class="o">.</span><span class="n">register</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">arg</span>
+</pre></div>
+</div>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">&#64;singledispatchmethod</span></code> 支持与其他装饰器如 <a class="reference internal" href="functions.html#classmethod" title="classmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;classmethod</span></code></a> 相嵌套。请注意为了允许 <code class="docutils literal notranslate"><span class="pre">dispatcher.register</span></code>，<code class="docutils literal notranslate"><span class="pre">singledispatchmethod</span></code> 必须是 <em>最外层的</em> 装饰器。下面的 <code class="docutils literal notranslate"><span class="pre">Negator</span></code> 类具有绑定到类的 <code class="docutils literal notranslate"><span class="pre">neg</span></code> 方法，而不是绑定到类的实例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Negator</span><span class="p">:</span>
+    <span class="nd">@singledispatchmethod</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">neg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Cannot negate a&quot;</span><span class="p">)</span>
+
+    <span class="nd">@neg</span><span class="o">.</span><span class="n">register</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">arg</span>
+
+    <span class="nd">@neg</span><span class="o">.</span><span class="n">register</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">arg</span>
+</pre></div>
+</div>
+<p class="translated">同样的模式也可被用于其他类似的装饰器：<a class="reference internal" href="functions.html#staticmethod" title="staticmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code></a>, <a class="reference internal" href="abc.html#abc.abstractmethod" title="abc.abstractmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;~abc.abstractmethod</span></code></a> 等等。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.8.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.update_wrapper">
+<span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">update_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrapped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WRAPPER_ASSIGNMENTS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WRAPPER_UPDATES</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.update_wrapper" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">更新一个 <em>包装器</em> 函数以使其与 <em>被包装的</em> 函数相似。 可选参数为指明原函数的哪些属性要被直接赋值给包装器函数的相匹配属性的元组以及包装器的哪些属性要使用原函数的相应属性来更新。这些参数的默认值是模块级常量 <code class="docutils literal notranslate"><span class="pre">WRAPPER_ASSIGNMENTS</span></code> (它将被赋值给包装器函数的 <a class="reference internal" href="../reference/datamodel.html#function.__module__" title="function.__module__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__name__" title="function.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__qualname__" title="function.__qualname__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__qualname__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__annotations__" title="function.__annotations__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__annotations__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__type_params__" title="function.__type_params__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__type_params__</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#function.__doc__" title="function.__doc__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__doc__</span></code></a>，即文档字符串) 以及 <code class="docutils literal notranslate"><span class="pre">WRAPPER_UPDATES</span></code> (它将更新包装器函数的 <a class="reference internal" href="../reference/datamodel.html#function.__dict__" title="function.__dict__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a>，即实例字典)。</p>
+<p class="untranslated">To allow access to the original function for introspection and other purposes
+(e.g. bypassing a caching decorator such as <a class="reference internal" href="#functools.lru_cache" title="functools.lru_cache"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;lru_cache</span></code></a>), this function
+automatically adds a <code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> attribute to the wrapper that refers to
+the function being wrapped.</p>
+<p class="translated">此函数的主要目的是在 <a class="reference internal" href="../glossary.html#term-decorator"><span class="xref std std-term">decorator</span></a> 函数中用来包装被装饰的函数并返回包装器。 如果包装器函数未被更新，则被返回函数的元数据将反映包装器定义而不是原始函数定义，这通常没有什么用处。</p>
+<p class="translated"><a class="reference internal" href="#functools.update_wrapper" title="functools.update_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_wrapper()</span></code></a> 可以与函数之外的可调用对象一同使用。在 <em>assigned</em> 或 <em>updated</em> 中命名的任何属性如果不存在于被包装对象则会被忽略（即该函数将不会尝试在包装器函数上设置它们）。如果包装器函数自身缺少在 <em>updated</em> 中命名的任何属性则仍将引发 <a class="reference internal" href="exceptions.html#AttributeError" title="AttributeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>现在 <code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> 属性会被自动添加。现在 <a class="reference internal" href="../reference/datamodel.html#function.__annotations__" title="function.__annotations__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__annotations__</span></code></a> 属性默认会被拷贝。 缺失的属性不会再触发 <a class="reference internal" href="exceptions.html#AttributeError" title="AttributeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> 属性现在总是指向被包装的函数，即使该函数定义了 <code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> 属性。 (参见 <a class="reference external" href="https://bugs.python.org/issue?&#64;action=redirect&amp;bpo=17482">bpo-17482</a>)</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>现在 <a class="reference internal" href="../reference/datamodel.html#function.__type_params__" title="function.__type_params__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__type_params__</span></code></a> 属性默认会被拷贝。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functools.wraps">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">functools.</span></span><span class="sig-name descname"><span class="pre">wraps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrapped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WRAPPER_ASSIGNMENTS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WRAPPER_UPDATES</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#functools.wraps" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是一个便捷函数，用于在定义包装器函数时调用 <a class="reference internal" href="#functools.update_wrapper" title="functools.update_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_wrapper()</span></code></a> 作为函数装饰器。它等价于 <code class="docutils literal notranslate"><span class="pre">partial(update_wrapper,</span> <span class="pre">wrapped=wrapped,</span> <span class="pre">assigned=assigned,</span> <span class="pre">updated=updated)</span></code>。例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">my_decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calling decorated function&#39;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">wrapper</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@my_decorator</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">example</span><span class="p">():</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Docstring&quot;&quot;&quot;</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Called example function&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">example</span><span class="p">()</span>
+<span class="go">Calling decorated function</span>
+<span class="go">Called example function</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">example</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="go">&#39;example&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">example</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="go">&#39;Docstring&#39;</span>
+</pre></div>
+</div>
+<p class="translated">如果不使用这个装饰器工厂函数，则 example 函数的名称将变为 <code class="docutils literal notranslate"><span class="pre">'wrapper'</span></code>，并且 <code class="xref py py-func docutils literal notranslate"><span class="pre">example()</span></code>  原本的文档字符串将会丢失。</p>
+</dd></dl>
+
+<section id="partial-objects">
+<span id="id1"></span><h2 class="translated"><a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 对象<a class="headerlink" href="#partial-objects" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 对象是由 <a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-func docutils literal notranslate"><span class="pre">partial()</span></code></a> 创建的可调用对象。它们具有三个只读属性：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functools.partial.func">
+<span class="sig-prename descclassname"><span class="pre">partial.</span></span><span class="sig-name descname"><span class="pre">func</span></span><a class="headerlink" href="#functools.partial.func" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个可调用对象或函数。对 <a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 对象的调用将被转发给 <a class="reference internal" href="#functools.partial.func" title="functools.partial.func"><code class="xref py py-attr docutils literal notranslate"><span class="pre">func</span></code></a> 并附带新的参数和关键字。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functools.partial.args">
+<span class="sig-prename descclassname"><span class="pre">partial.</span></span><span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#functools.partial.args" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">最左边的位置参数将放置在提供给 <a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 对象调用的位置参数之前。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functools.partial.keywords">
+<span class="sig-prename descclassname"><span class="pre">partial.</span></span><span class="sig-name descname"><span class="pre">keywords</span></span><a class="headerlink" href="#functools.partial.keywords" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当调用 <a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 对象时将要提供的关键字参数。</p>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#functools.partial" title="functools.partial"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code></a> 对象与 <a class="reference internal" href="../reference/datamodel.html#user-defined-funcs"><span class="std std-ref">函数对象</span></a> 的类似之处在于它们都是可调用、可弱引用并可具有属性的。 但两者也存在一些重要的区别。 例如，<a class="reference internal" href="stdtypes.html#definition.__name__" title="definition.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code></a> 和 <a class="reference internal" href="stdtypes.html#definition.__doc__" title="definition.__doc__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__doc__</span></code></a> 属性不会被自动创建。</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> —— 高阶函数，以及可调用对象上的操作</a><ul>
+<li><a class="reference internal" href="#partial-objects"><code class="xref py py-class docutils literal notranslate"><span class="pre">partial</span></code> 对象</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="itertools.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">itertools</span></code> --- 为高效循环创建迭代器的函数</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="operator.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operator</span></code> --- 标准运算符对应函数</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/functools.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/functools.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/functools.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="operator.html" title="operator --- 标准运算符对应函数"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="itertools.html" title="itertools --- 为高效循环创建迭代器的函数"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="functional.html" >函数式编程模块</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">functools</span></code> —— 高阶函数，以及可调用对象上的操作</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

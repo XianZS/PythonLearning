@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="线程安全性保证" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/threadsafety.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="本页面记录了针对 Python 自由线程构建版中内置类型的线程安全保证。 在此描述的保证适用于 Python 禁用了 GIL 的情况（即自由线程模式）。 当启用 GIL 时，大多数操作都是隐式地串行的。 有关如何在自由线程版 Python 中编写线程安全代码的通用指导，请参阅 Python 对自由线程的支持 。 线程安全性级别: C API 文档使用下列级别来描述每个函数的线程安全性保证。 ..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_threadsafety_047739ad.png" />
+<meta property="og:image:alt" content="本页面记录了针对 Python 自由线程构建版中内置类型的线程安全保证。 在此描述的保证适用于 Python 禁用了 GIL 的情况（即自由线程模式）。 当启用 GIL 时，大多数操作都是隐式地串行的。 有关如何在自由线程版 Python 中编写线程安全代码的通用指导，请参阅 Python 对自由线程的支持 。 线程安全性级别: C API 文档使用下列级别来描述每个函数的线程安全性保证。 ..." />
+<meta name="description" content="本页面记录了针对 Python 自由线程构建版中内置类型的线程安全保证。 在此描述的保证适用于 Python 禁用了 GIL 的情况（即自由线程模式）。 当启用 GIL 时，大多数操作都是隐式地串行的。 有关如何在自由线程版 Python 中编写线程安全代码的通用指导，请参阅 Python 对自由线程的支持 。 线程安全性级别: C API 文档使用下列级别来描述每个函数的线程安全性保证。 ..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>线程安全性保证 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="文本处理服务" href="text.html" />
+    <link rel="prev" title="内置异常" href="exceptions.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/threadsafety.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">线程安全性保证</a><ul>
+<li><a class="reference internal" href="#thread-safety-levels">线程安全性级别</a><ul>
+<li><a class="reference internal" href="#incompatible">不兼容</a></li>
+<li><a class="reference internal" href="#compatible">兼容的</a></li>
+<li><a class="reference internal" href="#safe-on-distinct-objects">在单独对象上安全</a></li>
+<li><a class="reference internal" href="#safe-on-shared-objects">在共享对象上安全</a></li>
+<li><a class="reference internal" href="#atomic">原子化的</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#thread-safety-for-list-objects">列表对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-dict-objects">字典对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-set-objects">集合对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-bytearray-objects">bytearray 对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-memoryview-objects">memoryview 对象的线程安全性</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="exceptions.html"
+                          title="上一章">内置异常</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="text.html"
+                          title="下一章">文本处理服务</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/threadsafety.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/threadsafety.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/threadsafety.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="text.html" title="文本处理服务"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="内置异常"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 标准库</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">线程安全性保证</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="thread-safety-guarantees">
+<span id="threadsafety"></span><h1 class="translated">线程安全性保证<a class="headerlink" href="#thread-safety-guarantees" title="Link to this heading">¶</a></h1>
+<p class="translated">本页面记录了针对 Python 自由线程构建版中内置类型的线程安全保证。 在此描述的保证适用于 Python 禁用了 <a class="reference internal" href="../glossary.html#term-GIL"><span class="xref std std-term">GIL</span></a> 的情况（即自由线程模式）。 当启用 GIL 时，大多数操作都是隐式地串行的。</p>
+<p class="translated">有关如何在自由线程版 Python 中编写线程安全代码的通用指导，请参阅 <a class="reference internal" href="../howto/free-threading-python.html#freethreading-python-howto"><span class="std std-ref">Python 对自由线程的支持</span></a>。</p>
+<section id="thread-safety-levels">
+<span id="threadsafety-levels"></span><h2 class="translated">线程安全性级别<a class="headerlink" href="#thread-safety-levels" title="Link to this heading">¶</a></h2>
+<p class="translated">C API 文档使用下列级别来描述每个函数的线程安全性保证。 这些级别按从最低到最高的安全性排列。</p>
+<section id="incompatible">
+<span id="threadsafety-level-incompatible"></span><h3 class="translated">不兼容<a class="headerlink" href="#incompatible" title="Link to this heading">¶</a></h3>
+<p class="translated">即便使用外部同步化也无法确保并发使用安全性的函数或操作。 不兼容的代码通常会以非同步方式访问全局状态并且在整个程序生命周期中只能从一个线程调用。</p>
+<p class="translated">例如：会修改进程级状态如信号处理器或环境变量的函数，当从任意线程调用时，即便使用了外部锁机制，也可能与运行时或其他库发生冲突。</p>
+</section>
+<section id="compatible">
+<span id="threadsafety-level-compatible"></span><h3 class="translated">兼容的<a class="headerlink" href="#compatible" title="Link to this heading">¶</a></h3>
+<p class="translated"><em>只要</em> 调用方提供了适当的外部同步化，例如通过在每次调用期间持有 <a class="reference internal" href="../glossary.html#term-lock"><span class="xref std std-term">lock</span></a> 锁，即可安全地从多个线程调用的函数或操作。 没有这样的同步化，并发调用可能会产生 <a class="reference internal" href="../glossary.html#term-race-condition"><span class="xref std std-term">竞争条件</span></a> 或 <a class="reference internal" href="../glossary.html#term-data-race"><span class="xref std std-term">数据竞争</span></a>。</p>
+<p class="translated">例如：针对一个内部状态没有锁保护的对象执行读取或写入的函数。 调用方必须确保不会有两个线程同时访问同一个对象。</p>
+</section>
+<section id="safe-on-distinct-objects">
+<span id="threadsafety-level-distinct"></span><h3 class="translated">在单独对象上安全<a class="headerlink" href="#safe-on-distinct-objects" title="Link to this heading">¶</a></h3>
+<p class="translated">只要每个线程是在 <strong>不同</strong> 对象上操作，即可安全地从多个线程调用的函数或操作。 两个线程可以同时调用该函数，但它们不能传入同一个对象（或共享底层状态的不同对象）作为参数。</p>
+<p class="translated">例如：使用非原子化写入来修改一个结构体的字段的函数。 两个线程可以分别在它们各自的结构体实例上安全地调用该函数，但在 <em>相同</em> 实例上并发调用则需要外部同步化。</p>
+</section>
+<section id="safe-on-shared-objects">
+<span id="threadsafety-level-shared"></span><h3 class="translated">在共享对象上安全<a class="headerlink" href="#safe-on-shared-objects" title="Link to this heading">¶</a></h3>
+<p class="translated">在 <strong>相同</strong> 对象上可安全地并发使用的函数或操作。 具体实现会使用内部同步化 (如 <a class="reference internal" href="../glossary.html#term-per-object-lock"><span class="xref std std-term">每对象锁</span></a> 或 <a class="reference internal" href="../c-api/synchronization.html#python-critical-section-api"><span class="std std-ref">关键节</span></a>) 来保护共享的可变状态，这样调用方就不需要提供它们自己的锁机制。</p>
+<p class="translated">例如：可以从多个线程在同一个 <a class="reference internal" href="../c-api/list.html#c.PyListObject" title="PyListObject"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyListObject</span></code></a> 上调用 <a class="reference internal" href="../c-api/list.html#c.PyList_GetItemRef" title="PyList_GetItemRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyList_GetItemRef()</span></code></a> —— 它将使用内部同步化来序列化访问。it uses internal synchronization to serialize access.</p>
+</section>
+<section id="atomic">
+<span id="threadsafety-level-atomic"></span><h3 class="translated">原子化的<a class="headerlink" href="#atomic" title="Link to this heading">¶</a></h3>
+<p class="translated">对于其他线程来说是 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化的</span></a> 函数或操作 —— 即从其他线程的视角看来是瞬间执行的。 这是线程安全性的最强形式。</p>
+<p class="translated">例如：对于互斥状态 <a class="reference internal" href="../c-api/synchronization.html#c.PyMutex_IsLocked" title="PyMutex_IsLocked"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyMutex_IsLocked()</span></code></a> 会执行原子化的读取因而可在任何时刻从任意线程调用。</p>
+</section>
+</section>
+<section id="thread-safety-for-list-objects">
+<span id="thread-safety-list"></span><h2 class="translated">列表对象的线程安全性<a class="headerlink" href="#thread-safety-for-list-objects" title="Link to this heading">¶</a></h2>
+<p class="translated">从 <a class="reference internal" href="stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> 读取一个元素属于 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化的操作</span></a>:</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>   <span class="c1"># list.__getitem__</span>
+</pre></div>
+</div>
+<p class="translated">下列方法会遍历列表并使用 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化操作</span></a> 读取每个条目来执行其函数。 这意味着它们可能返回受并发修改影响的结果：</p>
+<div class="maybe translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">item</span> <span class="ow">in</span> <span class="n">lst</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">上述操作都会避免获取 <a class="reference internal" href="../glossary.html#term-per-object-lock"><span class="xref std std-term">每对象锁</span></a>。 它们不会阻塞并发的修改。 其他持有锁的操作也不会在观察中间状态时阻塞这些操作。</p>
+<p class="translated">从这里开始的所有其他操作都会使用 <a class="reference internal" href="../glossary.html#term-per-object-lock"><span class="xref std std-term">per-object lock</span></a> 来阻塞执行。</p>
+<p class="translated">从多个线程通过 <code class="docutils literal notranslate"><span class="pre">lst[i]</span> <span class="pre">=</span> <span class="pre">x</span></code> 对单个条目的写入调用是安全的并且不会破坏列表。</p>
+<p class="translated">下列操作会返回新的对象并且对其他线程来说是 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化的</span></a>:</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">lst1</span> <span class="o">+</span> <span class="n">lst2</span>    <span class="c1"># 将两个列表拼接为一个新列表</span>
+<span class="n">x</span> <span class="o">*</span> <span class="n">lst</span>        <span class="c1"># 将列表重复 x 次成为一个新列表</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>     <span class="c1"># 返回列表的浅拷贝</span>
+</pre></div>
+</div>
+<p class="translated">以下仅在单个元素上执行操作而无需变换位置的方法都是 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化的</span></a>:</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># 添加到列表末尾，无需变换位置</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>      <span class="c1"># 从列表末尾弹出元素，无需变换位置</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="stdtypes.html#list.clear" title="list.clear"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clear()</span></code></a> 方法也是 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化的</span></a>。其他线程无法观察到被移除的元素。</p>
+<p class="translated"><a class="reference internal" href="stdtypes.html#list.sort" title="list.sort"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sort()</span></code></a> 方法不是 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化的</span></a>。 其他线程无法观察排序期间的中间状态，在排序期间列表将显示为空。</p>
+<p class="translated">以下操作可以允许 <a class="reference internal" href="../glossary.html#term-lock-free"><span class="xref std std-term">lock-free</span></a> 操作来观察中间状态因为它们会原地修改多个元素。</p>
+<div class="maybe translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">lst</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>  <span class="c1"># 改变元素位置</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>           <span class="c1"># idx 不在列表末尾，会改变元素位置</span>
+<span class="n">lst</span> <span class="o">*=</span> <span class="n">x</span>               <span class="c1"># 原地拷贝元素</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="stdtypes.html#list.remove" title="list.remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove()</span></code></a> 方法可允许并发修改因为元素比较可能执行任意 Python 代码 (通过 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a>).</p>
+<p class="translated">从多个线程调用 <a class="reference internal" href="stdtypes.html#list.extend" title="list.extend"><code class="xref py py-meth docutils literal notranslate"><span class="pre">extend()</span></code></a> 是安全的。不过，这项保证依赖于传给它的可迭代对象。如果它是 <a class="reference internal" href="stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference internal" href="stdtypes.html#tuple" title="tuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a>, <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a>, <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 或 <a class="reference internal" href="stdtypes.html#dict-views"><span class="std std-ref">字典视图对象</span></a> (但不能是它们的子类)，对于此可迭代对象进行的并发修改来说 <code class="docutils literal notranslate"><span class="pre">extend</span></code> 操作是安全的。 在其他情况下，则会创建可被另一个线程并发修改的可迭代对象。这种情况同样适合当使用 <code class="docutils literal notranslate"><span class="pre">lst</span> <span class="pre">+=</span> <span class="pre">iterable</span></code> 将一个列表与另一个可迭代对象进行原地拼接的场合。</p>
+<p class="translated">类似地，使用 <code class="docutils literal notranslate"><span class="pre">lst[i:j]</span> <span class="pre">=</span> <span class="pre">iterable</span></code> 对一个列表切片赋值的操作从多个线程调用也是安全的，但是 <code class="docutils literal notranslate"><span class="pre">iterable</span></code> 仅在它也是 <a class="reference internal" href="stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> (但不是其子类) 的时候才会被锁定。</p>
+<p class="translated">涉及到多线程访问，以及迭代的操作一定是非原子化的。例如：</p>
+<div class="bad translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 非原子化：读取 - 修改 - 写入\nlst[i] = lst[i] + 1</span>
+
+<span class="c1"># 非原子化：检测 - 等待 - 执行\nif lst:</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+<span class="c1"># 非线程安全：在修改期间迭代</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+    <span class="n">process</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># 其他线程可能修改 lst</span>
+</pre></div>
+</div>
+<p class="translated">当在线程间共享 <a class="reference internal" href="stdtypes.html#list" title="list"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> 实例时可考虑进行外部同步。</p>
+</section>
+<section id="thread-safety-for-dict-objects">
+<span id="thread-safety-dict"></span><h2 class="translated">字典对象的线程安全性<a class="headerlink" href="#thread-safety-for-dict-objects" title="Link to this heading">¶</a></h2>
+<p class="translated">使用 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 构造器创建字典在传入的参数为 <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> 或 <a class="reference internal" href="stdtypes.html#tuple" title="tuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> 时是原子化的。 如果使用 <a class="reference internal" href="stdtypes.html#dict.fromkeys" title="dict.fromkeys"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict.fromkeys()</span></code></a> 方法，字典创建在参数为 <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> 或 <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a> 时是原子化的。.</p>
+<p class="translated">以下操作和函数都是 <a class="reference internal" href="../glossary.html#term-lock-free"><span class="xref std std-term">lock-free</span></a> 和 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化</span></a> 的。</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>       <span class="c1"># dict.__getitem__</span>
+<span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>   <span class="c1"># dict.get</span>
+<span class="n">key</span> <span class="ow">in</span> <span class="n">d</span>     <span class="c1"># dict.__contains__</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>       <span class="c1"># dict.__len__</span>
+</pre></div>
+</div>
+<p class="translated">从这里开始的所有其他操作都会持有 <a class="reference internal" href="../glossary.html#term-per-object-lock"><span class="xref std std-term">per-object lock</span></a>。</p>
+<p class="translated">写入或移除单个条目的操作从多个线程调用是安全的并且不会破坏字典：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>        <span class="c1"># 写入</span>
+<span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>            <span class="c1"># 删除</span>
+<span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>            <span class="c1"># 移除并返回</span>
+<span class="n">d</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>           <span class="c1"># 移除并返回最后一项</span>
+<span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>  <span class="c1"># 如果缺失则插入</span>
+</pre></div>
+</div>
+<p class="translated">这些操作可能会使用 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> 对键进行比较，这可以执行任意 Python 代码。 在这种比较期间，字典可能会被其他线程修改。 对于内置类型如 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> 和 <a class="reference internal" href="functions.html#float" title="float"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>，它们是用 C 来实现 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code> 的，下层的锁在比较期间不会被释放所以这不是问题。</p>
+<p class="translated">下列操作会返回新的对象并在操作期间持有 <a class="reference internal" href="../glossary.html#term-per-object-lock"><span class="xref std std-term">per-object lock</span></a>:</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>      <span class="c1"># 返回一个字典的浅拷贝</span>
+<span class="n">d</span> <span class="o">|</span> <span class="n">other</span>     <span class="c1"># 将两个字典合并为一个新字典</span>
+<span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>      <span class="c1"># 返回一个新的 dict_keys 视图对象</span>
+<span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>    <span class="c1"># 返回一个新的 dict_values 视图对象</span>
+<span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>     <span class="c1"># 返回一个新的 dict_items 视图对象</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="stdtypes.html#dict.clear" title="dict.clear"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clear()</span></code></a> 方法会在其执行期间持有锁。 其他线程无法观察到元素被移除。</p>
+<p class="translated">下列操作会同时锁定两个字典。 对于 <a class="reference internal" href="stdtypes.html#dict.update" title="dict.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a> 和 <code class="docutils literal notranslate"><span class="pre">|=</span></code>，这仅在另一个操作数是使用标准字典迭代器（不能是重写了迭代操作的子类）的 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 时才适用。 对于相等性比较，这适用于 <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> 及其子类：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">other_dict</span><span class="p">)</span>  <span class="c1"># 当 other_dict 为字典时双方都会被锁定</span>
+<span class="n">d</span> <span class="o">|=</span> <span class="n">other_dict</span>       <span class="c1"># 当 other_dict 为字典时双方都会被锁定</span>
+<span class="n">d</span> <span class="o">==</span> <span class="n">other_dict</span>       <span class="c1"># 对于字典及其子类双方都会被锁定</span>
+</pre></div>
+</div>
+<p class="translated">所有比较操作也都会使用 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> 来比较值，因此对于非内置类型来说锁可能会在比较期间被释放。</p>
+<p class="translated">当可迭代对象为 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> 或 <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a> (不能为其子类) 时 <a class="reference internal" href="stdtypes.html#dict.fromkeys" title="dict.fromkeys"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fromkeys()</span></code></a> 会同时锁定新字典和可迭代对象：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">a_dict</span><span class="p">)</span>      <span class="c1"># 双方均锁定</span>
+<span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">a_set</span><span class="p">)</span>       <span class="c1"># 双方均锁定</span>
+<span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">a_frozenset</span><span class="p">)</span> <span class="c1"># 双方均锁定</span>
+</pre></div>
+</div>
+<p class="translated">当使用非字典可迭代对象进行更新时，只有目标字典会被锁定。 可迭代对象可能会被其他线程并发地修改：</p>
+<div class="maybe translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>        <span class="c1"># iterable 不是字典：仅 d 被锁定</span>
+<span class="n">d</span> <span class="o">|=</span> <span class="n">iterable</span>             <span class="c1"># iterable 不是字典：仅 d 被锁定</span>
+<span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>   <span class="c1"># iterable 不是字典 dict/set/frozenset：仅结果被锁定</span>
+</pre></div>
+</div>
+<p class="translated">涉及多线程访问，以及迭代的操作肯定是非原子化的：</p>
+<div class="bad translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 非原子化：读取-修改-写入</span>
+<span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="c1"># 非原子化：先检查再执行（TOCTOU）</span>
+<span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+    <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+<span class="c1"># 非线程安全：在修改时迭代</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">process</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># another thread may modify d</span>
+</pre></div>
+</div>
+<p class="translated">要避免检查时和使用时脱节（TOCTOU）问题，应使用原子化操作或处理异常：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 使用带默认值的而不是先检查再删除</span>
+<span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># 或者处理异常</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">要安全地迭代可能会被另一个线程修改的字典，可以迭代其拷贝：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 拷贝以安全地迭代</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">process</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">在线程间共享 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 实例时可考虑进行外部同步。</p>
+</section>
+<section id="thread-safety-for-set-objects">
+<span id="thread-safety-set"></span><h2 class="translated">集合对象的线程安全性<a class="headerlink" href="#thread-safety-for-set-objects" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="functions.html#len" title="len"><code class="xref py py-func docutils literal notranslate"><span class="pre">len()</span></code></a> 函数是免加锁且 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化</span></a> 的。</p>
+<p class="translated">以下读取操作是免锁的。 它不会阻塞并发修改并可以观察持有每对象锁的操作的中间状态：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">elem</span> <span class="ow">in</span> <span class="n">s</span>    <span class="c1"># set.__contains__</span>
+</pre></div>
+</div>
+<p class="translated">此操作可能会使用 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> 对元素进行比较，这可以执行任意 Python 代码。 在这种比较期间，集合可能会被其他线程修改。 对于内置类型如 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> 和 <a class="reference internal" href="functions.html#float" title="float"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code> 不会在比较期间释放下层的锁因而这不会有问题。</p>
+<p class="translated">从这里开始的所有其他操作都会持有每对象锁。All other operations from here on hold the per-object lock.</p>
+<p class="translated">添加或移除单个元素的操作从多个线程调用是安全的并且不会破坏集合：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>      <span class="c1"># 添加元素</span>
+<span class="n">s</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>   <span class="c1"># 移除元素，如不存在则引发异常</span>
+<span class="n">s</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>  <span class="c1"># 元素如存在则移除</span>
+<span class="n">s</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>          <span class="c1"># 移除并返回任意元素</span>
+</pre></div>
+</div>
+<p class="translated">这些操作也会对元素进行比较，因此也适用与上文相同的 <a class="reference internal" href="../reference/datamodel.html#object.__eq__" title="object.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> 考量。</p>
+<p class="translated"><a class="reference internal" href="stdtypes.html#set.copy" title="set.copy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">copy()</span></code></a> 方法会返回新的对象并在执行期间持有每对象锁因此它始终是原子化的。</p>
+<p class="translated"><a class="reference internal" href="stdtypes.html#set.clear" title="set.clear"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clear()</span></code></a> 方法会在其执行期间持有锁。 其他线程无法观察到元素被移除。</p>
+<p class="translated">下列操作仅接受 <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> 或 <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a> 作为操作数并且总是同时锁定两个对象：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">|=</span> <span class="n">other</span>                   <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">&amp;=</span> <span class="n">other</span>                   <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">-=</span> <span class="n">other</span>                   <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">^=</span> <span class="n">other</span>                   <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">&amp;</span> <span class="n">other</span>                    <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">|</span> <span class="n">other</span>                    <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">-</span> <span class="n">other</span>                    <span class="c1"># other 必须为 set/frozenset</span>
+<span class="n">s</span> <span class="o">^</span> <span class="n">other</span>                    <span class="c1"># other 必须为 set/frozenset</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="stdtypes.html#set.update" title="set.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.update()</span></code></a>, <a class="reference internal" href="stdtypes.html#set.union" title="set.union"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.union()</span></code></a>, <a class="reference internal" href="stdtypes.html#set.intersection" title="set.intersection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.intersection()</span></code></a> 和 <a class="reference internal" href="stdtypes.html#set.difference" title="set.difference"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.difference()</span></code></a> 可接受多个可迭代对象作为参数。 它们将迭代所传入的所有可迭代对象并执行以下操作：</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt class="translated"><a class="reference internal" href="stdtypes.html#set.update" title="set.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.update()</span></code></a> 和 <a class="reference internal" href="stdtypes.html#set.union" title="set.union"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.union()</span></code></a> 仅对以下情况同时锁定两个操作数</dt><dd><p class="translated">另一个操作数为 <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a>, <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a> 或 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt class="translated"><a class="reference internal" href="stdtypes.html#set.intersection" title="set.intersection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.intersection()</span></code></a> 和 <a class="reference internal" href="stdtypes.html#set.difference" title="set.difference"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.difference()</span></code></a> 总是会尝试锁定</dt><dd><p class="translated">所有对象。</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p class="translated"><a class="reference internal" href="stdtypes.html#set.symmetric_difference" title="set.symmetric_difference"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.symmetric_difference()</span></code></a> 会尝试同时锁定两个对象。</p>
+<p class="translated">以上方法的更新形式也存在一些不同之处：</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt class="translated"><a class="reference internal" href="stdtypes.html#set.difference_update" title="set.difference_update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.difference_update()</span></code></a> 和 <a class="reference internal" href="stdtypes.html#set.intersection_update" title="set.intersection_update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.intersection_update()</span></code></a> 会尝试</dt><dd><p class="translated">一个接一个地锁定所有对象。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt class="translated"><a class="reference internal" href="stdtypes.html#set.symmetric_difference_update" title="set.symmetric_difference_update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set.symmetric_difference_update()</span></code></a> 锁定参数仅针对</dt><dd><p class="translated"><a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a>, <a class="reference internal" href="stdtypes.html#frozenset" title="frozenset"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code></a> 或 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> 类型。</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p class="translated">下列方法总是会尝试锁定双方对象：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>          <span class="c1"># 锁定双方</span>
+<span class="n">s</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>            <span class="c1"># 锁定双方</span>
+<span class="n">s</span><span class="o">.</span><span class="n">issuperset</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>          <span class="c1"># 锁定双方</span>
+</pre></div>
+</div>
+<p class="translated">涉及多线程访问，以及迭代的操作肯定是非原子化的：</p>
+<div class="bad translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 非原子化的：检查 - 执行</span>
+<span class="k">if</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+      <span class="n">s</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+
+<span class="c1"># 非线程安全的：在修改期间迭代</span>
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+      <span class="n">process</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>  <span class="c1"># 另一个线程可能会修改 s</span>
+</pre></div>
+</div>
+<p class="translated">当在线程间共享 <a class="reference internal" href="stdtypes.html#set" title="set"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> 实例时可考虑进行外部同步。 详情参见 <a class="reference internal" href="../howto/free-threading-python.html#freethreading-python-howto"><span class="std std-ref">Python 对自由线程的支持</span></a>。</p>
+</section>
+<section id="thread-safety-for-bytearray-objects">
+<span id="thread-safety-bytearray"></span><h2 class="translated">bytearray 对象的线程安全性<a class="headerlink" href="#thread-safety-for-bytearray-objects" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><p class="translated"><a class="reference internal" href="functions.html#len" title="len"><code class="xref py py-func docutils literal notranslate"><span class="pre">len()</span></code></a> 函数是免加锁且 <a class="reference internal" href="../glossary.html#term-atomic-operation"><span class="xref std std-term">原子化</span></a> 的。</p>
+<p class="untranslated">Concatenation and comparisons use the buffer protocol, which prevents
+resizing but does not hold the per-object lock. These operations may
+observe intermediate states from concurrent modifications:</p>
+<div class="maybe untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ba</span> <span class="o">+</span> <span class="n">other</span>    <span class="c1"># may observe concurrent writes</span>
+<span class="n">ba</span> <span class="o">==</span> <span class="n">other</span>   <span class="c1"># may observe concurrent writes</span>
+<span class="n">ba</span> <span class="o">&lt;</span> <span class="n">other</span>    <span class="c1"># may observe concurrent writes</span>
+</pre></div>
+</div>
+<p class="translated">从这里开始的所有其他操作都会持有每对象锁。All other operations from here on hold the per-object lock.</p>
+<p class="untranslated">Reading a single element or slice is safe to call from multiple threads:</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ba</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>        <span class="c1"># bytearray.__getitem__</span>
+<span class="n">ba</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span>      <span class="c1"># 切片</span>
+</pre></div>
+</div>
+<p class="translated">下列操作从多个线程调用是安全的并且不会破坏字节数组：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ba</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>         <span class="c1"># 写入单个字节</span>
+<span class="n">ba</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>  <span class="c1"># 写入切片</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>      <span class="c1"># 添加单个字节</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>  <span class="c1"># 用可迭代对象扩展</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>   <span class="c1"># 插入单个字节</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>          <span class="c1"># 移除并返回末尾字节</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>         <span class="c1"># 移除并返回指定位置的字节</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>      <span class="c1"># 移除第首次出现的值</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>      <span class="c1"># 原地反转</span>
+<span class="n">ba</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>        <span class="c1"># 移除所有字节</span>
+</pre></div>
+</div>
+<p class="translated">当 <em>values</em> 为 <a class="reference internal" href="stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a> 时切片赋值会将两个对象都锁定：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ba</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">other_bytearray</span>  <span class="c1"># 两者都将被锁定</span>
+</pre></div>
+</div>
+<p class="translated">下列操作会返回新的对象并在执行期间拥有每对象锁：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">ba</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>     <span class="c1"># 返回一个浅拷贝</span>
+<span class="n">ba</span> <span class="o">*</span> <span class="n">n</span>        <span class="c1"># 对新的 bytearray 执行重复</span>
+</pre></div>
+</div>
+<p class="translated">成员检测会在执行期间持有锁：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="ow">in</span> <span class="n">ba</span>       <span class="c1"># bytearray.__contains__</span>
+</pre></div>
+</div>
+<p class="translated">所有其他 bytearray 方法 (如 <a class="reference internal" href="stdtypes.html#bytearray.find" title="bytearray.find"><code class="xref py py-meth docutils literal notranslate"><span class="pre">find()</span></code></a>, <a class="reference internal" href="stdtypes.html#bytearray.replace" title="bytearray.replace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">replace()</span></code></a>, <a class="reference internal" href="stdtypes.html#bytearray.split" title="bytearray.split"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a>, <a class="reference internal" href="stdtypes.html#bytearray.decode" title="bytearray.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> 等) 会在其执行期间持有每对象锁。</p>
+<p class="translated">涉及多线程访问，以及迭代的操作肯定是非原子化的：</p>
+<div class="bad translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 非原子化的：检查-执行</span>
+<span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ba</span><span class="p">:</span>
+    <span class="n">ba</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="c1"># 非线程安全的：在修改期间迭代</span>
+<span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">ba</span><span class="p">:</span>
+    <span class="n">process</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>  <span class="c1"># 另一个线程可能会修改 ba</span>
+</pre></div>
+</div>
+<p class="translated">要安全地迭代可能会被另一个线程修改的 bytearray，可以迭代其拷贝：</p>
+<div class="good translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建一个拷贝以安全地迭代</span>
+<span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">ba</span><span class="o">.</span><span class="n">copy</span><span class="p">():</span>
+    <span class="n">process</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">在跨线程共享 <a class="reference internal" href="stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a> 实例时可考虑进行外部同步化。 详情参见 <a class="reference internal" href="../howto/free-threading-python.html#freethreading-python-howto"><span class="std std-ref">Python 对自由线程的支持</span></a>。</p>
+</div></blockquote>
+</section>
+<section id="thread-safety-for-memoryview-objects">
+<span id="thread-safety-memoryview"></span><h2 class="translated">memoryview 对象的线程安全性<a class="headerlink" href="#thread-safety-for-memoryview-objects" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="stdtypes.html#memoryview" title="memoryview"><code class="xref py py-class docutils literal notranslate"><span class="pre">memoryview</span></code></a> 对象提供对下层对象内部数据的访问而不会拷贝它。 线程安全性同时依赖于 memoryview 本身和下层的缓冲区导出器。</p>
+<p class="untranslated">The memoryview implementation uses atomic operations to track its own
+exports in the <a class="reference internal" href="../glossary.html#term-free-threaded-build"><span class="xref std std-term">free-threaded build</span></a>. Creating and
+releasing a memoryview are thread-safe. Attribute access (e.g.,
+<a class="reference internal" href="stdtypes.html#memoryview.shape" title="memoryview.shape"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shape</span></code></a>, <a class="reference internal" href="stdtypes.html#memoryview.format" title="memoryview.format"><code class="xref py py-attr docutils literal notranslate"><span class="pre">format</span></code></a>) reads fields that
+are immutable for the lifetime of the memoryview, so concurrent reads
+are safe as long as the memoryview has not been released.</p>
+<p class="untranslated">However, the actual data accessed through the memoryview is owned by the
+underlying object. Concurrent access to this data is only safe if the
+underlying object supports it:</p>
+<ul class="simple">
+<li><p class="untranslated">For immutable objects like <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, concurrent reads through
+multiple memoryviews are safe.</p></li>
+<li><p class="untranslated">For mutable objects like <a class="reference internal" href="stdtypes.html#bytearray" title="bytearray"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a>, reading and writing the
+same memory region from multiple threads without external
+synchronization is not safe and may result in data corruption.
+Note that even read-only memoryviews of mutable objects do not
+prevent data races if the underlying object is modified from
+another thread.</p></li>
+</ul>
+<div class="bad untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOT safe: concurrent writes to the same buffer</span>
+<span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">view</span> <span class="o">=</span> <span class="nb">memoryview</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># Thread 1: view[0:500] = b&#39;x&#39; * 500</span>
+<span class="c1"># Thread 2: view[0:500] = b&#39;y&#39; * 500</span>
+</pre></div>
+</div>
+<div class="good untranslated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Safe: use a lock for concurrent access</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">view</span> <span class="o">=</span> <span class="nb">memoryview</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">lock</span><span class="p">:</span>
+    <span class="n">view</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">500</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;x&#39;</span> <span class="o">*</span> <span class="mi">500</span>
+</pre></div>
+</div>
+<p class="untranslated">Resizing or reallocating the underlying object (such as calling
+<a class="reference internal" href="stdtypes.html#bytearray.resize" title="bytearray.resize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytearray.resize()</span></code></a>) while a memoryview is exported raises
+<a class="reference internal" href="exceptions.html#BufferError" title="BufferError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BufferError</span></code></a>. This is enforced regardless of threading.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">线程安全性保证</a><ul>
+<li><a class="reference internal" href="#thread-safety-levels">线程安全性级别</a><ul>
+<li><a class="reference internal" href="#incompatible">不兼容</a></li>
+<li><a class="reference internal" href="#compatible">兼容的</a></li>
+<li><a class="reference internal" href="#safe-on-distinct-objects">在单独对象上安全</a></li>
+<li><a class="reference internal" href="#safe-on-shared-objects">在共享对象上安全</a></li>
+<li><a class="reference internal" href="#atomic">原子化的</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#thread-safety-for-list-objects">列表对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-dict-objects">字典对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-set-objects">集合对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-bytearray-objects">bytearray 对象的线程安全性</a></li>
+<li><a class="reference internal" href="#thread-safety-for-memoryview-objects">memoryview 对象的线程安全性</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="exceptions.html"
+                          title="上一章">内置异常</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="text.html"
+                          title="下一章">文本处理服务</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/threadsafety.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/threadsafety.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/threadsafety.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="text.html" title="文本处理服务"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="内置异常"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">线程安全性保证</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

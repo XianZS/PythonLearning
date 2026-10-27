@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="codecs --- 编解码器注册和相关基类" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/codecs.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码： Lib/codecs.py 这个模块定义了标准 Python 编解码器（编码器和解码器）的基类并提供对内部 Python 编解码器注册表的访问，该注册表负责管理编解码器和错误处理的查找过程。 大多数标准编解码器都属于 文本编码格式 ，它们可将文本编码为字节串（以及将字节串解码为文本），但也提供了一些将文本编码为文本，以及将字节串编码为字节串的编解码器。 自定义编解码器可以在任意类型..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_codecs_83a63e0c.png" />
+<meta property="og:image:alt" content="源代码： Lib/codecs.py 这个模块定义了标准 Python 编解码器（编码器和解码器）的基类并提供对内部 Python 编解码器注册表的访问，该注册表负责管理编解码器和错误处理的查找过程。 大多数标准编解码器都属于 文本编码格式 ，它们可将文本编码为字节串（以及将字节串解码为文本），但也提供了一些将文本编码为文本，以及将字节串编码为字节串的编解码器。 自定义编解码器可以在任意类型..." />
+<meta name="description" content="源代码： Lib/codecs.py 这个模块定义了标准 Python 编解码器（编码器和解码器）的基类并提供对内部 Python 编解码器注册表的访问，该注册表负责管理编解码器和错误处理的查找过程。 大多数标准编解码器都属于 文本编码格式 ，它们可将文本编码为字节串（以及将字节串解码为文本），但也提供了一些将文本编码为文本，以及将字节串编码为字节串的编解码器。 自定义编解码器可以在任意类型..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>codecs --- 编解码器注册和相关基类 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="数据类型" href="datatypes.html" />
+    <link rel="prev" title="struct --- 将字节串解读为打包的二进制数据" href="struct.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/codecs.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">codecs</span></code> --- 编解码器注册和相关基类</a><ul>
+<li><a class="reference internal" href="#codec-base-classes">编解码器基类</a><ul>
+<li><a class="reference internal" href="#error-handlers">错误处理方案</a></li>
+<li><a class="reference internal" href="#stateless-encoding-and-decoding">无状态的编码和解码</a></li>
+<li><a class="reference internal" href="#incremental-encoding-and-decoding">增量式的编码和解码</a><ul>
+<li><a class="reference internal" href="#incrementalencoder-objects">IncrementalEncoder 对象</a></li>
+<li><a class="reference internal" href="#incrementaldecoder-objects">IncrementalDecoder 对象</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stream-encoding-and-decoding">流式的编码和解码</a><ul>
+<li><a class="reference internal" href="#streamwriter-objects">StreamWriter 对象</a></li>
+<li><a class="reference internal" href="#streamreader-objects">StreamReader 对象</a></li>
+<li><a class="reference internal" href="#streamreaderwriter-objects">StreamReaderWriter 对象</a></li>
+<li><a class="reference internal" href="#streamrecoder-objects">StreamRecoder 对象</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#encodings-and-unicode">编码格式与 Unicode</a></li>
+<li><a class="reference internal" href="#standard-encodings">标准编码</a></li>
+<li><a class="reference internal" href="#python-specific-encodings">Python 专属的编码格式</a><ul>
+<li><a class="reference internal" href="#text-encodings">文字编码</a></li>
+<li><a class="reference internal" href="#binary-transforms">二进制转换</a></li>
+<li><a class="reference internal" href="#standalone-codec-functions">独立编解码器函数</a></li>
+<li><a class="reference internal" href="#text-transforms">文字转换</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-encodings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings</span></code> --- Encodings package</a></li>
+<li><a class="reference internal" href="#module-encodings.idna"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.idna</span></code> --- Internationalized Domain Names in Applications</a></li>
+<li><a class="reference internal" href="#module-encodings.mbcs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.mbcs</span></code> --- Windows ANSI codepage</a></li>
+<li><a class="reference internal" href="#module-encodings.utf_8_sig"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.utf_8_sig</span></code> --- 带 BOM 签名的 UTF-8 编解码器</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="struct.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code> --- 将字节串解读为打包的二进制数据</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="datatypes.html"
+                          title="下一章">数据类型</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/codecs.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/codecs.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/codecs.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="datatypes.html" title="数据类型"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="struct.html" title="struct --- 将字节串解读为打包的二进制数据"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="binary.html" accesskey="U">二进制数据服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">codecs</span></code> --- 编解码器注册和相关基类</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-codecs">
+<span id="codecs-codec-registry-and-base-classes"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">codecs</span></code> --- 编解码器注册和相关基类<a class="headerlink" href="#module-codecs" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码：</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/codecs.py">Lib/codecs.py</a></p>
+<hr class="docutils" id="index-0" />
+<p class="translated">这个模块定义了标准 Python 编解码器（编码器和解码器）的基类并提供对内部 Python 编解码器注册表的访问，该注册表负责管理编解码器和错误处理的查找过程。 大多数标准编解码器都属于 <a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">文本编码格式</span></a>，它们可将文本编码为字节串（以及将字节串解码为文本），但也提供了一些将文本编码为文本，以及将字节串编码为字节串的编解码器。 自定义编解码器可以在任意类型间进行编码和解码，但某些模块特性被限制为仅适用于 <span class="xref std std-term">文本编码格式</span> 或将数据编码为 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 的编解码器。</p>
+<p class="translated">该模块定义了以下用于使用任何编解码器进行编码和解码的函数:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.encode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.encode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用为 <em>encoding</em> 注册的编解码器对 <em>obj</em> 进行编码。</p>
+<p class="translated">可以给定 <em>Errors</em> 以设置所需要的错误处理方案。 默认的错误处理方案 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 表示编码错误将引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (或更特定编解码器相关的子类，例如 <a class="reference internal" href="exceptions.html#UnicodeEncodeError" title="UnicodeEncodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeEncodeError</span></code></a>)。 请参阅 <a class="reference internal" href="#codec-base-classes"><span class="std std-ref">编解码器基类</span></a> 了解有关编解码器错误处理的更多信息。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.decode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.decode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用为 <em>encoding</em> 注册的编解码器对 <em>obj</em> 进行解码。</p>
+<p class="translated">可以给定 <em>Errors</em> 以设置所需要的错误处理方案。 默认的错误处理方案 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 表示解码错误将引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (或更特定编解码器相关的子类，例如 <a class="reference internal" href="exceptions.html#UnicodeDecodeError" title="UnicodeDecodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a>)。 请参阅 <a class="reference internal" href="#codec-base-classes"><span class="std std-ref">编解码器基类</span></a> 了解有关编解码器错误处理的更多信息。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.charmap_build">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">charmap_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.charmap_build" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个适用于以自定义单字节编码格式进行编码的映射。 给定一个表示解码表的至多 256 个字符的 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <em>string</em>，返回一个将字符序号映射到字节值的紧凑内部映射对象 <code class="docutils literal notranslate"><span class="pre">EncodingMap</span></code> 或 <a class="reference internal" href="stdtypes.html#dict" title="dict"><code class="xref py py-class docutils literal notranslate"><span class="pre">字典</span></code></a>。 对于不合法的输入将引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>。</p>
+</dd></dl>
+
+<p class="translated">每种编解码器的完整细节也可以直接查找获取：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.lookup">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.lookup" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在 Python 编解码器注册表中查找编解码器信息，并返回一个 <a class="reference internal" href="#codecs.CodecInfo" title="codecs.CodecInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodecInfo</span></code></a> 对象，其定义见下文。</p>
+<p class="translated">首先将会在注册表缓存中查找编码，如果未找到，则会扫描注册的搜索函数列表。 如果没有找到 <a class="reference internal" href="#codecs.CodecInfo" title="codecs.CodecInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodecInfo</span></code></a> 对象，则将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。 否则，<code class="xref py py-class docutils literal notranslate"><span class="pre">CodecInfo</span></code> 对象将被存入缓存并返回给调用者。</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.CodecInfo">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">CodecInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">streamreader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">streamwriter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incrementalencoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incrementaldecoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.CodecInfo" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找编解码器注册表所得到的编解码器细节信息。 构造器参数将保存为同名的属性：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="codecs.CodecInfo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#codecs.CodecInfo.name" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">编码名称</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="codecs.CodecInfo.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><a class="headerlink" href="#codecs.CodecInfo.encode" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.CodecInfo.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><a class="headerlink" href="#codecs.CodecInfo.decode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">无状态的编码和解码函数。 它们必须是具有与 Codec 的 <a class="reference internal" href="#codecs.Codec.encode" title="codecs.Codec.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a> 和 <a class="reference internal" href="#codecs.Codec.decode" title="codecs.Codec.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> 方法相同接口的函数或方法 (参见 <a class="reference internal" href="#codec-objects"><span class="std std-ref">Codec 接口</span></a>)。 这些函数或方法应当工作于无状态的模式。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="codecs.CodecInfo.incrementalencoder">
+<span class="sig-name descname"><span class="pre">incrementalencoder</span></span><a class="headerlink" href="#codecs.CodecInfo.incrementalencoder" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.CodecInfo.incrementaldecoder">
+<span class="sig-name descname"><span class="pre">incrementaldecoder</span></span><a class="headerlink" href="#codecs.CodecInfo.incrementaldecoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">增量式的编码器和解码器类或工厂函数。 这些函数必须分别提供由基类 <a class="reference internal" href="#codecs.IncrementalEncoder" title="codecs.IncrementalEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalEncoder</span></code></a> 和 <a class="reference internal" href="#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalDecoder</span></code></a> 所定义的接口。 增量式编解码器可以保持状态。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="codecs.CodecInfo.streamwriter">
+<span class="sig-name descname"><span class="pre">streamwriter</span></span><a class="headerlink" href="#codecs.CodecInfo.streamwriter" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.CodecInfo.streamreader">
+<span class="sig-name descname"><span class="pre">streamreader</span></span><a class="headerlink" href="#codecs.CodecInfo.streamreader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">流式写入器和读取器类或工厂函数。 这些函数必须分别提供由基类 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 和 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 所定义的接口。 流式编解码器可以保持状态。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">为了简化对各种编解码器组件的访问，本模块提供了以下附加函数，它们使用 <a class="reference internal" href="#codecs.lookup" title="codecs.lookup"><code class="xref py py-func docutils literal notranslate"><span class="pre">lookup()</span></code></a> 来执行编解码器查找：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.getencoder">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">getencoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.getencoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找给定编码的编解码器并返回其编码器函数。</p>
+<p class="translated">在编码无法找到时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.getdecoder">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">getdecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.getdecoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找给定编码的编解码器并返回其解码器函数。</p>
+<p class="translated">在编码无法找到时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.getincrementalencoder">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">getincrementalencoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.getincrementalencoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找给定编码的编解码器并返回其增量式编码器类或工厂函数。</p>
+<p class="translated">在编码无法找到或编解码器不支持增量式编码器时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.getincrementaldecoder">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">getincrementaldecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.getincrementaldecoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找给定编码的编解码器并返回其增量式解码器类或工厂函数。</p>
+<p class="translated">在编码无法找到或编解码器不支持增量式解码器时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.getreader">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">getreader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.getreader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找给定编码的编解码器并返回其 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 类或工厂函数。</p>
+<p class="translated">在编码无法找到时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.getwriter">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">getwriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.getwriter" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">查找给定编码的编解码器并返回其 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 类或工厂函数。</p>
+<p class="translated">在编码无法找到时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<p class="translated">自定义编解码器的启用是通过注册适当的编解码器搜索函数：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.register">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_function</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.register" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">注册一个编解码器搜索函数。 搜索函数预期接收一个参数，即全部以小写字母表示的编码格式名称，其中中连字符和空格会被转换为下划线，并返回一个 <a class="reference internal" href="#codecs.CodecInfo" title="codecs.CodecInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodecInfo</span></code></a> 对象。 在搜索函数无法找到给定编码格式的情况下，它应当返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>连字符和空格会被转换为下划线。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.unregister">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">unregister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_function</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.unregister" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">注销一个编解码器搜索函数并清空注册表缓存。 如果指定搜索函数未被注册，则不做任何操作。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<p class="translated">虽然内置的 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 和相关联的 <a class="reference internal" href="io.html#module-io" title="io: Core tools for working with streams."><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a> 模块是操作已编码文本文件的推荐方式，但本模块也提供了额外的工具函数和类，允许在操作二进制文件时使用更多种类的编解码器：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.open">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.open" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用给定的 <em>mode</em> 打开已编码的文件并返回一个 <a class="reference internal" href="#codecs.StreamReaderWriter" title="codecs.StreamReaderWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReaderWriter</span></code></a> 的实例，提供透明的编码/解码。 默认的文件模式为 <code class="docutils literal notranslate"><span class="pre">'r'</span></code>，表示以读取模式打开文件。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果 <em>encoding</em> 不为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则下层的已编码文件总是以二进制模式打开。 在读取和写入时不会自动执行 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code> 的转换。 <em>mode</em> 参数可以是内置 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 函数所接受的任意二进制模式；<code class="docutils literal notranslate"><span class="pre">'b'</span></code> 会被自动添加。</p>
+</div>
+<p class="translated"><em>encoding</em> 指定文件所要使用的编码格式。 允许任何编码为字节串或从字节串解码的编码格式，而文件方法所支持的数据类型则取决于所使用的编解码器。</p>
+<p class="translated">可以指定 <em>errors</em> 来定义错误处理方案。 默认值 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 表示在出现编码错误时引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。</p>
+<p class="translated"><em>buffering</em> 的含义与内置 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 函数中的相同。 默认值 -1 表示将使用默认的缓冲区大小。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">'U'</span></code> 模式已被移除。</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 3.14 版本弃用: </span><a class="reference internal" href="#codecs.open" title="codecs.open"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.open()</span></code></a> 已被 <a class="reference internal" href="functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 取代。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.EncodedFile">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">EncodedFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.EncodedFile" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个 <a class="reference internal" href="#codecs.StreamRecoder" title="codecs.StreamRecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamRecoder</span></code></a> 实例，它提供了 <em>file</em> 的透明转码包装版本。 当包装版本被关闭时原始文件也会被关闭。</p>
+<p class="translated">写入已包装文件的数据会根据给定的 <em>data_encoding</em> 解码，然后以使用 <em>file_encoding</em> 的字节形式写入原始文件。 从原始文件读取的字节串将根据 <em>file_encoding</em> 解码，其结果将使用 <em>data_encoding</em> 进行编码。</p>
+<p class="translated">如果 <em>file_encoding</em> 未给定，则默认为 <em>data_encoding</em>。</p>
+<p class="translated">可以指定 <em>errors</em> 来定义错误处理方案。 默认值 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 表示在出现编码错误时引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.iterencode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">iterencode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.iterencode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用增量式编码器通过迭代来编码由 <em>iterator</em> 提供的输入。 <em>iterator</em> 必须产生 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 对象。 此函数属于 <a class="reference internal" href="../glossary.html#term-generator"><span class="xref std std-term">generator</span></a>。 <em>errors</em> 参数（以及任何其他关键字参数）会被传递给增量式编码器。</p>
+<p class="translated">此函数要求编解码器接受 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 对象形式的文本进行编码。 因此它不支持字节到字节的编码器，例如 <code class="docutils literal notranslate"><span class="pre">base64_codec</span></code>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.iterdecode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">iterdecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.iterdecode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用增量式解码器通过迭代来解码由 <em>iterator</em> 提供的输入。 <em>iterator</em> 必须产生 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象。 此函数属于 <a class="reference internal" href="../glossary.html#term-generator"><span class="xref std std-term">generator</span></a>。 <em>errors</em> 参数（以及任何其他关键字参数）会被传递给增量式解码器。</p>
+<p class="translated">此函数要求编解码器接受 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象进行解码。 因此它不支持文本到文本的编码器，例如 <code class="docutils literal notranslate"><span class="pre">rot_13</span></code>，但是 <code class="docutils literal notranslate"><span class="pre">rot_13</span></code> 可以通过同样效果的 <a class="reference internal" href="#codecs.iterencode" title="codecs.iterencode"><code class="xref py py-func docutils literal notranslate"><span class="pre">iterencode()</span></code></a> 来使用。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.readbuffer_encode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">readbuffer_encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.readbuffer_encode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个包含 <em>buffer</em> 中原始字节数据的 <a class="reference internal" href="stdtypes.html#tuple" title="tuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>，一个 <a class="reference internal" href="../c-api/buffer.html#bufferobjects"><span class="std std-ref">缓冲区兼容对象</span></a> 或 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> (在处理前已编码为 UTF-8)，及其字节长度。</p>
+<p class="translated"><em>errors</em> 参数会被忽略。</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">codecs</span><span class="o">.</span><span class="n">readbuffer_encode</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Zito&quot;</span><span class="p">)</span>
+<span class="go">(b&#39;Zito&#39;, 4)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="translated">本模块还提供了以下常量，适用于读取和写入依赖于平台的文件：</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="codecs.BOM">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM</span></span><a class="headerlink" href="#codecs.BOM" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_BE">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_BE</span></span><a class="headerlink" href="#codecs.BOM_BE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_LE">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_LE</span></span><a class="headerlink" href="#codecs.BOM_LE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF8">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF8</span></span><a class="headerlink" href="#codecs.BOM_UTF8" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF16">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF16</span></span><a class="headerlink" href="#codecs.BOM_UTF16" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF16_BE">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF16_BE</span></span><a class="headerlink" href="#codecs.BOM_UTF16_BE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF16_LE">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF16_LE</span></span><a class="headerlink" href="#codecs.BOM_UTF16_LE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF32">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF32</span></span><a class="headerlink" href="#codecs.BOM_UTF32" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF32_BE">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF32_BE</span></span><a class="headerlink" href="#codecs.BOM_UTF32_BE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="codecs.BOM_UTF32_LE">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">BOM_UTF32_LE</span></span><a class="headerlink" href="#codecs.BOM_UTF32_LE" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这些常量定义了多种字节序列，即一些编码格式的 Unicode 字节顺序标记（BOM）。 它们在 UTF-16 和 UTF-32 数据流中被用以指明所使用的字节顺序，并在 UTF-8 中被用作 Unicode 签名。 <a class="reference internal" href="#codecs.BOM_UTF16" title="codecs.BOM_UTF16"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_UTF16</span></code></a> 是 <a class="reference internal" href="#codecs.BOM_UTF16_BE" title="codecs.BOM_UTF16_BE"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_UTF16_BE</span></code></a> 或 <a class="reference internal" href="#codecs.BOM_UTF16_LE" title="codecs.BOM_UTF16_LE"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_UTF16_LE</span></code></a>，具体取决于平台的本机字节顺序，<a class="reference internal" href="#codecs.BOM" title="codecs.BOM"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOM</span></code></a> 是 <code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_UTF16</span></code> 的别名, <a class="reference internal" href="#codecs.BOM_LE" title="codecs.BOM_LE"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_LE</span></code></a> 是 <code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_UTF16_LE</span></code> 的别名，<a class="reference internal" href="#codecs.BOM_BE" title="codecs.BOM_BE"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_BE</span></code></a> 是 <code class="xref py py-const docutils literal notranslate"><span class="pre">BOM_UTF16_BE</span></code> 的别名。 其他序列则表示 UTF-8 和 UTF-32 编码格式中的 BOM。</p>
+</dd></dl>
+
+<section id="codec-base-classes">
+<span id="id1"></span><h2 class="translated">编解码器基类<a class="headerlink" href="#codec-base-classes" title="Link to this heading">¶</a></h2>
+<p class="untranslated">The <code class="xref py py-mod docutils literal notranslate"><span class="pre">codecs</span></code> module defines a set of base classes which define the
+interfaces for working with codec objects, and can also be used as the basis
+for custom codec implementations.</p>
+<p class="translated">每种编解码器必须定义四个接口以便用作 Python 中的编解码器：无状态编码器、无状态解码器、流读取器和流写入器。 流读取器和写入器通常会重用无状态编码器/解码器来实现文件协议。 编解码器作者还需要定义编解码器将如何处理编码和解码错误。</p>
+<section id="error-handlers">
+<span id="surrogateescape"></span><span id="id2"></span><h3 class="translated">错误处理方案<a class="headerlink" href="#error-handlers" title="Link to this heading">¶</a></h3>
+<p class="translated">为了简化和标准化错误处理，编解码器可以通过接受 <em>errors</em> 字符串参数来实现不同的错误处理方案:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;German ß, ♬&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;backslashreplace&#39;</span><span class="p">)</span>
+<span class="go">b&#39;German \\xdf, \\u266c&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;German ß, ♬&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;xmlcharrefreplace&#39;</span><span class="p">)</span>
+<span class="go">b&#39;German &amp;#223;, &amp;#9836;&#39;</span>
+</pre></div>
+</div>
+<p class="translated" id="index-1">以下错误处理器可以用于所有的 Python <a class="reference internal" href="#standard-encodings"><span class="std std-ref">标准编码</span></a> 编解码器:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">值</p></th>
+<th class="head"><p class="translated">含意</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'strict'</span></code></p></td>
+<td><p class="translated">引发 <a class="reference internal" href="exceptions.html#UnicodeError" title="UnicodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeError</span></code></a> (或其子类)，这是默认的方案。 在 <a class="reference internal" href="#codecs.strict_errors" title="codecs.strict_errors"><code class="xref py py-func docutils literal notranslate"><span class="pre">strict_errors()</span></code></a> 中实现。</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'ignore'</span></code></p></td>
+<td><p class="translated">忽略错误格式的数据并且不加进一步通知就继续执行。 在 <a class="reference internal" href="#codecs.ignore_errors" title="codecs.ignore_errors"><code class="xref py py-func docutils literal notranslate"><span class="pre">ignore_errors()</span></code></a> 中实现。</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'replace'</span></code></p></td>
+<td><p class="translated">用一个替代标记来替换。 在编码时，使用 <code class="docutils literal notranslate"><span class="pre">?</span></code> (ASCII 字符)。 在解码时，使用 <code class="docutils literal notranslate"><span class="pre">�</span></code> (U+FFFD，官方的 REPLACEMENT CHARACTER)。 在 <a class="reference internal" href="#codecs.replace_errors" title="codecs.replace_errors"><code class="xref py py-func docutils literal notranslate"><span class="pre">replace_errors()</span></code></a> 中实现。</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'backslashreplace'</span></code></p></td>
+<td><p class="translated">用反斜杠转义序列来替换。 在编码时，使用格式为 <code class="samp docutils literal notranslate"><span class="pre">\x</span><em><span class="pre">hh</span></em></code> <code class="samp docutils literal notranslate"><span class="pre">\u</span><em><span class="pre">xxxx</span></em></code> <code class="samp docutils literal notranslate"><span class="pre">\U</span><em><span class="pre">xxxxxxxx</span></em></code> 的 Unicode 码位十六进制表示形式。 在解码时，使用格式为 <code class="samp docutils literal notranslate"><span class="pre">\x</span><em><span class="pre">hh</span></em></code> 的字节值十六进制表示形式。 在 <a class="reference internal" href="#codecs.backslashreplace_errors" title="codecs.backslashreplace_errors"><code class="xref py py-func docutils literal notranslate"><span class="pre">backslashreplace_errors()</span></code></a> 中实现。</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'surrogateescape'</span></code></p></td>
+<td><p class="translated">在解码时，将字节替换为 <code class="docutils literal notranslate"><span class="pre">U+DC80</span></code> 至 <code class="docutils literal notranslate"><span class="pre">U+DCFF</span></code> 范围内的单个代理代码。 当在编码数据时使用 <code class="docutils literal notranslate"><span class="pre">'surrogateescape'</span></code> 错误处理方案时，此代理将被转换回相同的字节。 （请参阅 <span class="target" id="index-26"></span><a class="pep reference external" href="https://peps.python.org/pep-0383/"><strong>PEP 383</strong></a> 了解详情。）</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated" id="index-3">下列错误处理器仅在编码时适用（在 <a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">文本编码格式</span></a> 类别以内）:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">值</p></th>
+<th class="head"><p class="translated">含意</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'xmlcharrefreplace'</span></code></p></td>
+<td><p class="translated">用 XML/HTML 数字字符引用来替换，即格式为 <code class="samp docutils literal notranslate"><span class="pre">&amp;#</span><em><span class="pre">num</span></em><span class="pre">;</span></code> 的 Unicode 码位十进制表示形式。 在 <a class="reference internal" href="#codecs.xmlcharrefreplace_errors" title="codecs.xmlcharrefreplace_errors"><code class="xref py py-func docutils literal notranslate"><span class="pre">xmlcharrefreplace_errors()</span></code></a> 中实现。</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'namereplace'</span></code></p></td>
+<td><p class="translated">用 <code class="docutils literal notranslate"><span class="pre">\N{...}</span></code> 转义序列来替换，出现在花括号中的是来自 Unicode 字符数据库的 Name 属性。 在 <a class="reference internal" href="#codecs.namereplace_errors" title="codecs.namereplace_errors"><code class="xref py py-func docutils literal notranslate"><span class="pre">namereplace_errors()</span></code></a> 中实现。</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated" id="index-4">此外，以下错误处理方案被专门用于指定的编解码器：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">值</p></th>
+<th class="head"><p class="translated">编解码器</p></th>
+<th class="head"><p class="translated">含意</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">'surrogatepass'</span></code></p></td>
+<td><p class="translated">utf-8, utf-16, utf-32,
+utf-16-be, utf-16-le,
+utf-32-be, utf-32-le</p></td>
+<td><p class="translated">允许将代理码位 (<code class="docutils literal notranslate"><span class="pre">U+D800</span></code> - <code class="docutils literal notranslate"><span class="pre">U+DFFF</span></code>) 作为正常码位来编码和解码。 否则这些编解码器会将 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 中出现的代理码位视为错误。</p></td>
+</tr>
+</tbody>
+</table>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.1: </span><code class="docutils literal notranslate"><span class="pre">'surrogateescape'</span></code> 和 <code class="docutils literal notranslate"><span class="pre">'surrogatepass'</span></code> 错误处理方案。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">'surrogatepass'</span></code> 错误处理器现在可适用于 utf-16* 和 utf-32* 编解码器。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5: </span><code class="docutils literal notranslate"><span class="pre">'namereplace'</span></code> 错误处理方案。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">'backslashreplace'</span></code> 错误处理器现在可适用于解码和转码。</p>
+</div>
+<p class="translated">允许的值集合可以通过注册新命名的错误处理方案来扩展：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.register_error">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">register_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_handler</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.register_error" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在名称 <em>name</em> 之下注册错误处理函数 <em>error_handler</em>。 当 <em>name</em> 被指定为错误形参时，<em>error_handler</em> 参数所指定的对象将在编码和解码期间发生错误的情况下被调用，</p>
+<p class="translated">对于编码操作，将会调用 <em>error_handler</em> 并传入一个 <a class="reference internal" href="exceptions.html#UnicodeEncodeError" title="UnicodeEncodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeEncodeError</span></code></a> 实例，其中包含有关错误位置的信息。 错误处理程序必须引发此异常或别的异常，或者也可以返回一个元组，其中包含输入的不可编码部分的替换对象，以及应当继续进行编码的位置。 替换对象可以为 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 或 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 类型。 如果替换对象为字节串，编码器将简单地将其复制到输出缓冲区。 如果替换对象为字符串，编码器将对替换对象进行编码。 对原始输入的编码操作会在指定位置继续进行。 负的位置值将被视为相对于输入字符串的末尾。 如果结果位置超出范围则将引发 <a class="reference internal" href="exceptions.html#IndexError" title="IndexError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IndexError</span></code></a>。</p>
+<p class="translated">解码和转换的做法很相似，不同之处在于将把 <a class="reference internal" href="exceptions.html#UnicodeDecodeError" title="UnicodeDecodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a> 或 <a class="reference internal" href="exceptions.html#UnicodeTranslateError" title="UnicodeTranslateError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeTranslateError</span></code></a> 传给处理程序，并且来自错误处理程序的替换对象将被直接放入输出。</p>
+</dd></dl>
+
+<p class="translated">之前注册的错误处理方案（包括标准错误处理方案）可通过名称进行查找：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.lookup_error">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">lookup_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.lookup_error" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回之前在名称 <em>name</em> 之下注册的错误处理方案。</p>
+<p class="translated">在处理方案无法找到时将引发 <a class="reference internal" href="exceptions.html#LookupError" title="LookupError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a>。</p>
+</dd></dl>
+
+<p class="translated">以下标准错误处理方案也可通过模块层级函数的方式来使用：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.strict_errors">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">strict_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.strict_errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实现了 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 错误处理。</p>
+<p class="translated">每个编码或解码错误都将引发 <a class="reference internal" href="exceptions.html#UnicodeError" title="UnicodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeError</span></code></a>。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.ignore_errors">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">ignore_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.ignore_errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实现了 <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code> 错误处理。</p>
+<p class="translated">错误格式的数据会被忽略；编码或解码将继续执行而不再通知。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.replace_errors">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">replace_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.replace_errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实现了 <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> 错误处理。</p>
+<p class="translated">使用 <code class="docutils literal notranslate"><span class="pre">?</span></code> (ASCII 字符) 替换编码错误或者使用 <code class="docutils literal notranslate"><span class="pre">�</span></code> (U+FFFD，官方的 REPLACEMENT CHARACTER) 替换解码错误。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.backslashreplace_errors">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">backslashreplace_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.backslashreplace_errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实现了 <code class="docutils literal notranslate"><span class="pre">'backslashreplace'</span></code> 错误处理。</p>
+<p class="translated">错误格式的数据会用反斜杠转义序列来替换。 在编码时，使用格式为 <code class="samp docutils literal notranslate"><span class="pre">\x</span><em><span class="pre">hh</span></em></code> <code class="samp docutils literal notranslate"><span class="pre">\u</span><em><span class="pre">xxxx</span></em></code> <code class="samp docutils literal notranslate"><span class="pre">\U</span><em><span class="pre">xxxxxxxx</span></em></code> 的 Unicode 码位十六进制表示形式。 在解码时，使用格式为 <code class="samp docutils literal notranslate"><span class="pre">\x</span><em><span class="pre">hh</span></em></code> 的字节值 十六进制表示形式。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>适用于解码和转码。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.xmlcharrefreplace_errors">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">xmlcharrefreplace_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.xmlcharrefreplace_errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实现 <code class="docutils literal notranslate"><span class="pre">'xmlcharrefreplace'</span></code> 错误处理（仅限 <a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">text encoding</span></a> 范围内的编码操作）。</p>
+<p class="translated">不可编码的字符会被替换为适当的 XML/HTML 数值字符引用，即格式为 <code class="samp docutils literal notranslate"><span class="pre">&amp;#</span><em><span class="pre">num</span></em><span class="pre">;</span></code> 的十进制形式 Unicode 码位。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.namereplace_errors">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">namereplace_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.namereplace_errors" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">实现 <code class="docutils literal notranslate"><span class="pre">'namereplace'</span></code> 错误处理（仅限 <a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">text encoding</span></a> 范围内的编码操作）。</p>
+<p class="translated">不可编码的字符会被替换为 <code class="docutils literal notranslate"><span class="pre">\N{...}</span></code> 转义序列。 出现在花括号内的字符集合是来自于 Unicode 字符数据库的 Name 属性。 例如，德语小写字母 <code class="docutils literal notranslate"><span class="pre">'ß'</span></code> 将被转换为字符序列 <code class="docutils literal notranslate"><span class="pre">\N{LATIN</span> <span class="pre">SMALL</span> <span class="pre">LETTER</span> <span class="pre">SHARP</span> <span class="pre">S}</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="stateless-encoding-and-decoding">
+<span id="codec-objects"></span><h3 class="translated">无状态的编码和解码<a class="headerlink" href="#stateless-encoding-and-decoding" title="Link to this heading">¶</a></h3>
+<p class="translated">基本 <a class="reference internal" href="#codecs.Codec" title="codecs.Codec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code></a> 类定义了这些方法，同时还定义了无状态编码器和解码器的函数接口：</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.Codec">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">Codec</span></span><a class="headerlink" href="#codecs.Codec" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="codecs.Codec.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.Codec.encode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">编码 <em>input</em> 对象并返回一个元组 (输出对象, 消耗长度)。 例如，<a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">text encoding</span></a> 会使用特定的字符集编码格式 (例如 <code class="docutils literal notranslate"><span class="pre">cp1252</span></code> 或 <code class="docutils literal notranslate"><span class="pre">iso-8859-1</span></code>) 将字符串转换为字节串对象。</p>
+<p class="translated"><em>errors</em> 参数定义了要应用的错误处理方案。 默认为 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 处理方案。</p>
+<p class="translated">此方法不一定会在 <a class="reference internal" href="#codecs.Codec" title="codecs.Codec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code></a> 实例中保存状态。 可使用必须保存状态的 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 作为编解码器以便高效地进行编码。</p>
+<p class="translated">编码器必须能够处理零长度的输入并在此情况下返回输出对象类型的空对象。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.Codec.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.Codec.decode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">解码 <em>input</em> 对象并返回一个元组 (输出对象, 消耗长度)。 例如，<a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">text encoding</span></a> 的解码操作会使用特定的字符集编码格式将字节串对象转换为字符串对象。</p>
+<p class="translated">对于文本编码格式和字节到字节编解码器，<em>input</em> 必须为一个字节串对象或提供了只读缓冲区接口的对象 -- 例如，缓冲区对象和映射到内存的文件。</p>
+<p class="translated"><em>errors</em> 参数定义了要应用的错误处理方案。 默认为 <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> 处理方案。</p>
+<p class="translated">此方法不一定会在 <a class="reference internal" href="#codecs.Codec" title="codecs.Codec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code></a> 实例中保存状态。 可使用必须保存状态的 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 作为编解码器以便高效地进行解码。</p>
+<p class="translated">解码器必须能够处理零长度的输入并在此情况下返回输出对象类型的空对象。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="incremental-encoding-and-decoding">
+<h3 class="translated">增量式的编码和解码<a class="headerlink" href="#incremental-encoding-and-decoding" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="#codecs.IncrementalEncoder" title="codecs.IncrementalEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalEncoder</span></code></a> 和 <a class="reference internal" href="#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalDecoder</span></code></a> 类提供了增量式编码和解码的基本接口。 对输入的编码/解码不是通过对无状态编码器/解码器的一次调用，而是通过对增量式编码器/解码器的 <a class="reference internal" href="#codecs.IncrementalEncoder.encode" title="codecs.IncrementalEncoder.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a>/<a class="reference internal" href="#codecs.IncrementalDecoder.decode" title="codecs.IncrementalDecoder.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> 方法的多次调用。 增量式编码器/解码器会在方法调用期间跟踪编码/解码过程。</p>
+<p class="translated">调用 <a class="reference internal" href="#codecs.IncrementalEncoder.encode" title="codecs.IncrementalEncoder.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a>/<a class="reference internal" href="#codecs.IncrementalDecoder.decode" title="codecs.IncrementalDecoder.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> 方法后的全部输出相当于将所有通过无状态编码器/解码器进行编码/解码的单个输入连接在一起所得到的输出。</p>
+<section id="incrementalencoder-objects">
+<span id="incremental-encoder-objects"></span><h4 class="translated">IncrementalEncoder 对象<a class="headerlink" href="#incrementalencoder-objects" title="Link to this heading">¶</a></h4>
+<p class="translated"><a class="reference internal" href="#codecs.IncrementalEncoder" title="codecs.IncrementalEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalEncoder</span></code></a> 类用来对一个输入进行分步编码。 它定义了以下方法，每个增量式编码器都必须定义这些方法以便与 Python 编解码器注册表相兼容。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.IncrementalEncoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">IncrementalEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalEncoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#codecs.IncrementalEncoder" title="codecs.IncrementalEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalEncoder</span></code></a> 实例的构造器。</p>
+<p class="translated">所有增量式编码器必须提供此构造器接口。 它们可以自由地添加额外的关键字参数，但只有在这里定义的参数才会被 Python 编解码器注册表所使用。</p>
+<p class="translated"><a class="reference internal" href="#codecs.IncrementalEncoder" title="codecs.IncrementalEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalEncoder</span></code></a> 可以通过提供 <em>errors</em> 关键字参数来实现不同的错误处理方案。 可用的值请参阅 <a class="reference internal" href="#error-handlers"><span class="std std-ref">错误处理方案</span></a>。</p>
+<p class="translated"><em>errors</em> 参数将被赋值给一个同名的属性。 通过对此属性赋值就可以在 <a class="reference internal" href="#codecs.IncrementalEncoder" title="codecs.IncrementalEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalEncoder</span></code></a> 对象的生命期内在不同的错误处理策略之间进行切换。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalEncoder.encode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">编码 <em>object</em> (会将编码器的当前状态纳入考虑) 并返回已编码的结果对象。 如果这是对 <a class="reference internal" href="#codecs.encode" title="codecs.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a> 的最终调用则 <em>final</em> 必须为真值（默认为假值）。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalEncoder.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalEncoder.reset" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将编码器重置为初始状态。 输出将被丢弃：调用 <code class="docutils literal notranslate"><span class="pre">.encode(object,</span> <span class="pre">final=True)</span></code>，在必要时传入一个空字节串或字符串，重置编码器并得到输出。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalEncoder.getstate">
+<span class="sig-name descname"><span class="pre">getstate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalEncoder.getstate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回编码器的当前状态，该值必须为一个整数。 实现应当确保 <code class="docutils literal notranslate"><span class="pre">0</span></code> 是最常见的状态。 （比整数更复杂的状态表示可以通过编组/选择状态并将结果字符串的字节数据编码为整数来转换为一个整数值）。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalEncoder.setstate">
+<span class="sig-name descname"><span class="pre">setstate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalEncoder.setstate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将编码器的状态设为 <em>state</em>。 <em>state</em> 必须为 <a class="reference internal" href="#codecs.IncrementalEncoder.getstate" title="codecs.IncrementalEncoder.getstate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">getstate()</span></code></a> 所返回的一个编码器状态。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="incrementaldecoder-objects">
+<span id="incremental-decoder-objects"></span><h4 class="translated">IncrementalDecoder 对象<a class="headerlink" href="#incrementaldecoder-objects" title="Link to this heading">¶</a></h4>
+<p class="translated"><a class="reference internal" href="#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalDecoder</span></code></a> 类用来对一个输入进行分步解码。 它定义了以下方法，每个增量式解码器都必须定义这些方法以便与 Python 编解码器注册表相兼容。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.IncrementalDecoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">IncrementalDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalDecoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalDecoder</span></code></a> 实例的构造器。</p>
+<p class="translated">所有增量式解码器必须提供此构造器接口。 它们可以自由地添加额外的关键字参数，但只有在这里定义的参数才会被 Python 编解码器注册表所使用。</p>
+<p class="translated"><a class="reference internal" href="#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalDecoder</span></code></a> 可以通过提供 <em>errors</em> 关键字参数来实现不同的错误处理方案。 可用的值请参阅 <a class="reference internal" href="#error-handlers"><span class="std std-ref">错误处理方案</span></a>。</p>
+<p class="translated"><em>errors</em> 参数将被赋值给一个同名的属性。 通过对此属性赋值就可以在 <a class="reference internal" href="#codecs.IncrementalDecoder" title="codecs.IncrementalDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">IncrementalDecoder</span></code></a> 对象的生命期内在不同的错误处理策略之间进行切换。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalDecoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalDecoder.decode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">解码 <em>object</em> (会将解码器的当前状态纳入考虑) 并返回已解码的结果对象。 如果这是对 <a class="reference internal" href="#codecs.decode" title="codecs.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> 的最终调用则 <em>final</em> 必须为真值（默认为假值）。 如果 <em>final</em> 为真值则解码器必须对输入进行完全解码并且必须 刷新所有缓冲区。 如果这无法做到（例如由于在输入结束时字节串序列不完整）则它必须像在无状态的情况下那样初始化错误处理（这可能引发一个异常）。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalDecoder.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalDecoder.reset" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将解码器重置为初始状态。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalDecoder.getstate">
+<span class="sig-name descname"><span class="pre">getstate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalDecoder.getstate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回解码器的当前状态。 这必须为一个二元组，第一项必须是包含尚未解码的输入的缓冲区。 第二项必须为一个整数，可以表示附加状态信息。 （实现应当确保 <code class="docutils literal notranslate"><span class="pre">0</span></code> 是最常见的附加状态信息。） 如果此附加状态信息为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 则必须可以将解码器设为没有已缓冲输入并且以 <code class="docutils literal notranslate"><span class="pre">0</span></code> 作为附加状态信息，以便将先前已缓冲的输入馈送到解码器使其返回到先前的状态而不产生任何输出。 （比整数更复杂的附加状态信息可以通过编组/选择状态信息并将结果字符串的字节数据编码为整数来转换为一个整数值。）</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.IncrementalDecoder.setstate">
+<span class="sig-name descname"><span class="pre">setstate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.IncrementalDecoder.setstate" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将解码器的状态设为 <em>state</em>。 <em>state</em> 必须为 <a class="reference internal" href="#codecs.IncrementalDecoder.getstate" title="codecs.IncrementalDecoder.getstate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">getstate()</span></code></a> 所返回的一个解码器状态。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="stream-encoding-and-decoding">
+<h3 class="translated">流式的编码和解码<a class="headerlink" href="#stream-encoding-and-decoding" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 和 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 类提供了一些泛用工作接口，可被用来非常方便地实现新的编码格式子模块。 请参阅 <code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.utf_8</span></code> 中的示例了解如何做到这一点。</p>
+<section id="streamwriter-objects">
+<span id="stream-writer-objects"></span><h4 class="translated">StreamWriter 对象<a class="headerlink" href="#streamwriter-objects" title="Link to this heading">¶</a></h4>
+<p class="translated"><a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 类是 <a class="reference internal" href="#codecs.Codec" title="codecs.Codec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code></a> 的子类，它定义了以下方法，每个流式写入器都必须定义这些方法以便与 Python 编解码器注册表相兼容。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.StreamWriter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">StreamWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamWriter" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 实例的构造器。</p>
+<p class="translated">所有流式写入器必须提供此构造器接口。 它们可以自由地添加额外的关键字参数，但只有在这里定义的参数才会被 Python 编解码器注册表所使用。</p>
+<p class="translated"><em>stream</em> 参数必须为一个基于特定编解码器打开用于写入文本或二进制数据的文件型对象。</p>
+<p class="translated"><a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 可以通过提供 <em>errors</em> 关键字参数来实现不同的错误处理方案。 请参阅 <a class="reference internal" href="#error-handlers"><span class="std std-ref">错误处理方案</span></a> 了解下层的流式编解码器可支持的标准错误处理方案。</p>
+<p class="translated"><em>errors</em> 参数将被赋值给一个同名的属性。 通过对此属性赋值就可以在 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 对象的生命期内在不同的错误处理策略之间进行切换。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamWriter.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamWriter.write" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将编码后的对象内容写入到流。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamWriter.writelines">
+<span class="sig-name descname"><span class="pre">writelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamWriter.writelines" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将拼接后的字符串可迭代对象写入到流（可能通过重用 <a class="reference internal" href="#codecs.StreamWriter.write" title="codecs.StreamWriter.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 方法）。 无限长或非常大的可迭代对象不受支持。 标准的字节到字节编解码器不支持此方法。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamWriter.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamWriter.reset" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">重置用于保持内部状态的编解码器缓冲区。</p>
+<p class="translated">调用此方法应当确保在干净的状态下放入输出数据，以允许直接添加新的干净数据而无须重新扫描整个流来恢复状态。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">除了上述的方法，<a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 还必须继承来自下层流的所有其他方法和属性。</p>
+</section>
+<section id="streamreader-objects">
+<span id="stream-reader-objects"></span><h4 class="translated">StreamReader 对象<a class="headerlink" href="#streamreader-objects" title="Link to this heading">¶</a></h4>
+<p class="translated"><a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 类是 <a class="reference internal" href="#codecs.Codec" title="codecs.Codec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code></a> 的子类，它定义了以下方法，每个流式读取器都必须定义这些方法以便与 Python 编解码器注册表相兼容。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.StreamReader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">StreamReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamReader" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 实例的构造器。</p>
+<p class="translated">所有流式读取器必须提供此构造器接口。 它们可以自由地添加额外的关键字参数，但只有在这里定义的参数才会被 Python 编解码器注册表所使用。</p>
+<p class="translated"><em>stream</em> 参数必须为一个基于特定编解码器打开用于读取文本或二进制数据的文件型对象。</p>
+<p class="translated"><a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 可以通过提供 <em>errors</em> 关键字参数来实现不同的错误处理方案。 请参阅 <a class="reference internal" href="#error-handlers"><span class="std std-ref">错误处理方案</span></a> 了解下层的流式编解码器可支持的标准错误处理方案。</p>
+<p class="translated"><em>errors</em> 参数将被赋值给一个同名的属性。 通过对此属性赋值就可以在 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 对象的生命期内在不同的错误处理策略之间进行切换。</p>
+<p class="translated"><em>errors</em> 参数所允许的值集合可以使用 <a class="reference internal" href="#codecs.register_error" title="codecs.register_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_error()</span></code></a> 来扩展。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamReader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firstline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamReader.read" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">解码来自流的数据并返回结果对象。</p>
+<p class="translated"><em>chars</em> 参数指明要返回的解码后码位或字节数量。 <a class="reference internal" href="#codecs.StreamReader.read" title="codecs.StreamReader.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code></a> 方法绝不会返回超出请求数量的数据，但如果可用数量不足，它可能返回少于请求数量的数据。</p>
+<p class="translated"><em>size</em> 参数指明要读取并解码的已编码字节或码位的最大数量近似值。 解码器可以适当地修改此设置。 默认值 -1 表示尽可能多地读取并解码。 此形参的目的是防止一次性解码过于巨大的文件。</p>
+<p class="translated"><em>firstline</em> 旗标指明如果在后续行发生解码错误，则仅返回第一行就足够了。</p>
+<p class="translated">此方法应当使用“贪婪”读取策略，这意味着它应当在编码格式定义和给定大小所允许的情况下尽可能多地读取数据，例如，如果在流上存在可选的编码结束或状态标记，这些内容也应当被读取。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamReader.readline">
+<span class="sig-name descname"><span class="pre">readline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepends</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamReader.readline" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从输入流读取一行并返回解码后的数据。</p>
+<p class="translated">如果给定了 <em>size</em>，则将其作为 size 参数传递给流的 <a class="reference internal" href="#codecs.StreamReader.read" title="codecs.StreamReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 方法。</p>
+<p class="translated">如果 <em>keepends</em> 为假值，则行结束符将从返回的行中去除。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamReader.readlines">
+<span class="sig-name descname"><span class="pre">readlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sizehint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepends</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamReader.readlines" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从输入流读取所有行并将其作为一个行列表返回。</p>
+<p class="translated">行结束符会使用编解码器的 <a class="reference internal" href="#codecs.decode" title="codecs.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> 方法来实现，并且如果 <em>keepends</em> 为真值则会将其包含在列表条目中。</p>
+<p class="translated">如果给定了 <em>sizehint</em>，则将其作为 <em>size</em> 参数传递给流的 <a class="reference internal" href="#codecs.StreamReader.read" title="codecs.StreamReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 方法。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="codecs.StreamReader.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamReader.reset" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">重置用于保持内部状态的编解码器缓冲区。</p>
+<p class="translated">请注意不应当对流进行重定位。 使用此方法的主要目的是为了能够从解码错误中恢复。</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="translated">除了上述的方法，<a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 还必须继承来自下层流的所有其他方法和属性。</p>
+</section>
+<section id="streamreaderwriter-objects">
+<span id="stream-reader-writer"></span><h4 class="translated">StreamReaderWriter 对象<a class="headerlink" href="#streamreaderwriter-objects" title="Link to this heading">¶</a></h4>
+<p class="translated"><a class="reference internal" href="#codecs.StreamReaderWriter" title="codecs.StreamReaderWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReaderWriter</span></code></a> 是一个方便的类，允许对同时工作于读取和写入模式的流进行包装。</p>
+<p class="translated">其设计使得开发者可以使用 <a class="reference internal" href="#codecs.lookup" title="codecs.lookup"><code class="xref py py-func docutils literal notranslate"><span class="pre">lookup()</span></code></a> 函数所返回的工厂函数来构造实例。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.StreamReaderWriter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">StreamReaderWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Writer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamReaderWriter" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个 <a class="reference internal" href="#codecs.StreamReaderWriter" title="codecs.StreamReaderWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReaderWriter</span></code></a> 实例。 <em>stream</em> 必须为一个文件型对象。 <em>Reader</em> 和 <em>Writer</em> 必须为分别提供了 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 和 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 接口的工厂函数或类。 错误处理通过与流式读取器和写入器所定义的相同方式来完成。</p>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#codecs.StreamReaderWriter" title="codecs.StreamReaderWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReaderWriter</span></code></a> 实例定义了 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 和 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 类的组合接口。 它们还继承了来自下层流的所有其他方法和属性。</p>
+</section>
+<section id="streamrecoder-objects">
+<span id="stream-recoder-objects"></span><h4 class="translated">StreamRecoder 对象<a class="headerlink" href="#streamrecoder-objects" title="Link to this heading">¶</a></h4>
+<p class="translated"><a class="reference internal" href="#codecs.StreamRecoder" title="codecs.StreamRecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamRecoder</span></code></a> 将数据从一种编码格式转换为另一种，这对于处理不同编码环境的情况有时会很有用。</p>
+<p class="translated">其设计使得开发者可以使用 <a class="reference internal" href="#codecs.lookup" title="codecs.lookup"><code class="xref py py-func docutils literal notranslate"><span class="pre">lookup()</span></code></a> 函数所返回的工厂函数来构造实例。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="codecs.StreamRecoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">StreamRecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Writer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.StreamRecoder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建一个实现了双向转换的 <a class="reference internal" href="#codecs.StreamRecoder" title="codecs.StreamRecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamRecoder</span></code></a> 实例: <em>encode</em> 和 <em>decode</em> 工作于前端 —— 调用 <a class="reference internal" href="#codecs.StreamReader.read" title="codecs.StreamReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> 和 <a class="reference internal" href="#codecs.StreamWriter.write" title="codecs.StreamWriter.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> 的代码可见的数据，而 <em>Reader</em> 和 <em>Writer</em> 工作于后端 —— <em>stream</em> 中的数据。</p>
+<p class="translated">你可以使用这些对象来进行透明转码，例如从 Latin-1 转为 UTF-8 以及反向转换。</p>
+<p class="translated"><em>stream</em> 参数必须为一个文件型对象。</p>
+<p class="translated"><em>encode</em> 和 <em>decode</em> 参数必须遵循 <a class="reference internal" href="#codecs.Codec" title="codecs.Codec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code></a> 接口。 <em>Reader</em> 和 <em>Writer</em> 必须为分别提供了 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 和 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 接口对象的工厂函数或类。</p>
+<p class="translated">错误处理通过与流式读取器和写入器所定义的相同方式来完成。</p>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#codecs.StreamRecoder" title="codecs.StreamRecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamRecoder</span></code></a> 实例定义了 <a class="reference internal" href="#codecs.StreamReader" title="codecs.StreamReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamReader</span></code></a> 和 <a class="reference internal" href="#codecs.StreamWriter" title="codecs.StreamWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamWriter</span></code></a> 类的组合接口。 它们还继承了来自下层流的所有其他方法和属性。</p>
+</section>
+</section>
+</section>
+<section id="encodings-and-unicode">
+<span id="encodings-overview"></span><h2 class="translated">编码格式与 Unicode<a class="headerlink" href="#encodings-and-unicode" title="Link to this heading">¶</a></h2>
+<p class="translated">字符串在系统内部存储为 <code class="docutils literal notranslate"><span class="pre">U+0000</span></code>--<code class="docutils literal notranslate"><span class="pre">U+10FFFF</span></code> 范围内的码位序列。 （请参阅 <span class="target" id="index-27"></span><a class="pep reference external" href="https://peps.python.org/pep-0393/"><strong>PEP 393</strong></a> 了解有关实现的详情。） 一旦字符串对象要在 CPU 和内存以外使用，字节的大小端顺序和字节数组的存储方式就成为一个影响因素。 如同使用其他编解码器一样，将字符串序列化为字节序列被称为 <em>编码</em>，而从字节序列重建字符串被称为 <em>解码</em>。 存在许多不同的文本序列化编解码器，它们被统称为 <a class="reference internal" href="../glossary.html#term-text-encoding"><span class="xref std std-term">文本编码格式</span></a>。</p>
+<p class="translated">最简单的文本编码格式 (称为 <code class="docutils literal notranslate"><span class="pre">'latin-1'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'iso-8859-1'</span></code>) 将码位 0--255 映射为字节值 <code class="docutils literal notranslate"><span class="pre">0x0</span></code>--<code class="docutils literal notranslate"><span class="pre">0xff</span></code>，这意味着包含 <code class="docutils literal notranslate"><span class="pre">U+00FF</span></code> 以上码位的字符串对象无法使用此编解码器进行编码。 这样做将引发 <a class="reference internal" href="exceptions.html#UnicodeEncodeError" title="UnicodeEncodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeEncodeError</span></code></a>，其形式类似下面这样（不过详细的错误信息可能会有所不同）: <code class="docutils literal notranslate"><span class="pre">UnicodeEncodeError:</span> <span class="pre">'latin-1'</span> <span class="pre">codec</span> <span class="pre">can't</span> <span class="pre">encode</span> <span class="pre">character</span> <span class="pre">'\u1234'</span> <span class="pre">in</span> <span class="pre">position</span> <span class="pre">3:</span> <span class="pre">ordinal</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">range(256)</span></code>。</p>
+<p class="translated">还有另外一组编码格式（所谓的字符映射编码）会选择全部 Unicode 码位的不同子集并设定如何将这些码位映射为字节值 <code class="docutils literal notranslate"><span class="pre">0x0</span></code>--<code class="docutils literal notranslate"><span class="pre">0xff</span></code>。 要查看这是如何实现的，只需简单地打开相应源码例如 <code class="file docutils literal notranslate"><span class="pre">encodings/cp1252.py</span></code> (这是一个主要在 Windows 上使用的编码格式)。 其中会有一个包含 256 个字符的字符串常量，指明每个字符所映射的字节值。</p>
+<p class="translated">所有这些编码格式只能编码在 Unicode 中定义的 1114112 个码位中的 256 个。 一种能够存储每个 Unicode 码位的简单直观的做法就是将每个码位存储为四个连续的字节。 这有两种可能的方式：以大端序或小端序存储字节。 这两种编码格式分别被称为 <code class="docutils literal notranslate"><span class="pre">UTF-32-BE</span></code> 和 <code class="docutils literal notranslate"><span class="pre">UTF-32-LE</span></code>。 它们是有缺点的，举例来说，如果你在小端序的机器上使用 <code class="docutils literal notranslate"><span class="pre">UTF-32-BE</span></code> 你就必须在编码和解码时交换字节顺序。 Python 的 <code class="docutils literal notranslate"><span class="pre">UTF-16</span></code> 和 <code class="docutils literal notranslate"><span class="pre">UTF-32</span></code> 编解码器会在没有 BOM 时通过使用平台的原生字节序来避免这个问题。 Python 会遵循主流平台的最佳实践，这样原生字节序的数据在处理时就没有冗余的字节交换，即使 Unicode 标准在未指明字节序时默认使用大端序。 当 CPU 以不同的字节序读取字节数据时，必须进行字节交换。 为了能够检测 <code class="docutils literal notranslate"><span class="pre">UTF-16</span></code> 或 <code class="docutils literal notranslate"><span class="pre">UTF-32</span></code> 字节序列的字节序，可以使用 BOM (&quot;Byte Order Mark&quot;)。 对应 Unicode 字符 <code class="docutils literal notranslate"><span class="pre">U+FEFF</span></code>。 此字符可被添加到每个 <code class="docutils literal notranslate"><span class="pre">UTF-16</span></code> 或 <code class="docutils literal notranslate"><span class="pre">UTF-32</span></code> 字节序列之前。此字符的交换字节版本 (<code class="docutils literal notranslate"><span class="pre">0xFFFE</span></code>) 是不可在 Unicode 文本中出现的非法字符。 当一个 <code class="docutils literal notranslate"><span class="pre">UTF-16</span></code> 或 <code class="docutils literal notranslate"><span class="pre">UTF-32</span></code> 的首字符为 <code class="docutils literal notranslate"><span class="pre">U+FFFE</span></code> 时，该字节数据就必须在解码时交换字节序。</p>
+<p class="translated">不幸的是字符 <code class="docutils literal notranslate"><span class="pre">U+FEFF</span></code> 还有另一个作为 <code class="docutils literal notranslate"><span class="pre">ZERO</span> <span class="pre">WIDTH</span> <span class="pre">NO-BREAK</span> <span class="pre">SPACE</span></code> 的含义：表示没有宽度且不允许拆分单词的字符。 例如它可被用于对连字算法进行提示。 在 Unicode 4.0 中 <code class="docutils literal notranslate"><span class="pre">U+FEFF</span></code> 作为 <code class="docutils literal notranslate"><span class="pre">ZERO</span> <span class="pre">WIDTH</span> <span class="pre">NO-BREAK</span> <span class="pre">SPACE</span></code> 的含义已被弃用 (使用 <code class="docutils literal notranslate"><span class="pre">U+2060</span></code> (<code class="docutils literal notranslate"><span class="pre">WORD</span> <span class="pre">JOINER</span></code>) 担任此任务)。 不过 Unicode 软件仍然必须能够在两种任务下处理 <code class="docutils literal notranslate"><span class="pre">U+FEFF</span></code>: 作为 BOM 它是确定已编码字节串的存储布局的标记，并会在字节序列被解码为字符串时消失；作为 <code class="docutils literal notranslate"><span class="pre">ZERO</span> <span class="pre">WIDTH</span> <span class="pre">NO-BREAK</span> <span class="pre">SPACE</span></code> 它是会如任何其他字符一样被解码的普通字符。</p>
+<p class="translated">还有另一种编码格式能够对所有 Unicode 字符进行编码：UTF-8。 UTF-8 是一种 8 位编码，这意味着在 UTF-8 中没有字节顺序问题。 UTF-8 字节序列中的每个字节由两部分组成：标志位（最重要的位）和内容位。 标志位是由零至四个值为 <code class="docutils literal notranslate"><span class="pre">1</span></code> 的二进制位加一个值为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 的二进制位构成的序列。 Unicode 字符会按以下形式进行编码（其中 x 为内容位，当拼接为一体时将给出对应的 Unicode 字符）:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">范围</p></th>
+<th class="head"><p class="translated">编码</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">U-00000000</span></code> ... <code class="docutils literal notranslate"><span class="pre">U-0000007F</span></code></p></td>
+<td><p class="translated">0xxxxxxx</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">U-00000080</span></code> ... <code class="docutils literal notranslate"><span class="pre">U-000007FF</span></code></p></td>
+<td><p class="translated">110xxxxx 10xxxxxx</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">U-00000800</span></code> ... <code class="docutils literal notranslate"><span class="pre">U-0000FFFF</span></code></p></td>
+<td><p class="translated">1110xxxx 10xxxxxx 10xxxxxx</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated"><code class="docutils literal notranslate"><span class="pre">U-00010000</span></code> ... <code class="docutils literal notranslate"><span class="pre">U-0010FFFF</span></code></p></td>
+<td><p class="translated">11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</p></td>
+</tr>
+</tbody>
+</table>
+<p class="translated">Unicode 字符最不重要的一个位就是最右侧的二进制位 x。</p>
+<p class="translated">由于 UTF-8 是一种 8 位编码格式，因此 BOM 是不必要的，并且已编码字符串中的任何 <code class="docutils literal notranslate"><span class="pre">U+FEFF</span></code> 字符（即使是作为第一个字符）都会被视为是 <code class="docutils literal notranslate"><span class="pre">ZERO</span> <span class="pre">WIDTH</span> <span class="pre">NO-BREAK</span> <span class="pre">SPACE</span></code>。</p>
+<p class="translated">在没有外部信息的情况下将不可能毫无疑义地确定一个字符串使用了何种编码格式。 每种字符映射编码格式都可以解码任意的随机字节序列。 然而对 UTF-8 来说这却是不可能的，因为 UTF-8 字节序列具有不允许任意字节序列的特别结构。 为了提升 UTF-8 编码格式检测的可靠性，Microsoft 发明了一种 UTF-8 的变体形式 (Python 称之为 <code class="docutils literal notranslate"><span class="pre">&quot;utf-8-sig&quot;</span></code>) 专门用于其 Notepad 程序：在任何 Unicode 字节被写入文件之前，会先写入一个 UTF-8 编码的 BOM (它看起来是这样一个字节序列: <code class="docutils literal notranslate"><span class="pre">0xef</span></code>, <code class="docutils literal notranslate"><span class="pre">0xbb</span></code>, <code class="docutils literal notranslate"><span class="pre">0xbf</span></code>)。 由于任何字符映射编码后的文件都不大可能以这些字节值开头 (例如它们会映射为</p>
+<blockquote>
+<div><div class="line-block">
+<div class="translated line">LATIN SMALL LETTER I WITH DIAERESIS</div>
+<div class="translated line">RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK</div>
+<div class="translated line">INVERTED QUESTION MARK</div>
+</div>
+</div></blockquote>
+<p class="translated">对于 iso-8859-1 编码格式来说），这提升了根据字节序列来正确猜测 <code class="docutils literal notranslate"><span class="pre">utf-8-sig</span></code> 编码格式的成功率。 所以在这里 BOM 的作用并不是帮助确定生成字节序列所使用的字节顺序，而是作为帮助猜测编码格式的记号。 在进行编码时 utf-8-sig 编解码器将把 <code class="docutils literal notranslate"><span class="pre">0xef</span></code>, <code class="docutils literal notranslate"><span class="pre">0xbb</span></code>, <code class="docutils literal notranslate"><span class="pre">0xbf</span></code> 作为头三个字节写入文件。 在进行解码时 <code class="docutils literal notranslate"><span class="pre">utf-8-sig</span></code> 将跳过这三个字节，如果它们作为文件的头三个字节出现的话。 在 UTF-8 中并不推荐使用 BOM，通常应当避免它们的出现。</p>
+</section>
+<section id="standard-encodings">
+<span id="id3"></span><h2 class="translated">标准编码<a class="headerlink" href="#standard-encodings" title="Link to this heading">¶</a></h2>
+<p class="translated">Python 内置了多种编解码器，这些编解码器既可以通过 C 函数实现，也可以使用字典作为映射表来实现。下表按名称列出了这些编解码器，同时提供了部分常用别名以及该编码格式可能适用的语言。需要注意的是，所列的别名列表和语言列表并非详尽无遗。此外，请注意，仅存在大小写差异或使用连字符替代下划线的拼写变体同样属于有效别名，因为在经过 <a class="reference internal" href="#encodings.normalize_encoding" title="encodings.normalize_encoding"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_encoding()</span></code></a> 规范化处理后，这些形式是等效的。例如，<code class="docutils literal notranslate"><span class="pre">'utf-8'</span></code> 就是 <code class="docutils literal notranslate"><span class="pre">'utf_8'</span></code> 编解码器的一个有效别名。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">下表列出了最常见的编解码器别名，如需查看完整列表，请参阅源文件 <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/encodings/aliases.py">aliases.py</a>。</p>
+</div>
+<p class="translated">在 Windows 系统上，<code class="docutils literal notranslate"><span class="pre">cpXXX</span></code> 编解码器可用于所有代码页。 但只有下表中列出的编解码器才能保证在其他平台上存在。</p>
+<div class="impl-detail compound">
+<p class="translated">有些常见编码格式可以绕过编解码器查找机制来提升性能。 这些优化机会对于 CPython 来说仅能通过一组有限的别名（大小写不敏感）来识别：utf-8, utf8, latin-1, latin1, iso-8859-1, iso8859-1, mbcs (Windows 专属), ascii, us-ascii, utf-16, utf16, utf-32, utf32, 也包括使用下划线替代连字符的的形式。 使用这些编码格式的其他别名可能会导致更慢的执行速度。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>可识别针对 us-ascii 的优化机会。</p>
+</div>
+</div>
+<p class="translated">许多字符集都支持相同的语言。 它们在个别字符（例如是否支持 EURO SIGN 等）以及给字符所分配的码位方面存在差异。 特别是对于欧洲语言来说，通常存在以下几种变体：</p>
+<ul class="simple">
+<li><p class="translated">某个 ISO 8859 编码集</p></li>
+<li><p class="translated">某个 Microsoft Windows 编码页，通常是派生自某个 8859 编码集，但会用附加的图形字符来替换控制字符。</p></li>
+<li><p class="translated">某个 IBM EBCDIC 编码页</p></li>
+<li><p class="translated">某个 IBM PC 编码页，通常会兼容 ASCII</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">编码</p></th>
+<th class="head"><p class="translated">别名</p></th>
+<th class="head"><p class="translated">语言</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">ascii</p></td>
+<td><p class="translated">646, us-ascii</p></td>
+<td><p class="translated">英语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">big5</p></td>
+<td><p class="translated">big5-tw, csbig5</p></td>
+<td><p class="translated">繁体中文</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">big5hkscs</p></td>
+<td><p class="translated">big5-hkscs, hkscs</p></td>
+<td><p class="translated">繁体中文</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp037</p></td>
+<td><p class="translated">IBM037, IBM039</p></td>
+<td><p class="translated">英语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp273</p></td>
+<td><p class="translated">273, IBM273, csIBM273</p></td>
+<td><p class="translated">德语</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp424</p></td>
+<td><p class="translated">EBCDIC-CP-HE, IBM424</p></td>
+<td><p class="translated">希伯来语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp437</p></td>
+<td><p class="translated">437, IBM437</p></td>
+<td><p class="translated">英语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp500</p></td>
+<td><p class="translated">EBCDIC-CP-BE, EBCDIC-CP-CH,
+IBM500</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp720</p></td>
+<td></td>
+<td><p class="translated">阿拉伯语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp737</p></td>
+<td></td>
+<td><p class="translated">希腊语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp775</p></td>
+<td><p class="translated">IBM775</p></td>
+<td><p class="translated">波罗的海语言</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp850</p></td>
+<td><p class="translated">850, IBM850</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp852</p></td>
+<td><p class="translated">852, IBM852</p></td>
+<td><p class="translated">中欧和东欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp855</p></td>
+<td><p class="translated">855, IBM855</p></td>
+<td><p class="translated">白俄罗斯语，保加利亚语，马其顿语，俄语，塞尔维亚语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp856</p></td>
+<td></td>
+<td><p class="translated">希伯来语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp857</p></td>
+<td><p class="translated">857, IBM857</p></td>
+<td><p class="translated">土耳其语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp858</p></td>
+<td><p class="untranslated">858, IBM00858</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp860</p></td>
+<td><p class="translated">860, IBM860</p></td>
+<td><p class="translated">葡萄牙语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp861</p></td>
+<td><p class="translated">861, CP-IS, IBM861</p></td>
+<td><p class="translated">冰岛语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp862</p></td>
+<td><p class="translated">862, IBM862</p></td>
+<td><p class="translated">希伯来语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp863</p></td>
+<td><p class="translated">863, IBM863</p></td>
+<td><p class="translated">加拿大语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp864</p></td>
+<td><p class="translated">IBM864</p></td>
+<td><p class="translated">阿拉伯语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp865</p></td>
+<td><p class="translated">865, IBM865</p></td>
+<td><p class="translated">丹麦语/挪威语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp866</p></td>
+<td><p class="translated">866, IBM866</p></td>
+<td><p class="translated">俄语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp869</p></td>
+<td><p class="translated">869, CP-GR, IBM869</p></td>
+<td><p class="translated">希腊语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp874</p></td>
+<td></td>
+<td><p class="translated">泰语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp875</p></td>
+<td></td>
+<td><p class="translated">希腊语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp932</p></td>
+<td><p class="translated">932, ms932, mskanji, ms-kanji,
+windows-31j</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp949</p></td>
+<td><p class="translated">949, ms949, uhc</p></td>
+<td><p class="translated">韩语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp950</p></td>
+<td><p class="translated">950, ms950</p></td>
+<td><p class="translated">繁体中文</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1006</p></td>
+<td></td>
+<td><p class="translated">乌尔都语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp1026</p></td>
+<td><p class="translated">ibm1026</p></td>
+<td><p class="translated">土耳其语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1125</p></td>
+<td><p class="translated">1125, ibm1125, cp866u, ruscii</p></td>
+<td><p class="translated">乌克兰语</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp1140</p></td>
+<td><p class="untranslated">IBM01140</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1250</p></td>
+<td><p class="translated">windows-1250</p></td>
+<td><p class="translated">中欧和东欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp1251</p></td>
+<td><p class="translated">windows-1251</p></td>
+<td><p class="translated">白俄罗斯语，保加利亚语，马其顿语，俄语，塞尔维亚语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1252</p></td>
+<td><p class="translated">windows-1252</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp1253</p></td>
+<td><p class="translated">windows-1253</p></td>
+<td><p class="translated">希腊语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1254</p></td>
+<td><p class="translated">windows-1254</p></td>
+<td><p class="translated">土耳其语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp1255</p></td>
+<td><p class="translated">windows-1255</p></td>
+<td><p class="translated">希伯来语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1256</p></td>
+<td><p class="translated">windows-1256</p></td>
+<td><p class="translated">阿拉伯语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">cp1257</p></td>
+<td><p class="translated">windows-1257</p></td>
+<td><p class="translated">波罗的海语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">cp1258</p></td>
+<td><p class="translated">windows-1258</p></td>
+<td><p class="translated">越南语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">euc_jp</p></td>
+<td><p class="translated">eucjp, ujis, u-jis</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">euc_jis_2004</p></td>
+<td><p class="translated">jisx0213, eucjis2004</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">euc_jisx0213</p></td>
+<td><p class="translated">eucjisx0213</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">euc_kr</p></td>
+<td><p class="translated">euckr, korean, ksc5601,
+ks_c-5601, ks_c-5601-1987,
+ksx1001, ks_x-1001</p></td>
+<td><p class="translated">韩语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">gb2312</p></td>
+<td><p class="translated">chinese, csiso58gb231280,
+euc-cn, euccn, eucgb2312-cn,
+gb2312-1980, gb2312-80,
+iso-ir-58</p></td>
+<td><p class="translated">简体中文</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">gbk</p></td>
+<td><p class="translated">936, cp936, ms936</p></td>
+<td><p class="translated">统一汉语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">gb18030</p></td>
+<td><p class="translated">gb18030-2000</p></td>
+<td><p class="translated">统一汉语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">hz</p></td>
+<td><p class="translated">hzgb, hz-gb, hz-gb-2312</p></td>
+<td><p class="translated">简体中文</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso2022_jp</p></td>
+<td><p class="translated">csiso2022jp, iso2022jp,
+iso-2022-jp</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso2022_jp_1</p></td>
+<td><p class="translated">iso2022jp-1, iso-2022-jp-1</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso2022_jp_2</p></td>
+<td><p class="translated">iso2022jp-2, iso-2022-jp-2</p></td>
+<td><p class="translated">日语，韩语，简体中文，西欧，希腊语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso2022_jp_2004</p></td>
+<td><p class="translated">iso2022jp-2004,
+iso-2022-jp-2004</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso2022_jp_3</p></td>
+<td><p class="translated">iso2022jp-3, iso-2022-jp-3</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso2022_jp_ext</p></td>
+<td><p class="translated">iso2022jp-ext, iso-2022-jp-ext</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso2022_kr</p></td>
+<td><p class="translated">csiso2022kr, iso2022kr,
+iso-2022-kr</p></td>
+<td><p class="translated">韩语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">latin_1</p></td>
+<td><p class="translated">iso-8859-1, iso8859-1, 8859,
+cp819, latin, latin1, L1</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_2</p></td>
+<td><p class="translated">iso-8859-2, latin2, L2</p></td>
+<td><p class="translated">中欧和东欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_3</p></td>
+<td><p class="translated">iso-8859-3, latin3, L3</p></td>
+<td><p class="translated">世界语，马耳他语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_4</p></td>
+<td><p class="translated">iso-8859-4, latin4, L4</p></td>
+<td><p class="translated">北欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_5</p></td>
+<td><p class="translated">iso-8859-5, cyrillic</p></td>
+<td><p class="translated">白俄罗斯语，保加利亚语，马其顿语，俄语，塞尔维亚语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_6</p></td>
+<td><p class="translated">iso-8859-6, arabic</p></td>
+<td><p class="translated">阿拉伯语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_7</p></td>
+<td><p class="translated">iso-8859-7, greek, greek8</p></td>
+<td><p class="translated">希腊语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_8</p></td>
+<td><p class="translated">iso-8859-8, hebrew</p></td>
+<td><p class="translated">希伯来语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_9</p></td>
+<td><p class="translated">iso-8859-9, latin5, L5</p></td>
+<td><p class="translated">土耳其语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_10</p></td>
+<td><p class="translated">iso-8859-10, latin6, L6</p></td>
+<td><p class="translated">北欧语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_11</p></td>
+<td><p class="translated">iso-8859-11, thai</p></td>
+<td><p class="translated">泰语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_13</p></td>
+<td><p class="translated">iso-8859-13, latin7, L7</p></td>
+<td><p class="translated">波罗的海语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_14</p></td>
+<td><p class="translated">iso-8859-14, latin8, L8</p></td>
+<td><p class="translated">凯尔特语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">iso8859_15</p></td>
+<td><p class="translated">iso-8859-15, latin9, L9</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">iso8859_16</p></td>
+<td><p class="translated">iso-8859-16, latin10, L10</p></td>
+<td><p class="translated">东南欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">johab</p></td>
+<td><p class="translated">cp1361, ms1361</p></td>
+<td><p class="translated">韩语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">koi8_r</p></td>
+<td></td>
+<td><p class="translated">俄语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">koi8_t</p></td>
+<td></td>
+<td><p class="translated">塔吉克</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p class="translated">koi8_u</p></td>
+<td></td>
+<td><p class="translated">乌克兰语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">kz1048</p></td>
+<td><p class="translated">kz_1048, strk1048_2002, rk1048</p></td>
+<td><p class="translated">哈萨克语</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p class="translated">mac_cyrillic</p></td>
+<td><p class="translated">maccyrillic</p></td>
+<td><p class="translated">白俄罗斯语，保加利亚语，马其顿语，俄语，塞尔维亚语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">mac_greek</p></td>
+<td><p class="translated">macgreek</p></td>
+<td><p class="translated">希腊语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">mac_iceland</p></td>
+<td><p class="translated">maciceland</p></td>
+<td><p class="translated">冰岛语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">mac_latin2</p></td>
+<td><p class="translated">maclatin2, maccentraleurope,
+mac_centeuro</p></td>
+<td><p class="translated">中欧和东欧</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">mac_roman</p></td>
+<td><p class="translated">macroman, macintosh</p></td>
+<td><p class="translated">西欧</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">mac_turkish</p></td>
+<td><p class="translated">macturkish</p></td>
+<td><p class="translated">土耳其语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">ptcp154</p></td>
+<td><p class="translated">csptcp154, pt154, cp154,
+cyrillic-asian</p></td>
+<td><p class="translated">哈萨克语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">shift_jis</p></td>
+<td><p class="translated">csshiftjis, shiftjis, sjis,
+s_jis</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">shift_jis_2004</p></td>
+<td><p class="translated">shiftjis2004, sjis_2004,
+sjis2004</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">shift_jisx0213</p></td>
+<td><p class="translated">shiftjisx0213, sjisx0213,
+s_jisx0213</p></td>
+<td><p class="translated">日语</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">utf_32</p></td>
+<td><p class="translated">U32, utf32</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">utf_32_be</p></td>
+<td><p class="translated">UTF-32BE</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">utf_32_le</p></td>
+<td><p class="translated">UTF-32LE</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">utf_16</p></td>
+<td><p class="translated">U16, utf16</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">utf_16_be</p></td>
+<td><p class="translated">UTF-16BE</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">utf_16_le</p></td>
+<td><p class="translated">UTF-16LE</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">utf_7</p></td>
+<td><p class="translated">U7, unicode-1-1-utf-7</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">utf_8</p></td>
+<td><p class="translated">U8, UTF, utf8, cp65001</p></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">utf_8_sig</p></td>
+<td></td>
+<td><p class="translated">所有语言</p></td>
+</tr>
+</tbody>
+</table>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>utf-16* 和 utf-32* 编码器将不再允许编码代理码位 (<code class="docutils literal notranslate"><span class="pre">U+D800</span></code>--<code class="docutils literal notranslate"><span class="pre">U+DFFF</span></code>)。 utf-32* 解码器将不再解码与代理码位相对应的字节序列。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">cp65001</span></code> 现在是 <code class="docutils literal notranslate"><span class="pre">utf_8</span></code> 的一个别名。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>在 Windows 系统上，现在所有代码页都可以使用 <code class="docutils literal notranslate"><span class="pre">cpXXX</span></code> 编解码器了。</p>
+</div>
+</section>
+<section id="python-specific-encodings">
+<h2 class="translated">Python 专属的编码格式<a class="headerlink" href="#python-specific-encodings" title="Link to this heading">¶</a></h2>
+<p class="translated">有一些预定义编解码器是 Python 专属的，因此它们在 Python 之外没有意义。 这些编解码器按其所预期的输入和输出类型在下表中列出（请注意虽然文本编码是编解码器最常见的使用场景，但下层的编解码器架构支持任意数据转换而不仅是文本编码）。 对于非对称编解码器，该列描述的含义是编码方向。</p>
+<section id="text-encodings">
+<h3 class="translated">文字编码<a class="headerlink" href="#text-encodings" title="Link to this heading">¶</a></h3>
+<p class="translated">以下编解码器提供了 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 到 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 的编码和 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> 到 <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> 的解码，类似于 Unicode 文本编码。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">编码</p></th>
+<th class="head"><p class="translated">别名</p></th>
+<th class="head"><p class="translated">含意</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">idna</p></td>
+<td></td>
+<td><p class="translated">实现 <span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3490.html"><strong>RFC 3490</strong></a>，另请参阅 <a class="reference internal" href="#module-encodings.idna" title="encodings.idna: Internationalized Domain Names implementation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.idna</span></code></a> 。仅支持 <code class="docutils literal notranslate"><span class="pre">errors='strict'</span></code> 。</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">mbcs</p></td>
+<td><p class="translated">ansi,
+dbcs</p></td>
+<td><p class="translated">Windows 专属：根据 ANSI 代码页（CP_ACP）对操作数进行编码。</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">oem</p></td>
+<td></td>
+<td><p class="translated">Windows 专属：根据 OEM 代码页（CP_OEMCP）对操作数进行编码。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6.</span></p>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="translated">palmos</p></td>
+<td></td>
+<td><p class="translated">PalmOS 3.5 的编码格式</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">punycode</p></td>
+<td></td>
+<td><p class="translated">实现 <span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3492.html"><strong>RFC 3492</strong></a>。 不支持有状态编解码器。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p class="untranslated">The decoding and
+encoding algorithms
+scale poorly, so
+limit the length of
+untrusted input.</p>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="translated">raw_unicode_escape</p></td>
+<td></td>
+<td><p class="translated">Latin-1 编码格式附带对其他码位以 <code class="samp docutils literal notranslate"><span class="pre">\u</span><em><span class="pre">XXXX</span></em></code> 和 <code class="samp docutils literal notranslate"><span class="pre">\U</span><em><span class="pre">XXXXXXXX</span></em></code> 进行编码。 现有的反斜杠不会以任何方式转义。 它被用于 Python 的 pickle 协议。</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">undefined</p></td>
+<td></td>
+<td><p class="translated">该编解码器应当仅用于测试目的。</p>
+<p class="translated">所有转换都将引发异常，甚至对空字符串也不例外。 错误处理方案会被忽略。</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="translated">unicode_escape</p></td>
+<td></td>
+<td><p class="translated">适合用于以 ASCII 编码的 Python 源代码中的 Unicode 字面值内容的编码格式，但引号不会被转义。 对 Latin-1 源代码进行解码。 请注意 Python 源代码实际上默认使用 UTF-8。</p></td>
+</tr>
+</tbody>
+</table>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>&quot;unicode_internal&quot; 编解码器已被移除。</p>
+</div>
+</section>
+<section id="binary-transforms">
+<span id="id4"></span><h3 class="translated">二进制转换<a class="headerlink" href="#binary-transforms" title="Link to this heading">¶</a></h3>
+<p class="translated">以下编解码器提供了二进制转换: <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> 到 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 的映射。 它们不被 <a class="reference internal" href="stdtypes.html#bytes.decode" title="bytes.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytes.decode()</span></code></a> 所支持（该方法只生成 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 类型的输出）。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">编码</p></th>
+<th class="head"><p class="translated">别名</p></th>
+<th class="head"><p class="translated">含意</p></th>
+<th class="head"><p class="translated">编码器/解码器</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">base64_codec <a class="footnote-reference brackets" href="#b64" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p class="translated">base64, base_64</p></td>
+<td><p class="translated">将操作数转换为多行 MIME base64 (结果总是包含一个末尾的 <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>)</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>接受任意 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a> 作为输入用于编码和解码</p>
+</div>
+</td>
+<td><p class="translated"><a class="reference internal" href="base64.html#base64.encodebytes" title="base64.encodebytes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">base64.encodebytes()</span></code></a> /
+<a class="reference internal" href="base64.html#base64.decodebytes" title="base64.decodebytes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">base64.decodebytes()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">bz2_codec</p></td>
+<td><p class="translated">bz2</p></td>
+<td><p class="translated">使用bz2压缩操作数</p></td>
+<td><p class="translated"><a class="reference internal" href="bz2.html#bz2.compress" title="bz2.compress"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bz2.compress()</span></code></a> /
+<a class="reference internal" href="bz2.html#bz2.decompress" title="bz2.decompress"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bz2.decompress()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">hex_codec</p></td>
+<td><p class="translated">hex</p></td>
+<td><p class="translated">将操作数转换为十六进制表示，每个字节有两位数</p></td>
+<td><p class="translated"><a class="reference internal" href="binascii.html#binascii.b2a_hex" title="binascii.b2a_hex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">binascii.b2a_hex()</span></code></a> /
+<a class="reference internal" href="binascii.html#binascii.a2b_hex" title="binascii.a2b_hex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">binascii.a2b_hex()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">quopri_codec</p></td>
+<td><p class="translated">quopri,
+quotedprintable,
+quoted_printable</p></td>
+<td><p class="translated">将操作数转换为 MIME 带引号的可打印数据</p></td>
+<td><p class="translated"><a class="reference internal" href="quopri.html#quopri.encode" title="quopri.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">quopri.encode()</span></code></a> 且 <code class="docutils literal notranslate"><span class="pre">quotetabs=True</span></code> / <a class="reference internal" href="quopri.html#quopri.decode" title="quopri.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">quopri.decode()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">uu_codec</p></td>
+<td><p class="translated">uu</p></td>
+<td><p class="translated">使用uuencode转换操作数</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">zlib_codec</p></td>
+<td><p class="translated">zip, zlib</p></td>
+<td><p class="translated">使用gzip压缩操作数</p></td>
+<td><p class="translated"><a class="reference internal" href="zlib.html#zlib.compress" title="zlib.compress"><code class="xref py py-meth docutils literal notranslate"><span class="pre">zlib.compress()</span></code></a> /
+<a class="reference internal" href="zlib.html#zlib.decompress" title="zlib.decompress"><code class="xref py py-meth docutils literal notranslate"><span class="pre">zlib.decompress()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="b64" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
+<p class="translated">除了 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">字节类对象</span></a>，<code class="docutils literal notranslate"><span class="pre">'base64_codec'</span></code> 也接受仅包含 ASCII 的 <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 实例用于解码</p>
+</aside>
+</aside>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2: </span>恢复二进制转换。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>恢复二进制转换的别名。</p>
+</div>
+</section>
+<section id="standalone-codec-functions">
+<span id="id6"></span><h3 class="translated">独立编解码器函数<a class="headerlink" href="#standalone-codec-functions" title="Link to this heading">¶</a></h3>
+<p class="translated">下列函数提供了与编解码器类似的编码和解码功能，但并不能通过 <a class="reference internal" href="#codecs.encode" title="codecs.encode"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.encode()</span></code></a> 或 <a class="reference internal" href="#codecs.decode" title="codecs.decode"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.decode()</span></code></a> 作为已命名的编解码器使用。 它们仅供内部使用（例如，由 <a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> 使用）且其行为类似于已在 Python 3 中被移除的 <code class="docutils literal notranslate"><span class="pre">string_escape</span></code> 编解码器。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.codecs.escape_encode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">escape_encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.codecs.escape_encode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用转义序列对 <em>input</em> 进行编码。 类似于字节串上的 <a class="reference internal" href="functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 产生转义后的字节值。</p>
+<p class="translated"><em>input</em> 必须是一个 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象。</p>
+<p class="translated">返回一个元组 <code class="docutils literal notranslate"><span class="pre">(output,</span> <span class="pre">length)</span></code> 其中 <em>output</em> 为 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象而 <em>length</em> 为消耗的字节数。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="codecs.codecs.escape_decode">
+<span class="sig-prename descclassname"><span class="pre">codecs.</span></span><span class="sig-name descname"><span class="pre">escape_decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#codecs.codecs.escape_decode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>input</em> 从转义序列解码回原始字节串。</p>
+<p class="translated"><em>input</em> 必须是一个 <a class="reference internal" href="../glossary.html#term-bytes-like-object"><span class="xref std std-term">bytes-like object</span></a>。</p>
+<p class="translated">返回一个元组 <code class="docutils literal notranslate"><span class="pre">(output,</span> <span class="pre">length)</span></code> 其中 <em>output</em> 为 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 对象而 <em>length</em> 为消耗的字节数。</p>
+</dd></dl>
+
+</section>
+<section id="text-transforms">
+<span id="id7"></span><h3 class="translated">文字转换<a class="headerlink" href="#text-transforms" title="Link to this heading">¶</a></h3>
+<p class="translated">以下编解码器提供了文本转换: <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> 到 <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> 的映射。 它不被 <a class="reference internal" href="stdtypes.html#str.encode" title="str.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.encode()</span></code></a> 所支持（该方法只生成 <a class="reference internal" href="stdtypes.html#bytes" title="bytes"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> 类型的输出）。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">编码</p></th>
+<th class="head"><p class="translated">别名</p></th>
+<th class="head"><p class="translated">含意</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">rot_13</p></td>
+<td><p class="translated">rot13</p></td>
+<td><p class="translated">返回操作数的凯撒密码加密结果</p></td>
+</tr>
+</tbody>
+</table>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2: </span>恢复 <code class="docutils literal notranslate"><span class="pre">rot_13</span></code> 文本转换。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>恢复 <code class="docutils literal notranslate"><span class="pre">rot13</span></code> 别名。</p>
+</div>
+</section>
+</section>
+<section id="module-encodings">
+<span id="encodings-encodings-package"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings</span></code> --- Encodings package<a class="headerlink" href="#module-encodings" title="Link to this heading">¶</a></h2>
+<p class="translated">这个模块实现了以下函数：</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="encodings.normalize_encoding">
+<span class="sig-prename descclassname"><span class="pre">encodings.</span></span><span class="sig-name descname"><span class="pre">normalize_encoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#encodings.normalize_encoding" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">规范化编码格式名称 <em>encoding</em>。</p>
+<p class="translated">规范化的运作方式如下：用于 Python 包名称的点号除外的所有非字母数字类字符都会被缩减替换为一个下划线，开头和末尾的下划线将被移除。 例如，<code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">-;#'</span></code> 将变为 <code class="docutils literal notranslate"><span class="pre">'_'</span></code>。</p>
+<p class="translated">请注意 <em>encoding</em> 应当仅用 ASCII 字符。</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">以下函数不应被直接使用，除非出于测试目的；应当改用 <a class="reference internal" href="#codecs.lookup" title="codecs.lookup"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.lookup()</span></code></a>。</p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="encodings.search_function">
+<span class="sig-prename descclassname"><span class="pre">encodings.</span></span><span class="sig-name descname"><span class="pre">search_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#encodings.search_function" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">搜索与给定的编码格式名称 <em>encoding</em> 相对应的编解码器模块。</p>
+<p class="translated">此函数首先会使用 <a class="reference internal" href="#encodings.normalize_encoding" title="encodings.normalize_encoding"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_encoding()</span></code></a> 来规范化 <em>encoding</em>，然后查找相应的别名。 它会尝试使用别名或规范化的名称从 encodings 包导入一个编解码器模块。 如果模块被找到并且它定义了有效的返回 <a class="reference internal" href="#codecs.CodecInfo" title="codecs.CodecInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">codecs.CodecInfo</span></code></a> 对象的 <code class="docutils literal notranslate"><span class="pre">getregentry()</span></code> 函数，该编解码器将被缓存并被返回。</p>
+<p class="translated">如果该编解码器模块定义了 <code class="docutils literal notranslate"><span class="pre">getaliases()</span></code> 函数则任何被返回的别名都将被注册以供将来使用。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="encodings.win32_code_page_search_function">
+<span class="sig-prename descclassname"><span class="pre">encodings.</span></span><span class="sig-name descname"><span class="pre">win32_code_page_search_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#encodings.win32_code_page_search_function" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">搜索形式为 <code class="docutils literal notranslate"><span class="pre">cpXXXX</span></code> 的 Windows 代码页编码格式 <em>encoding</em>。</p>
+<p class="translated">如果代码页有效且受到支持，则返回与它对应的 <a class="reference internal" href="#codecs.CodecInfo" title="codecs.CodecInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">codecs.CodecInfo</span></code></a> 对象。</p>
+<div class="availability docutils container">
+<p class="untranslated"><a class="reference internal" href="intro.html#availability"><span class="std std-ref">适用范围</span></a>: Windows.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+</dd></dl>
+
+<p class="translated">这个模块实现了以下异常：</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="encodings.CodecRegistryError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">encodings.</span></span><span class="sig-name descname"><span class="pre">CodecRegistryError</span></span><a class="headerlink" href="#encodings.CodecRegistryError" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当一个编解码器无效或不兼容时引发。</p>
+</dd></dl>
+
+</section>
+<section id="module-encodings.idna">
+<span id="encodings-idna-internationalized-domain-names-in-applications"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.idna</span></code> --- Internationalized Domain Names in Applications<a class="headerlink" href="#module-encodings.idna" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块实现了 <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3490.html"><strong>RFC 3490</strong></a> (应用程序中的国际化域名) 和 <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3492.html"><strong>RFC 3492</strong></a> (Nameprep: 用于国际化域名 (IDN) 的 Stringprep 配置文件)。 它是在 <code class="docutils literal notranslate"><span class="pre">punycode</span></code> 编码格式和 <a class="reference internal" href="stringprep.html#module-stringprep" title="stringprep: String preparation, as per RFC 3453"><code class="xref py py-mod docutils literal notranslate"><span class="pre">stringprep</span></code></a> 的基础上构建的。</p>
+<p class="translated">如果你需要来自 <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5891.html"><strong>RFC 5891</strong></a> 和 <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5895.html"><strong>RFC 5895</strong></a> 的 IDNA 2008 标准，请使用第三方的 <a class="extlink-pypi reference external" href="https://pypi.org/project/idna/">idna</a> 模块。</p>
+<p class="translated">这些 RFC 共同定义了一个在域名中支持非 ASCII 字符的协议。 一个包含非 ASCII 字符的域名 (例如 <code class="docutils literal notranslate"><span class="pre">www.Alliancefrançaise.nu</span></code>) 会被转换为兼容 ASCII 的编码格式 (简称 ACE，例如 <code class="docutils literal notranslate"><span class="pre">www.xn--alliancefranaise-npb.nu</span></code>)。 随后此域名的 ACE 形式可以用于所有由于特定协议而不允许使用任意字符的场合，例如 DNS 查询，HTTP <em class="mailheader">Host</em> 字段等等。 此转换是在应用中进行的；如有可能将对用户不可见：应用应当透明地将 Unicode 域名标签转换为线上的 IDNA，并在 ACE 标签被呈现给用户之前将其转换回 Unicode。</p>
+<p class="translated">Python 以多种方式支持这种转换:  <code class="docutils literal notranslate"><span class="pre">idna</span></code> 编解码器执行 Unicode 和 ACE 之间的转换，基于在 <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3490.html#section-3.1"><strong>section 3.1 of RFC 3490</strong></a> 中定义的分隔字符将输入字符串拆分为标签，再根据需要将每个标签转换为 ACE，相反地又会基于 <code class="docutils literal notranslate"><span class="pre">.</span></code> 分隔符将输入字节串拆分为标签，再将找到的任何 ACE 标签转换为 Unicode。 此外，<a class="reference internal" href="socket.html#module-socket" title="socket: Low-level networking interface."><code class="xref py py-mod docutils literal notranslate"><span class="pre">socket</span></code></a> 模块可透明地将 Unicode 主机名转换为 ACE，以便应用在将它们传给 socket 模块时无须自行转换主机名。 除此之外，许多包含以主机名作为函数参数的模块例如 <a class="reference internal" href="http.client.html#module-http.client" title="http.client: HTTP and HTTPS protocol client (requires sockets)."><code class="xref py py-mod docutils literal notranslate"><span class="pre">http.client</span></code></a> 和 <a class="reference internal" href="ftplib.html#module-ftplib" title="ftplib: FTP protocol client (requires sockets)."><code class="xref py py-mod docutils literal notranslate"><span class="pre">ftplib</span></code></a> 都接受 Unicode 主机名（并且 <code class="xref py py-mod docutils literal notranslate"><span class="pre">http.client</span></code> 也会在 <em class="mailheader">Host</em> 字段中透明地发送 IDNA 主机名，如果它需要发送该字段的话）。</p>
+<p class="translated">当从线路接收主机名时（例如反向名称查找），到 Unicode 的转换不会自动被执行：希望向用户提供此种主机名的应用应当将它们解码为 Unicode。</p>
+<p class="untranslated">The module <code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.idna</span></code> also implements the nameprep procedure, which
+performs certain normalizations on host names, to achieve case-insensitivity of
+international domain names, and to unify similar characters. The nameprep
+functions can be used directly if desired.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="encodings.idna.nameprep">
+<span class="sig-prename descclassname"><span class="pre">encodings.idna.</span></span><span class="sig-name descname"><span class="pre">nameprep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#encodings.idna.nameprep" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回 <em>label</em> 经过名称处理操作的版本。 该实现目前基于查询字符串，因此 <code class="docutils literal notranslate"><span class="pre">AllowUnassigned</span></code> 为真值。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="encodings.idna.ToASCII">
+<span class="sig-prename descclassname"><span class="pre">encodings.idna.</span></span><span class="sig-name descname"><span class="pre">ToASCII</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#encodings.idna.ToASCII" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将标签转换为 ASCII，规则定义见 <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3490.html"><strong>RFC 3490</strong></a>。 <code class="docutils literal notranslate"><span class="pre">UseSTD3ASCIIRules</span></code> 预设为假值。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="encodings.idna.ToUnicode">
+<span class="sig-prename descclassname"><span class="pre">encodings.idna.</span></span><span class="sig-name descname"><span class="pre">ToUnicode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#encodings.idna.ToUnicode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将标签转换为 Unicode，规则定义见 <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3490.html"><strong>RFC 3490</strong></a>。</p>
+</dd></dl>
+
+</section>
+<section id="module-encodings.mbcs">
+<span id="encodings-mbcs-windows-ansi-codepage"></span><h2 class="untranslated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.mbcs</span></code> --- Windows ANSI codepage<a class="headerlink" href="#module-encodings.mbcs" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块实现ANSI代码页（CP_ACP）。</p>
+<div class="availability docutils container">
+<p class="untranslated"><a class="reference internal" href="intro.html#availability"><span class="std std-ref">适用范围</span></a>: Windows.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>在 3.2 版之前， <em>errors</em> 参数会被忽略；总是会使用 <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> 进行编码，并使用 <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code> 进行解码。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.3 版本发生变更: </span>支持任何错误处理</p>
+</div>
+</section>
+<section id="module-encodings.utf_8_sig">
+<span id="encodings-utf-8-sig-utf-8-codec-with-bom-signature"></span><h2 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.utf_8_sig</span></code> --- 带 BOM 签名的 UTF-8 编解码器<a class="headerlink" href="#module-encodings.utf_8_sig" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块实现了 UTF-8 编解码器的一个变种：在编码时将把 UTF-8 已编码 BOM 添加到 UTF-8 编码字节数据的开头。 对于有状态编码器此操作只执行一次（当首次写入字节流时）。 在解码时将跳过数据开头作为可选项的 UTF-8 已编码 BOM。</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">codecs</span></code> --- 编解码器注册和相关基类</a><ul>
+<li><a class="reference internal" href="#codec-base-classes">编解码器基类</a><ul>
+<li><a class="reference internal" href="#error-handlers">错误处理方案</a></li>
+<li><a class="reference internal" href="#stateless-encoding-and-decoding">无状态的编码和解码</a></li>
+<li><a class="reference internal" href="#incremental-encoding-and-decoding">增量式的编码和解码</a><ul>
+<li><a class="reference internal" href="#incrementalencoder-objects">IncrementalEncoder 对象</a></li>
+<li><a class="reference internal" href="#incrementaldecoder-objects">IncrementalDecoder 对象</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stream-encoding-and-decoding">流式的编码和解码</a><ul>
+<li><a class="reference internal" href="#streamwriter-objects">StreamWriter 对象</a></li>
+<li><a class="reference internal" href="#streamreader-objects">StreamReader 对象</a></li>
+<li><a class="reference internal" href="#streamreaderwriter-objects">StreamReaderWriter 对象</a></li>
+<li><a class="reference internal" href="#streamrecoder-objects">StreamRecoder 对象</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#encodings-and-unicode">编码格式与 Unicode</a></li>
+<li><a class="reference internal" href="#standard-encodings">标准编码</a></li>
+<li><a class="reference internal" href="#python-specific-encodings">Python 专属的编码格式</a><ul>
+<li><a class="reference internal" href="#text-encodings">文字编码</a></li>
+<li><a class="reference internal" href="#binary-transforms">二进制转换</a></li>
+<li><a class="reference internal" href="#standalone-codec-functions">独立编解码器函数</a></li>
+<li><a class="reference internal" href="#text-transforms">文字转换</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-encodings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings</span></code> --- Encodings package</a></li>
+<li><a class="reference internal" href="#module-encodings.idna"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.idna</span></code> --- Internationalized Domain Names in Applications</a></li>
+<li><a class="reference internal" href="#module-encodings.mbcs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.mbcs</span></code> --- Windows ANSI codepage</a></li>
+<li><a class="reference internal" href="#module-encodings.utf_8_sig"><code class="xref py py-mod docutils literal notranslate"><span class="pre">encodings.utf_8_sig</span></code> --- 带 BOM 签名的 UTF-8 编解码器</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="struct.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code> --- 将字节串解读为打包的二进制数据</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="datatypes.html"
+                          title="下一章">数据类型</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/codecs.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/codecs.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/codecs.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="datatypes.html" title="数据类型"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="struct.html" title="struct --- 将字节串解读为打包的二进制数据"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="binary.html" >二进制数据服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">codecs</span></code> --- 编解码器注册和相关基类</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

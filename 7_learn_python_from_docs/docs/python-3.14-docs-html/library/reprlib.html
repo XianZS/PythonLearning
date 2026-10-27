@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="reprlib --- 替代性 repr() 实现" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/reprlib.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/reprlib.py reprlib 模块提供了一种对象表示的产生方式，它会对结果字符串的大小进行限制。该方式被用于 Python 调试器并可能同样适用于某些其他场景。 此模块提供了一个类、一个实例和一个函数： 在大小限制工具以外，此模块还提供了一个装饰器用于检测对__repr__() 的递归调用并改用一个占位符来替换。 Repr 对象: Repr 实例对象包含一些属性可以..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_reprlib_e6074562.png" />
+<meta property="og:image:alt" content="源代码: Lib/reprlib.py reprlib 模块提供了一种对象表示的产生方式，它会对结果字符串的大小进行限制。该方式被用于 Python 调试器并可能同样适用于某些其他场景。 此模块提供了一个类、一个实例和一个函数： 在大小限制工具以外，此模块还提供了一个装饰器用于检测对__repr__() 的递归调用并改用一个占位符来替换。 Repr 对象: Repr 实例对象包含一些属性可以..." />
+<meta name="description" content="源代码: Lib/reprlib.py reprlib 模块提供了一种对象表示的产生方式，它会对结果字符串的大小进行限制。该方式被用于 Python 调试器并可能同样适用于某些其他场景。 此模块提供了一个类、一个实例和一个函数： 在大小限制工具以外，此模块还提供了一个装饰器用于检测对__repr__() 的递归调用并改用一个占位符来替换。 Repr 对象: Repr 实例对象包含一些属性可以..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>reprlib --- 替代性 repr() 实现 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="enum --- 对枚举的支持" href="enum.html" />
+    <link rel="prev" title="pprint --- 数据美化输出" href="pprint.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/reprlib.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">reprlib</span></code> --- 替代性 <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> 实现</a><ul>
+<li><a class="reference internal" href="#repr-objects">Repr 对象</a></li>
+<li><a class="reference internal" href="#subclassing-repr-objects">子类化 Repr 对象</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="pprint.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pprint</span></code> --- 数据美化输出</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="enum.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code> --- 对枚举的支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/reprlib.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/reprlib.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/reprlib.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="enum.html" title="enum --- 对枚举的支持"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="pprint.html" title="pprint --- 数据美化输出"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="datatypes.html" accesskey="U">数据类型</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">reprlib</span></code> --- 替代性 <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> 实现</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-reprlib">
+<span id="reprlib-alternate-repr-implementation"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">reprlib</span></code> --- 替代性 <a class="reference internal" href="functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 实现<a class="headerlink" href="#module-reprlib" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/reprlib.py">Lib/reprlib.py</a></p>
+<hr class="docutils" />
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">reprlib</span></code> 模块提供了一种对象表示的产生方式，它会对结果字符串的大小进行限制。该方式被用于 Python 调试器并可能同样适用于某些其他场景。</p>
+<p class="translated">此模块提供了一个类、一个实例和一个函数：</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="reprlib.Repr">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reprlib.</span></span><span class="sig-name descname"><span class="pre">Repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxtuple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxlist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxarray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxfrozenset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdeque</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxstring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxlong</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxother</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'...'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reprlib.Repr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">该类提供了格式化服务，适用于实现与内置 <a class="reference internal" href="functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 相似的函数；其中附加了针对不同对象类型的大小限制，以避免生成超长的表示。</p>
+<p class="translated">该构造器的关键字参数可被用作设置 <a class="reference internal" href="#reprlib.Repr" title="reprlib.Repr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repr</span></code></a> 实例属性的快捷方式。这意味着以下的初始化:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">aRepr</span> <span class="o">=</span> <span class="n">reprlib</span><span class="o">.</span><span class="n">Repr</span><span class="p">(</span><span class="n">maxlevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">等价于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">aRepr</span> <span class="o">=</span> <span class="n">reprlib</span><span class="o">.</span><span class="n">Repr</span><span class="p">()</span>
+<span class="n">aRepr</span><span class="o">.</span><span class="n">maxlevel</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p class="translated">请参阅 <a class="reference internal" href="#id1">Repr Objects</a> 小节了解有关 <a class="reference internal" href="#reprlib.Repr" title="reprlib.Repr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repr</span></code></a> 属性的信息。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span>允许通过关键字参数来设置属性。</p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="reprlib.aRepr">
+<span class="sig-prename descclassname"><span class="pre">reprlib.</span></span><span class="sig-name descname"><span class="pre">aRepr</span></span><a class="headerlink" href="#reprlib.aRepr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是 <a class="reference internal" href="#reprlib.Repr" title="reprlib.Repr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repr</span></code></a> 的一个实例，用于提供如下所述的 <a class="reference internal" href="#reprlib.repr" title="reprlib.repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 函数。改变此对象的属性将会影响 <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> 和 Python 调试器所使用的大小限制。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="reprlib.repr">
+<span class="sig-prename descclassname"><span class="pre">reprlib.</span></span><span class="sig-name descname"><span class="pre">repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reprlib.repr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">这是 <code class="docutils literal notranslate"><span class="pre">aRepr</span></code> 的 <a class="reference internal" href="#reprlib.Repr.repr" title="reprlib.Repr.repr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repr()</span></code></a> 方法。 它会返回与同名内置函数所返回字符串相似的字符串，区别在于附带了对多数类型的大小限制。</p>
+</dd></dl>
+
+<p class="translated">在大小限制工具以外，此模块还提供了一个装饰器用于检测对 <a class="reference internal" href="../reference/datamodel.html#object.__repr__" title="object.__repr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> 的递归调用并改用一个占位符来替换。</p>
+<dl class="py function" id="index-0">
+<dt class="sig sig-object py" id="reprlib.recursive_repr">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">reprlib.</span></span><span class="sig-name descname"><span class="pre">recursive_repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'...'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reprlib.recursive_repr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于为 <a class="reference internal" href="../reference/datamodel.html#object.__repr__" title="object.__repr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> 方法检查同一线程内部递归调用的装饰器。如果执行了递归调用，则返回 <em>fillvalue</em>，在其他情况下，将执行正常的 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> 调用。例如：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">reprlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">recursive_repr</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">MyList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nd">@recursive_repr</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">MyList</span><span class="p">(</span><span class="s1">&#39;abc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="go">&lt;&#39;a&#39;|&#39;b&#39;|&#39;c&#39;|...|&#39;x&#39;&gt;</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<section id="repr-objects">
+<span id="id1"></span><h2 class="translated">Repr 对象<a class="headerlink" href="#repr-objects" title="Link to this heading">¶</a></h2>
+<p class="translated"><a class="reference internal" href="#reprlib.Repr" title="reprlib.Repr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repr</span></code></a> 实例对象包含一些属性可以用于为不同对象类型的表示提供大小限制，还包含一些方法可以格式化特定的对象类型。</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.fillvalue">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">fillvalue</span></span><a class="headerlink" href="#reprlib.Repr.fillvalue" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">该字符串将针对递归引用显示。它默认为 <code class="docutils literal notranslate"><span class="pre">...</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.maxlevel">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxlevel</span></span><a class="headerlink" href="#reprlib.Repr.maxlevel" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">创建递归表示形式的深度限制。默认为 <code class="docutils literal notranslate"><span class="pre">6</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.maxdict">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxdict</span></span><a class="headerlink" href="#reprlib.Repr.maxdict" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="reprlib.Repr.maxlist">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxlist</span></span><a class="headerlink" href="#reprlib.Repr.maxlist" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="reprlib.Repr.maxtuple">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxtuple</span></span><a class="headerlink" href="#reprlib.Repr.maxtuple" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="reprlib.Repr.maxset">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxset</span></span><a class="headerlink" href="#reprlib.Repr.maxset" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="reprlib.Repr.maxfrozenset">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxfrozenset</span></span><a class="headerlink" href="#reprlib.Repr.maxfrozenset" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="reprlib.Repr.maxdeque">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxdeque</span></span><a class="headerlink" href="#reprlib.Repr.maxdeque" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="reprlib.Repr.maxarray">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxarray</span></span><a class="headerlink" href="#reprlib.Repr.maxarray" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">表示命名对象类型的条目数量限制。对于 <a class="reference internal" href="#reprlib.Repr.maxdict" title="reprlib.Repr.maxdict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">maxdict</span></code></a> 的默认值为 <code class="docutils literal notranslate"><span class="pre">4</span></code>，对于 <a class="reference internal" href="#reprlib.Repr.maxarray" title="reprlib.Repr.maxarray"><code class="xref py py-attr docutils literal notranslate"><span class="pre">maxarray</span></code></a> 为 <code class="docutils literal notranslate"><span class="pre">5</span></code>，对于其他则为  <code class="docutils literal notranslate"><span class="pre">6</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.maxlong">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxlong</span></span><a class="headerlink" href="#reprlib.Repr.maxlong" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">表示整数的最大字符数量。数码会从中间被丢弃。默认值为 <code class="docutils literal notranslate"><span class="pre">40</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.maxstring">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxstring</span></span><a class="headerlink" href="#reprlib.Repr.maxstring" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">表示字符串的字符数量限制。请注意字符源会使用字符串的“正常”表示形式：如果表示中需要用到转义序列，在缩短表示时它们可能会被破坏。默认值为 <code class="docutils literal notranslate"><span class="pre">30</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.maxother">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">maxother</span></span><a class="headerlink" href="#reprlib.Repr.maxother" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此限制用于控制在 <a class="reference internal" href="#reprlib.Repr" title="reprlib.Repr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repr</span></code></a> 对象上没有特定的格式化方法可用的对象类型的大小。它会以类似 <a class="reference internal" href="#reprlib.Repr.maxstring" title="reprlib.Repr.maxstring"><code class="xref py py-attr docutils literal notranslate"><span class="pre">maxstring</span></code></a> 的方式被应用。默认值为 <code class="docutils literal notranslate"><span class="pre">20</span></code>。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reprlib.Repr.indent">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">indent</span></span><a class="headerlink" href="#reprlib.Repr.indent" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果该属性被设为 <code class="docutils literal notranslate"><span class="pre">None</span></code> (默认值)，输出将被格式化为不带换行或缩进，像标准的 <a class="reference internal" href="functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 一样。例如：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">example</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;spam&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="s1">&#39;spam eggs&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">3</span><span class="p">:</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="p">[]}},</span> <span class="s1">&#39;ham&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">reprlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aRepr</span> <span class="o">=</span> <span class="n">reprlib</span><span class="o">.</span><span class="n">Repr</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">aRepr</span><span class="o">.</span><span class="n">repr</span><span class="p">(</span><span class="n">example</span><span class="p">))</span>
+<span class="go">[1, &#39;spam&#39;, {&#39;a&#39;: 2, &#39;b&#39;: &#39;spam eggs&#39;, &#39;c&#39;: {3: 4.5, 6: []}}, &#39;ham&#39;]</span>
+</pre></div>
+</div>
+<p class="translated">如果 <a class="reference internal" href="#reprlib.Repr.indent" title="reprlib.Repr.indent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">indent</span></code></a> 被设为一个字符串，每个递归层级将放在单独行中，并用该字符串来缩进：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aRepr</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39;--&gt;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">aRepr</span><span class="o">.</span><span class="n">repr</span><span class="p">(</span><span class="n">example</span><span class="p">))</span>
+<span class="go">[</span>
+<span class="go">--&gt;1,</span>
+<span class="go">--&gt;&#39;spam&#39;,</span>
+<span class="go">--&gt;{</span>
+<span class="go">--&gt;--&gt;&#39;a&#39;: 2,</span>
+<span class="go">--&gt;--&gt;&#39;b&#39;: &#39;spam eggs&#39;,</span>
+<span class="go">--&gt;--&gt;&#39;c&#39;: {</span>
+<span class="go">--&gt;--&gt;--&gt;3: 4.5,</span>
+<span class="go">--&gt;--&gt;--&gt;6: [],</span>
+<span class="go">--&gt;--&gt;},</span>
+<span class="go">--&gt;},</span>
+<span class="go">--&gt;&#39;ham&#39;,</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p class="translated">将 <a class="reference internal" href="#reprlib.Repr.indent" title="reprlib.Repr.indent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">indent</span></code></a> 设为一个正整数时其行为与设为相应数量的空格是相同的：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aRepr</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">aRepr</span><span class="o">.</span><span class="n">repr</span><span class="p">(</span><span class="n">example</span><span class="p">))</span>
+<span class="go">[</span>
+<span class="go">    1,</span>
+<span class="go">    &#39;spam&#39;,</span>
+<span class="go">    {</span>
+<span class="go">        &#39;a&#39;: 2,</span>
+<span class="go">        &#39;b&#39;: &#39;spam eggs&#39;,</span>
+<span class="go">        &#39;c&#39;: {</span>
+<span class="go">            3: 4.5,</span>
+<span class="go">            6: [],</span>
+<span class="go">        },</span>
+<span class="go">    },</span>
+<span class="go">    &#39;ham&#39;,</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reprlib.Repr.repr">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reprlib.Repr.repr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">内置 <a class="reference internal" href="functions.html#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> 的等价形式，它使用实例专属的格式化。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reprlib.Repr.repr1">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">repr1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reprlib.Repr.repr1" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">供 <a class="reference internal" href="#reprlib.Repr.repr" title="reprlib.Repr.repr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repr()</span></code></a> 使用的递归实现。此方法使用 <em>obj</em> 的类型来确定要调用哪个格式化方法，并传入 <em>obj</em> 和 <em>level</em>。 类型专属的方法应当调用 <a class="reference internal" href="#reprlib.Repr.repr1" title="reprlib.Repr.repr1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repr1()</span></code></a> 来执行递归格式化，在递归调用中使用 <code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">-</span> <span class="pre">1</span></code> 作为 <em>level</em> 的值。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Repr.</span></span><span class="sig-name descname"><span class="pre">repr_TYPE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p class="translated">特定类型的格式化方法会被实现为基于类型名称来命名的方法。在方法名称中，<strong>TYPE</strong> 会被替换为 <code class="docutils literal notranslate"><span class="pre">'_'.join(type(obj).__name__.split())</span></code>。对这些方法的分派会由 <a class="reference internal" href="#reprlib.Repr.repr1" title="reprlib.Repr.repr1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repr1()</span></code></a> 来处理。 需要对值进行递归格式化的类型专属方法应当调用 <code class="docutils literal notranslate"><span class="pre">self.repr1(subobj,</span> <span class="pre">level</span> <span class="pre">-</span> <span class="pre">1)</span></code>。</p>
+</dd></dl>
+
+</section>
+<section id="subclassing-repr-objects">
+<span id="subclassing-reprs"></span><h2 class="translated">子类化 Repr 对象<a class="headerlink" href="#subclassing-repr-objects" title="Link to this heading">¶</a></h2>
+<p class="translated">通过 <a class="reference internal" href="#reprlib.Repr.repr1" title="reprlib.Repr.repr1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Repr.repr1()</span></code></a> 使用动态分派允许 <a class="reference internal" href="#reprlib.Repr" title="reprlib.Repr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repr</span></code></a> 的子类添加额外内置对象类型的支持，或是修改对已支持类型的处理。 这个例子演示了如何添加对文件对象的特殊支持：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">reprlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyRepr</span><span class="p">(</span><span class="n">reprlib</span><span class="o">.</span><span class="n">Repr</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">repr_TextIOWrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;&lt;stdin&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;stdout&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;stderr&gt;&#39;</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="n">aRepr</span> <span class="o">=</span> <span class="n">MyRepr</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">aRepr</span><span class="o">.</span><span class="n">repr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">))</span>         <span class="c1"># 打印 &#39;&lt;stdin&gt;&#39;</span>
+</pre></div>
+</div>
+<div class="translated highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;stdin&gt;
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">reprlib</span></code> --- 替代性 <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> 实现</a><ul>
+<li><a class="reference internal" href="#repr-objects">Repr 对象</a></li>
+<li><a class="reference internal" href="#subclassing-repr-objects">子类化 Repr 对象</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="pprint.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pprint</span></code> --- 数据美化输出</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="enum.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code> --- 对枚举的支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/reprlib.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/reprlib.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/reprlib.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="enum.html" title="enum --- 对枚举的支持"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="pprint.html" title="pprint --- 数据美化输出"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="datatypes.html" >数据类型</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">reprlib</span></code> --- 替代性 <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> 实现</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

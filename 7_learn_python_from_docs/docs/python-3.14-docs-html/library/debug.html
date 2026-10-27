@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Debugging and Profiling" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/debug.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="这些库可以帮助你进行 Python 开发：调试器使你能够逐步执行代码，分析堆栈帧并设置断点等等，性能分析器可以运行代码并为你提供执行时间的详细数据，使你能够找出你的程序中的瓶颈。 审计事件提供运行时行为的可见性，如果没有此工具则需要进行侵入式调试或修补。 审计事件表, bdb--- 调试器框架, faulthandler--- 转储 Python 回溯信息- 转储跟踪信息, 对 C 栈进行转..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_debug_4c5b0f9a.png" />
+<meta property="og:image:alt" content="这些库可以帮助你进行 Python 开发：调试器使你能够逐步执行代码，分析堆栈帧并设置断点等等，性能分析器可以运行代码并为你提供执行时间的详细数据，使你能够找出你的程序中的瓶颈。 审计事件提供运行时行为的可见性，如果没有此工具则需要进行侵入式调试或修补。 审计事件表, bdb--- 调试器框架, faulthandler--- 转储 Python 回溯信息- 转储跟踪信息, 对 C 栈进行转..." />
+<meta name="description" content="这些库可以帮助你进行 Python 开发：调试器使你能够逐步执行代码，分析堆栈帧并设置断点等等，性能分析器可以运行代码并为你提供执行时间的详细数据，使你能够找出你的程序中的瓶颈。 审计事件提供运行时行为的可见性，如果没有此工具则需要进行侵入式调试或修补。 审计事件表, bdb--- 调试器框架, faulthandler--- 转储 Python 回溯信息- 转储跟踪信息, 对 C 栈进行转..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>Debugging and Profiling &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="审计事件表" href="audit_events.html" />
+    <link rel="prev" title="test --- Python 回归测试包" href="test.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/debug.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="test.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">test</span></code> --- Python 回归测试包</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="audit_events.html"
+                          title="下一章">审计事件表</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/debug.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/debug.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/debug.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="audit_events.html" title="审计事件表"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="test.html" title="test --- Python 回归测试包"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 标准库</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Debugging and Profiling</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="debugging-and-profiling">
+<h1 class="untranslated">Debugging and Profiling<a class="headerlink" href="#debugging-and-profiling" title="Link to this heading">¶</a></h1>
+<p class="translated">这些库可以帮助你进行 Python 开发：调试器使你能够逐步执行代码，分析堆栈帧并设置断点等等，性能分析器可以运行代码并为你提供执行时间的详细数据，使你能够找出你的程序中的瓶颈。 审计事件提供运行时行为的可见性，如果没有此工具则需要进行侵入式调试或修补。</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="audit_events.html">审计事件表</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bdb.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdb</span></code> --- 调试器框架</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faulthandler.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">faulthandler</span></code> --- 转储 Python 回溯信息</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#dumping-the-traceback">转储跟踪信息</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#dumping-the-c-stack">对 C 栈进行转储</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="faulthandler.html#c-stack-compatibility">C 栈兼容性</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#fault-handler-state">故障处理程序的状态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#dumping-the-tracebacks-after-a-timeout">一定时间后转储跟踪数据</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#dumping-the-traceback-on-a-user-signal">转储用户信号的跟踪信息</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#issue-with-file-descriptors">文件描述符相关话题</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faulthandler.html#example">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pdb.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pdb</span></code> --- The Python Debugger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pdb.html#command-line-interface">命令行接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pdb.html#debugger-commands">调试器命令</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">The Python Profilers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#introduction-to-the-profilers">Introduction to the profilers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#instant-user-s-manual">Instant User's Manual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#module-cProfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">profile</span></code> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">cProfile</span></code> Module Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#the-stats-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Stats</span></code> Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#what-is-deterministic-profiling">What Is Deterministic Profiling?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#limitations">局限性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#calibration">校准</a></li>
+<li class="toctree-l2"><a class="reference internal" href="profile.html#using-a-custom-timer">使用自定义计时器</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timeit.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">timeit</span></code> --- 测量小代码片段的执行时间</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timeit.html#basic-examples">Basic Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeit.html#python-interface">Python Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeit.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeit.html#examples">例子</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trace.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">trace</span></code> --- 跟踪或记录 Python 语句的执行</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trace.html#command-line-usage">命令行用法</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trace.html#main-options">主要的可选参数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace.html#modifiers">修饰器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace.html#filters">过滤器</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trace.html#programmatic-interface">编程接口</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tracemalloc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracemalloc</span></code> --- 跟踪内存分配</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tracemalloc.html#examples">例子</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#display-the-top-10">显示前10项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#compute-differences">计算差异</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#get-the-traceback-of-a-memory-block">获取一个内存块的溯源</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#pretty-top">美化的 top</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tracemalloc.html#record-the-current-and-peak-size-of-all-traced-memory-blocks">记录所有被追踪内存块的当前和峰值大小</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tracemalloc.html#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#functions">函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#domainfilter">域过滤器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#filter">过滤器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#frame">帧</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#snapshot">快照</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#statistic">统计</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#statisticdiff">StatisticDiff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#trace">跟踪</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracemalloc.html#traceback">回溯</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="test.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">test</span></code> --- Python 回归测试包</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="audit_events.html"
+                          title="下一章">审计事件表</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/debug.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/debug.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/debug.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="audit_events.html" title="审计事件表"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="test.html" title="test --- Python 回归测试包"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Debugging and Profiling</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

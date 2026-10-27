@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="compileall --- 字节编译 Python 库" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/compileall.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/compileall.py 这个模块提供了一些工具函数来支持安装 Python 库。 这些函数可以编译一个目录树中的 Python 源文件。 这个模块可被用来在安装库时创建缓存的字节码文件，这使得它们对于没有库目录写入权限的用户来说也是可用的。 适用范围: not WASI. 此模块在 WebAssembly 平台上无效或不可用。 请参阅 WebAssembly 平台 了解..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_compileall_1ab57aea.png" />
+<meta property="og:image:alt" content="源代码: Lib/compileall.py 这个模块提供了一些工具函数来支持安装 Python 库。 这些函数可以编译一个目录树中的 Python 源文件。 这个模块可被用来在安装库时创建缓存的字节码文件，这使得它们对于没有库目录写入权限的用户来说也是可用的。 适用范围: not WASI. 此模块在 WebAssembly 平台上无效或不可用。 请参阅 WebAssembly 平台 了解..." />
+<meta name="description" content="源代码: Lib/compileall.py 这个模块提供了一些工具函数来支持安装 Python 库。 这些函数可以编译一个目录树中的 Python 源文件。 这个模块可被用来在安装库时创建缓存的字节码文件，这使得它们对于没有库目录写入权限的用户来说也是可用的。 适用范围: not WASI. 此模块在 WebAssembly 平台上无效或不可用。 请参阅 WebAssembly 平台 了解..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>compileall --- 字节编译 Python 库 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="dis --- Python 字节码反汇编器" href="dis.html" />
+    <link rel="prev" title="py_compile --- 编译 Python 源文件" href="py_compile.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/compileall.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compileall</span></code> --- 字节编译 Python 库</a><ul>
+<li><a class="reference internal" href="#command-line-use">使用命令行</a></li>
+<li><a class="reference internal" href="#public-functions">公有函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="py_compile.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">py_compile</span></code> --- 编译 Python 源文件</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="dis.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dis</span></code> --- Python 字节码反汇编器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/compileall.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/compileall.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/compileall.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="dis.html" title="dis --- Python 字节码反汇编器"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="py_compile.html" title="py_compile --- 编译 Python 源文件"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="language.html" accesskey="U">Python 语言服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">compileall</span></code> --- 字节编译 Python 库</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-compileall">
+<span id="compileall-byte-compile-python-libraries"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compileall</span></code> --- 字节编译 Python 库<a class="headerlink" href="#module-compileall" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/compileall.py">Lib/compileall.py</a></p>
+<hr class="docutils" />
+<p class="translated">这个模块提供了一些工具函数来支持安装 Python 库。 这些函数可以编译一个目录树中的 Python 源文件。 这个模块可被用来在安装库时创建缓存的字节码文件，这使得它们对于没有库目录写入权限的用户来说也是可用的。</p>
+<div class="availability docutils container">
+<p class="untranslated"><a class="reference internal" href="intro.html#availability"><span class="std std-ref">适用范围</span></a>: not WASI.</p>
+<p class="translated">此模块在 WebAssembly 平台上无效或不可用。 请参阅 <a class="reference internal" href="intro.html#wasm-availability"><span class="std std-ref">WebAssembly 平台</span></a> 了解详情。</p>
+</div>
+<section id="command-line-use">
+<span id="compileall-cli"></span><h2 class="translated">使用命令行<a class="headerlink" href="#command-line-use" title="Link to this heading">¶</a></h2>
+<p class="translated">此模块可以作为脚本运行 (使用 <strong class="program">python -m compileall</strong>) 来编译 Python 源代码。</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-arg-directory">
+<span class="sig-name descname"><span class="pre">directory</span></span><span class="sig-prename descclassname"> <span class="pre">...</span></span><a class="headerlink" href="#cmdoption-compileall-arg-directory" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object std" id="cmdoption-compileall-arg-file">
+<span class="sig-name descname"><span class="pre">file</span></span><span class="sig-prename descclassname"> <span class="pre">...</span></span><a class="headerlink" href="#cmdoption-compileall-arg-file" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">位置参数是要编译的文件或包含源文件的目录，目录将被递归地遍历。 如果没有给出参数，则其行为如同使用了命令行 <code class="samp docutils literal notranslate"><span class="pre">-l</span> <em><span class="pre">&lt;directories</span> <span class="pre">from</span> <span class="pre">sys.path&gt;</span></em></code>。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-l">
+<span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compileall-l" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">不要递归到子目录，只编译直接包含在指明或隐含的目录中的源代码文件。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-f">
+<span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compileall-f" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">强制重新构建即使时间戳是最新的。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-q">
+<span class="sig-name descname"><span class="pre">-q</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compileall-q" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">不要打印已编译文件的列表。 如果传入一次，则错误消息仍将被打印。 如果传入两次 (<code class="docutils literal notranslate"><span class="pre">-qq</span></code>)，所有输出都会被屏蔽。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-d">
+<span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">destdir</span></span><a class="headerlink" href="#cmdoption-compileall-d" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">要附加到每个被编译文件的路径之前的目录。 这将出现在编译时回溯信息中，并且还会被编译到字节码文件中，届时它将在字节码文件被执行而源文件已不存在的情况下被用于回溯和其他消息。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-s">
+<span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">strip_prefix</span></span><a class="headerlink" href="#cmdoption-compileall-s" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">从记录在 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件中的路径移除给定的前缀。 路径将成为基于该前缀的相对路径。</p>
+<p class="translated">该选项可用于 <code class="docutils literal notranslate"><span class="pre">-p</span></code> 但不可用于 <code class="docutils literal notranslate"><span class="pre">-d</span></code>。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-p">
+<span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"> <span class="pre">prepend_prefix</span></span><a class="headerlink" href="#cmdoption-compileall-p" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将给定的前缀添加到记录在 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件中的路径。 使用 <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">/</span></code> 将使路径成为绝对路径。</p>
+<p class="translated">该选项可用于 <code class="docutils literal notranslate"><span class="pre">-s</span></code> 但不可用于 <code class="docutils literal notranslate"><span class="pre">-d</span></code>。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-x">
+<span class="sig-name descname"><span class="pre">-x</span></span><span class="sig-prename descclassname"> <span class="pre">regex</span></span><a class="headerlink" href="#cmdoption-compileall-x" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">regex 会被用于搜索每个要执行编译的文件的完整路径，而如果 regex 产生了一个匹配，则相应文件会被跳过。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-i">
+<span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"> <span class="pre">list</span></span><a class="headerlink" href="#cmdoption-compileall-i" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">读取文件 <code class="docutils literal notranslate"><span class="pre">list</span></code> 并将其包含的每一行添加到要编译的文件和目录列表中。 如果 <code class="docutils literal notranslate"><span class="pre">list</span></code> 为 <code class="docutils literal notranslate"><span class="pre">-</span></code>，则从 <code class="docutils literal notranslate"><span class="pre">stdin</span></code> 读取行。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-b">
+<span class="sig-name descname"><span class="pre">-b</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compileall-b" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将字节码写入到它们的传统位置和名称，这可能会覆盖由另一版本的 Python 所创建的字节码文件。 默认是将文件写入到它们的 <span class="target" id="index-8"></span><a class="pep reference external" href="https://peps.python.org/pep-3147/"><strong>PEP 3147</strong></a> 位置和名称，这允许来自多个版本的 Python 字节码文件共存。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-r">
+<span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compileall-r" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">控制子目录的最大递归层级。 如果给出此选项，则 <code class="docutils literal notranslate"><span class="pre">-l</span></code> 选项将不会被考虑。 <strong class="program">python -m compileall &lt;directory&gt; -r 0</strong> 等价于 <strong class="program">python -m compileall &lt;directory&gt; -l</strong>。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-j">
+<span class="sig-name descname"><span class="pre">-j</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-compileall-j" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用 <em>N</em> 个工作进程来编译给定目录中的文件。 如果使用 <code class="docutils literal notranslate"><span class="pre">0</span></code>，则将使用 <a class="reference internal" href="os.html#os.process_cpu_count" title="os.process_cpu_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.process_cpu_count()</span></code></a> 的结果。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-invalidation-mode">
+<span class="sig-name descname"><span class="pre">--invalidation-mode</span></span><span class="sig-prename descclassname"> <span class="pre">[timestamp|checked-hash|unchecked-hash]</span></span><a class="headerlink" href="#cmdoption-compileall-invalidation-mode" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">控制生成的字节码文件在运行时的失效规则。 值为 <code class="docutils literal notranslate"><span class="pre">timestamp</span></code>，意味着将生成嵌入了源时间戳和大小的 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件。 <code class="docutils literal notranslate"><span class="pre">checked-hash</span></code> 和 <code class="docutils literal notranslate"><span class="pre">unchecked-hash</span></code> 等值将导致生成基于哈希的 pyc。 基于哈希的 pyc 嵌入了源文件内容的哈希值而不是时间戳。 请参阅 <a class="reference internal" href="../reference/import.html#pyc-invalidation"><span class="std std-ref">已缓存字节码的失效</span></a> 了解有关 Python 在运行时如何验证字节码缓存文件的更多信息。 如果未设置 <span class="target" id="index-9"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">SOURCE_DATE_EPOCH</span></code> 环境变量则默认值为 <code class="docutils literal notranslate"><span class="pre">timestamp</span></code>，而如果设置了 <code class="docutils literal notranslate"><span class="pre">SOURCE_DATE_EPOCH</span></code> 则为 <code class="docutils literal notranslate"><span class="pre">checked-hash</span></code>。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-o">
+<span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">level</span></span><a class="headerlink" href="#cmdoption-compileall-o" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用给定的优化级别进行编译。 可以多次使用来一次性地针对多个级别进行编译 (例如，<code class="docutils literal notranslate"><span class="pre">compileall</span> <span class="pre">-o</span> <span class="pre">1</span> <span class="pre">-o</span> <span class="pre">2</span></code>)。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-e">
+<span class="sig-name descname"><span class="pre">-e</span></span><span class="sig-prename descclassname"> <span class="pre">dir</span></span><a class="headerlink" href="#cmdoption-compileall-e" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">忽略指向给定目录之外的符号链接。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compileall-hardlink-dupes">
+<span class="sig-name descname"><span class="pre">--hardlink-dupes</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compileall-hardlink-dupes" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">如果两个不同优化级别的 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件具有相同的内容，则使用硬链接来合并重复的文件。</p>
+</dd></dl>
+
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>增加了 <code class="docutils literal notranslate"><span class="pre">-i</span></code>, <code class="docutils literal notranslate"><span class="pre">-b</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-h</span></code> 选项。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>增加了 <code class="docutils literal notranslate"><span class="pre">-j</span></code>, <code class="docutils literal notranslate"><span class="pre">-r</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-qq</span></code> 选项。 <code class="docutils literal notranslate"><span class="pre">-q</span></code> 选项改为多级别值。 <code class="docutils literal notranslate"><span class="pre">-b</span></code> 将总是产生以 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 为后缀的字节码文件，而不是 <code class="docutils literal notranslate"><span class="pre">.pyo</span></code>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>增加了 <code class="docutils literal notranslate"><span class="pre">--invalidation-mode</span></code> 选项。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>增加了 <code class="docutils literal notranslate"><span class="pre">-s</span></code>, <code class="docutils literal notranslate"><span class="pre">-p</span></code>, <code class="docutils literal notranslate"><span class="pre">-e</span></code> 和 <code class="docutils literal notranslate"><span class="pre">--hardlink-dupes</span></code> 选项。 将默认的递归限制从 10 提高到 <a class="reference internal" href="sys.html#sys.getrecursionlimit" title="sys.getrecursionlimit"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.getrecursionlimit()</span></code></a>。 增加允许多次指定 <code class="docutils literal notranslate"><span class="pre">-o</span></code> 选项。</p>
+</div>
+<p class="translated">没有可以控制 <a class="reference internal" href="functions.html#compile" title="compile"><code class="xref py py-func docutils literal notranslate"><span class="pre">compile()</span></code></a> 函数所使用的优化级别的命令行选项，因为 Python 解释器本身已经提供了该选项: <strong class="program">python -O -m compileall</strong>。</p>
+<p class="translated">类似地，<a class="reference internal" href="functions.html#compile" title="compile"><code class="xref py py-func docutils literal notranslate"><span class="pre">compile()</span></code></a> 函数会遵循 <a class="reference internal" href="sys.html#sys.pycache_prefix" title="sys.pycache_prefix"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.pycache_prefix</span></code></a> 设置。 所生成的字节码缓存将仅在 <code class="xref py py-func docutils literal notranslate"><span class="pre">compile()</span></code> 附带与将在运行时使用的相同 <code class="xref py py-data docutils literal notranslate"><span class="pre">sys.pycache_prefix</span></code> 时可用（如果存在该设置）。</p>
+</section>
+<section id="public-functions">
+<h2 class="translated">公有函数<a class="headerlink" href="#public-functions" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="compileall.compile_dir">
+<span class="sig-prename descclassname"><span class="pre">compileall.</span></span><span class="sig-name descname"><span class="pre">compile_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxlevels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.getrecursionlimit()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legacy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalidation_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stripdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prependdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_sl_dest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardlink_dupes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compileall.compile_dir" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">递归地深入名为 <em>dir</em> 的目录树，在途中编译所有 <code class="file docutils literal notranslate"><span class="pre">.py</span></code> 文件。 如果所有文件都编译成功则返回真值，否则返回假值。</p>
+<p class="translated"><em>maxlevels</em> 形参被用来限制递归深度；它默认为 <code class="docutils literal notranslate"><span class="pre">sys.getrecursionlimit()</span></code>。</p>
+<p class="translated">如果给出了 <em>ddir</em>，它会被附加到每个被编译的文件的路径之前以便在编译时回溯中使用，同时还会被编译到字节码文件中，届时它将在字节码文件被执行而源文件已不存在的情况下被用于回溯和其他消息中。</p>
+<p class="translated">如果 <em>force</em> 为真值，则即使时间戳为最新模块也会被重新编译。</p>
+<p class="translated">如果给出了 <em>rx</em>，则它的 <code class="docutils literal notranslate"><span class="pre">search</span></code> 方法会在准备编译的每个文件的完整路径上被调用，并且如果它返回真值，则该文件会被跳过。 这可被用来排除与一个正则表达式相匹配的文件，正则表达式将以 <a class="reference internal" href="re.html#re-objects"><span class="std std-ref">re.Pattern</span></a> 对象的形式给出。</p>
+<p class="translated">如果 <em>quiet</em> 为 <code class="docutils literal notranslate"><span class="pre">False</span></code> 或 <code class="docutils literal notranslate"><span class="pre">0</span></code> (默认值)，则文件名和其他信息将被打印到标准输出。 如果设为 <code class="docutils literal notranslate"><span class="pre">1</span></code>，则只打印错误。 如果设为 <code class="docutils literal notranslate"><span class="pre">2</span></code>，则屏蔽所有输出。</p>
+<p class="translated">如果 <em>legacy</em> 为真值，则将字节码文件写入到它们的传统位置和名称，这可能会覆盖由另一版本的 Python 所创建的字节码文件。 默认是将文件写入到它们的 <span class="target" id="index-10"></span><a class="pep reference external" href="https://peps.python.org/pep-3147/"><strong>PEP 3147</strong></a> 位置和名称，这允许来自多个版本的 Python 字节码文件共存。</p>
+<p class="translated"><em>optimize</em> 指明编译器的优化级别。 它会被传给内置 <a class="reference internal" href="functions.html#compile" title="compile"><code class="xref py py-func docutils literal notranslate"><span class="pre">compile()</span></code></a> 函数。 还接受一个优化级别列表，这将在单次调用中多次编译一个 <code class="file docutils literal notranslate"><span class="pre">.py</span></code> 文件。</p>
+<p class="translated">参数 <em>workers</em> 指明要使用多少个工作进程来并行编译文件。 默认设置不使用多个工作进程。 如果平台不能使用多个工作进程而又给出了 <em>workers</em> 参数，则将回退为使用顺序编译。 如果 <em>workers</em> 为 0，则会使用系统的核心数量。 如果 <em>workers</em> 小于 <code class="docutils literal notranslate"><span class="pre">0</span></code>，则会引发 <a class="reference internal" href="exceptions.html#ValueError" title="ValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>。</p>
+<p class="translated"><em>invalidation_mode</em> 应为 <a class="reference internal" href="py_compile.html#py_compile.PycInvalidationMode" title="py_compile.PycInvalidationMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">py_compile.PycInvalidationMode</span></code></a> 枚举的成员之一并将控制所生成的 pyc 在运行时以何种方式验证是否失效。</p>
+<p class="translated"><em>stripdir</em>, <em>prependdir</em> 和 <em>limit_sl_dest</em> 参数分别对应上述的 <code class="docutils literal notranslate"><span class="pre">-s</span></code>, <code class="docutils literal notranslate"><span class="pre">-p</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-e</span></code> 选项。 它们可以被指定为 <code class="docutils literal notranslate"><span class="pre">str</span></code> 或 <a class="reference internal" href="os.html#os.PathLike" title="os.PathLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>。</p>
+<p class="translated">如果 <em>hardlink_dupes</em> 为真值且两个使用不同优化级别的 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件具有相同的内容，则会使用硬链接来合并重复的文件。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>增加了 <em>legacy</em> 和 <em>optimize</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>增加了 <em>workers</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>quiet</em> 形参已改为多级别值。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>legacy</em> 形参将只写入 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件而非 <code class="docutils literal notranslate"><span class="pre">.pyo</span></code> 文件，无论 <em>optimize</em> 的值是什么。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.6 版本发生变更: </span>接受一个 <a class="reference internal" href="../glossary.html#term-path-like-object"><span class="xref std std-term">path-like object</span></a>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>增加了 <em>invalidation_mode</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7.2 版本发生变更: </span><em>invalidation_mode</em> 形参的默认值已更新为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.8 版本发生变更: </span>将 <em>workers</em> 设为 0 现在将会选择最优核心数量。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>增加了 <em>stripdir</em>, <em>prependdir</em>, <em>limit_sl_dest</em> 和 <em>hardlink_dupes</em> 参数。 <em>maxlevels</em> 的默认值从 <code class="docutils literal notranslate"><span class="pre">10</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">sys.getrecursionlimit()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="compileall.compile_file">
+<span class="sig-prename descclassname"><span class="pre">compileall.</span></span><span class="sig-name descname"><span class="pre">compile_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legacy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalidation_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stripdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prependdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_sl_dest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardlink_dupes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compileall.compile_file" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">编译路径为 <em>fullname</em> 的文件。 如果文件编译成功则返回真值，否则返回假值。</p>
+<p class="translated">如果给出了 <em>ddir</em>，它会被附加到被编译的文件的路径之前以便在编译时回溯中使用，同时还会被编译到字节码文件中，届时它将在字节码文件被执行而源文件已不存在的情况下被用于回溯和其他消息中。</p>
+<p class="translated">如果给出了 <em>rx</em>，则会向它的 <code class="docutils literal notranslate"><span class="pre">search</span></code> 方法传入准备编译的文件的完整路径，并且如果它返回真值，则不编译该文件并返回 <code class="docutils literal notranslate"><span class="pre">True</span></code>。 这可被用来排除与一个正则表达式相匹配的文件，正则表达式将以 <a class="reference internal" href="re.html#re-objects"><span class="std std-ref">re.Pattern</span></a> 对象的形式给出。</p>
+<p class="translated">如果 <em>quiet</em> 为 <code class="docutils literal notranslate"><span class="pre">False</span></code> 或 <code class="docutils literal notranslate"><span class="pre">0</span></code> (默认值)，则文件名和其他信息将被打印到标准输出。 如果设为 <code class="docutils literal notranslate"><span class="pre">1</span></code>，则只打印错误。 如果设为 <code class="docutils literal notranslate"><span class="pre">2</span></code>，则屏蔽所有输出。</p>
+<p class="translated">如果 <em>legacy</em> 为真值，则将字节码文件写入到它们的传统位置和名称，这可能会覆盖由另一版本的 Python 所创建的字节码文件。 默认是将文件写入到它们的 <span class="target" id="index-11"></span><a class="pep reference external" href="https://peps.python.org/pep-3147/"><strong>PEP 3147</strong></a> 位置和名称，这允许来自多个版本的 Python 字节码文件共存。</p>
+<p class="translated"><em>optimize</em> 指明编译器的优化级别。 它会被传给内置 <a class="reference internal" href="functions.html#compile" title="compile"><code class="xref py py-func docutils literal notranslate"><span class="pre">compile()</span></code></a> 函数。 还接受一个优化级别列表，这将在单次调用中多次编译一个 <code class="file docutils literal notranslate"><span class="pre">.py</span></code> 文件。</p>
+<p class="translated"><em>invalidation_mode</em> 应为 <a class="reference internal" href="py_compile.html#py_compile.PycInvalidationMode" title="py_compile.PycInvalidationMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">py_compile.PycInvalidationMode</span></code></a> 枚举的成员之一并将控制所生成的 pyc 在运行时以何种方式验证是否失效。</p>
+<p class="translated"><em>stripdir</em>, <em>prependdir</em> 和 <em>limit_sl_dest</em> 参数分别对应上述的 <code class="docutils literal notranslate"><span class="pre">-s</span></code>, <code class="docutils literal notranslate"><span class="pre">-p</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-e</span></code> 选项。 它们可以被指定为 <code class="docutils literal notranslate"><span class="pre">str</span></code> 或 <a class="reference internal" href="os.html#os.PathLike" title="os.PathLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>。</p>
+<p class="translated">如果 <em>hardlink_dupes</em> 为真值且两个使用不同优化级别的 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件具有相同的内容，则会使用硬链接来合并重复的文件。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>quiet</em> 形参已改为多级别值。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>legacy</em> 形参将只写入 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件而非 <code class="docutils literal notranslate"><span class="pre">.pyo</span></code> 文件，无论 <em>optimize</em> 的值是什么。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>增加了 <em>invalidation_mode</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7.2 版本发生变更: </span><em>invalidation_mode</em> 形参的默认值已更新为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>增加了 <em>stripdir</em>, <em>prependdir</em>, <em>limit_sl_dest</em> 和 <em>hardlink_dupes</em> 参数。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="compileall.compile_path">
+<span class="sig-prename descclassname"><span class="pre">compileall.</span></span><span class="sig-name descname"><span class="pre">compile_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_curdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxlevels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legacy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalidation_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compileall.compile_path" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将在 <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> 中找到的所有 <code class="file docutils literal notranslate"><span class="pre">.py</span></code> 文件编译为字节码。 如果所有文件编译成功则返回真值，否则返回假值。</p>
+<p class="translated">如果 <em>skip_curdir</em> 为真值（默认），则当前目录不会被包括在搜索中。 所有其他形参将被传递给 <a class="reference internal" href="#compileall.compile_dir" title="compileall.compile_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">compile_dir()</span></code></a> 函数。 请注意不同于其他编译函数，<code class="docutils literal notranslate"><span class="pre">maxlevels</span></code> 默认为 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>增加了 <em>legacy</em> 和 <em>optimize</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>quiet</em> 形参已改为多级别值。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span><em>legacy</em> 形参将只写入 <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> 文件而非 <code class="docutils literal notranslate"><span class="pre">.pyo</span></code> 文件，无论 <em>optimize</em> 的值是什么。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7 版本发生变更: </span>增加了 <em>invalidation_mode</em> 形参。</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.7.2 版本发生变更: </span><em>invalidation_mode</em> 形参的默认值已更新为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+</dd></dl>
+
+<p class="translated">强制重新编译 <code class="file docutils literal notranslate"><span class="pre">Lib/</span></code> 子目录及其所有子目录下的全部 <code class="file docutils literal notranslate"><span class="pre">.py</span></code> 文件:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">compileall</span>
+
+<span class="n">compileall</span><span class="o">.</span><span class="n">compile_dir</span><span class="p">(</span><span class="s1">&#39;Lib/&#39;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># 执行同样的编译，排除 .svn 目录中的文件。</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="n">compileall</span><span class="o">.</span><span class="n">compile_dir</span><span class="p">(</span><span class="s1">&#39;Lib/&#39;</span><span class="p">,</span> <span class="n">rx</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[/</span><span class="se">\\</span><span class="s1">][.]svn&#39;</span><span class="p">),</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># 也可以使用 pathlib.Path 对象。</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="n">compileall</span><span class="o">.</span><span class="n">compile_dir</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;Lib/&#39;</span><span class="p">),</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated">模块 <a class="reference internal" href="py_compile.html#module-py_compile" title="py_compile: Generate byte-code files from Python source files."><code class="xref py py-mod docutils literal notranslate"><span class="pre">py_compile</span></code></a></dt><dd><p class="translated">将单个源文件编译为字节码。</p>
+</dd>
+</dl>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compileall</span></code> --- 字节编译 Python 库</a><ul>
+<li><a class="reference internal" href="#command-line-use">使用命令行</a></li>
+<li><a class="reference internal" href="#public-functions">公有函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="py_compile.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">py_compile</span></code> --- 编译 Python 源文件</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="dis.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dis</span></code> --- Python 字节码反汇编器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/compileall.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/compileall.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/compileall.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="dis.html" title="dis --- Python 字节码反汇编器"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="py_compile.html" title="py_compile --- 编译 Python 源文件"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="language.html" >Python 语言服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">compileall</span></code> --- 字节编译 Python 库</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

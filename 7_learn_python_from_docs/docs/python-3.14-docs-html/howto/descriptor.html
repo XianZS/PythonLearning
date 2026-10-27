@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="描述器指南" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/descriptor.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="作者, Raymond Hettinger（译者：wh2099 at outlook dot com）,, 联系方式,&lt;python at rcn dot com&gt;,. 目录: 描述器指南- 入门- 简单示例：返回常量的描述器, 动态查找, 托管属性, 定制名称, 结束语., 完整的实际例子- 验证器类, 自定义验证器, 实际应用., 技术教程- 摘要, 定义与介绍, 描述器协议..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_descriptor_45b50406.png" />
+<meta property="og:image:alt" content="作者, Raymond Hettinger（译者：wh2099 at outlook dot com）,, 联系方式,&lt;python at rcn dot com&gt;,. 目录: 描述器指南- 入门- 简单示例：返回常量的描述器, 动态查找, 托管属性, 定制名称, 结束语., 完整的实际例子- 验证器类, 自定义验证器, 实际应用., 技术教程- 摘要, 定义与介绍, 描述器协议..." />
+<meta name="description" content="作者, Raymond Hettinger（译者：wh2099 at outlook dot com）,, 联系方式,&lt;python at rcn dot com&gt;,. 目录: 描述器指南- 入门- 简单示例：返回常量的描述器, 动态查找, 托管属性, 定制名称, 结束语., 完整的实际例子- 验证器类, 自定义验证器, 实际应用., 技术教程- 摘要, 定义与介绍, 描述器协议..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>描述器指南 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="使用 GDB 调试 C API 扩展和 CPython 内部代码" href="gdb_helpers.html" />
+    <link rel="prev" title="用 Python 进行 Curses 编程" href="curses.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/descriptor.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">描述器指南</a><ul>
+<li><a class="reference internal" href="#primer">入门</a><ul>
+<li><a class="reference internal" href="#simple-example-a-descriptor-that-returns-a-constant">简单示例：返回常量的描述器</a></li>
+<li><a class="reference internal" href="#dynamic-lookups">动态查找</a></li>
+<li><a class="reference internal" href="#managed-attributes">托管属性</a></li>
+<li><a class="reference internal" href="#customized-names">定制名称</a></li>
+<li><a class="reference internal" href="#closing-thoughts">结束语</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#complete-practical-example">完整的实际例子</a><ul>
+<li><a class="reference internal" href="#validator-class">验证器类</a></li>
+<li><a class="reference internal" href="#custom-validators">自定义验证器</a></li>
+<li><a class="reference internal" href="#practical-application">实际应用</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#technical-tutorial">技术教程</a><ul>
+<li><a class="reference internal" href="#abstract">摘要</a></li>
+<li><a class="reference internal" href="#definition-and-introduction">定义与介绍</a></li>
+<li><a class="reference internal" href="#descriptor-protocol">描述器协议</a></li>
+<li><a class="reference internal" href="#overview-of-descriptor-invocation">描述器调用概述</a></li>
+<li><a class="reference internal" href="#invocation-from-an-instance">通过实例调用</a></li>
+<li><a class="reference internal" href="#invocation-from-a-class">通过类调用</a></li>
+<li><a class="reference internal" href="#invocation-from-super">通过 super 调用</a></li>
+<li><a class="reference internal" href="#summary-of-invocation-logic">调用逻辑总结</a></li>
+<li><a class="reference internal" href="#automatic-name-notification">自动名称通知</a></li>
+<li><a class="reference internal" href="#orm-example">ORM（对象关系映射）示例</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pure-python-equivalents">纯 Python 等价实现</a><ul>
+<li><a class="reference internal" href="#properties">属性</a></li>
+<li><a class="reference internal" href="#functions-and-methods">函数和方法</a></li>
+<li><a class="reference internal" href="#kinds-of-methods">方法的种类</a></li>
+<li><a class="reference internal" href="#static-methods">静态方法</a></li>
+<li><a class="reference internal" href="#class-methods">类方法</a></li>
+<li><a class="reference internal" href="#member-objects-and-slots">成员对象和 __slots__</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="curses.html"
+                          title="上一章">用 Python 进行 Curses 编程</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="gdb_helpers.html"
+                          title="下一章">使用 GDB 调试 C API 扩展和 CPython 内部代码</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/descriptor.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/descriptor.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/descriptor.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="gdb_helpers.html" title="使用 GDB 调试 C API 扩展和 CPython 内部代码"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="curses.html" title="用 Python 进行 Curses 编程"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">描述器指南</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="descriptor-guide">
+<span id="descriptorhowto"></span><h1 class="translated"><a class="toc-backref" href="#id2" role="doc-backlink">描述器指南</a><a class="headerlink" href="#descriptor-guide" title="Link to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd translated">作者<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated">Raymond Hettinger（译者：wh2099 at outlook dot com）</p>
+</dd>
+<dt class="field-even translated">联系方式<span class="colon">:</span></dt>
+<dd class="field-even translated"><p class="translated">&lt;python at rcn dot com&gt;</p>
+</dd>
+</dl>
+<nav class="contents" id="id1">
+<p class="untranslated topic-title">目录</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#descriptor-guide" id="id2">描述器指南</a></p>
+<ul>
+<li><p><a class="reference internal" href="#primer" id="id3">入门</a></p>
+<ul>
+<li><p><a class="reference internal" href="#simple-example-a-descriptor-that-returns-a-constant" id="id4">简单示例：返回常量的描述器</a></p></li>
+<li><p><a class="reference internal" href="#dynamic-lookups" id="id5">动态查找</a></p></li>
+<li><p><a class="reference internal" href="#managed-attributes" id="id6">托管属性</a></p></li>
+<li><p><a class="reference internal" href="#customized-names" id="id7">定制名称</a></p></li>
+<li><p><a class="reference internal" href="#closing-thoughts" id="id8">结束语</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#complete-practical-example" id="id9">完整的实际例子</a></p>
+<ul>
+<li><p><a class="reference internal" href="#validator-class" id="id10">验证器类</a></p></li>
+<li><p><a class="reference internal" href="#custom-validators" id="id11">自定义验证器</a></p></li>
+<li><p><a class="reference internal" href="#practical-application" id="id12">实际应用</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#technical-tutorial" id="id13">技术教程</a></p>
+<ul>
+<li><p><a class="reference internal" href="#abstract" id="id14">摘要</a></p></li>
+<li><p><a class="reference internal" href="#definition-and-introduction" id="id15">定义与介绍</a></p></li>
+<li><p><a class="reference internal" href="#descriptor-protocol" id="id16">描述器协议</a></p></li>
+<li><p><a class="reference internal" href="#overview-of-descriptor-invocation" id="id17">描述器调用概述</a></p></li>
+<li><p><a class="reference internal" href="#invocation-from-an-instance" id="id18">通过实例调用</a></p></li>
+<li><p><a class="reference internal" href="#invocation-from-a-class" id="id19">通过类调用</a></p></li>
+<li><p><a class="reference internal" href="#invocation-from-super" id="id20">通过 super 调用</a></p></li>
+<li><p><a class="reference internal" href="#summary-of-invocation-logic" id="id21">调用逻辑总结</a></p></li>
+<li><p><a class="reference internal" href="#automatic-name-notification" id="id22">自动名称通知</a></p></li>
+<li><p><a class="reference internal" href="#orm-example" id="id23">ORM（对象关系映射）示例</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#pure-python-equivalents" id="id24">纯 Python 等价实现</a></p>
+<ul>
+<li><p><a class="reference internal" href="#properties" id="id25">属性</a></p></li>
+<li><p><a class="reference internal" href="#functions-and-methods" id="id26">函数和方法</a></p></li>
+<li><p><a class="reference internal" href="#kinds-of-methods" id="id27">方法的种类</a></p></li>
+<li><p><a class="reference internal" href="#static-methods" id="id28">静态方法</a></p></li>
+<li><p><a class="reference internal" href="#class-methods" id="id29">类方法</a></p></li>
+<li><p><a class="reference internal" href="#member-objects-and-slots" id="id30">成员对象和 __slots__</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<p class="translated"><a class="reference internal" href="../glossary.html#term-descriptor"><span class="xref std std-term">描述器</span></a> 让对象能够自定义属性查找、存储和删除的操作。</p>
+<p class="translated">本指南主要分为四个部分：</p>
+<ol class="arabic simple">
+<li><p class="translated">“入门”部分从简单的示例着手，逐步添加特性，从而给出基本的概述。如果你是刚接触到描述器，请从这里开始。</p></li>
+<li><p class="translated">第二部分展示了完整的、实用的描述器示例。如果您已经掌握了基础知识，请从此处开始。</p></li>
+<li><p class="translated">第三部分提供了更多技术教程，详细介绍了描述器如何工作。大多数人并不需要深入到这种程度。</p></li>
+<li><p class="untranslated">The last section has pure Python equivalents for built-in descriptors that
+are written in C.  Read this if you're curious about how functions turn
+into bound methods or about the implementation of common tools like
+<a class="reference internal" href="../library/functions.html#classmethod" title="classmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;classmethod</span></code></a>, <a class="reference internal" href="../library/functions.html#staticmethod" title="staticmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code></a>, <a class="reference internal" href="../library/functions.html#property" title="property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;property</span></code></a>, and
+<a class="reference internal" href="../glossary.html#term-__slots__"><span class="xref std std-term">__slots__</span></a>.</p></li>
+</ol>
+<section id="primer">
+<h2 class="translated"><a class="toc-backref" href="#id3" role="doc-backlink">入门</a><a class="headerlink" href="#primer" title="Link to this heading">¶</a></h2>
+<p class="translated">现在，让我们从最基本的示例开始，然后逐步添加新功能。</p>
+<section id="simple-example-a-descriptor-that-returns-a-constant">
+<h3 class="translated"><a class="toc-backref" href="#id4" role="doc-backlink">简单示例：返回常量的描述器</a><a class="headerlink" href="#simple-example-a-descriptor-that-returns-a-constant" title="Link to this heading">¶</a></h3>
+<p class="translated"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ten</span></code> 类是一个描述器，其 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 方法始终返回常量 <code class="docutils literal notranslate"><span class="pre">10</span></code>:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Ten</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p class="translated">要使用描述器，它必须作为一个类变量存储在另一个类中：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>                       <span class="c1"># 常规类属性</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Ten</span><span class="p">()</span>                   <span class="c1"># 描述器实例</span>
+</pre></div>
+</div>
+<p class="translated">用交互式会话查看普通属性查找和描述器查找之间的区别：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>                     <span class="c1"># 创建一个类 A 的实例</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">x</span>                         <span class="c1"># 正常属性查找</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">y</span>                         <span class="c1"># 描述器查找</span>
+<span class="go">10</span>
+</pre></div>
+</div>
+<p class="translated">在 <code class="docutils literal notranslate"><span class="pre">a.x</span></code> 属性查找中，点运算符会找到存储在类字典中的 <code class="docutils literal notranslate"><span class="pre">'x':</span> <span class="pre">5</span></code>。在 <code class="docutils literal notranslate"><span class="pre">a.y</span></code> 查找中，点运算符会根据描述器实例的 <code class="docutils literal notranslate"><span class="pre">__get__</span></code> 方法将其识别出来，调用该方法并返回 <code class="docutils literal notranslate"><span class="pre">10</span></code>。</p>
+<p class="translated">请注意，值 <code class="docutils literal notranslate"><span class="pre">10</span></code> 既不存储在类字典中也不存储在实例字典中。相反，值 <code class="docutils literal notranslate"><span class="pre">10</span></code> 是在调用时才取到的。</p>
+<p class="translated">这个简单的例子展示了一个描述器是如何工作的，但它不是很有用。在查找常量时，用常规属性查找会更好。</p>
+<p class="translated">在下一节中，我们将创建更有用的东西，即动态查找。</p>
+</section>
+<section id="dynamic-lookups">
+<h3 class="translated"><a class="toc-backref" href="#id5" role="doc-backlink">动态查找</a><a class="headerlink" href="#dynamic-lookups" title="Link to this heading">¶</a></h3>
+<p class="translated">有趣的描述器通常运行计算而不是返回常量：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DirectorySize</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">dirname</span><span class="p">))</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Directory</span><span class="p">:</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="n">DirectorySize</span><span class="p">()</span>              <span class="c1"># 描述器实例</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span>          <span class="c1"># 常规实例属性</span>
+</pre></div>
+</div>
+<p class="translated">交互式会话显示查找是动态的，每次都会计算不同的，经过更新的返回值:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;songs&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;games&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">size</span>                              <span class="c1"># songs 目录有二十个文件</span>
+<span class="go">20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">size</span>                              <span class="c1"># games 目录有三个文件</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;games/chess&#39;</span><span class="p">)</span>            <span class="c1"># 删除一个游戏</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">size</span>                              <span class="c1"># 文件计数将自动更新</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<p class="translated">除了说明描述器如何运行计算，这个例子也揭示了传给 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 的形参的目的。 <em>self</em> 形参为 <em>size</em>，即一个 <em>DirectorySize</em> 的实例。 <em>obj</em> 形参为 <em>g</em> 或 <em>s</em>，即一个 <em>Directory</em> 的实例。 <em>obj</em> 形参让 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code> 方法获知目标目录。 <em>objtype</em> 形参为 <em>Directory</em> 类。</p>
+</section>
+<section id="managed-attributes">
+<h3 class="translated"><a class="toc-backref" href="#id6" role="doc-backlink">托管属性</a><a class="headerlink" href="#managed-attributes" title="Link to this heading">¶</a></h3>
+<p class="translated">描述器的一种流行用法是管理对实例数据的访问。描述器被分配给类字典中的公有属性，而实际数据则作为私有属性存储在实例字典中。描述器的 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#object.__set__" title="object.__set__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code></a> 方法会在公有属性被访问时被触发。</p>
+<p class="translated">在下面的例子中，<em>age</em> 是公开属性，<em>_age</em> 是私有属性。当访问公开属性时，描述器会记录下查找或更新的日志：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LoggedAgeAccess</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_age</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Accessing </span><span class="si">%r</span><span class="s1"> giving </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Updating </span><span class="si">%r</span><span class="s1"> to </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_age</span> <span class="o">=</span> <span class="n">value</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="p">:</span>
+
+    <span class="n">age</span> <span class="o">=</span> <span class="n">LoggedAgeAccess</span><span class="p">()</span>             <span class="c1"># 描述器实例</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>                <span class="c1"># 常规实例属性</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span>                  <span class="c1"># 调用 __set__()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">birthday</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age</span> <span class="o">+=</span> <span class="mi">1</span>                   <span class="c1"># 调用 __get__() 和 __set__()</span>
+</pre></div>
+</div>
+<p class="translated">交互式会话展示中，对托管属性 <em>age</em> 的所有访问都被记录了下来，但常规属性 <em>name</em> 则未被记录：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mary</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Mary M&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>         <span class="c1"># 初始年龄更新会被记录</span>
+<span class="go">INFO:root:Updating &#39;age&#39; to 30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dave</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;David D&#39;</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+<span class="go">INFO:root:Updating &#39;age&#39; to 40</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="n">mary</span><span class="p">)</span>                          <span class="c1"># 私有属性中的实际数据</span>
+<span class="go">{&#39;name&#39;: &#39;Mary M&#39;, &#39;_age&#39;: 30}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="n">dave</span><span class="p">)</span>
+<span class="go">{&#39;name&#39;: &#39;David D&#39;, &#39;_age&#39;: 40}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mary</span><span class="o">.</span><span class="n">age</span>                            <span class="c1"># 访问数据并记录查找操作</span>
+<span class="go">INFO:root:Accessing &#39;age&#39; giving 30</span>
+<span class="go">30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mary</span><span class="o">.</span><span class="n">birthday</span><span class="p">()</span>                     <span class="c1"># 更新也会被记录</span>
+<span class="go">INFO:root:Accessing &#39;age&#39; giving 30</span>
+<span class="go">INFO:root:Updating &#39;age&#39; to 31</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dave</span><span class="o">.</span><span class="n">name</span>                           <span class="c1"># 常规属性查找不会被记录</span>
+<span class="go">&#39;David D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dave</span><span class="o">.</span><span class="n">age</span>                            <span class="c1"># 只有被管理的属性会被记录</span>
+<span class="go">INFO:root:Accessing &#39;age&#39; giving 40</span>
+<span class="go">40</span>
+</pre></div>
+</div>
+<p class="translated">此示例的一个主要问题是私有名称 <em>_age</em> 在类 <em>LoggedAgeAccess</em> 中是硬耦合的。这意味着每个实例只能有一个用于记录的属性，并且其名称不可更改。在下一个示例中，我们将解决这个问题。</p>
+</section>
+<section id="customized-names">
+<h3 class="translated"><a class="toc-backref" href="#id7" role="doc-backlink">定制名称</a><a class="headerlink" href="#customized-names" title="Link to this heading">¶</a></h3>
+<p class="translated">当一个类使用描述器时，它可以告知每个描述器使用了什么变量名。</p>
+<p class="translated">在此示例中，<code class="xref py py-class docutils literal notranslate"><span class="pre">Person</span></code> 类具有两个描述器实例 <em>name</em> 和 <em>age</em>。当 <code class="xref py py-class docutils literal notranslate"><span class="pre">Person</span></code> 类被定义时，它将在 <em>LoggedAccess</em> 中执行对 <a class="reference internal" href="../reference/datamodel.html#object.__set_name__" title="object.__set_name__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set_name__()</span></code></a> 的回调以便记录字段名称，给予每个描述器自己的 <em>public_name</em> 和 <em>private_name</em>:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LoggedAccess</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_name__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">public_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Accessing </span><span class="si">%r</span><span class="s1"> giving </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">public_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Updating </span><span class="si">%r</span><span class="s1"> to </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">public_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="p">:</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">LoggedAccess</span><span class="p">()</span>                <span class="c1"># 第一个描述器实例</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">LoggedAccess</span><span class="p">()</span>                 <span class="c1"># 第二个描述器实例</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>                 <span class="c1"># 调用第一个描述器</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span>                   <span class="c1"># 调用第二个描述器</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">birthday</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p class="translated">交互式会话显示 <code class="xref py py-class docutils literal notranslate"><span class="pre">Person</span></code> 类调用了 <a class="reference internal" href="../reference/datamodel.html#object.__set_name__" title="object.__set_name__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set_name__()</span></code></a> 以使字段名称可被记录。 在这里我们调用 <a class="reference internal" href="../library/functions.html#vars" title="vars"><code class="xref py py-func docutils literal notranslate"><span class="pre">vars()</span></code></a> 来查找描述器而不触发它：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">Person</span><span class="p">)[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+<span class="go">{&#39;public_name&#39;: &#39;name&#39;, &#39;private_name&#39;: &#39;_name&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">Person</span><span class="p">)[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span>
+<span class="go">{&#39;public_name&#39;: &#39;age&#39;, &#39;private_name&#39;: &#39;_age&#39;}</span>
+</pre></div>
+</div>
+<p class="translated">现在，新类会记录对 <em>name</em> 和 <em>age</em> 二者的访问：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pete</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Peter P&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="go">INFO:root:Updating &#39;name&#39; to &#39;Peter P&#39;</span>
+<span class="go">INFO:root:Updating &#39;age&#39; to 10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kate</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Catherine C&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="go">INFO:root:Updating &#39;name&#39; to &#39;Catherine C&#39;</span>
+<span class="go">INFO:root:Updating &#39;age&#39; to 20</span>
+</pre></div>
+</div>
+<p class="translated">这两个 <em>Person</em> 实例仅包含私有名称：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="n">pete</span><span class="p">)</span>
+<span class="go">{&#39;_name&#39;: &#39;Peter P&#39;, &#39;_age&#39;: 10}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="n">kate</span><span class="p">)</span>
+<span class="go">{&#39;_name&#39;: &#39;Catherine C&#39;, &#39;_age&#39;: 20}</span>
+</pre></div>
+</div>
+</section>
+<section id="closing-thoughts">
+<h3 class="translated"><a class="toc-backref" href="#id8" role="doc-backlink">结束语</a><a class="headerlink" href="#closing-thoughts" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="../glossary.html#term-descriptor"><span class="xref std std-term">descriptor</span></a> 是指任何定义了 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#object.__set__" title="object.__set__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code></a> 或 <a class="reference internal" href="../reference/datamodel.html#object.__delete__" title="object.__delete__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__delete__()</span></code></a> 的对象。</p>
+<p class="translated">作为可选项，描述器可以有 <a class="reference internal" href="../reference/datamodel.html#object.__set_name__" title="object.__set_name__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set_name__()</span></code></a> 方法。 这仅会被用于当描述器需要知道创建它的类或它被分配的类变量名称等场合。 （此方法如果存在，那么即使所在类并不是一个描述器仍会被调用。）</p>
+<p class="translated">在属性查找期间，描述器由点运算符调用。如果使用 <code class="docutils literal notranslate"><span class="pre">vars(some_class)[descriptor_name]</span></code> 间接访问描述器，则返回描述器实例而不调用它。</p>
+<p class="translated">描述器仅在用作类变量时起作用。放入实例时，它们将失效。</p>
+<p class="translated">描述器的主要目的是提供一个挂钩，允许存储在类变量中的对象控制在属性查找期间发生的情况。</p>
+<p class="translated">传统上，调用类控制查找过程中发生的事情。描述器反转了这种关系，并允许正在被查询的数据对此进行干涉。</p>
+<p class="untranslated">Descriptors are used throughout the language.  It is how functions turn into
+bound methods.  Common tools like <a class="reference internal" href="../library/functions.html#classmethod" title="classmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;classmethod</span></code></a>, <a class="reference internal" href="../library/functions.html#staticmethod" title="staticmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code></a>,
+<a class="reference internal" href="../library/functions.html#property" title="property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;property</span></code></a>, and <a class="reference internal" href="../library/functools.html#functools.cached_property" title="functools.cached_property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;functools.cached_property</span></code></a> are all implemented as
+descriptors.</p>
+</section>
+</section>
+<section id="complete-practical-example">
+<h2 class="translated"><a class="toc-backref" href="#id9" role="doc-backlink">完整的实际例子</a><a class="headerlink" href="#complete-practical-example" title="Link to this heading">¶</a></h2>
+<p class="translated">在此示例中，我们创建了一个实用而强大的工具来查找难以发现的数据损坏错误。</p>
+<section id="validator-class">
+<h3 class="translated"><a class="toc-backref" href="#id10" role="doc-backlink">验证器类</a><a class="headerlink" href="#validator-class" title="Link to this heading">¶</a></h3>
+<p class="translated">验证器是一个用于托管属性访问的描述器。在存储任何数据之前，它会验证新值是否满足各种类型和范围限制。如果不满足这些限制，它将引发异常，从源头上防止数据损坏。</p>
+<p class="translated">这个 <code class="xref py py-class docutils literal notranslate"><span class="pre">Validator</span></code> 类既是一个 <a class="reference internal" href="../glossary.html#term-abstract-base-class"><span class="xref std std-term">abstract base class</span></a> 也是一个被管理的属性描述器：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Validator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_name__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">自定义验证器必须继承自 <code class="xref py py-class docutils literal notranslate"><span class="pre">Validator</span></code> 并且必须提供 <code class="xref py py-meth docutils literal notranslate"><span class="pre">validate()</span></code> 方法以根据需要测试各种约束。</p>
+</section>
+<section id="custom-validators">
+<h3 class="translated"><a class="toc-backref" href="#id11" role="doc-backlink">自定义验证器</a><a class="headerlink" href="#custom-validators" title="Link to this heading">¶</a></h3>
+<p class="translated">这是三个实用的数据验证工具：</p>
+<ol class="arabic simple">
+<li><p class="translated"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneOf</span></code> 验证值是指定的受约束选项集合中的一项。</p></li>
+<li><p class="translated"><code class="xref py py-class docutils literal notranslate"><span class="pre">Number</span></code> 验证值是否为 <a class="reference internal" href="../library/functions.html#int" title="int"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> 或 <a class="reference internal" href="../library/functions.html#float" title="float"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>。 作为可选项，它还能验证值在给定的最小值和最大值之间。</p></li>
+<li><p class="translated"><code class="xref py py-class docutils literal notranslate"><span class="pre">String</span></code> 验证值是否为 <a class="reference internal" href="../library/stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>。作为可选项，它还能验证给定的最小或最大长度。它还能验证用户定义的 <a class="reference external" href="https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)">predicate</a>.</p></li>
+</ol>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OneOf</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">options</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be one of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Number</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minvalue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxvalue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minvalue</span> <span class="o">=</span> <span class="n">minvalue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxvalue</span> <span class="o">=</span> <span class="n">maxvalue</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be an int or float&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">minvalue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minvalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be at least </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minvalue</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxvalue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxvalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be no more than </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxvalue</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">String</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minsize</span> <span class="o">=</span> <span class="n">minsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxsize</span> <span class="o">=</span> <span class="n">maxsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicate</span> <span class="o">=</span> <span class="n">predicate</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be a str&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">minsize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minsize</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be no smaller than </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minsize</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxsize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxsize</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> to be no bigger than </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxsize</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicate</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">predicate</span><span class="si">}</span><span class="s1"> to be true for </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="practical-application">
+<h3 class="translated"><a class="toc-backref" href="#id12" role="doc-backlink">实际应用</a><a class="headerlink" href="#practical-application" title="Link to this heading">¶</a></h3>
+<p class="translated">这是在真实类中使用数据验证器的方法：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Component</span><span class="p">:</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">minsize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">maxsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="nb">str</span><span class="o">.</span><span class="n">isupper</span><span class="p">)</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">OneOf</span><span class="p">(</span><span class="s1">&#39;wood&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="s1">&#39;plastic&#39;</span><span class="p">)</span>
+    <span class="n">quantity</span> <span class="o">=</span> <span class="n">Number</span><span class="p">(</span><span class="n">minvalue</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">quantity</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span>
+</pre></div>
+</div>
+<p class="translated">描述器阻止无效实例的创建：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Component</span><span class="p">(</span><span class="s1">&#39;Widget&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>      <span class="c1"># 阻止：&#39;Widget&#39; 不是全大写</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Expected &lt;method &#39;isupper&#39; of &#39;str&#39; objects&gt; to be true for &#39;Widget&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Component</span><span class="p">(</span><span class="s1">&#39;WIDGET&#39;</span><span class="p">,</span> <span class="s1">&#39;metle&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>      <span class="c1"># 阻止：&#39;metle&#39; 拼写错误</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Expected &#39;metle&#39; to be one of {&#39;metal&#39;, &#39;plastic&#39;, &#39;wood&#39;}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Component</span><span class="p">(</span><span class="s1">&#39;WIDGET&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>     <span class="c1"># 阻止：-5 为负数</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">Expected -5 to be at least 0</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Component</span><span class="p">(</span><span class="s1">&#39;WIDGET&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">)</span>    <span class="c1"># 阻止：&#39;V&#39; 不是数字</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">TypeError</span>: <span class="n">Expected &#39;V&#39; to be an int or float</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="s1">&#39;WIDGET&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 允许：输入有效</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="technical-tutorial">
+<h2 class="translated"><a class="toc-backref" href="#id13" role="doc-backlink">技术教程</a><a class="headerlink" href="#technical-tutorial" title="Link to this heading">¶</a></h2>
+<p class="translated">接下来是专业性更强的技术教程，以及描述器工作原理的详细信息。</p>
+<section id="abstract">
+<h3 class="translated"><a class="toc-backref" href="#id14" role="doc-backlink">摘要</a><a class="headerlink" href="#abstract" title="Link to this heading">¶</a></h3>
+<p class="translated">定义描述器，总结协议，并说明如何调用描述器。提供一个展示对象关系映射如何工作的示例。</p>
+<p class="translated">学习描述器不仅能提供接触到更多工具集的途径，还能更深地理解 Python 工作的原理。</p>
+</section>
+<section id="definition-and-introduction">
+<h3 class="translated"><a class="toc-backref" href="#id15" role="doc-backlink">定义与介绍</a><a class="headerlink" href="#definition-and-introduction" title="Link to this heading">¶</a></h3>
+<p class="translated">一般而言，描述器是具有描述器协议中的方法之一的属性值。这些方法是 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#object.__set__" title="object.__set__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#object.__delete__" title="object.__delete__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__delete__()</span></code></a>。 如果为某个属性定义了这些方法中的任何一个，它就被称为 <a class="reference internal" href="../glossary.html#term-descriptor"><span class="xref std std-term">descriptor</span></a>。</p>
+<p class="translated">属性访问的默认行为是从一个对象的字典中获取、设置或删除属性。对于实例来说，<code class="docutils literal notranslate"><span class="pre">a.x</span></code> 的查找顺序会从 <code class="docutils literal notranslate"><span class="pre">a.__dict__['x']</span></code> 开始，然后是 <code class="docutils literal notranslate"><span class="pre">type(a).__dict__['x']</span></code>，接下来依次查找 <code class="docutils literal notranslate"><span class="pre">type(a)</span></code> 的方法解析顺序（MRO）。 如果找到的值是定义了某个描述器方法的对象，则 Python 可能会重写默认行为并转而唤起描述器方法。这具体发生在优先级链的哪个环节则要根据所定义的描述器方法及其被调用的方式来决定。</p>
+<p class="translated">描述器是一种强大的，通用的协议。它们是属性、方法、静态方法、类方法和 <a class="reference internal" href="../library/functions.html#super" title="super"><code class="xref py py-func docutils literal notranslate"><span class="pre">super()</span></code></a> 背后的机制。它们在整个 Python 中都有使用。 描述器简化了底层的 C 代码并为日常的 Python 程序提供了一套灵活的新工具。</p>
+</section>
+<section id="descriptor-protocol">
+<h3 class="translated"><a class="toc-backref" href="#id16" role="doc-backlink">描述器协议</a><a class="headerlink" href="#descriptor-protocol" title="Link to this heading">¶</a></h3>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">descr.__get__(self,</span> <span class="pre">obj,</span> <span class="pre">type=None)</span></code></p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">descr.__set__(self,</span> <span class="pre">obj,</span> <span class="pre">value)</span></code></p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">descr.__delete__(self,</span> <span class="pre">obj)</span></code></p>
+<p class="translated">描述器的方法就这些。一个对象只要定义了以上方法中的任何一个，就被视为描述器，并在被作为属性时覆盖其默认行为。</p>
+<p class="translated">如果一个对象定义了 <a class="reference internal" href="../reference/datamodel.html#object.__set__" title="object.__set__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code></a> 或 <a class="reference internal" href="../reference/datamodel.html#object.__delete__" title="object.__delete__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__delete__()</span></code></a>，它将被视为数据描述器。 仅定义了 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 的描述器称为非数据描述器（它们经常被用于方法但也可以有其他用途）。</p>
+<p class="translated">数据和非数据描述器的不同之处在于，如何计算实例字典中条目的替代值。如果实例的字典具有与数据描述器同名的条目，则数据描述器优先。如果实例的字典具有与非数据描述器同名的条目，则该字典条目优先。</p>
+<p class="translated">为了使一个数据描述器只读，应同时定义 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#object.__set__" title="object.__set__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code></a> 并在调用 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code> 时引发 <a class="reference internal" href="../library/exceptions.html#AttributeError" title="AttributeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>。用引发异常的占位符定义 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__set__()</span></code> 方法就足以使其成为一个数据描述器。</p>
+</section>
+<section id="overview-of-descriptor-invocation">
+<h3 class="translated"><a class="toc-backref" href="#id17" role="doc-backlink">描述器调用概述</a><a class="headerlink" href="#overview-of-descriptor-invocation" title="Link to this heading">¶</a></h3>
+<p class="translated">描述器可以通过 <code class="docutils literal notranslate"><span class="pre">desc.__get__(obj)</span></code> 或 <code class="docutils literal notranslate"><span class="pre">desc.__get__(None,</span> <span class="pre">cls)</span></code> 直接调用。</p>
+<p class="translated">但更常见的是通过属性访问自动调用描述器。</p>
+<p class="translated">表达式 <code class="docutils literal notranslate"><span class="pre">obj.x</span></code> 在 <code class="docutils literal notranslate"><span class="pre">obj</span></code> 的命名空间链中查找属性 <code class="docutils literal notranslate"><span class="pre">x</span></code>。如果搜索发现了一个实例 <a class="reference internal" href="../reference/datamodel.html#object.__dict__" title="object.__dict__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> 以外的描述器，将根据下面列出的优先级规则调用其 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 方法。</p>
+<p class="translated">调用的细节取决于 <code class="docutils literal notranslate"><span class="pre">obj</span></code> 是对象、类还是超类的实例。</p>
+</section>
+<section id="invocation-from-an-instance">
+<h3 class="translated"><a class="toc-backref" href="#id18" role="doc-backlink">通过实例调用</a><a class="headerlink" href="#invocation-from-an-instance" title="Link to this heading">¶</a></h3>
+<p class="translated">实例查找会扫描命名空间链并给予数据描述器最高的优先级，然后是实例变量，然后是非数据描述器，最后是 <a class="reference internal" href="../reference/datamodel.html#object.__getattr__" title="object.__getattr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__()</span></code></a>，如果有提供的话。</p>
+<p class="translated">如果 <code class="docutils literal notranslate"><span class="pre">a.x</span></code> 找到了一个描述器，那么将通过 <code class="docutils literal notranslate"><span class="pre">desc.__get__(a,</span> <span class="pre">type(a))</span></code> 调用它。</p>
+<p class="translated">点运算符的查找逻辑在 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__getattribute__()</span></code></a> 中。这里是一个等价的纯 Python 实现：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">find_name_in_mro</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+    <span class="s2">&quot;Emulate _PyType_Lookup() in Objects/typeobject.c&quot;</span>
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">vars</span><span class="p">(</span><span class="n">base</span><span class="p">)[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">default</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">object_getattribute</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="s2">&quot;Emulate PyObject_GenericGetAttr() in Objects/object.c&quot;</span>
+    <span class="n">null</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+    <span class="n">objtype</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">cls_var</span> <span class="o">=</span> <span class="n">find_name_in_mro</span><span class="p">(</span><span class="n">objtype</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">null</span><span class="p">)</span>
+    <span class="n">descr_get</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cls_var</span><span class="p">),</span> <span class="s1">&#39;__get__&#39;</span><span class="p">,</span> <span class="n">null</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">descr_get</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">null</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cls_var</span><span class="p">),</span> <span class="s1">&#39;__set__&#39;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cls_var</span><span class="p">),</span> <span class="s1">&#39;__delete__&#39;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">descr_get</span><span class="p">(</span><span class="n">cls_var</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="p">)</span>     <span class="c1"># 数据描述器</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)[</span><span class="n">name</span><span class="p">]</span>                          <span class="c1"># 实例变量</span>
+    <span class="k">if</span> <span class="n">descr_get</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">null</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">descr_get</span><span class="p">(</span><span class="n">cls_var</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="p">)</span>         <span class="c1"># 非数据描述器</span>
+    <span class="k">if</span> <span class="n">cls_var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">null</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cls_var</span>                                  <span class="c1"># 类变量</span>
+    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">注意，在 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a> 代码中没有 <a class="reference internal" href="../reference/datamodel.html#object.__getattr__" title="object.__getattr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__()</span></code></a> 钩子。 这就是为什么直接调用 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code> 或用 <code class="docutils literal notranslate"><span class="pre">super().__getattribute__</span></code> 会彻底绕过 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__()</span></code>。</p>
+<p class="translated">相反，一旦 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a> 引发 <a class="reference internal" href="../library/exceptions.html#AttributeError" title="AttributeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> 则将由点运算符和 <a class="reference internal" href="../library/functions.html#getattr" title="getattr"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> 函数来负责唤起 <a class="reference internal" href="../reference/datamodel.html#object.__getattr__" title="object.__getattr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__()</span></code></a>。它们的逻辑封装在一个辅助函数中：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">getattr_hook</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="s2">&quot;Emulate slot_tp_getattr_hook() in Objects/typeobject.c&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="s1">&#39;__getattr__&#39;</span><span class="p">):</span>
+            <span class="k">raise</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>             <span class="c1"># __getattr__</span>
+</pre></div>
+</div>
+</section>
+<section id="invocation-from-a-class">
+<h3 class="translated"><a class="toc-backref" href="#id19" role="doc-backlink">通过类调用</a><a class="headerlink" href="#invocation-from-a-class" title="Link to this heading">¶</a></h3>
+<p class="translated">像 <code class="docutils literal notranslate"><span class="pre">A.x</span></code> 这样的点操作符查找的逻辑在 <code class="xref py py-meth docutils literal notranslate"><span class="pre">type.__getattribute__()</span></code> 中。其步骤与 <code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__getattribute__()</span></code> 相似，但是实例字典查找被替换为搜索类的 <a class="reference internal" href="../glossary.html#term-method-resolution-order"><span class="xref std std-term">method resolution order</span></a>。</p>
+<p class="translated">如果找到了一个描述器，那么将通过 <code class="docutils literal notranslate"><span class="pre">desc.__get__(None,</span> <span class="pre">A)</span></code> 调用它。</p>
+<p class="translated">完整的 C 实现可在 <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Objects/typeobject.c">Objects/typeobject.c</a> 里的 <code class="xref c c-func docutils literal notranslate"><span class="pre">type_getattro()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">_PyType_Lookup()</span></code> 中找到。</p>
+</section>
+<section id="invocation-from-super">
+<h3 class="translated"><a class="toc-backref" href="#id20" role="doc-backlink">通过 super 调用</a><a class="headerlink" href="#invocation-from-super" title="Link to this heading">¶</a></h3>
+<p class="translated">super 的点操作符查找的逻辑在 <a class="reference internal" href="../library/functions.html#super" title="super"><code class="xref py py-func docutils literal notranslate"><span class="pre">super()</span></code></a> 所返回对象的 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a> 方法中。</p>
+<p class="translated">类似 <code class="docutils literal notranslate"><span class="pre">super(A,</span> <span class="pre">obj).m</span></code> 形式的点分查找将在 <code class="docutils literal notranslate"><span class="pre">obj.__class__.__mro__</span></code> 中搜索紧接在 <code class="docutils literal notranslate"><span class="pre">A</span></code> 之后的基类 <code class="docutils literal notranslate"><span class="pre">B</span></code>，然后返回 <code class="docutils literal notranslate"><span class="pre">B.__dict__['m'].__get__(obj,</span> <span class="pre">A)</span></code>。如果 <code class="docutils literal notranslate"><span class="pre">m</span></code> 不是描述器，则直接返回其值。</p>
+<p class="translated">完整的 C 实现可在 <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Objects/typeobject.c">Objects/typeobject.c</a> 里的 <code class="xref c c-func docutils literal notranslate"><span class="pre">super_getattro()</span></code> 中找到。 纯 Python 的等价实现可在 <a class="reference external" href="https://www.python.org/download/releases/2.2.3/descrintro/#cooperation">Guido 的教程</a> 中找到。</p>
+</section>
+<section id="summary-of-invocation-logic">
+<h3 class="translated"><a class="toc-backref" href="#id21" role="doc-backlink">调用逻辑总结</a><a class="headerlink" href="#summary-of-invocation-logic" title="Link to this heading">¶</a></h3>
+<p class="translated">描述器的机制嵌入在 <a class="reference internal" href="../library/functions.html#object" title="object"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, <a class="reference internal" href="../library/functions.html#type" title="type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a> 和 <a class="reference internal" href="../library/functions.html#super" title="super"><code class="xref py py-func docutils literal notranslate"><span class="pre">super()</span></code></a> 的 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a> 方法中。</p>
+<p class="translated">要记住的重要点是：</p>
+<ul class="simple">
+<li><p class="translated">描述器将由 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a> 方法唤起。</p></li>
+<li><p class="translated">类从 <a class="reference internal" href="../library/functions.html#object" title="object"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>，<a class="reference internal" href="../library/functions.html#type" title="type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a> 或 <a class="reference internal" href="../library/functions.html#super" title="super"><code class="xref py py-func docutils literal notranslate"><span class="pre">super()</span></code></a> 继承此机制。</p></li>
+<li><p class="translated">重写 <a class="reference internal" href="../reference/datamodel.html#object.__getattribute__" title="object.__getattribute__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a> 将阻止自动的描述器调用，因为所有描述器逻辑都在该方法中。</p></li>
+<li><p class="translated"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__getattribute__()</span></code> 和 <code class="xref py py-meth docutils literal notranslate"><span class="pre">type.__getattribute__()</span></code> 会用不同方式调用 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a>。第一个会包括实例并可能包括类。第二个会将 <code class="docutils literal notranslate"><span class="pre">None</span></code> 作为实例并且总是包括类。</p></li>
+<li><p class="translated">数据描述器始终会覆盖实例字典。</p></li>
+<li><p class="translated">非数据描述器会被实例字典覆盖。</p></li>
+</ul>
+</section>
+<section id="automatic-name-notification">
+<h3 class="translated"><a class="toc-backref" href="#id22" role="doc-backlink">自动名称通知</a><a class="headerlink" href="#automatic-name-notification" title="Link to this heading">¶</a></h3>
+<p class="translated">有时描述器需要知道它被赋值到哪个变量名。当一个新类被创建时，<a class="reference internal" href="../library/functions.html#type" title="type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a> 元类将扫描新类的字典。 如果其中有任何条目是描述器并且它们定义了 <a class="reference internal" href="../reference/datamodel.html#object.__set_name__" title="object.__set_name__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set_name__()</span></code></a>，则该方法被调用时将附带两个参数。 <em>owner</em> 是使用该描述器的类，而 <em>name</em> 是该描述器被赋值到的变量。</p>
+<p class="translated">实现的细节在 <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Objects/typeobject.c">Objects/typeobject.c</a> 里的 <code class="xref c c-func docutils literal notranslate"><span class="pre">type_new()</span></code> 和 <code class="xref c c-func docutils literal notranslate"><span class="pre">set_names()</span></code> 中。</p>
+<p class="translated">由于更新逻辑是在 <code class="xref py py-meth docutils literal notranslate"><span class="pre">type.__new__()</span></code> 中，因此通知仅在类创建时发出。之后如果将描述器添加到类中，则需要手动调用 <a class="reference internal" href="../reference/datamodel.html#object.__set_name__" title="object.__set_name__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__set_name__()</span></code></a>.</p>
+</section>
+<section id="orm-example">
+<h3 class="translated"><a class="toc-backref" href="#id23" role="doc-backlink">ORM（对象关系映射）示例</a><a class="headerlink" href="#orm-example" title="Link to this heading">¶</a></h3>
+<p class="translated">以下代码展示了如何使用数据描述器来实现简单的 <a class="reference external" href="https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping">对象关系映射</a> 框架。</p>
+<p class="translated">其核心思路是将数据存储在外部数据库中，Python 实例仅持有数据库表中对应的键。描述器负责对值进行查找或更新：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Field</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_name__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fetch</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> FROM </span><span class="si">{</span><span class="n">owner</span><span class="o">.</span><span class="n">table</span><span class="si">}</span><span class="s1"> WHERE </span><span class="si">{</span><span class="n">owner</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s1">=?;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;UPDATE </span><span class="si">{</span><span class="n">owner</span><span class="o">.</span><span class="n">table</span><span class="si">}</span><span class="s1"> SET </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">=? WHERE </span><span class="si">{</span><span class="n">owner</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s1">=?;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch</span><span class="p">,</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="p">[</span><span class="n">value</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">我们可以使用 <code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code> 类来定义描述了数据库中每张表的结构的 <a class="reference external" href="https://en.wikipedia.org/wiki/Database_model">模型</a>:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Movie</span><span class="p">:</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="s1">&#39;Movies&#39;</span>                    <span class="c1"># 表名</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;title&#39;</span>                       <span class="c1"># 主键</span>
+    <span class="n">director</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Song</span><span class="p">:</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="s1">&#39;Music&#39;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;title&#39;</span>
+    <span class="n">artist</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">genre</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+</pre></div>
+</div>
+<p class="translated">要使用模型，首先要连接到数据库:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;entertainment.db&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">交互式会话显示了如何从数据库中检索数据及如何对其进行更新：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Star Wars&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">director</span>
+<span class="go">&#39;George Lucas&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jaws</span> <span class="o">=</span> <span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Jaws&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="sa">f</span><span class="s1">&#39;Released in </span><span class="si">{</span><span class="n">jaws</span><span class="o">.</span><span class="n">year</span><span class="si">}</span><span class="s1"> by </span><span class="si">{</span><span class="n">jaws</span><span class="o">.</span><span class="n">director</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="go">&#39;Released in 1975 by Steven Spielberg&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Song</span><span class="p">(</span><span class="s1">&#39;Country Roads&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">artist</span>
+<span class="go">&#39;John Denver&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Star Wars&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">director</span> <span class="o">=</span> <span class="s1">&#39;J.J. Abrams&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Movie</span><span class="p">(</span><span class="s1">&#39;Star Wars&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">director</span>
+<span class="go">&#39;J.J. Abrams&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="pure-python-equivalents">
+<h2 class="translated"><a class="toc-backref" href="#id24" role="doc-backlink">纯 Python 等价实现</a><a class="headerlink" href="#pure-python-equivalents" title="Link to this heading">¶</a></h2>
+<p class="translated">描述器协议很简单，但它提供了令人兴奋的可能性。有几个用例非常通用，以至于它们已预先打包到内置工具中。属性、绑定方法、静态方法、类方法和 __slots__ 均基于描述器协议。</p>
+<section id="properties">
+<h3 class="translated"><a class="toc-backref" href="#id25" role="doc-backlink">属性</a><a class="headerlink" href="#properties" title="Link to this heading">¶</a></h3>
+<p class="translated">调用 <a class="reference internal" href="../library/functions.html#property" title="property"><code class="xref py py-func docutils literal notranslate"><span class="pre">property()</span></code></a> 是构建数据描述器的简洁方式，该数据描述器在访问属性时触发函数调用。它的签名是:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fdel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">property</span>
+</pre></div>
+</div>
+<p class="translated">该文档显示了定义托管属性 <code class="docutils literal notranslate"><span class="pre">x</span></code> 的典型用法：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__x</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">__x</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__x</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getx</span><span class="p">,</span> <span class="n">setx</span><span class="p">,</span> <span class="n">delx</span><span class="p">,</span> <span class="s2">&quot;I&#39;m the &#39;x&#39; property.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">要了解 <a class="reference internal" href="../library/functions.html#property" title="property"><code class="xref py py-func docutils literal notranslate"><span class="pre">property()</span></code></a> 是如何按描述器协议的方式来实现的，以下是一个实现了大部分核心功能的纯 Python 等价实现：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Property</span><span class="p">:</span>
+    <span class="s2">&quot;Emulate PyProperty_Type() in Objects/descrobject.c&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fget</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fdel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fget</span> <span class="o">=</span> <span class="n">fget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fset</span> <span class="o">=</span> <span class="n">fset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fdel</span> <span class="o">=</span> <span class="n">fdel</span>
+        <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">fget</span><span class="o">.</span><span class="vm">__doc__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">doc</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_name__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delete__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fdel</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fget</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">fget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fset</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">,</span> <span class="n">fset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">deleter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fdel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fset</span><span class="p">,</span> <span class="n">fdel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">当用户接口已授权直接访问属性，但后续的变化要求通过方法来干预时，内置的 <a class="reference internal" href="../library/functions.html#property" title="property"><code class="xref py py-func docutils literal notranslate"><span class="pre">property()</span></code></a> 就能派上用场。</p>
+<p class="translated">例如，一个电子表格类可以通过 <code class="docutils literal notranslate"><span class="pre">Cell('b10').value</span></code> 授予对单元格值的访问权限。对程序的后续改进要求每次访问都要重新计算单元格；但是，程序员不希望影响直接访问该属性的现有客户端代码。解决方案是将对 value 属性的访问包装在属性数据描述器中：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Cell</span><span class="p">:</span>
+    <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Recalculate the cell before returning value&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recalc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+</pre></div>
+</div>
+<p class="translated">在这个例子中内置的 <a class="reference internal" href="../library/functions.html#property" title="property"><code class="xref py py-func docutils literal notranslate"><span class="pre">property()</span></code></a> 或我们的 <code class="xref py py-func docutils literal notranslate"><span class="pre">Property()</span></code> 等价实现都是可以的。</p>
+</section>
+<section id="functions-and-methods">
+<h3 class="translated"><a class="toc-backref" href="#id26" role="doc-backlink">函数和方法</a><a class="headerlink" href="#functions-and-methods" title="Link to this heading">¶</a></h3>
+<p class="translated">Python 的面向对象功能是在基于函数的环境构建的。通过使用非数据描述器，这两方面完成了无缝融合。</p>
+<p class="translated">在调用时，存储在类字典中的函数将被转换为方法。方法与常规函数的不同之处仅在于对象实例被置于其他参数之前。按照惯例，实例引用称为 <em>self</em> ，但也可以称为 <em>this</em> 或任何其他变量名称。</p>
+<p class="translated">可以使用 <a class="reference internal" href="../library/types.html#types.MethodType" title="types.MethodType"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.MethodType</span></code></a> 手动创建方法，其行为基本等价于：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MethodType</span><span class="p">:</span>
+    <span class="s2">&quot;Emulate PyMethod_Type in Objects/classobject.c&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__func__</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__self__</span> <span class="o">=</span> <span class="n">obj</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__func__</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__self__</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="s2">&quot;Emulate method_getset() in Objects/classobject.c&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;__doc__&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__func__</span><span class="o">.</span><span class="vm">__doc__</span>
+        <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="s2">&quot;Emulate method_getattro() in Objects/classobject.c&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__func__</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="s2">&quot;Emulate method_descr_get() in Objects/classobject.c&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</pre></div>
+</div>
+<p class="translated">为支持方法的自动创建，函数会包括 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 方法以便在属性访问期间绑定方法。 这意味着函数就是在通过实例进行点号查找期间返回所绑定方法的非数据描述器。其运作方式是这样的：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Function</span><span class="p">:</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="s2">&quot;Simulate func_descr_get() in Objects/funcobject.c&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">MethodType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">在解释器中运行以下类，这显示了函数描述器的实际工作方式：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+         <span class="k">return</span> <span class="bp">self</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">D2</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">该函数具有 <a class="reference internal" href="../glossary.html#term-qualified-name"><span class="xref std std-term">qualified name</span></a> 属性以支持自省：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">D</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="vm">__qualname__</span>
+<span class="go">&#39;D.f&#39;</span>
+</pre></div>
+</div>
+<p class="translated">通过类字典访问函数不会唤起 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a>。相反，它只是返回下层的函数对象:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">D</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">]</span>
+<span class="go">&lt;function D.f at 0x00C45070&gt;</span>
+</pre></div>
+</div>
+<p class="translated">通过类进行点号访问调用 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a>，它将只原样返回下层的函数:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">D</span><span class="o">.</span><span class="n">f</span>
+<span class="go">&lt;function D.f at 0x00C45070&gt;</span>
+</pre></div>
+</div>
+<p class="translated">有趣的行为发生在通过实例进行点号访问期间。点号查找调用 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a>，它将返回绑定的方法对象:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">D</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">f</span>
+<span class="go">&lt;bound method D.f of &lt;__main__.D object at 0x00B18C90&gt;&gt;</span>
+</pre></div>
+</div>
+<p class="translated">绑定方法在内部存储了底层函数和绑定的实例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="vm">__func__</span>
+<span class="go">&lt;function D.f at 0x00C45070&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="vm">__self__</span>
+<span class="go">&lt;__main__.D object at 0x00B18C90&gt;</span>
+</pre></div>
+</div>
+<p class="translated">如果你曾好奇常规方法中的 <em>self</em> 或类方法中的 <em>cls</em> 是从什么地方来的，就是这里了！</p>
+</section>
+<section id="kinds-of-methods">
+<h3 class="translated"><a class="toc-backref" href="#id27" role="doc-backlink">方法的种类</a><a class="headerlink" href="#kinds-of-methods" title="Link to this heading">¶</a></h3>
+<p class="translated">非数据描述器为把函数绑定为方法的通常模式提供了一种简单的机制。</p>
+<p class="translated">总结一下，函数具有 <a class="reference internal" href="../reference/datamodel.html#object.__get__" title="object.__get__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__get__()</span></code></a> 方法以便在其作为属性被访问时可被转换为方法。非数据描述器会将 <code class="docutils literal notranslate"><span class="pre">obj.f(*args)</span></code> 调用转化为 <code class="docutils literal notranslate"><span class="pre">f(obj,</span> <span class="pre">*args)</span></code>。调用 <code class="docutils literal notranslate"><span class="pre">cls.f(*args)</span></code> 将变成 <code class="docutils literal notranslate"><span class="pre">f(*args)</span></code>.</p>
+<p class="translated">下表总结了绑定及其两个最有用的变体：</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">转换形式</p></th>
+<th class="head"><p class="translated">通过对象调用</p></th>
+<th class="head"><p class="translated">通过类调用</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="translated">function -- 函数</p></td>
+<td><p class="translated">f(obj, *args)</p></td>
+<td><p class="translated">f(*args)</p></td>
+</tr>
+<tr class="row-odd"><td><p class="translated">静态方法</p></td>
+<td><p class="translated">f(*args)</p></td>
+<td><p class="translated">f(*args)</p></td>
+</tr>
+<tr class="row-even"><td><p class="translated">类方法</p></td>
+<td><p class="translated">f(type(obj), *args)</p></td>
+<td><p class="translated">f(cls, *args)</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</section>
+<section id="static-methods">
+<h3 class="translated"><a class="toc-backref" href="#id28" role="doc-backlink">静态方法</a><a class="headerlink" href="#static-methods" title="Link to this heading">¶</a></h3>
+<p class="translated">静态方法返回底层函数，不做任何更改。调用 <code class="docutils literal notranslate"><span class="pre">c.f</span></code> 或 <code class="docutils literal notranslate"><span class="pre">C.f</span></code> 等效于通过 <code class="docutils literal notranslate"><span class="pre">object.__getattribute__(c,</span> <span class="pre">&quot;f&quot;)</span></code> 或 <code class="docutils literal notranslate"><span class="pre">object.__getattribute__(C,</span> <span class="pre">&quot;f&quot;)</span></code> 查找。这样该函数就可以从对象或类中进行相同的访问。</p>
+<p class="translated">适合作为静态方法的是那些不引用 <code class="docutils literal notranslate"><span class="pre">self</span></code> 变量的方法。</p>
+<p class="translated">举例来说，一个统计软件包可能包括存放实验性数据的容器类。 该类提供了用于计算平均数、均值、中位数以及其他描述性的统计数据的方法。 不过，还可能存在在概念上相关但不依赖于这些数据的有用函数。 例如，<code class="docutils literal notranslate"><span class="pre">erf(x)</span></code> 是在统计工作中的便捷转换例程但并不直接依赖于特定的数据集。 它可以通过对象或者类来调用: <code class="docutils literal notranslate"><span class="pre">s.erf(1.5)</span> <span class="pre">--&gt;</span> <span class="pre">0.9332</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">Sample.erf(1.5)</span> <span class="pre">--&gt;</span> <span class="pre">0.9332</span></code>。</p>
+<p class="translated">由于静态方法返回的底层函数没有任何变化，因此示例调用也是意料之中：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">:</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">E</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">E</span><span class="p">()</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">30</span>
+</pre></div>
+</div>
+<p class="untranslated">Using the non-data descriptor protocol, a pure Python version of
+<a class="reference internal" href="../library/functions.html#staticmethod" title="staticmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code></a> would look like this:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StaticMethod</span><span class="p">:</span>
+    <span class="s2">&quot;Emulate PyStaticMethod_Type() in Objects/funcobject.c&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">functools</span><span class="o">.</span><span class="n">update_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__annotations__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="vm">__annotations__</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../library/functools.html#functools.update_wrapper" title="functools.update_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.update_wrapper()</span></code></a> 调用增加了一个指向下层函数的 <code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> 属性。 它还会向前传递必要的属性以使此包装器看起来像是被包装的函数，包括 <a class="reference internal" href="../reference/datamodel.html#function.__name__" title="function.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__qualname__" title="function.__qualname__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__qualname__</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#function.__doc__" title="function.__doc__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__doc__</span></code></a>。</p>
+</section>
+<section id="class-methods">
+<h3 class="translated"><a class="toc-backref" href="#id29" role="doc-backlink">类方法</a><a class="headerlink" href="#class-methods" title="Link to this heading">¶</a></h3>
+<p class="translated">与静态方法不同，类方法在调用函数之前将类引用放在参数列表的最前。无论调用方是对象还是类，此格式相同：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">x</span>
+</pre></div>
+</div>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">F</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">(&#39;F&#39;, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">F</span><span class="p">()</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">(&#39;F&#39;, 3)</span>
+</pre></div>
+</div>
+<p class="translated">当方法仅需要具有类引用并且不依赖于存储在特定实例中的数据时，此行为就很有用。类方法的一种用途是创建备用类构造函数。例如，类方法 <a class="reference internal" href="../library/stdtypes.html#dict.fromkeys" title="dict.fromkeys"><code class="xref py py-func docutils literal notranslate"><span class="pre">dict.fromkeys()</span></code></a> 从键列表创建一个新字典。纯 Python 的等价实现是：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Dict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fromkeys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="s2">&quot;Emulate dict_fromkeys() in Objects/dictobject.c&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p class="translated">现在可以这样构造一个新的唯一键字典：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">Dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="s1">&#39;abracadabra&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Dict</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">{&#39;a&#39;: None, &#39;b&#39;: None, &#39;r&#39;: None, &#39;c&#39;: None, &#39;d&#39;: None}</span>
+</pre></div>
+</div>
+<p class="untranslated">Using the non-data descriptor protocol, a pure Python version of
+<a class="reference internal" href="../library/functions.html#classmethod" title="classmethod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;classmethod</span></code></a> would look like this:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ClassMethod</span><span class="p">:</span>
+    <span class="s2">&quot;Emulate PyClassMethod_Type() in Objects/funcobject.c&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">functools</span><span class="o">.</span><span class="n">update_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MethodType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">ClassMethod</span></code> 中的 <a class="reference internal" href="../library/functools.html#functools.update_wrapper" title="functools.update_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.update_wrapper()</span></code></a> 调用增加了一个指向下层函数的 <code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> 属性。它还会向前传递必要的属性以使此包装器看起来像是被包装的函数：<a class="reference internal" href="../reference/datamodel.html#function.__name__" title="function.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__qualname__" title="function.__qualname__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__qualname__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#function.__doc__" title="function.__doc__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__doc__</span></code></a> 以及 <a class="reference internal" href="../reference/datamodel.html#function.__annotations__" title="function.__annotations__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__annotations__</span></code></a>。</p>
+</section>
+<section id="member-objects-and-slots">
+<h3 class="translated"><a class="toc-backref" href="#id30" role="doc-backlink">成员对象和 __slots__</a><a class="headerlink" href="#member-objects-and-slots" title="Link to this heading">¶</a></h3>
+<p class="translated">当一个类定义了 <code class="docutils literal notranslate"><span class="pre">__slots__</span></code>，它会用一个固定长度的 slot 值数组来替换实例字典。从用户的视角看，效果是这样的：</p>
+<p class="untranslated">1. Provides immediate detection of bugs due to misspelled attribute
+assignments.  Only attribute names specified in <code class="docutils literal notranslate"><span class="pre">__slots__</span></code> are allowed:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Vehicle</span><span class="p">:</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id_number&#39;</span><span class="p">,</span> <span class="s1">&#39;make&#39;</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">auto</span> <span class="o">=</span> <span class="n">Vehicle</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">auto</span><span class="o">.</span><span class="n">id_nubmer</span> <span class="o">=</span> <span class="s1">&#39;VYE483814LQEX&#39;</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">AttributeError</span>: <span class="n">&#39;Vehicle&#39; object has no attribute &#39;id_nubmer&#39;</span>
+</pre></div>
+</div>
+<p class="untranslated">2. Helps create immutable objects where descriptors manage access to private
+attributes stored in <code class="docutils literal notranslate"><span class="pre">__slots__</span></code>:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Immutable</span><span class="p">:</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_dept&#39;</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">)</span>          <span class="c1"># 替代实例字典</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dept</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dept</span> <span class="o">=</span> <span class="n">dept</span>                   <span class="c1"># 保存到私有属性</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>                   <span class="c1"># 保存到私有属性</span>
+
+    <span class="nd">@property</span>                               <span class="c1"># 只读描述器</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dept</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>                         <span class="c1"># 只读描述器</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+</pre></div>
+</div>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mark</span> <span class="o">=</span> <span class="n">Immutable</span><span class="p">(</span><span class="s1">&#39;Botany&#39;</span><span class="p">,</span> <span class="s1">&#39;Mark Watney&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mark</span><span class="o">.</span><span class="n">dept</span>
+<span class="go">&#39;Botany&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mark</span><span class="o">.</span><span class="n">dept</span> <span class="o">=</span> <span class="s1">&#39;Space Pirate&#39;</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">AttributeError</span>: <span class="n">property &#39;dept&#39; of &#39;Immutable&#39; object has no setter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mark</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;Mars&#39;</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">AttributeError</span>: <span class="n">&#39;Immutable&#39; object has no attribute &#39;location&#39;</span>
+</pre></div>
+</div>
+<p class="untranslated">3. Saves memory.  On a 64-bit Linux build, an instance with two attributes
+takes 48 bytes with <code class="docutils literal notranslate"><span class="pre">__slots__</span></code> and 152 bytes without.  This <a class="reference external" href="https://en.wikipedia.org/wiki/Flyweight_pattern">flyweight
+design pattern</a> likely only
+matters when a large number of instances are going to be created.</p>
+<p class="untranslated">4. Improves speed.  Reading instance variables is 35% faster with
+<code class="docutils literal notranslate"><span class="pre">__slots__</span></code> (as measured with Python 3.10 on an Apple M1 processor).</p>
+<p class="untranslated">5. Blocks tools like <a class="reference internal" href="../library/functools.html#functools.cached_property" title="functools.cached_property"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;functools.cached_property</span></code></a> which require an
+instance dictionary to function correctly:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CP</span><span class="p">:</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>                          <span class="c1"># 去除实例字典</span>
+
+    <span class="nd">@cached_property</span>                        <span class="c1"># 需要一个实例字典</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">((</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span><span class="o">**</span><span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">100_000</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">CP</span><span class="p">()</span><span class="o">.</span><span class="n">pi</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">  </span><span class="c">...</span>
+<span class="gr">TypeError</span>: <span class="n">No &#39;__dict__&#39; attribute on &#39;CP&#39; instance to cache &#39;pi&#39; property.</span>
+</pre></div>
+</div>
+<p class="translated">要创建一个一模一样的纯 Python 版的 <code class="docutils literal notranslate"><span class="pre">__slots__</span></code> 是不可能的，因为它需要直接访问 C 结构体并控制对象内存分配。 但是，我们可以构建一个非常相似的模拟版，其中作为 slot 的实际 C 结构体由一个私有的 <code class="docutils literal notranslate"><span class="pre">_slotvalues</span></code> 列表来模拟。 对该私有结构体的读写操作将由成员描述器来管理：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">null</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Member</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">clsname</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate PyMemberDef in Include/descrobject.h&#39;</span>
+        <span class="c1"># 另见 Objects/descrobject.c 中的 descr_new()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clsname</span> <span class="o">=</span> <span class="n">clsname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate member_get() in Objects/descrobject.c&#39;</span>
+        <span class="c1"># 另见 Python/structmember.c 中的 PyMember_GetOne()</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_slotvalues</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">null</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate member_set() in Objects/descrobject.c&#39;</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_slotvalues</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delete__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate member_delete() in Objects/descrobject.c&#39;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_slotvalues</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">null</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_slotvalues</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">null</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate member_repr() in Objects/descrobject.c&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;Member </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">clsname</span><span class="si">!r}</span><span class="s1">&gt;&#39;</span>
+</pre></div>
+</div>
+<p class="translated"><code class="xref py py-meth docutils literal notranslate"><span class="pre">type.__new__()</span></code> 方法负责将成员对象添加到类变量：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="s1">&#39;Simulate how the type metaclass adds member objects for slots&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="n">mcls</span><span class="p">,</span> <span class="n">clsname</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate type_new() in Objects/typeobject.c&#39;</span>
+        <span class="c1"># type_new() 将调用 PyTypeReady()，后者将调用 add_methods()</span>
+        <span class="n">slot_names</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;slot_names&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slot_names</span><span class="p">):</span>
+            <span class="n">mapping</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Member</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">clsname</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">mcls</span><span class="p">,</span> <span class="n">clsname</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../reference/datamodel.html#object.__new__" title="object.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__new__()</span></code></a> 方法负责创建具有 slot 而非实例字典的实例。以下是一个纯 Python 的粗略模拟版：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Object</span><span class="p">:</span>
+    <span class="s1">&#39;Simulate how object.__new__() allocates memory for __slots__&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate object_new() in Objects/typeobject.c&#39;</span>
+        <span class="n">inst</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;slot_names&#39;</span><span class="p">):</span>
+            <span class="n">empty_slots</span> <span class="o">=</span> <span class="p">[</span><span class="n">null</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">slot_names</span><span class="p">)</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="s1">&#39;_slotvalues&#39;</span><span class="p">,</span> <span class="n">empty_slots</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">inst</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate _PyObject_GenericSetAttrWithDict() Objects/object.c&#39;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;slot_names&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">slot_names</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="s1">&#39;Emulate _PyObject_GenericSetAttrWithDict() Objects/object.c&#39;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;slot_names&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">slot_names</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__delattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">要在真实的类中使用此模拟，只需从 <code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code> 继承并将 <a class="reference internal" href="../glossary.html#term-metaclass"><span class="xref std std-term">metaclass</span></a> 设为 <code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>:</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">H</span><span class="p">(</span><span class="n">Object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">Type</span><span class="p">):</span>
+    <span class="s1">&#39;Instance variables stored in slots&#39;</span>
+
+    <span class="n">slot_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+</pre></div>
+</div>
+<p class="translated">这时，元类已经为 <em>x</em> 和 <em>y</em> 加载了成员对象:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pp</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">H</span><span class="p">)))</span>
+<span class="go">{&#39;__module__&#39;: &#39;__main__&#39;,</span>
+<span class="go"> &#39;__doc__&#39;: &#39;Instance variables stored in slots&#39;,</span>
+<span class="go"> &#39;slot_names&#39;: [&#39;x&#39;, &#39;y&#39;],</span>
+<span class="go"> &#39;__init__&#39;: &lt;function H.__init__ at 0x7fb5d302f9d0&gt;,</span>
+<span class="go"> &#39;x&#39;: &lt;Member &#39;x&#39; of &#39;H&#39;&gt;,</span>
+<span class="go"> &#39;y&#39;: &lt;Member &#39;y&#39; of &#39;H&#39;&gt;}</span>
+</pre></div>
+</div>
+<p class="translated">当实例被创建时，它们将拥有一个用于存放属性的 <code class="docutils literal notranslate"><span class="pre">slot_values</span></code> 列表：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+<span class="go">{&#39;_slotvalues&#39;: [10, 20]}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">55</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">vars</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+<span class="go">{&#39;_slotvalues&#39;: [55, 20]}</span>
+</pre></div>
+</div>
+<p class="translated">错误拼写或未赋值的属性将引发一个异常：</p>
+<div class="translated highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">xz</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">AttributeError</span>: <span class="n">&#39;H&#39; object has no attribute &#39;xz&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">描述器指南</a><ul>
+<li><a class="reference internal" href="#primer">入门</a><ul>
+<li><a class="reference internal" href="#simple-example-a-descriptor-that-returns-a-constant">简单示例：返回常量的描述器</a></li>
+<li><a class="reference internal" href="#dynamic-lookups">动态查找</a></li>
+<li><a class="reference internal" href="#managed-attributes">托管属性</a></li>
+<li><a class="reference internal" href="#customized-names">定制名称</a></li>
+<li><a class="reference internal" href="#closing-thoughts">结束语</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#complete-practical-example">完整的实际例子</a><ul>
+<li><a class="reference internal" href="#validator-class">验证器类</a></li>
+<li><a class="reference internal" href="#custom-validators">自定义验证器</a></li>
+<li><a class="reference internal" href="#practical-application">实际应用</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#technical-tutorial">技术教程</a><ul>
+<li><a class="reference internal" href="#abstract">摘要</a></li>
+<li><a class="reference internal" href="#definition-and-introduction">定义与介绍</a></li>
+<li><a class="reference internal" href="#descriptor-protocol">描述器协议</a></li>
+<li><a class="reference internal" href="#overview-of-descriptor-invocation">描述器调用概述</a></li>
+<li><a class="reference internal" href="#invocation-from-an-instance">通过实例调用</a></li>
+<li><a class="reference internal" href="#invocation-from-a-class">通过类调用</a></li>
+<li><a class="reference internal" href="#invocation-from-super">通过 super 调用</a></li>
+<li><a class="reference internal" href="#summary-of-invocation-logic">调用逻辑总结</a></li>
+<li><a class="reference internal" href="#automatic-name-notification">自动名称通知</a></li>
+<li><a class="reference internal" href="#orm-example">ORM（对象关系映射）示例</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pure-python-equivalents">纯 Python 等价实现</a><ul>
+<li><a class="reference internal" href="#properties">属性</a></li>
+<li><a class="reference internal" href="#functions-and-methods">函数和方法</a></li>
+<li><a class="reference internal" href="#kinds-of-methods">方法的种类</a></li>
+<li><a class="reference internal" href="#static-methods">静态方法</a></li>
+<li><a class="reference internal" href="#class-methods">类方法</a></li>
+<li><a class="reference internal" href="#member-objects-and-slots">成员对象和 __slots__</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="curses.html"
+                          title="上一章">用 Python 进行 Curses 编程</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="gdb_helpers.html"
+                          title="下一章">使用 GDB 调试 C API 扩展和 CPython 内部代码</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/descriptor.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/descriptor.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/descriptor.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="gdb_helpers.html" title="使用 GDB 调试 C API 扩展和 CPython 内部代码"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="curses.html" title="用 Python 进行 Curses 编程"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">描述器指南</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

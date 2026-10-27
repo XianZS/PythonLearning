@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="contextlib --- 为 with语句上下文提供的工具" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/contextlib.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码 Lib/contextlib.py 此模块为涉及 with 语句的常见任务提供了实用的工具。更多信息请参见 上下文管理器类型 和 with 语句上下文管理器 。 工具: 提供的函数和类： 例子和配方: 本节描述了一些用于有效利用 contextlib 所提供的工具的示例和步骤说明。 支持可变数量的上下文管理器: ExitStack 的主要应用场景已在该类的文档中给出：在单个 with..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_contextlib_8057bc99.png" />
+<meta property="og:image:alt" content="源代码 Lib/contextlib.py 此模块为涉及 with 语句的常见任务提供了实用的工具。更多信息请参见 上下文管理器类型 和 with 语句上下文管理器 。 工具: 提供的函数和类： 例子和配方: 本节描述了一些用于有效利用 contextlib 所提供的工具的示例和步骤说明。 支持可变数量的上下文管理器: ExitStack 的主要应用场景已在该类的文档中给出：在单个 with..." />
+<meta name="description" content="源代码 Lib/contextlib.py 此模块为涉及 with 语句的常见任务提供了实用的工具。更多信息请参见 上下文管理器类型 和 with 语句上下文管理器 。 工具: 提供的函数和类： 例子和配方: 本节描述了一些用于有效利用 contextlib 所提供的工具的示例和步骤说明。 支持可变数量的上下文管理器: ExitStack 的主要应用场景已在该类的文档中给出：在单个 with..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>contextlib --- 为 with语句上下文提供的工具 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="abc --- 抽象基类" href="abc.html" />
+    <link rel="prev" title="dataclasses --- 数据类" href="dataclasses.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/contextlib.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextlib</span></code> --- 为 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code>语句上下文提供的工具</a><ul>
+<li><a class="reference internal" href="#utilities">工具</a></li>
+<li><a class="reference internal" href="#examples-and-recipes">例子和配方</a><ul>
+<li><a class="reference internal" href="#supporting-a-variable-number-of-context-managers">支持可变数量的上下文管理器</a></li>
+<li><a class="reference internal" href="#catching-exceptions-from-enter-methods">捕获 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> 方法产生的异常</a></li>
+<li><a class="reference internal" href="#cleaning-up-in-an-enter-implementation">在一个 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> 方法的实现中进行清理</a></li>
+<li><a class="reference internal" href="#replacing-any-use-of-try-finally-and-flag-variables">替换任何对 <code class="docutils literal notranslate"><span class="pre">try-finally</span></code> 和旗标变量的使用</a></li>
+<li><a class="reference internal" href="#using-a-context-manager-as-a-function-decorator">将上下文管理器作为函数装饰器使用</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#single-use-reusable-and-reentrant-context-managers">单独使用，可重用并可重进入的上下文管理器</a><ul>
+<li><a class="reference internal" href="#reentrant-context-managers">重进入上下文管理器</a></li>
+<li><a class="reference internal" href="#reusable-context-managers">可重用的上下文管理器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="dataclasses.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dataclasses</span></code> --- 数据类</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="abc.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">abc</span></code> --- 抽象基类</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/contextlib.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/contextlib.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/contextlib.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="abc.html" title="abc --- 抽象基类"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="dataclasses.html" title="dataclasses --- 数据类"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="python.html" accesskey="U">Python 运行时服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextlib</span></code> --- 为 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code>语句上下文提供的工具</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-contextlib">
+<span id="contextlib-utilities-for-with-statement-contexts"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextlib</span></code> --- 为 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code>语句上下文提供的工具<a class="headerlink" href="#module-contextlib" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/contextlib.py">Lib/contextlib.py</a></p>
+<hr class="docutils" />
+<p class="translated">此模块为涉及 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句的常见任务提供了实用的工具。更多信息请参见 <a class="reference internal" href="stdtypes.html#typecontextmanager"><span class="std std-ref">上下文管理器类型</span></a> 和 <a class="reference internal" href="../reference/datamodel.html#context-managers"><span class="std std-ref">with 语句上下文管理器</span></a>。</p>
+<section id="utilities">
+<h2 class="translated">工具<a class="headerlink" href="#utilities" title="Link to this heading">¶</a></h2>
+<p class="translated">提供的函数和类：</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="contextlib.AbstractContextManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">AbstractContextManager</span></span><a class="headerlink" href="#contextlib.AbstractContextManager" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">An <a class="reference internal" href="../glossary.html#term-abstract-base-class"><span class="xref std std-term">abstract base class</span></a> for classes that implement
+<a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> and <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a>. A default
+implementation for <code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code> is provided which returns
+<code class="docutils literal notranslate"><span class="pre">self</span></code> while <code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code> is an abstract method which by default
+returns <code class="docutils literal notranslate"><span class="pre">None</span></code>. See also the definition of <a class="reference internal" href="stdtypes.html#typecontextmanager"><span class="std std-ref">上下文管理器类型</span></a>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.6.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextlib.AbstractAsyncContextManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">AbstractAsyncContextManager</span></span><a class="headerlink" href="#contextlib.AbstractAsyncContextManager" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">An <a class="reference internal" href="../glossary.html#term-abstract-base-class"><span class="xref std std-term">abstract base class</span></a> for classes that implement
+<a class="reference internal" href="../reference/datamodel.html#object.__aenter__" title="object.__aenter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aenter__()</span></code></a> and <a class="reference internal" href="../reference/datamodel.html#object.__aexit__" title="object.__aexit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code></a>. A default
+implementation for <code class="xref py py-meth docutils literal notranslate"><span class="pre">__aenter__()</span></code> is provided which returns
+<code class="docutils literal notranslate"><span class="pre">self</span></code> while <code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code> is an abstract method which by default
+returns <code class="docutils literal notranslate"><span class="pre">None</span></code>. See also the definition of
+<a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">异步上下文管理器</span></a>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.contextmanager">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">contextmanager</span></span><a class="headerlink" href="#contextlib.contextmanager" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">此函数是一个 <a class="reference internal" href="../glossary.html#term-decorator"><span class="xref std std-term">decorator</span></a>，它可被用来定义一个支持 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句上下文管理器的工厂函数，而无需创建一个类或单独的 <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> 方法。</p>
+<p class="translated">尽管许多对象都原生支持在 with 语句中使用，但有时需要被管理的资源本身并不是上下文管理器，并且没有实现 <code class="docutils literal notranslate"><span class="pre">close()</span></code> 方法以配合 <code class="docutils literal notranslate"><span class="pre">contextlib.closing</span></code> 使用。</p>
+<p class="translated">下面是一个抽象的示例，展示如何确保正确的资源管理:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">managed_resource</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="c1"># 获取资源的代码，例如：</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="n">acquire_resource</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">resource</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># 释放资源的代码，例如：</span>
+        <span class="n">release_resource</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">随后可以这样使用此函数:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">managed_resource</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span> <span class="k">as</span> <span class="n">resource</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="c1"># 资源将在此代码块的末尾被释放，</span>
+<span class="gp">... </span>    <span class="c1"># 即使代码块中的代码引发了异常</span>
+</pre></div>
+</div>
+<p class="translated">被装饰的函数在被调用时，必须返回一个 <a class="reference internal" href="../glossary.html#term-generator"><span class="xref std std-term">generator</span></a> 迭代器。 这个迭代器必须只 yield 一个值出来，这个值会被用在 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中，绑定到 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">as</span></code> 后面的变量，如果给定了的话。</p>
+<p class="translated">当生成器发生 yield 时，嵌套在 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中的语句体会被执行。 语句体执行完毕离开之后，该生成器将被恢复执行。 如果在该语句体中发生了未处理的异常，则该异常会在生成器发生 yield 时重新被引发。 因此，你可以使用 <a class="reference internal" href="../reference/compound_stmts.html#try"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">try</span></code></a>...<a class="reference internal" href="../reference/compound_stmts.html#except"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">except</span></code></a>...<a class="reference internal" href="../reference/compound_stmts.html#finally"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">finally</span></code></a> 语句来捕获该异常（如果有的话），或确保进行了一些清理。 如果仅出于记录日志或执行某些操作（而非完全抑制异常）的目的捕获了异常，生成器必须重新引发该异常。 否则生成器的上下文管理器将向 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句指示该异常已经被处理，程序将立即在 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句之后恢复并继续执行。</p>
+<p class="untranslated"><a class="reference internal" href="#contextlib.contextmanager" title="contextlib.contextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;contextmanager</span></code></a> uses <a class="reference internal" href="#contextlib.ContextDecorator" title="contextlib.ContextDecorator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextDecorator</span></code></a> so the context managers
+it creates can be used as decorators as well as in <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> statements.
+When used as a decorator, a new generator instance is implicitly created on
+each function call (this allows the otherwise &quot;one-shot&quot; context managers
+created by <code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;contextmanager</span></code> to meet the requirement that context
+managers support multiple invocations in order to be used as decorators).</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span><a class="reference internal" href="#contextlib.ContextDecorator" title="contextlib.ContextDecorator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextDecorator</span></code></a> 的使用。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.asynccontextmanager">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">asynccontextmanager</span></span><a class="headerlink" href="#contextlib.asynccontextmanager" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">Similar to <a class="reference internal" href="#contextlib.contextmanager" title="contextlib.contextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;~contextlib.contextmanager</span></code></a>, but creates an
+<a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">asynchronous context manager</span></a>.</p>
+<p class="translated">该函数是一个 <a class="reference internal" href="../glossary.html#term-decorator"><span class="xref std std-term">decorator</span></a>，它可被用来定义一个使用 <a class="reference internal" href="../reference/compound_stmts.html#async-with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code></a> 语句的异步上下文管理器的工厂函数，而不需要创建一个类或单独的 <a class="reference internal" href="../reference/datamodel.html#object.__aenter__" title="object.__aenter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aenter__()</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#object.__aexit__" title="object.__aexit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__aexit__()</span></code></a> 方法。 它必须应用在 <a class="reference internal" href="../glossary.html#term-asynchronous-generator"><span class="xref std std-term">asynchronous generator</span></a> 函数上。</p>
+<p class="translated">一个简单的示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">asynccontextmanager</span>
+
+<span class="nd">@asynccontextmanager</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_connection</span><span class="p">():</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acquire_db_connection</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">conn</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">release_db_connection</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_all_users</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">conn</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;SELECT ...&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+<p class="untranslated">Context managers defined with <a class="reference internal" href="#contextlib.asynccontextmanager" title="contextlib.asynccontextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;asynccontextmanager</span></code></a> can be used
+either as decorators or with <a class="reference internal" href="../reference/compound_stmts.html#async-with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">async</span> <span class="pre">with</span></code></a> statements:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">asynccontextmanager</span>
+
+<span class="nd">@asynccontextmanager</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">timeit</span><span class="p">():</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;it took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">now</span><span class="si">}</span><span class="s1">s to run&#39;</span><span class="p">)</span>
+
+<span class="nd">@timeit</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># ... 异步代码 ...</span>
+</pre></div>
+</div>
+<p class="untranslated">When used as a decorator, a new generator instance is implicitly created on
+each function call. This allows the otherwise &quot;one-shot&quot; context managers
+created by <a class="reference internal" href="#contextlib.asynccontextmanager" title="contextlib.asynccontextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;asynccontextmanager</span></code></a> to meet the requirement that context
+managers support multiple invocations in order to be used as decorators.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>Async context managers created with <a class="reference internal" href="#contextlib.asynccontextmanager" title="contextlib.asynccontextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;asynccontextmanager</span></code></a> can
+be used as decorators.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.closing">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">closing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.closing" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个在语句块执行完成时关闭 <em>thing</em> 的上下文管理器。这基本上等价于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">closing</span><span class="p">(</span><span class="n">thing</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">thing</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">thing</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">并允许你编写这样的代码:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">closing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlopen</span>
+
+<span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">urlopen</span><span class="p">(</span><span class="s1">&#39;https://www.python.org&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">page</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">page</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">而无需显式地关闭 <code class="docutils literal notranslate"><span class="pre">page</span></code> 。 即使发生错误，在退出 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句块时， <code class="docutils literal notranslate"><span class="pre">page.close()</span></code> 也同样会被调用。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">大多数管理资源的类型都支持 <a class="reference internal" href="../glossary.html#term-context-manager"><span class="xref std std-term">context manager</span></a> 协议，它在离开 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句时将关闭 <em>thing</em>。 因此，<code class="xref py py-func docutils literal notranslate"><span class="pre">closing()</span></code> 对不支持上下文管理器的第三方类型是最有用的。 这个例子纯粹是为了说明问题，因为 <a class="reference internal" href="urllib.request.html#urllib.request.urlopen" title="urllib.request.urlopen"><code class="xref py py-func docutils literal notranslate"><span class="pre">urlopen()</span></code></a> 通常都会在上下文管理器中使用。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.aclosing">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">aclosing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.aclosing" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个在语句块执行完成时调用 <code class="docutils literal notranslate"><span class="pre">aclose()</span></code> 方法来关闭 <em>thing</em> 的异步上下文管理器。这基本上等价于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">asynccontextmanager</span>
+
+<span class="nd">@asynccontextmanager</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">aclosing</span><span class="p">(</span><span class="n">thing</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">thing</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">thing</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">重要的是，<code class="docutils literal notranslate"><span class="pre">aclosing()</span></code> 支持在异步生成器因遭遇 <a class="reference internal" href="../reference/simple_stmts.html#break"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">break</span></code></a> 或异常而提前退出时对其执行确定性的清理。 例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">aclosing</span>
+
+<span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">my_generator</span><span class="p">())</span> <span class="k">as</span> <span class="n">values</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">42</span><span class="p">:</span>
+            <span class="k">break</span>
+</pre></div>
+</div>
+<p class="translated">此模式将确保生成器的异步退出代码在与其迭代相同的上下文中执行（这样异常和上下文变量将能按预期工作，并且退出代码不会在其所依赖的某些任务的生命期结束后继续运行）。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function" id="simplifying-support-for-single-optional-context-managers">
+<dt class="sig sig-object py" id="contextlib.nullcontext">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">nullcontext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enter_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.nullcontext" title="Link to this definition">¶</a></dt>
+<dd><p class="untranslated">Return a context manager that returns <em>enter_result</em> from <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a>, but
+otherwise does nothing. It is intended to be used as a stand-in for an
+optional context manager, for example:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">myfunction</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ignore_exceptions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ignore_exceptions</span><span class="p">:</span>
+        <span class="c1"># 使用 suppress 来忽略所有异常。</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 不忽略任何异常，cm 将没有影响。</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">cm</span><span class="p">:</span>
+        <span class="c1"># 执行某些操作</span>
+</pre></div>
+</div>
+<p class="translated">一个使用 <em>enter_result</em> 的例子:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_file</span><span class="p">(</span><span class="n">file_or_path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_or_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># 如果是字符串，打开文件</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_or_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 调用方要负责关闭文件</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">(</span><span class="n">file_or_path</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">cm</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="c1"># 在文件上执行处理</span>
+</pre></div>
+</div>
+<p class="translated">它也可以替代 <a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">asynchronous context managers</span></a></p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_http</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">:</span>
+        <span class="c1"># 如果没有 http 会话，则使用 aiohttp 创建它</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 调用方要负责关闭会话</span>
+        <span class="n">cm</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">cm</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="c1"># 使用会话发送 http 请求</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.10 版本发生变更: </span>增加了对 <a class="reference internal" href="../glossary.html#term-asynchronous-context-manager"><span class="xref std std-term">asynchronous context manager</span></a> 的支持。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.suppress">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">suppress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">exceptions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.suppress" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">返回一个当指定的异常在 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句体中发生时会屏蔽它们然后从 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句结束后的第一条语句开始恢复执行的上下文管理器。</p>
+<p class="translated">与完全抑制异常的任何其他机制一样，该上下文管理器应当只用来抑制非常具体的错误，并确保该场景下静默地继续执行程序是通用的正确做法。</p>
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span>
+
+<span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;somefile.tmp&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;someotherfile.tmp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">这段代码等价于:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;somefile.tmp&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;someotherfile.tmp&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">该上下文管理器是 <a class="reference internal" href="#reentrant-cms"><span class="std std-ref">reentrant</span></a> 。</p>
+<p class="translated">如果 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句块内的代码引发了 <a class="reference internal" href="exceptions.html#BaseExceptionGroup" title="BaseExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseExceptionGroup</span></code></a>，将从分组中移除被抑制的异常。 该分组中任何未被抑制的异常会在一个使用原分组的 <a class="reference internal" href="exceptions.html#BaseExceptionGroup.derive" title="BaseExceptionGroup.derive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derive()</span></code></a> 方法创建的新分组中被重新引发。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.12 版本发生变更: </span><code class="docutils literal notranslate"><span class="pre">suppress</span></code> 现在支持抑制作为 <a class="reference internal" href="exceptions.html#BaseExceptionGroup" title="BaseExceptionGroup"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseExceptionGroup</span></code></a> 的组成部分被引发的异常。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.redirect_stdout">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">redirect_stdout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.redirect_stdout" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于将 <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a> 临时重定向到一个文件或类文件对象的上下文管理器。</p>
+<p class="translated">该工具给已有的将输出硬编码写到 stdout 的函数或类提供了额外的灵活性。</p>
+<p class="untranslated">For example, the output of <a class="reference internal" href="functions.html#help" title="help"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a> normally is sent to <em>sys.stdout</em>.
+You can capture that output in a string by redirecting the output to an
+<a class="reference internal" href="io.html#io.StringIO" title="io.StringIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.StringIO</span></code></a> object. The replacement stream is returned from the
+<a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> method and so is available as the target of the
+<a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> statement:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">redirect_stdout</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">())</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">help</span><span class="p">(</span><span class="nb">pow</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">如果要把 <a class="reference internal" href="functions.html#help" title="help"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a> 的输出写到磁盘上的一个文件，重定向该输出到一个常规文件:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;help.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">redirect_stdout</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="n">help</span><span class="p">(</span><span class="nb">pow</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">如果要把 <a class="reference internal" href="functions.html#help" title="help"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a> 的输出写到 <em>sys.stderr</em></p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">redirect_stdout</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">):</span>
+    <span class="n">help</span><span class="p">(</span><span class="nb">pow</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">需要注意的点在于， <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a> 的全局副作用意味着此上下文管理器不适合在库代码和大多数多线程应用程序中使用。它对子进程的输出没有影响。不过对于许多工具脚本而言，它仍然是一个有用的方法。</p>
+<p class="translated">该上下文管理器是 <a class="reference internal" href="#reentrant-cms"><span class="std std-ref">reentrant</span></a> 。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.redirect_stderr">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">redirect_stderr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.redirect_stderr" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">与 <a class="reference internal" href="#contextlib.redirect_stdout" title="contextlib.redirect_stdout"><code class="xref py py-func docutils literal notranslate"><span class="pre">redirect_stdout()</span></code></a> 类似，不过是将 <a class="reference internal" href="sys.html#sys.stderr" title="sys.stderr"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> 重定向到一个文件或类文件对象。</p>
+<p class="translated">该上下文管理器是 <a class="reference internal" href="#reentrant-cms"><span class="std std-ref">reentrant</span></a> 。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contextlib.chdir">
+<span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">chdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.chdir" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">用于改变当前工作目录的非并行安全的上下文管理器。 由于这会改变一个全局状态，即工作目录，因此它不适合在大多数线程或异步上下文中使用。 它也不适合大多数非线性的代码执行，比如生成器，在此类代码中程序的执行会被临时性挂起 -- 除非明确希望如此，当该上下文管理器被激活时你不应执行 yield 语句。</p>
+<p class="translated">这是一个对 <a class="reference internal" href="os.html#os.chdir" title="os.chdir"><code class="xref py py-func docutils literal notranslate"><span class="pre">chdir()</span></code></a> 的简单包装器，它会在进入时改变当前工作目录并在退出时恢复。</p>
+<p class="translated">该上下文管理器是 <a class="reference internal" href="#reentrant-cms"><span class="std std-ref">reentrant</span></a> 。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.11.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextlib.ContextDecorator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">ContextDecorator</span></span><a class="headerlink" href="#contextlib.ContextDecorator" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个使上下文管理器能用作装饰器的基类。</p>
+<p class="untranslated">Context managers inheriting from <code class="docutils literal notranslate"><span class="pre">ContextDecorator</span></code> have to implement
+<a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> and <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> as normal.
+<code class="docutils literal notranslate"><span class="pre">__exit__</span></code> retains its optional
+exception handling even when used as a decorator.</p>
+<p class="untranslated"><code class="docutils literal notranslate"><span class="pre">ContextDecorator</span></code> is used by <a class="reference internal" href="#contextlib.contextmanager" title="contextlib.contextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;contextmanager</span></code></a>, so you get this
+functionality automatically.</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">ContextDecorator</span></code> 的示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextDecorator</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">mycontext</span><span class="p">(</span><span class="n">ContextDecorator</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">exc</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finishing&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p class="translated">随后可以这样使用该类:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@mycontext</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The bit in the middle&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">function</span><span class="p">()</span>
+<span class="go">Starting</span>
+<span class="go">The bit in the middle</span>
+<span class="go">Finishing</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mycontext</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The bit in the middle&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Starting</span>
+<span class="go">The bit in the middle</span>
+<span class="go">Finishing</span>
+</pre></div>
+</div>
+<p class="translated">这个改动只是针对如下形式的一个语法糖:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">cm</span><span class="p">():</span>
+        <span class="c1"># 执行操作</span>
+</pre></div>
+</div>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">ContextDecorator</span></code> 使得你可以这样改写:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@cm</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+    <span class="c1"># 执行操作</span>
+</pre></div>
+</div>
+<p class="translated">这能清楚地表明， <code class="docutils literal notranslate"><span class="pre">cm</span></code> 作用于整个函数，而不仅仅是函数的一部分（同时也能保持不错的缩进层级）。</p>
+<p class="translated">现有的上下文管理器即使已经有基类，也可以使用 <code class="docutils literal notranslate"><span class="pre">ContextDecorator</span></code> 作为混合类进行扩展:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextDecorator</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">mycontext</span><span class="p">(</span><span class="n">ContextBaseClass</span><span class="p">,</span> <span class="n">ContextDecorator</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">exc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">由于被装饰的函数必须能够被多次调用，因此对应的上下文管理器必须支持在多个 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中使用。如果不是这样，则应当使用原来的具有显式 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句的形式使用该上下文管理器。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextlib.AsyncContextDecorator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">AsyncContextDecorator</span></span><a class="headerlink" href="#contextlib.AsyncContextDecorator" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">和 <a class="reference internal" href="#contextlib.ContextDecorator" title="contextlib.ContextDecorator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextDecorator</span></code></a> 类似，但是用于异步函数。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">AsyncContextDecorator</span></code> 的示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asyncio</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncContextDecorator</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">mycontext</span><span class="p">(</span><span class="n">AsyncContextDecorator</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">exc</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finishing&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p class="translated">随后可以这样使用该类:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@mycontext</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The bit in the middle&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">function</span><span class="p">())</span>
+<span class="go">Starting</span>
+<span class="go">The bit in the middle</span>
+<span class="go">Finishing</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">():</span>
+<span class="gp">... </span>   <span class="k">async</span> <span class="k">with</span> <span class="n">mycontext</span><span class="p">():</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The bit in the middle&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">function</span><span class="p">())</span>
+<span class="go">Starting</span>
+<span class="go">The bit in the middle</span>
+<span class="go">Finishing</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextlib.ExitStack">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">ExitStack</span></span><a class="headerlink" href="#contextlib.ExitStack" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">该上下文管理器的设计目标是使得在编码中组合其他上下文管理器和清理函数更加容易，尤其是那些可选的或由输入数据驱动的上下文管理器。</p>
+<p class="translated">例如，通过一个如下的 with 语句可以很容易处理一组文件:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
+    <span class="c1"># 所有已打开的文件都将在 with 语句结束时</span>
+    <span class="c1"># 自动被关闭，即使此后打开列表中文件的</span>
+    <span class="c1"># 尝试引发了异常</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> 方法返回 <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 的实例，并且不会执行额外的操作。</p>
+<p class="translated">每个实例维护一个注册了一组回调的栈，这些回调在实例关闭时以相反的顺序被调用（显式或隐式地在 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句的末尾）。请注意，当一个栈实例被垃圾回收时，这些回调将 <em>不会</em> 被隐式调用。</p>
+<p class="translated">通过使用这个基于栈的模型，那些通过 <code class="docutils literal notranslate"><span class="pre">__init__</span></code> 方法获取资源的上下文管理器（如文件对象）能够被正确处理。</p>
+<p class="translated">由于注册的回调函数是按照与注册相反的顺序调用的，因此最终的行为就像多个嵌套的 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句用在这些注册的回调函数上。这个行为甚至扩展到了异常处理：如果内部的回调函数抑制或替换了异常，则外部回调收到的参数是基于该更新后的状态得到的。</p>
+<p class="translated">这是一个相对底层的 API，它负责正确处理栈里回调退出时依次展开的细节。它为相对高层的上下文管理器提供了一个合适的基础，使得它能根据应用程序的需求使用特定方式操作栈。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.ExitStack.enter_context">
+<span class="sig-name descname"><span class="pre">enter_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.ExitStack.enter_context" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">进入一个新的上下文管理器并将其 <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> 方法添加到回调栈中。 返回值是该上下文管理器自己的 <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> 方法的输出结果。</p>
+<p class="translated">这些上下文管理器可能会屏蔽异常就如当它们作为 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句的一部分直接使用时通常表现的行为一样。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>如果 <em>cm</em> 不是上下文管理器则会引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> 而不是 <a class="reference internal" href="exceptions.html#AttributeError" title="AttributeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.ExitStack.push">
+<span class="sig-name descname"><span class="pre">push</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.ExitStack.push" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将一个上下文管理器的 <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> 方法添加到回调栈。</p>
+<p class="translated">由于 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> <em>没有</em> 被唤起，此方法可以被用来通过一个上下文管理器自己的 <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> 方法覆盖一部分 <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> 的实现。</p>
+<p class="translated">如果传入了一个不是上下文管理器的对象，此方法将假定它是一个具有与上下文管理器的 <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> 方法相同的签名的回调并会直接将其添加到回调栈中。</p>
+<p class="translated">通过返回真值，这些回调可以通过与上下文管理器的 <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a> 方法相同的方式抑制异常。</p>
+<p class="translated">传入的对象将被该函数返回，允许此方法作为函数装饰器使用。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.ExitStack.callback">
+<span class="sig-name descname"><span class="pre">callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.ExitStack.callback" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">接受一个任意的回调函数和参数并将其添加到回调栈。</p>
+<p class="translated">与其他方法不同，通过此方式添加的回调无法屏蔽异常（因为异常的细节不会被传递给它们）。</p>
+<p class="translated">传入的回调将被该函数返回，允许此方法作为函数装饰器使用。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.ExitStack.pop_all">
+<span class="sig-name descname"><span class="pre">pop_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.ExitStack.pop_all" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将回调栈传输到一个新的 <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 实例并返回它。 此操作不会唤起任何回调 —— 作为替代，现在当新栈被关闭时它们将（显式地或是在一条 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句结束时隐式地）被唤起。</p>
+<p class="translated">例如，一组文件可以像下面这样以“全有或全无”的操作方式被打开:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
+    <span class="c1"># 持有 close 方法，但暂时不调用它。</span>
+    <span class="n">close_files</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop_all</span><span class="p">()</span><span class="o">.</span><span class="n">close</span>
+    <span class="c1"># 如果任何文件打开失败，则所有之前打开的文件</span>
+    <span class="c1"># 将自动被关闭。 如果所有文件都被成功地打开，</span>
+    <span class="c1"># 即使在 with 语句结束后它们仍将保持打开状态。</span>
+    <span class="c1"># 随后可以显式唤起 close_files() 来全部关闭它们。</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.ExitStack.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.ExitStack.close" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">立即展开回调栈，按注册时的相反顺序唤起其中的回调。 对于任何已注册的上下文管理器和退出回调，传入的参数将表明没有发生异常。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="contextlib.AsyncExitStack">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contextlib.</span></span><span class="sig-name descname"><span class="pre">AsyncExitStack</span></span><a class="headerlink" href="#contextlib.AsyncExitStack" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个 <a class="reference internal" href="../reference/datamodel.html#async-context-managers"><span class="std std-ref">异步上下文管理器</span></a>，类似于 <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a>，它支持组合同步和异步上下文管理器，并拥有针对清理逻辑的协程。</p>
+<p class="translated"><a class="reference internal" href="#contextlib.ExitStack.close" title="contextlib.ExitStack.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a> 方法未实现，必须改用 <a class="reference internal" href="#contextlib.AsyncExitStack.aclose" title="contextlib.AsyncExitStack.aclose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">aclose()</span></code></a>。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.AsyncExitStack.enter_async_context">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enter_async_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.AsyncExitStack.enter_async_context" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#contextlib.ExitStack.enter_context" title="contextlib.ExitStack.enter_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ExitStack.enter_context()</span></code></a> 但是需要一个异步上下文管理器。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.11 版本发生变更: </span>如果 <em>cm</em> 不是异步上下文管理器则会引发 <a class="reference internal" href="exceptions.html#TypeError" title="TypeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> 而不是 <a class="reference internal" href="exceptions.html#AttributeError" title="AttributeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>。</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.AsyncExitStack.push_async_exit">
+<span class="sig-name descname"><span class="pre">push_async_exit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.AsyncExitStack.push_async_exit" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#contextlib.ExitStack.push" title="contextlib.ExitStack.push"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ExitStack.push()</span></code></a> 但是需要一个异步上下文管理器或协程函数。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.AsyncExitStack.push_async_callback">
+<span class="sig-name descname"><span class="pre">push_async_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.AsyncExitStack.push_async_callback" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#contextlib.ExitStack.callback" title="contextlib.ExitStack.callback"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ExitStack.callback()</span></code></a> 但是需要一个协程函数。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contextlib.AsyncExitStack.aclose">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aclose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contextlib.AsyncExitStack.aclose" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#contextlib.ExitStack.close" title="contextlib.ExitStack.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ExitStack.close()</span></code></a> 但是能正确处理可等待对象。</p>
+</dd></dl>
+
+<p class="untranslated">Continuing the example for <a class="reference internal" href="#contextlib.asynccontextmanager" title="contextlib.asynccontextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;asynccontextmanager</span></code></a>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">with</span> <span class="n">AsyncExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+    <span class="n">connections</span> <span class="o">=</span> <span class="p">[</span><span class="k">await</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span><span class="n">get_connection</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+    <span class="c1"># 所有已打开连接都将在 async with 语句结束时</span>
+    <span class="c1"># 自动被关闭，即使此后打开列表中连接的尝试</span>
+    <span class="c1"># 引发了异常。</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.7.</span></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="examples-and-recipes">
+<h2 class="translated">例子和配方<a class="headerlink" href="#examples-and-recipes" title="Link to this heading">¶</a></h2>
+<p class="translated">本节描述了一些用于有效利用 <code class="xref py py-mod docutils literal notranslate"><span class="pre">contextlib</span></code> 所提供的工具的示例和步骤说明。</p>
+<section id="supporting-a-variable-number-of-context-managers">
+<h3 class="translated">支持可变数量的上下文管理器<a class="headerlink" href="#supporting-a-variable-number-of-context-managers" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 的主要应用场景已在该类的文档中给出：在单个 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中支持可变数量的上下文管理器和其他清理操作。 这个可变性可以来自通过用户输入驱动所需的上下文管理器数量（例如打开用户所指定的文件集），或者来自将某些上下文管理器作为可选项:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">:</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">need_special_resource</span><span class="p">():</span>
+        <span class="n">special</span> <span class="o">=</span> <span class="n">acquire_special_resource</span><span class="p">()</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">release_special_resource</span><span class="p">,</span> <span class="n">special</span><span class="p">)</span>
+    <span class="c1"># 执行使用了所获取资源的操作</span>
+</pre></div>
+</div>
+<p class="translated">如上所示，<a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 还让使用 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句来管理任意非原生支持上下文管理协议的资源变得相当容易。</p>
+</section>
+<section id="catching-exceptions-from-enter-methods">
+<h3 class="translated">捕获 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> 方法产生的异常<a class="headerlink" href="#catching-exceptions-from-enter-methods" title="Link to this heading">¶</a></h3>
+<p class="untranslated">It is occasionally desirable to catch exceptions from an <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a>
+method implementation, <em>without</em> inadvertently catching exceptions from
+the <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> statement body or the context manager's <a class="reference internal" href="../reference/datamodel.html#object.__exit__" title="object.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a>
+method. By using <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> the steps in the context management
+protocol can be separated slightly in order to allow this:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">stack</span> <span class="o">=</span> <span class="n">ExitStack</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="c1"># 处理 __enter__ 异常</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="c1"># 处理正常情况</span>
+</pre></div>
+</div>
+<p class="translated">实际上需要这样做很可能表明下层的 API 应该提供一个直接的资源管理接口以便与 <a class="reference internal" href="../reference/compound_stmts.html#try"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">try</span></code></a>/<a class="reference internal" href="../reference/compound_stmts.html#except"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">except</span></code></a>/<a class="reference internal" href="../reference/compound_stmts.html#finally"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">finally</span></code></a> 语句配合使用，但并不是所有的 API 在这方面都设计得很好。 当上下文管理器是所提供的唯一资源管理 API 时，则 <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 可以让处理各种无法在 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中直接处理的情况变得更为容易。</p>
+</section>
+<section id="cleaning-up-in-an-enter-implementation">
+<h3 class="translated">在一个 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> 方法的实现中进行清理<a class="headerlink" href="#cleaning-up-in-an-enter-implementation" title="Link to this heading">¶</a></h3>
+<p class="translated">正如 <a class="reference internal" href="#contextlib.ExitStack.push" title="contextlib.ExitStack.push"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ExitStack.push()</span></code></a> 的文档中指出的，如果在 <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> 实现中的后续步骤失败则此方法将可被用于清理已分配的资源。</p>
+<p class="translated">下面是为一个上下文管理器做这件事的例子，该上下文管理器可接受资源获取和释放函数，以及可选的验证函数，并将它们映射到上下文管理协议:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span><span class="p">,</span> <span class="n">AbstractContextManager</span><span class="p">,</span> <span class="n">ExitStack</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ResourceManager</span><span class="p">(</span><span class="n">AbstractContextManager</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acquire_resource</span><span class="p">,</span> <span class="n">release_resource</span><span class="p">,</span> <span class="n">check_resource_ok</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquire_resource</span> <span class="o">=</span> <span class="n">acquire_resource</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">release_resource</span> <span class="o">=</span> <span class="n">release_resource</span>
+        <span class="k">if</span> <span class="n">check_resource_ok</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">check_resource_ok</span><span class="p">(</span><span class="n">resource</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_resource_ok</span> <span class="o">=</span> <span class="n">check_resource_ok</span>
+
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cleanup_on_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">yield</span>
+            <span class="c1"># 验证检测通过且没有引发异常</span>
+            <span class="c1"># 相应地，我们想要保留资源，并将其</span>
+            <span class="c1"># 回传给调用方</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">pop_all</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquire_resource</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup_on_error</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_resource_ok</span><span class="p">(</span><span class="n">resource</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Failed validation for </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">resource</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">resource</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">exc_details</span><span class="p">):</span>
+        <span class="c1"># 我们不需要复制任何的资源释放逻辑</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">release_resource</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="replacing-any-use-of-try-finally-and-flag-variables">
+<h3 class="translated">替换任何对 <code class="docutils literal notranslate"><span class="pre">try-finally</span></code> 和旗标变量的使用<a class="headerlink" href="#replacing-any-use-of-try-finally-and-flag-variables" title="Link to this heading">¶</a></h3>
+<p class="translated">一种你有时将看到的模式是 <code class="docutils literal notranslate"><span class="pre">try-finally</span></code> 语句附带一个旗标变量来指明 <code class="docutils literal notranslate"><span class="pre">finally</span></code> 子句体是否要被执行。 在其最简单的形式中（它无法仅仅通过改用一条 <code class="docutils literal notranslate"><span class="pre">except</span></code> 子句来预先处理），看起来会是这样:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">cleanup_needed</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">perform_operation</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">cleanup_needed</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cleanup_needed</span><span class="p">:</span>
+        <span class="n">cleanup_resources</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">就如任何基于 <code class="docutils literal notranslate"><span class="pre">try</span></code> 语句的代码一样，这可能会导致开发和审查方面的问题，因为设置代码和清理代码最终可能会被任意长的代码部分所分隔。</p>
+<p class="translated"><a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 将允许选择在一条 <code class="docutils literal notranslate"><span class="pre">with</span></code> 语句末尾注册一个用于执行的回调的替代方式，等以后再决定是否跳过该回调的执行:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+
+<span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+    <span class="n">stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">cleanup_resources</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">perform_operation</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">pop_all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">这允许在事先显式地指明预期的清理行为，而不需要一个单独的旗标变量。</p>
+<p class="translated">如果某个应用程序大量使用此模式，则可以通过使用一个较小的辅助类来进一步地简化它:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Callback</span><span class="p">(</span><span class="n">ExitStack</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop_all</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">Callback</span><span class="p">(</span><span class="n">cleanup_resources</span><span class="p">)</span> <span class="k">as</span> <span class="n">cb</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">perform_operation</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">如果资源清理操作尚未完善地捆绑到一个独立的函数中，则仍然可以使用 <a class="reference internal" href="#contextlib.ExitStack.callback" title="contextlib.ExitStack.callback"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ExitStack.callback()</span></code></a> 的装饰器形式来提前声明资源清理:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+
+<span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+    <span class="nd">@stack</span><span class="o">.</span><span class="n">callback</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup_resources</span><span class="p">():</span>
+        <span class="o">...</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">perform_operation</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">pop_all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">受装饰器协议工作方式的影响，以此方式声明的回调函数无法接受任何形参。 作为替代，任何要释放的资源必须作为闭包变量来访问。</p>
+</section>
+<section id="using-a-context-manager-as-a-function-decorator">
+<h3 class="translated">将上下文管理器作为函数装饰器使用<a class="headerlink" href="#using-a-context-manager-as-a-function-decorator" title="Link to this heading">¶</a></h3>
+<p class="translated"><a class="reference internal" href="#contextlib.ContextDecorator" title="contextlib.ContextDecorator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextDecorator</span></code></a> 类允许将上下文管理器作为函数装饰器使用，而不仅在 <code class="docutils literal notranslate"><span class="pre">with</span></code> 语句块中使用。</p>
+<p class="translated">例如，有时将函数或语句组包装在一个可以跟踪进入和退出时间的记录器中是很有用的。 与其为任务同时编写函数装饰器和上下文管理器，不如继承 <a class="reference internal" href="#contextlib.ContextDecorator" title="contextlib.ContextDecorator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextDecorator</span></code></a> 在一个定义中同时提供这两种能力:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextDecorator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">track_entry_and_exit</span><span class="p">(</span><span class="n">ContextDecorator</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Entering: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Exiting: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">这个类的实例既可以被用作上下文管理器:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">track_entry_and_exit</span><span class="p">(</span><span class="s1">&#39;widget loader&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Some time consuming activity goes here&#39;</span><span class="p">)</span>
+    <span class="n">load_widget</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">也可以被用作函数装饰器:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@track_entry_and_exit</span><span class="p">(</span><span class="s1">&#39;widget loader&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">activity</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Some time consuming activity goes here&#39;</span><span class="p">)</span>
+    <span class="n">load_widget</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="translated">请注意当使用上下文管理器作为函数装饰器时有一个额外的限制：没有任何办法可以访问 <a class="reference internal" href="../reference/datamodel.html#object.__enter__" title="object.__enter__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__enter__()</span></code></a> 的返回值。 如果需要该值，那么你仍然需要使用显式的 <code class="docutils literal notranslate"><span class="pre">with</span></code> 语句。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="translated"><span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0343/"><strong>PEP 343</strong></a> - &quot;with&quot; 语句</dt><dd><p class="translated">Python <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句的规范描述、背景和示例。</p>
+</dd>
+</dl>
+</div>
+</section>
+</section>
+<section id="single-use-reusable-and-reentrant-context-managers">
+<span id="single-use-reusable-and-reentrant-cms"></span><h2 class="translated">单独使用，可重用并可重进入的上下文管理器<a class="headerlink" href="#single-use-reusable-and-reentrant-context-managers" title="Link to this heading">¶</a></h2>
+<p class="translated">大多数上下文管理器的编写方式意味着它们只能在一个 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中被有效使用一次。 这些一次性使用的上下文管理器必须在每次被使用时重新创建 —— 试图第二次使用它们将会触发异常或是不能正确工作。</p>
+<p class="translated">这个常见的限制意味着通常来说都建议在 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句开头上下文管理器被使用的位置直接创建它们（如上面所有的使用示例所显示的）。</p>
+<p class="translated">文件是一个高效的单次使用上下文管理器的例子，因为第一个 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句将关闭文件，防止任何后续的使用该文件对象的 IO 操作。</p>
+<p class="untranslated">Context managers created using <a class="reference internal" href="#contextlib.contextmanager" title="contextlib.contextmanager"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;contextmanager</span></code></a> are also single use
+context managers, and will complain about the underlying generator failing
+to yield if an attempt is made to use them a second time:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@contextmanager</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">singleuse</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Before&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">yield</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;After&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cm</span> <span class="o">=</span> <span class="n">singleuse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">cm</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">...</span>
+<span class="go">Before</span>
+<span class="go">After</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">cm</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">...</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">RuntimeError</span>: <span class="n">generator didn&#39;t yield</span>
+</pre></div>
+</div>
+<section id="reentrant-context-managers">
+<span id="reentrant-cms"></span><h3 class="translated">重进入上下文管理器<a class="headerlink" href="#reentrant-context-managers" title="Link to this heading">¶</a></h3>
+<p class="translated">更复杂的上下文管理器可以“重进入”。 这些上下文管理器不但可以被用于多个 <a class="reference internal" href="../reference/compound_stmts.html#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> 语句中，还可以被用于已经在使用同一个上下文管理器的 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code> 语句 <em>内部</em>。</p>
+<p class="translated"><a class="reference internal" href="threading.html#threading.RLock" title="threading.RLock"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.RLock</span></code></a> 是一个可重入上下文管理器的例子，<a class="reference internal" href="#contextlib.suppress" title="contextlib.suppress"><code class="xref py py-func docutils literal notranslate"><span class="pre">suppress()</span></code></a>, <a class="reference internal" href="#contextlib.redirect_stdout" title="contextlib.redirect_stdout"><code class="xref py py-func docutils literal notranslate"><span class="pre">redirect_stdout()</span></code></a> 和 <a class="reference internal" href="#contextlib.chdir" title="contextlib.chdir"><code class="xref py py-func docutils literal notranslate"><span class="pre">chdir()</span></code></a> 也是。 下面是一个非常简单的使用重入的示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">redirect_stdout</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">write_to_stream</span> <span class="o">=</span> <span class="n">redirect_stdout</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">write_to_stream</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This is written to the stream rather than stdout&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">write_to_stream</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This is also written to the stream&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This is written directly to stdout&quot;</span><span class="p">)</span>
+<span class="go">This is written directly to stdout</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+<span class="go">This is written to the stream rather than stdout</span>
+<span class="go">This is also written to the stream</span>
+</pre></div>
+</div>
+<p class="translated">现实世界的可重入例子更可能涉及到多个函数的相互调用因此会比这个例子要复杂得多。</p>
+<p class="translated">还要注意可重入与线程安全 <em>不是</em> 一回事。 举例来说，<a class="reference internal" href="#contextlib.redirect_stdout" title="contextlib.redirect_stdout"><code class="xref py py-func docutils literal notranslate"><span class="pre">redirect_stdout()</span></code></a> 肯定不是线程安全的，因为它会通过将 <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a> 绑定到一个不同的流对系统状态做了全局性的修改。</p>
+</section>
+<section id="reusable-context-managers">
+<span id="reusable-cms"></span><h3 class="translated">可重用的上下文管理器<a class="headerlink" href="#reusable-context-managers" title="Link to this heading">¶</a></h3>
+<p class="translated">与单次使用和可重入上下文管理器都不同的还有“可重用”上下文管理器（或者，使用完全显式的表达应为“可重用，但不可重入”上下文管理器，因为可重入上下文管理器也会是可重用的）。 这些上下文管理器支持多次使用，但如果特定的上下文管理器实例已经在包含它的 with 语句中被使用过则将失败（或者不能正确工作）。</p>
+<p class="translated"><a class="reference internal" href="threading.html#threading.Lock" title="threading.Lock"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Lock</span></code></a> 是一个可重用，但是不可重入的上下文管理器的例子（对于可重入锁，则有必要使用 <a class="reference internal" href="threading.html#threading.RLock" title="threading.RLock"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.RLock</span></code></a> 来代替）。</p>
+<p class="translated">另一个可重用，但不可重入的上下文管理器的例子是 <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a>，因为它在离开任何 with 语句时会唤起 <em>所有</em> 当前已注册的回调，不论回调是在哪里添加的:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stack</span> <span class="o">=</span> <span class="n">ExitStack</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">stack</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="s2">&quot;Callback: from first context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leaving first context&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Leaving first context</span>
+<span class="go">Callback: from first context</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">stack</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="s2">&quot;Callback: from second context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leaving second context&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Leaving second context</span>
+<span class="go">Callback: from second context</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">stack</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="s2">&quot;Callback: from outer context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">stack</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="s2">&quot;Callback: from inner context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leaving inner context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leaving outer context&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Leaving inner context</span>
+<span class="go">Callback: from inner context</span>
+<span class="go">Callback: from outer context</span>
+<span class="go">Leaving outer context</span>
+</pre></div>
+</div>
+<p class="translated">正如这个例子的输出所显示的，在多个 with 语句中重用一个单独的栈对象可以正确工作，但尝试嵌套它们就将导致栈在最内层的 with 语句结束时被清空，这不大可能是符合期望的行为。</p>
+<p class="translated">使用单独的 <a class="reference internal" href="#contextlib.ExitStack" title="contextlib.ExitStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExitStack</span></code></a> 实例而不是重复使用一个实例可以避免此问题:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">outer_stack</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">outer_stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="s2">&quot;Callback: from outer context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">inner_stack</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">inner_stack</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="s2">&quot;Callback: from inner context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leaving inner context&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Leaving outer context&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Leaving inner context</span>
+<span class="go">Callback: from inner context</span>
+<span class="go">Leaving outer context</span>
+<span class="go">Callback: from outer context</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextlib</span></code> --- 为 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code>语句上下文提供的工具</a><ul>
+<li><a class="reference internal" href="#utilities">工具</a></li>
+<li><a class="reference internal" href="#examples-and-recipes">例子和配方</a><ul>
+<li><a class="reference internal" href="#supporting-a-variable-number-of-context-managers">支持可变数量的上下文管理器</a></li>
+<li><a class="reference internal" href="#catching-exceptions-from-enter-methods">捕获 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> 方法产生的异常</a></li>
+<li><a class="reference internal" href="#cleaning-up-in-an-enter-implementation">在一个 <code class="docutils literal notranslate"><span class="pre">__enter__</span></code> 方法的实现中进行清理</a></li>
+<li><a class="reference internal" href="#replacing-any-use-of-try-finally-and-flag-variables">替换任何对 <code class="docutils literal notranslate"><span class="pre">try-finally</span></code> 和旗标变量的使用</a></li>
+<li><a class="reference internal" href="#using-a-context-manager-as-a-function-decorator">将上下文管理器作为函数装饰器使用</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#single-use-reusable-and-reentrant-context-managers">单独使用，可重用并可重进入的上下文管理器</a><ul>
+<li><a class="reference internal" href="#reentrant-context-managers">重进入上下文管理器</a></li>
+<li><a class="reference internal" href="#reusable-context-managers">可重用的上下文管理器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="dataclasses.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dataclasses</span></code> --- 数据类</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="abc.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">abc</span></code> --- 抽象基类</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/contextlib.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/contextlib.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/contextlib.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="abc.html" title="abc --- 抽象基类"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="dataclasses.html" title="dataclasses --- 数据类"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="python.html" >Python 运行时服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">contextlib</span></code> --- 为 <code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code>语句上下文提供的工具</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="模块对象" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/module.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="模块定义: 上一节中的函数适用于任何模块对象，包括从 Python 代码导入的模块。 使用 C API 定义的模块通常使用一个 模块定义 ，即 PyModuleDef-- 有关模块应当如何被创建的静态分配的、常量形式的“描述”。 该定义通常被用来定义扩展的“main”模块对象（参阅 定义扩展模块 了解详情）。它还会被用来 动态创建扩展模块 。 不同于 PyModule_New() ，该定义管..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_module_aabaf358.png" />
+<meta property="og:image:alt" content="模块定义: 上一节中的函数适用于任何模块对象，包括从 Python 代码导入的模块。 使用 C API 定义的模块通常使用一个 模块定义 ，即 PyModuleDef-- 有关模块应当如何被创建的静态分配的、常量形式的“描述”。 该定义通常被用来定义扩展的“main”模块对象（参阅 定义扩展模块 了解详情）。它还会被用来 动态创建扩展模块 。 不同于 PyModule_New() ，该定义管..." />
+<meta name="description" content="模块定义: 上一节中的函数适用于任何模块对象，包括从 Python 代码导入的模块。 使用 C API 定义的模块通常使用一个 模块定义 ，即 PyModuleDef-- 有关模块应当如何被创建的静态分配的、常量形式的“描述”。 该定义通常被用来定义扩展的“main”模块对象（参阅 定义扩展模块 了解详情）。它还会被用来 动态创建扩展模块 。 不同于 PyModule_New() ，该定义管..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>模块对象 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="迭代器对象" href="iterator.html" />
+    <link rel="prev" title="File objects" href="file.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/module.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">模块对象</a></li>
+<li><a class="reference internal" href="#module-definitions">模块定义</a><ul>
+<li><a class="reference internal" href="#module-slots">模块槽位</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-extension-modules-dynamically">动态创建扩展模块</a></li>
+<li><a class="reference internal" href="#support-functions">支持函数</a><ul>
+<li><a class="reference internal" href="#module-lookup-single-phase-initialization">模块查找（单阶段初始化）</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="file.html"
+                          title="上一章">File objects</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="iterator.html"
+                          title="下一章">迭代器对象</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/module.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/module.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/module.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="iterator.html" title="迭代器对象"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="file.html" title="File objects"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concrete.html" accesskey="U">具体的对象层</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">模块对象</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-objects">
+<span id="moduleobjects"></span><h1 class="translated">模块对象<a class="headerlink" href="#module-objects" title="Link to this heading">¶</a></h1>
+<dl class="c var" id="index-0">
+<dt class="sig sig-object c" id="c.PyModule_Type">
+<a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><span class="n"><span class="pre">PyTypeObject</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_Type</span></span></span><a class="headerlink" href="#c.PyModule_Type" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated" id="index-1">这个 <a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyTypeObject</span></code></a> 的实例代表 Python 模块类型。它作为 <a class="reference internal" href="../library/types.html#types.ModuleType" title="types.ModuleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.ModuleType</span></code></a> 被暴露给 Python 程序。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_Check">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_Check</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_Check" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">当 <em>p</em> 为模块类型的对象，或是模块子类型的对象时返回真值。该函数永远有返回值。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_CheckExact">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_CheckExact</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_CheckExact" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">当 <em>p</em> 为模块类型的对象且不是 <a class="reference internal" href="#c.PyModule_Type" title="PyModule_Type"><code class="xref c c-data docutils literal notranslate"><span class="pre">PyModule_Type</span></code></a> 的子类型的对象时返回真值。该函数永远有返回值。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_NewObject">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_NewObject</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_NewObject" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated" id="index-2">返回一个新的模块对象，该对象的 <a class="reference internal" href="../reference/datamodel.html#module.__name__" title="module.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">module.__name__</span></code></a> 将设为 <em>name</em>。模块的 <code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code>, <a class="reference internal" href="../reference/datamodel.html#module.__doc__" title="module.__doc__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__doc__</span></code></a>, <a class="reference internal" href="../reference/datamodel.html#module.__package__" title="module.__package__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__package__</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#module.__loader__" title="module.__loader__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__loader__</span></code></a> 属性将被填充 (除 <code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code> 外全都设为 <code class="docutils literal notranslate"><span class="pre">None</span></code>)。 调用方要负责设置 <a class="reference internal" href="../reference/datamodel.html#module.__file__" title="module.__file__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__file__</span></code></a> 属性。</p>
+<p class="translated">当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并设置一个异常。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.4 版本发生变更: </span>现在 <a class="reference internal" href="../reference/datamodel.html#module.__package__" title="module.__package__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__package__</span></code></a> 和 <a class="reference internal" href="../reference/datamodel.html#module.__loader__" title="module.__loader__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__loader__</span></code></a> 将被设为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_New">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_New</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_New" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">这类似于 <a class="reference internal" href="#c.PyModule_NewObject" title="PyModule_NewObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_NewObject()</span></code></a>，但其名称为 UTF-8 编码的字符串而不是 Unicode 对象。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetDict">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetDict</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetDict" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_borrowed_ref">返回值：借入的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated" id="index-3">返回实现 <em>module</em> 的命名空间的字典对象；此对象与模块对象的 <a class="reference internal" href="../reference/datamodel.html#object.__dict__" title="object.__dict__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> 属性相同。如果 <em>module</em> 不是一个模块对象（或模块对象的子类型），则会引发 <a class="reference internal" href="../library/exceptions.html#SystemError" title="SystemError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a> 并返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">建议扩展使用其他 <code class="docutils literal notranslate"><span class="pre">PyModule_*</span></code> 和 <code class="docutils literal notranslate"><span class="pre">PyObject_*</span></code> 函数而不是直接操纵模块的 <a class="reference internal" href="../reference/datamodel.html#object.__dict__" title="object.__dict__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> 属性。</p>
+<p class="translated">返回的引用是从模块借入的；它将保持可用直到模块被销毁。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetNameObject">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetNameObject</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetNameObject" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated" id="index-4">返回 <em>module</em> 的 <a class="reference internal" href="../reference/datamodel.html#module.__name__" title="module.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code></a> 值。如果模块未提供该值，或者如果它不是一个字符串，则会引发 <a class="reference internal" href="../library/exceptions.html#SystemError" title="SystemError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a> 并返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetName">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetName</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetName" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">类似于 <a class="reference internal" href="#c.PyModule_GetNameObject" title="PyModule_GetNameObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetNameObject()</span></code></a> 但返回 <code class="docutils literal notranslate"><span class="pre">'utf-8'</span></code> 编码的名称。</p>
+<p class="translated">返回的缓冲区将保持可用直到模块被重命名或销毁。请注意 Python 代码可能会通过设置其 <a class="reference internal" href="../reference/datamodel.html#module.__name__" title="module.__name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__name__</span></code></a> 属性来重命名一个模块。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetState">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetState</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetState" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">返回模块的“状态”，也就是说，返回指向在模块创建时分配的内存块的指针，或者 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。参见 <a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal notranslate"><span class="pre">PyModuleDef.m_size</span></code></a> 字段。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetDef">
+<a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetDef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetDef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">返回指向模块创建所使用的 <a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyModuleDef</span></code></a> 结构体的指针，或者如果模块不是使用结构体定义创建的则返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">出错时，返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并设置一个异常。使用 <a class="reference internal" href="exceptions.html#c.PyErr_Occurred" title="PyErr_Occurred"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_Occurred()</span></code></a> 将这种情况与缺少 <code class="xref c c-type docutils literal notranslate"><span class="pre">PyModuleDef</span></code> 区分开来。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetFilenameObject">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetFilenameObject</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetFilenameObject" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated" id="index-5">返回使用 <em>module</em> 的 <a class="reference internal" href="../reference/datamodel.html#module.__file__" title="module.__file__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__file__</span></code></a> 属性所加载的 <em>module</em> 所对应的文件名。 如果未定义该属性，或者如果它不是一个字符串，则会引发 <a class="reference internal" href="../library/exceptions.html#SystemError" title="SystemError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a> 并返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>；在其他情况下将返回一个指向 Unicode 对象的引用。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_GetFilename">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_GetFilename</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_GetFilename" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">类似于 <a class="reference internal" href="#c.PyModule_GetFilenameObject" title="PyModule_GetFilenameObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetFilenameObject()</span></code></a> 但会返回编码为 'utf-8' 的文件名。</p>
+<p class="translated">返回的缓冲区将保持可用直到模块的 <a class="reference internal" href="../reference/datamodel.html#module.__file__" title="module.__file__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__file__</span></code></a> 属性被重新赋值或模块被销毁。</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">自 3.2 版本弃用: </span><a class="reference internal" href="#c.PyModule_GetFilename" title="PyModule_GetFilename"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetFilename()</span></code></a> 对于不可编码的文件名会引发 <a class="reference internal" href="../library/exceptions.html#UnicodeEncodeError" title="UnicodeEncodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeEncodeError</span></code></a>，请改用 <a class="reference internal" href="#c.PyModule_GetFilenameObject" title="PyModule_GetFilenameObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetFilenameObject()</span></code></a> 函数。</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-definitions">
+<span id="pymoduledef"></span><h1 class="translated">模块定义<a class="headerlink" href="#module-definitions" title="Link to this heading">¶</a></h1>
+<p class="translated">上一节中的函数适用于任何模块对象，包括从 Python 代码导入的模块。</p>
+<p class="translated">使用 C API 定义的模块通常使用一个 <em>模块定义</em>，即 <a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyModuleDef</span></code></a> -- 有关模块应当如何被创建的静态分配的、常量形式的“描述”。</p>
+<p class="translated">该定义通常被用来定义扩展的“main”模块对象（参阅 <a class="reference internal" href="extension-modules.html#extension-modules"><span class="std std-ref">定义扩展模块</span></a> 了解详情）。它还会被用来 <a class="reference internal" href="#moduledef-dynamic"><span class="std std-ref">动态创建扩展模块</span></a>。</p>
+<p class="translated">不同于 <a class="reference internal" href="#c.PyModule_New" title="PyModule_New"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_New()</span></code></a>，该定义管理 <em>模块状态</em> -- 一块随同模块对象被分配和清空的内存。不同于模块的 Python 属性，Python 代码无法替换或删除存储在模块状态中的数据。</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyModuleDef">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModuleDef</span></span></span><a class="headerlink" href="#c.PyModuleDef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> （包括所有成员）.</em><p class="translated">模块定义结构体，它保存着创建模块对象所有的全部信息。该结构体必须被静态地分配（或者要确保在由它创建的任何模块存在期间保持有效）。通常，每个扩展模块仅有一个该类型的变量。</p>
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_base">
+<span class="n"><span class="pre">PyModuleDef_Base</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m_base</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_base" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">始终将此成员初始化为 <code class="xref c c-macro docutils literal notranslate"><span class="pre">PyModuleDef_HEAD_INIT</span></code>。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_name">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">m_name</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_name" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">新模块的名称。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_doc">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">m_doc</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_doc" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">模块的文档字符串；一般会使用通过 <a class="reference internal" href="intro.html#c.PyDoc_STRVAR" title="PyDoc_STRVAR"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PyDoc_STRVAR</span></code></a> 创建的文档字符串变量。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_size">
+<a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m_size</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_size" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">可以把模块的状态保存在为单个模块分配的内存区域中，使用 <a class="reference internal" href="#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 检索，而不是保存在静态全局区。这使得模块可以在多个子解释器中安全地使用。</p>
+<p class="translated">这个内存区域将在创建模块时根据 <em>m_size</em> 分配，并在模块对象被释放时，在调用 <a class="reference internal" href="#c.PyModuleDef.m_free" title="PyModuleDef.m_free"><code class="xref c c-member docutils literal notranslate"><span class="pre">m_free</span></code></a> 函数（如果存在）之后释放。</p>
+<p class="translated">将其设置为非负值意味着可以重新初始化模块，并指定其状态所需的额外内存量。</p>
+<p class="translated">将 <code class="docutils literal notranslate"><span class="pre">m_size</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 意味着模块不支持子解释器，因为它具有全局状态。负的 <code class="docutils literal notranslate"><span class="pre">m_size</span></code> 只允许在使用 <a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">遗留单阶段初始化</span></a> 或 <a class="reference internal" href="#moduledef-dynamic"><span class="std std-ref">动态创建模块</span></a> 时使用。</p>
+<p class="translated">请参阅 <span class="target" id="index-10"></span><a class="pep reference external" href="https://peps.python.org/pep-3121/"><strong>PEP 3121</strong></a> 了解详情。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_methods">
+<a class="reference internal" href="structures.html#c.PyMethodDef" title="PyMethodDef"><span class="n"><span class="pre">PyMethodDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">m_methods</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_methods" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">一个指向模块函数表的指针，由 <a class="reference internal" href="structures.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMethodDef</span></code></a> 描述。如果模块没有函数，可以为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_slots">
+<a class="reference internal" href="#c.PyModuleDef_Slot" title="PyModuleDef_Slot"><span class="n"><span class="pre">PyModuleDef_Slot</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">m_slots</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_slots" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">由针对多阶段初始化的槽位定义组成的数组，以一个 <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">NULL}</span></code> 条目结束。当使用遗留单阶段初始化时，<em>m_slots</em> 必须为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 值。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.5 版本发生变更: </span>在 3.5 版之前，此成员总是被设为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>，并被定义为：</p>
+<blockquote>
+<div><dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_slots.m_reload">
+<a class="reference internal" href="gcsupport.html#c.inquiry" title="inquiry"><span class="n"><span class="pre">inquiry</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m_reload</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_slots.m_reload" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+</div>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_traverse">
+<a class="reference internal" href="gcsupport.html#c.traverseproc" title="traverseproc"><span class="n"><span class="pre">traverseproc</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m_traverse</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_traverse" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在模块对象的垃圾回收遍历期间所调用的遍历函数，如果不需要则为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">如果模块状态已被请求但尚未分配则不会调用此函数。在模块创建之后至模块执行之前（调用 <a class="reference internal" href="#c.Py_mod_exec" title="Py_mod_exec"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_exec</span></code></a> 函数）就属于这种情况。 更确切地说，如果 <a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal notranslate"><span class="pre">m_size</span></code></a> 大于 0 且模块状态（由 <a class="reference internal" href="#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 返回）为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 则不会调用此函数。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>在模块状态被分配之前不再调用。</p>
+</div>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_clear">
+<a class="reference internal" href="gcsupport.html#c.inquiry" title="inquiry"><span class="n"><span class="pre">inquiry</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m_clear</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_clear" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在模块对象的垃圾回收清理期间所调用的清理函数，如果不需要则为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">如果模块状态已被请求但尚未分配则不会调用此函数。在模块创建之后至模块执行之前（调用 <a class="reference internal" href="#c.Py_mod_exec" title="Py_mod_exec"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_exec</span></code></a> 函数）就属于这种情况。 更确切地说，如果 <a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal notranslate"><span class="pre">m_size</span></code></a> 大于 0 且模块状态（由 <a class="reference internal" href="#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 返回）为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 则不会调用此函数。</p>
+<p class="translated">就像 <a class="reference internal" href="typeobj.html#c.PyTypeObject.tp_clear" title="PyTypeObject.tp_clear"><code class="xref c c-member docutils literal notranslate"><span class="pre">PyTypeObject.tp_clear</span></code></a> 那样，这个函数并不总是在模块被释放前被调用。例如，当引用计数足以确定一个对象不再被使用时，就会直接调用 <a class="reference internal" href="#c.PyModuleDef.m_free" title="PyModuleDef.m_free"><code class="xref c c-member docutils literal notranslate"><span class="pre">m_free</span></code></a>，而不使用循环垃圾回收器。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>在模块状态被分配之前不再调用。</p>
+</div>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef.m_free">
+<a class="reference internal" href="typeobj.html#c.freefunc" title="freefunc"><span class="n"><span class="pre">freefunc</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m_free</span></span></span><a class="headerlink" href="#c.PyModuleDef.m_free" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">在模块对象的释放期间所调用的函数，如果不需要则为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">如果模块状态已被请求但尚未分配则不会调用此函数。在模块创建之后至模块执行之前（调用 <a class="reference internal" href="#c.Py_mod_exec" title="Py_mod_exec"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_exec</span></code></a> 函数）就属于这种情况。 更确切地说，如果 <a class="reference internal" href="#c.PyModuleDef.m_size" title="PyModuleDef.m_size"><code class="xref c c-member docutils literal notranslate"><span class="pre">m_size</span></code></a> 大于 0 且模块状态（由 <a class="reference internal" href="#c.PyModule_GetState" title="PyModule_GetState"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_GetState()</span></code></a> 返回）为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 则不会调用此函数。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.9 版本发生变更: </span>在模块状态被分配之前不再调用。</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.PyModuleDef_Type">
+<a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><span class="n"><span class="pre">PyTypeObject</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModuleDef_Type</span></span></span><a class="headerlink" href="#c.PyModuleDef_Type" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.5 版起.</em><p class="translated"><code class="docutils literal notranslate"><span class="pre">PyModuleDef</span></code> 对象的类型。</p>
+</dd></dl>
+
+<section id="module-slots">
+<h2 class="translated">模块槽位<a class="headerlink" href="#module-slots" title="Link to this heading">¶</a></h2>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyModuleDef_Slot">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModuleDef_Slot</span></span></span><a class="headerlink" href="#c.PyModuleDef_Slot" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> （包括所有成员） 自 3.5 版起.</em><dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef_Slot.slot">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">slot</span></span></span><a class="headerlink" href="#c.PyModuleDef_Slot.slot" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">槽位 ID，从下面介绍的可用值中选择。</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.PyModuleDef_Slot.value">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">value</span></span></span><a class="headerlink" href="#c.PyModuleDef_Slot.value" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">槽位值，其含义取决于槽位 ID。</p>
+</dd></dl>
+
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<p class="translated">可用的槽位类型是：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_mod_create">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_mod_create</span></span></span><a class="headerlink" href="#c.Py_mod_create" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.5 版起.</em><p class="translated">指定一个函数供调用以创建模块对象本身。该槽位的 <em>value</em> 指针必须指向一个具有如下签名的函数：</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_mod_create.create_module">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">create_module</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span>, <a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_mod_create.create_module" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<p class="translated">该函数接受一个 <a class="reference internal" href="../library/importlib.html#importlib.machinery.ModuleSpec" title="importlib.machinery.ModuleSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleSpec</span></code></a> 实例，如 <span class="target" id="index-11"></span><a class="pep reference external" href="https://peps.python.org/pep-0451/"><strong>PEP 451</strong></a> 所定义的，以及模块定义。它应当返回一个新的模块对象，或者设置一个错误并返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">此函数应当保持最小化。特别地，它不应当调用任意 Python 代码，因为尝试再次导入同一个模块可能会导致无限循环。</p>
+<p class="translated">多个 <code class="docutils literal notranslate"><span class="pre">Py_mod_create</span></code> 槽位不能在一个模块定义中指定。</p>
+<p class="translated">如果未指定 <code class="docutils literal notranslate"><span class="pre">Py_mod_create</span></code>，导入机制将使用 <a class="reference internal" href="#c.PyModule_New" title="PyModule_New"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_New()</span></code></a> 创建一个普通的模块对象。名称是获取自 <em>spec</em> 而非定义，以允许扩展模块动态地调整它们在模块层级结构中的位置并通过符号链接以不同的名称被导入，同时共享同一个模块定义。</p>
+<p class="translated">不要求返回的对象必须为 <a class="reference internal" href="#c.PyModule_Type" title="PyModule_Type"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyModule_Type</span></code></a> 的实例。任何类型均可使用，只要它支持设置和获取导入相关的属性。但是，如果 <code class="docutils literal notranslate"><span class="pre">PyModuleDef</span></code> 具有非 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 的 <code class="docutils literal notranslate"><span class="pre">m_traverse</span></code>, <code class="docutils literal notranslate"><span class="pre">m_clear</span></code>, <code class="docutils literal notranslate"><span class="pre">m_free</span></code>；非零的 <code class="docutils literal notranslate"><span class="pre">m_size</span></code>；或者 <code class="docutils literal notranslate"><span class="pre">Py_mod_create</span></code> 以外的槽位则只能返回 <code class="docutils literal notranslate"><span class="pre">PyModule_Type</span></code> 的实例。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_mod_exec">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_mod_exec</span></span></span><a class="headerlink" href="#c.Py_mod_exec" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.5 版起.</em><p class="translated">指定一个供调用以 <em>执行</em> 模块的函数。这等价于执行一个 Python 模块的代码：通常，此函数会向模块添加类和常量。此函数的签名为：</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_mod_exec.exec_module">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exec_module</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.Py_mod_exec.exec_module" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<p class="translated">如果指定了多个 <code class="docutils literal notranslate"><span class="pre">Py_mod_exec</span></code> 槽位，将按照它们在*m_slots*数组中出现的顺序进行处理。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_mod_multiple_interpreters">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_mod_multiple_interpreters</span></span></span><a class="headerlink" href="#c.Py_mod_multiple_interpreters" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.12 版起.</em><p class="translated">指定以下的值之一：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED</span></span></span><a class="headerlink" href="#c.Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">该模块不支持在子解释器中导入。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED</span></span></span><a class="headerlink" href="#c.Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">该模块支持在子解释器中导入，但是它们必须要共享主解释器的 GIL。 （参见 <a class="reference internal" href="../howto/isolating-extensions.html#isolating-extensions-howto"><span class="std std-ref">隔离扩展模块</span></a>。）</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_MOD_PER_INTERPRETER_GIL_SUPPORTED">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_MOD_PER_INTERPRETER_GIL_SUPPORTED</span></span></span><a class="headerlink" href="#c.Py_MOD_PER_INTERPRETER_GIL_SUPPORTED" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">该模块支持在子解释器中导入，即使它们有自己的 GIL。 （参见 <a class="reference internal" href="../howto/isolating-extensions.html#isolating-extensions-howto"><span class="std std-ref">隔离扩展模块</span></a>。）</p>
+</dd></dl>
+
+<p class="translated">此槽位决定在子解释器中导入此模块是否会失败。</p>
+<p class="translated">在一个模块定义中不能指定多个 <code class="docutils literal notranslate"><span class="pre">Py_mod_multiple_interpreters</span></code> 槽位。</p>
+<p class="translated">如果未指定 <code class="docutils literal notranslate"><span class="pre">Py_mod_multiple_interpreters</span></code>，则导入机制默认为 <code class="docutils literal notranslate"><span class="pre">Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED</span></code> 值。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.12.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_mod_gil">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_mod_gil</span></span></span><a class="headerlink" href="#c.Py_mod_gil" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.13 版起.</em><p class="translated">指定以下的值之一：</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_MOD_GIL_USED">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_MOD_GIL_USED</span></span></span><a class="headerlink" href="#c.Py_MOD_GIL_USED" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">这个模块依赖于全局解释器锁 (GIL) 的存在，并可在无需同步的情况下访问全局状态。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.Py_MOD_GIL_NOT_USED">
+<span class="sig-name descname"><span class="n"><span class="pre">Py_MOD_GIL_NOT_USED</span></span></span><a class="headerlink" href="#c.Py_MOD_GIL_NOT_USED" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">这个模块可以在不激活 GIL 的情况下安全运行。</p>
+</dd></dl>
+
+<p class="translated">这个槽位会被未配置 <a class="reference internal" href="../using/configure.html#cmdoption-disable-gil"><code class="xref std std-option docutils literal notranslate"><span class="pre">--disable-gil</span></code></a> 的 Python 构建版所忽略。在其他情况下，它将决定导入此模块是否会导致 GIL 被自动启用。请参阅 <a class="reference internal" href="../whatsnew/3.13.html#whatsnew313-free-threaded-cpython"><span class="std std-ref">自由线程的 CPython</span></a> 了解详情。</p>
+<p class="translated">多个 <code class="docutils literal notranslate"><span class="pre">Py_mod_gil</span></code> 槽位不能在一个模块定义中指定。</p>
+<p class="translated">如果未指定 <code class="docutils literal notranslate"><span class="pre">Py_mod_gil</span></code>，则导入机制默认为 <code class="docutils literal notranslate"><span class="pre">Py_MOD_GIL_USED</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="creating-extension-modules-dynamically">
+<span id="moduledef-dynamic"></span><h1 class="translated">动态创建扩展模块<a class="headerlink" href="#creating-extension-modules-dynamically" title="Link to this heading">¶</a></h1>
+<p class="translated">以下函数可用于在扩展的 <a class="reference internal" href="extension-modules.html#extension-export-hook"><span class="std std-ref">初始化函数</span></a> 之外创建模块。它们也用于 <a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">单阶段初始化</span></a> 流程。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_Create">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_Create</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_Create" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">根据 <em>def</em> 中的定义创建一个新的模块对象。这是一个调用 <a class="reference internal" href="#c.PyModule_Create2" title="PyModule_Create2"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_Create2()</span></code></a> 的宏，其中 <em>module_api_version</em> 设置为 <a class="reference internal" href="#c.PYTHON_API_VERSION" title="PYTHON_API_VERSION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYTHON_API_VERSION</span></code></a>，或者如果使用 <a class="reference internal" href="stable.html#limited-c-api"><span class="std std-ref">受限 API</span></a>，则设置为 <a class="reference internal" href="#c.PYTHON_ABI_VERSION" title="PYTHON_ABI_VERSION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYTHON_ABI_VERSION</span></code></a>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_Create2">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_Create2</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">module_api_version</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_Create2" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">创建一个新的模块对象，在参数 <em>def</em> 中给出定义，设定 API 版本为参数 <em>module_api_version</em>。如果该版本与正在运行的解释器版本不匹配，则会触发 <a class="reference internal" href="../library/exceptions.html#RuntimeWarning" title="RuntimeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a>。</p>
+<p class="translated">当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并设置一个异常。</p>
+<p class="translated">此函数不支持槽位。 <em>def</em> 的 <a class="reference internal" href="#c.PyModuleDef.m_slots" title="PyModuleDef.m_slots"><code class="xref c c-member docutils literal notranslate"><span class="pre">m_slots</span></code></a> 成员必须为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">大多数时候应该使用 <a class="reference internal" href="#c.PyModule_Create" title="PyModule_Create"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_Create()</span></code></a> 代替使用此函数，除非你确定需要使用它。</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_FromDefAndSpec">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_FromDefAndSpec</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_FromDefAndSpec" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><p class="translated">这个宏调用 <a class="reference internal" href="#c.PyModule_FromDefAndSpec2" title="PyModule_FromDefAndSpec2"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_FromDefAndSpec2()</span></code></a>， <em>module_api_version</em> 设置为 <a class="reference internal" href="#c.PYTHON_API_VERSION" title="PYTHON_API_VERSION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYTHON_API_VERSION</span></code></a>，或者如果使用 <a class="reference internal" href="stable.html#limited-c-api"><span class="std std-ref">受限 API</span></a>，则设置为 <a class="reference internal" href="#c.PYTHON_ABI_VERSION" title="PYTHON_ABI_VERSION"><code class="xref c c-macro docutils literal notranslate"><span class="pre">PYTHON_ABI_VERSION</span></code></a> 常量。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_FromDefAndSpec2">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_FromDefAndSpec2</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">module_api_version</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_FromDefAndSpec2" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_new_ref">返回值：新的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated">创建一个新的模块对象，在参数 <em>def</em> 和 <em>spec</em> 中给出定义，设置 API 版本为参数 <em>module_api_version</em>。如果该版本与正在运行的解释器版本不匹配，则会触发 <a class="reference internal" href="../library/exceptions.html#RuntimeWarning" title="RuntimeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a>。</p>
+<p class="translated">当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 并设置一个异常。</p>
+<p class="translated">注意，这不会处理执行槽位 (<a class="reference internal" href="#c.Py_mod_exec" title="Py_mod_exec"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_exec</span></code></a>)。 必须调用 <code class="docutils literal notranslate"><span class="pre">PyModule_FromDefAndSpec</span></code> 和 <code class="docutils literal notranslate"><span class="pre">PyModule_ExecDef</span></code> 来完全初始化模块。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">大多数时候应该使用 <a class="reference internal" href="#c.PyModule_FromDefAndSpec" title="PyModule_FromDefAndSpec"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_FromDefAndSpec()</span></code></a> 代替使用此函数，除非你确定需要使用它。</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_ExecDef">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_ExecDef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_ExecDef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated">处理在 <em>def</em> 中给出的任何执行槽位 (<a class="reference internal" href="#c.Py_mod_exec" title="Py_mod_exec"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_exec</span></code></a>)。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PYTHON_API_VERSION">
+<span class="sig-name descname"><span class="n"><span class="pre">PYTHON_API_VERSION</span></span></span><a class="headerlink" href="#c.PYTHON_API_VERSION" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">C API 版本，为向后兼容性而定义。</p>
+<p class="translated">目前，该常量在新的 Python 版本中没有更新，并且对于版本控制没有用处。这在未来可能会改变。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PYTHON_ABI_VERSION">
+<span class="sig-name descname"><span class="n"><span class="pre">PYTHON_ABI_VERSION</span></span></span><a class="headerlink" href="#c.PYTHON_ABI_VERSION" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">为向后兼容性定义为 <code class="docutils literal notranslate"><span class="pre">3</span></code>。</p>
+<p class="translated">目前，该常量在新的 Python 版本中没有更新，并且对于版本控制没有用处。这在未来可能会改变。</p>
+</dd></dl>
+
+</section>
+<section id="support-functions">
+<h1 class="translated">支持函数<a class="headerlink" href="#support-functions" title="Link to this heading">¶</a></h1>
+<p class="translated">提供以下函数来帮助初始化模块状态。它们用于模块的执行槽 (<a class="reference internal" href="#c.Py_mod_exec" title="Py_mod_exec"><code class="xref c c-data docutils literal notranslate"><span class="pre">Py_mod_exec</span></code></a>)、遗留的 <a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">单阶段初始化</span></a> 的初始化函数，或动态创建模块的代码。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_AddObjectRef">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddObjectRef</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddObjectRef" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.10 版起.</em><p class="translated">将一个对象以 <em>name</em> 为名称添加到 <em>module</em> 中。这是一个便捷函数，可在模块的初始化函数中使用。</p>
+<p class="translated">如果成功，返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。如果发生错误，引发异常并返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>。</p>
+<p class="translated">用法示例：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span>
+<span class="nf">add_spam</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyLong_FromLong</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyModule_AddObjectRef</span><span class="p">(</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;spam&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Py_DECREF</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+<span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">为了方便，该函数接受 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> <em>value</em> 并设置一个异常。在此情况下，将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并让所引发的异常保持不变。</p>
+<p class="translated">这个例子也可以写成不显式地检查 <em>obj</em> 是否为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>:</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span>
+<span class="nf">add_spam</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyLong_FromLong</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyModule_AddObjectRef</span><span class="p">(</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;spam&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Py_XDECREF</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+<span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p class="translated">注意在此情况下应当使用 <code class="docutils literal notranslate"><span class="pre">Py_XDECREF()</span></code> 而不是 <code class="docutils literal notranslate"><span class="pre">Py_DECREF()</span></code>，因为 <em>obj</em> 可能为 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+<p class="translated">传给该函数的不同 <em>name</em> 字符串应当保持在较少的数量，通常是通过仅使用静态分配的字符串作为 <em>name</em> 来做到这一点。 对于编译时未知的名称，建议直接调用 <a class="reference internal" href="unicode.html#c.PyUnicode_FromString" title="PyUnicode_FromString"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnicode_FromString()</span></code></a> 和 <a class="reference internal" href="object.html#c.PyObject_SetAttr" title="PyObject_SetAttr"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyObject_SetAttr()</span></code></a>。更多相关细节，请参阅 <a class="reference internal" href="unicode.html#c.PyUnicode_InternFromString" title="PyUnicode_InternFromString"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnicode_InternFromString()</span></code></a>，它可在内部用于创建键对象。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.10.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_Add">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_Add</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_Add" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.13 版起.</em><p class="untranslated">Similar to <a class="reference internal" href="#c.PyModule_AddObjectRef" title="PyModule_AddObjectRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_AddObjectRef()</span></code></a>, but &quot;<a class="reference internal" href="../glossary.html#term-steal"><span class="xref std std-term">steals</span></a>&quot;
+a reference to <em>value</em> (even on error).
+It can be called with a result of function that returns a new reference
+without bothering to check its result or even saving it to a variable.</p>
+<p class="translated">用法示例：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">PyModule_Add</span><span class="p">(</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;spam&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PyBytes_FromString</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">goto</span><span class="w"> </span><span class="n">error</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_AddObject">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddObject</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddObject" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="untranslated">Similar to <a class="reference internal" href="#c.PyModule_AddObjectRef" title="PyModule_AddObjectRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_AddObjectRef()</span></code></a>, but <a class="reference internal" href="../glossary.html#term-steal"><span class="xref std std-term">steals</span></a>
+a reference to <em>value</em> on success (if it returns <code class="docutils literal notranslate"><span class="pre">0</span></code>).</p>
+<p class="translated">推荐使用新的 <a class="reference internal" href="#c.PyModule_Add" title="PyModule_Add"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_Add()</span></code></a> 或 <a class="reference internal" href="#c.PyModule_AddObjectRef" title="PyModule_AddObjectRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_AddObjectRef()</span></code></a> 函数，因为误用 <a class="reference internal" href="#c.PyModule_AddObject" title="PyModule_AddObject"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_AddObject()</span></code></a> 函数很容易导致引用泄漏。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">与其他窃取引用的函数不同，<code class="docutils literal notranslate"><span class="pre">PyModule_AddObject()</span></code> 只在 <strong>成功</strong> 时释放对 <em>value</em> 的引用。</p>
+<p class="translated">这意味着必须检查它的返回值，调用方代码必须在发生错误时手动为 <em>value</em> 执行 <a class="reference internal" href="refcounting.html#c.Py_XDECREF" title="Py_XDECREF"><code class="xref c c-func docutils literal notranslate"><span class="pre">Py_XDECREF()</span></code></a>。</p>
+</div>
+<p class="translated">用法示例：</p>
+<div class="translated highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyBytes_FromString</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">PyModule_AddObject</span><span class="p">(</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;spam&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 如果 &#39;obj&#39; 不为 NULL 且 PyModule_AddObject() 执行失败，</span>
+<span class="w">    </span><span class="c1">// 则 &#39;obj&#39; 强引用必须使用 Py_XDECREF() 来删除。</span>
+<span class="w">    </span><span class="c1">// 如果 &#39;obj&#39; 为 NULL，则 Py_XDECREF() 不做任何操作。</span>
+<span class="w">    </span><span class="n">Py_XDECREF</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="w">    </span><span class="k">goto</span><span class="w"> </span><span class="n">error</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// PyModule_AddObject() 会偷取一个对 obj 的引用：</span>
+<span class="c1">// 这里不需要 Py_XDECREF(obj)。</span>
+</pre></div>
+</div>
+<div class="versionchanged soft-deprecated">
+<p><span class="versionmodified soft-deprecated">自 3.13 版起已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated">Soft deprecated</a> 状态.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_AddIntConstant">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddIntConstant</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddIntConstant" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">将一个整数常量作为 <em>name</em> 添加到 <em>module</em> 中。这个便捷函数可在模块的初始化函数中使用。当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常，成功时则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<p class="translated">这是一个调用 <a class="reference internal" href="long.html#c.PyLong_FromLong" title="PyLong_FromLong"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyLong_FromLong()</span></code></a> 和 <a class="reference internal" href="#c.PyModule_AddObjectRef" title="PyModule_AddObjectRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_AddObjectRef()</span></code></a> 的便捷函数；请参阅其文档了解详情。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_AddStringConstant">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddStringConstant</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddStringConstant" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">将一个字符串常量作为 <em>name</em> 添加到 <em>module</em> 中。这个便捷函数可在模块初始化函数中使用。字符串 <em>value</em> 必须以 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 结尾。当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code>，成功时则返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<p class="translated">这是一个调用 <a class="reference internal" href="unicode.html#c.PyUnicode_InternFromString" title="PyUnicode_InternFromString"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyUnicode_InternFromString()</span></code></a> 和 <a class="reference internal" href="#c.PyModule_AddObjectRef" title="PyModule_AddObjectRef"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyModule_AddObjectRef()</span></code></a> 的便捷函数；请参阅其文档了解详情。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyModule_AddIntMacro">
+<span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddIntMacro</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">module</span></span>, <span class="n"><span class="pre">macro</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddIntMacro" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">将一个整数常量添加到 <em>module</em> 中。名称和值取自 <em>macro</em>。例如 <code class="docutils literal notranslate"><span class="pre">PyModule_AddIntMacro(module,</span> <span class="pre">AF_INET)</span></code> 将值为 <em>AF_INET</em> 的整数常量 <em>AF_INET</em> 添加到 <em>module</em> 中。当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常，成功时将返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.PyModule_AddStringMacro">
+<span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddStringMacro</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">module</span></span>, <span class="n"><span class="pre">macro</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddStringMacro" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">将一个字符串常量添加到*module*模块中。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_AddType">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddType</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <a class="reference internal" href="type.html#c.PyTypeObject" title="PyTypeObject"><span class="n"><span class="pre">PyTypeObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddType" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.10 版起.</em><p class="translated">将一个类型对象添加到 <em>module</em> 中。类型对象是通过在内部调用 <a class="reference internal" href="type.html#c.PyType_Ready" title="PyType_Ready"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyType_Ready()</span></code></a> 来最终化的。类型对象的名称取自 <a class="reference internal" href="typeobj.html#c.PyTypeObject.tp_name" title="PyTypeObject.tp_name"><code class="xref c c-member docutils literal notranslate"><span class="pre">tp_name</span></code></a> 在点号之后的部分。当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常，成功时将返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.9.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_AddFunctions">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_AddFunctions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <a class="reference internal" href="structures.html#c.PyMethodDef" title="PyMethodDef"><span class="n"><span class="pre">PyMethodDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">functions</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_AddFunctions" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated">将以 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> 结尾的 <em>functions</em> 数组中的函数添加到 <em>module</em> 中。有关单个条目的更多细节，请参阅 <a class="reference internal" href="structures.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMethodDef</span></code></a> 文档（由于缺少共享的模块命名空间，在 C 中实现的模块级&quot;函数&quot;通常将模块作为其第一个形参，与 Python 类的实例方法类似）。</p>
+<p class="translated">此函数在从 <code class="docutils literal notranslate"><span class="pre">PyModuleDef</span></code> 创建模块时自动调用（例如使用 <a class="reference internal" href="extension-modules.html#multi-phase-initialization"><span class="std std-ref">多阶段初始化</span></a>、 <code class="docutils literal notranslate"><span class="pre">PyModule_Create</span></code> 或 <code class="docutils literal notranslate"><span class="pre">PyModule_FromDefAndSpec</span></code> 等）。一些模块作者可能更喜欢在多个 <a class="reference internal" href="structures.html#c.PyMethodDef" title="PyMethodDef"><code class="xref c c-type docutils literal notranslate"><span class="pre">PyMethodDef</span></code></a> 数组中定义函数；在这种情况下，他们应该直接调用这个函数。</p>
+<p class="translated"><em>functions</em> 数组必须被静态地分配（或者要保证比模块对象生存得更久）。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyModule_SetDocString">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyModule_SetDocString</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">docstring</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyModule_SetDocString" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.7 版起.</em><p class="translated">将 <em>module</em> 的文档字符串设置为 <em>docstring</em>。此函数在使用 <code class="docutils literal notranslate"><span class="pre">PyModuleDef</span></code> 创建模块时自动调用（例如使用 <a class="reference internal" href="extension-modules.html#multi-phase-initialization"><span class="std std-ref">多阶段初始化</span></a>、<code class="docutils literal notranslate"><span class="pre">PyModule_Create</span></code> 或 <code class="docutils literal notranslate"><span class="pre">PyModule_FromDefAndSpec</span></code> 时）。</p>
+<p class="translated">成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。出错时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置异常。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.5.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyUnstable_Module_SetGIL">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyUnstable_Module_SetGIL</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">gil</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyUnstable_Module_SetGIL" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="unstable-c-api warning admonition">
+<em>这是 <a class="reference internal" href="stable.html#unstable-c-api"><span class="std std-ref">不稳定 API</span></a>。它可能在次要版本中不经警告地被更改。</em></div>
+<p class="translated">指明 <em>module</em> 是否支持不带全局解释器锁 (GIL) 运行，使用一个来自 <a class="reference internal" href="#c.Py_mod_gil" title="Py_mod_gil"><code class="xref c c-macro docutils literal notranslate"><span class="pre">Py_mod_gil</span></code></a> 的值。当使用 <a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">旧式的单阶段初始化</span></a> 时它必须在 <em>module</em> 的初始化函数执行期间被调用。 如果此函数在模块初始化期间未被调用，导入机制将假定该模块不支持不带 GIL 运行。此函数仅在配置了 <a class="reference internal" href="../using/configure.html#cmdoption-disable-gil"><code class="xref std std-option docutils literal notranslate"><span class="pre">--disable-gil</span></code></a> 的 Python 构建版中可用。当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常，成功时将返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+</dd></dl>
+
+<section id="module-lookup-single-phase-initialization">
+<h2 class="translated">模块查找（单阶段初始化）<a class="headerlink" href="#module-lookup-single-phase-initialization" title="Link to this heading">¶</a></h2>
+<p class="translated">遗留的 <a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">单阶段初始化</span></a> 初始化方案创建可以在当前解释器上下文中被查找的单例模块。这使得仅通过模块定义的引用，就可以检索模块对象。</p>
+<p class="translated">这些函数不适用于通过多阶段初始化创建的模块，因为可以从一个模块定义创建多个模块对象。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyState_FindModule">
+<a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PyState_FindModule</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyState_FindModule" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="refcount return_borrowed_ref">返回值：借入的引用。</em><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a>.</em><p class="translated">返回当前解释器中由 <em>def</em> 创建的模块对象。此方法要求模块对象此前已通过 <a class="reference internal" href="#c.PyState_AddModule" title="PyState_AddModule"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyState_AddModule()</span></code></a> 函数附加到解释器状态中。如果找不到相应的模块对象，或模块对象还未附加到解释器状态，返回 <code class="docutils literal notranslate"><span class="pre">NULL</span></code>。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyState_AddModule">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyState_AddModule</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">module</span></span>, <a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyState_AddModule" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.3 版起.</em><p class="translated">将传给函数的模块对象附加到解释器状态。这将允许通过 <a class="reference internal" href="#c.PyState_FindModule" title="PyState_FindModule"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyState_FindModule()</span></code></a> 来访问该模块对象。</p>
+<p class="translated">仅在使用单阶段初始化创建的模块上有效。</p>
+<p class="translated">Python 会在使用 <a class="reference internal" href="extension-modules.html#single-phase-initialization"><span class="std std-ref">单阶段初始化</span></a> 导入一个模块后自动调用 <code class="docutils literal notranslate"><span class="pre">PyState_AddModule</span></code>，因此从模块初始化代码中调用它是没有必要的（但也没有害处）。显式的调用仅在模块自己的初始化代码后继调用了 <code class="docutils literal notranslate"><span class="pre">PyState_FindModule</span></code> 的情况下才是必要的。 此函数主要是为了实现替代导入机制（或是通过直接调用它，或是通过引用它的实现来获取所需的状态更新详情）。</p>
+<p class="translated">如果先前使用相同的 <em>def</em> 附加了一个模块，则将其替换为新的 <em>module</em>。</p>
+<p class="translated">调用方必须有已附加的线程状态 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+<p class="translated">出错时返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常，成功时返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyState_RemoveModule">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyState_RemoveModule</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyModuleDef" title="PyModuleDef"><span class="n"><span class="pre">PyModuleDef</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">def</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyState_RemoveModule" title="Link to this definition">¶</a><br /></dt>
+<dd><em class="stableabi"> 属于 <a class="reference internal" href="stable.html#stable"><span class="std std-ref">稳定 ABI</span></a> 自 3.3 版起.</em><p class="translated">从解释器状态中移除由 <em>def</em> 创建的模块对象。当发生错误时将返回 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 并设置一个异常，成功时将返回 <code class="docutils literal notranslate"><span class="pre">0</span></code>。</p>
+<p class="translated">调用方必须有已附加的线程状态 <a class="reference internal" href="../glossary.html#term-attached-thread-state"><span class="xref std std-term">attached thread state</span></a>。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">模块对象</a></li>
+<li><a class="reference internal" href="#module-definitions">模块定义</a><ul>
+<li><a class="reference internal" href="#module-slots">模块槽位</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-extension-modules-dynamically">动态创建扩展模块</a></li>
+<li><a class="reference internal" href="#support-functions">支持函数</a><ul>
+<li><a class="reference internal" href="#module-lookup-single-phase-initialization">模块查找（单阶段初始化）</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="file.html"
+                          title="上一章">File objects</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="iterator.html"
+                          title="下一章">迭代器对象</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/module.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/module.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/module.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="iterator.html" title="迭代器对象"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="file.html" title="File objects"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="concrete.html" >具体的对象层</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">模块对象</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

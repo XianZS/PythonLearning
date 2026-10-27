@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="pickletools --- pickle 开发者工具" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/pickletools.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/pickletools.py 此模块包含与 pickle 模块内部细节有关的多个常量，一些关于具体实现的详细注释，以及一些能够分析封存数据的有用函数。 此模块的内容对需要操作 pickle 的 Python 核心开发者来说很有用处； pickle 模块的一般用户则可能会感觉 pickletools 模块与他们无关。 命令行用法: 当从命令行唤起时， python -m pi..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_pickletools_73880aa9.png" />
+<meta property="og:image:alt" content="源代码: Lib/pickletools.py 此模块包含与 pickle 模块内部细节有关的多个常量，一些关于具体实现的详细注释，以及一些能够分析封存数据的有用函数。 此模块的内容对需要操作 pickle 的 Python 核心开发者来说很有用处； pickle 模块的一般用户则可能会感觉 pickletools 模块与他们无关。 命令行用法: 当从命令行唤起时， python -m pi..." />
+<meta name="description" content="源代码: Lib/pickletools.py 此模块包含与 pickle 模块内部细节有关的多个常量，一些关于具体实现的详细注释，以及一些能够分析封存数据的有用函数。 此模块的内容对需要操作 pickle 的 Python 核心开发者来说很有用处； pickle 模块的一般用户则可能会感觉 pickletools 模块与他们无关。 命令行用法: 当从命令行唤起时， python -m pi..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>pickletools --- pickle 开发者工具 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="Windows 系统相关模块" href="windows.html" />
+    <link rel="prev" title="dis --- Python 字节码反汇编器" href="dis.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/pickletools.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickletools</span></code> --- pickle 开发者工具</a><ul>
+<li><a class="reference internal" href="#command-line-usage">命令行用法</a><ul>
+<li><a class="reference internal" href="#command-line-options">命令行选项</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#programmatic-interface">编程接口</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="dis.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dis</span></code> --- Python 字节码反汇编器</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="windows.html"
+                          title="下一章">Windows 系统相关模块</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/pickletools.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/pickletools.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/pickletools.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="windows.html" title="Windows 系统相关模块"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="dis.html" title="dis --- Python 字节码反汇编器"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="language.html" accesskey="U">Python 语言服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickletools</span></code> --- pickle 开发者工具</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pickletools">
+<span id="pickletools-tools-for-pickle-developers"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickletools</span></code> --- pickle 开发者工具<a class="headerlink" href="#module-pickletools" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/pickletools.py">Lib/pickletools.py</a></p>
+<hr class="docutils" />
+<p class="translated">此模块包含与 <a class="reference internal" href="pickle.html#module-pickle" title="pickle: Convert Python objects to streams of bytes and back."><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> 模块内部细节有关的多个常量，一些关于具体实现的详细注释，以及一些能够分析封存数据的有用函数。 此模块的内容对需要操作 <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> 的 Python 核心开发者来说很有用处；<code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> 模块的一般用户则可能会感觉 <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickletools</span></code> 模块与他们无关。</p>
+<section id="command-line-usage">
+<span id="pickletools-cli"></span><h2 class="translated">命令行用法<a class="headerlink" href="#command-line-usage" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.2.</span></p>
+</div>
+<p class="translated">当从命令行唤起时，<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pickletools</span></code> 将对一个或更多 pickle 文件的内容进行拆解。 请注意如果你想查看 pickle 中保存的 Python 对象而非 pickle 格式的细节，你可能需要改用 <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">pickle</span></code>。 但是，当你想检查的 pickle 文件来自某个不受信任的源时，<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">pickletools</span></code> 是更安全的选择，因为它不会执行 pickle 字节码。</p>
+<p class="translated">例如，对于一个封存在文件 <code class="docutils literal notranslate"><span class="pre">x.pickle</span></code> 中的元组 <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>:</p>
+<div class="translated highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pickle<span class="w"> </span>x.pickle
+<span class="gp gp-VirtualEnv">(1, 2)</span>
+
+<span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pickletools<span class="w"> </span>x.pickle
+<span class="go">    0: \x80 PROTO      3</span>
+<span class="go">    2: K    BININT1    1</span>
+<span class="go">    4: K    BININT1    2</span>
+<span class="go">    6: \x86 TUPLE2</span>
+<span class="go">    7: q    BINPUT     0</span>
+<span class="go">    9: .    STOP</span>
+<span class="go">highest protocol among opcodes = 2</span>
+</pre></div>
+</div>
+<section id="command-line-options">
+<h3 class="translated">命令行选项<a class="headerlink" href="#command-line-options" title="Link to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-pickletools-a">
+<span id="cmdoption-pickletools-annotate"></span><span class="sig-name descname"><span class="pre">-a</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--annotate</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-pickletools-a" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">使用简短的操作码描述来标注每一行。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-pickletools-o">
+<span id="cmdoption-pickletools-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;file&gt;</span></span><a class="headerlink" href="#cmdoption-pickletools-o" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">输出应当写入到的文件名称。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-pickletools-l">
+<span id="cmdoption-pickletools-indentlevel"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--indentlevel</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;num&gt;</span></span><a class="headerlink" href="#cmdoption-pickletools-l" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个新的 MARK 层级所需缩进的空格数。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-pickletools-m">
+<span id="cmdoption-pickletools-memo"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--memo</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-pickletools-m" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当反汇编多个对象时，保留各个反汇编的备忘记录。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-pickletools-p">
+<span id="cmdoption-pickletools-preamble"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--preamble</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;preamble&gt;</span></span><a class="headerlink" href="#cmdoption-pickletools-p" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">当指定了多个 pickle 文件时，在每次反汇编之前将打印给定的前言。</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-pickletools-arg-pickle_file">
+<span class="sig-name descname"><span class="pre">pickle_file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-pickletools-arg-pickle_file" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">一个要读取的 pickle 文件，或者为 <code class="docutils literal notranslate"><span class="pre">-</span></code> 表示从标准输入读取。</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="programmatic-interface">
+<h2 class="translated">编程接口<a class="headerlink" href="#programmatic-interface" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pickletools.dis">
+<span class="sig-prename descclassname"><span class="pre">pickletools.</span></span><span class="sig-name descname"><span class="pre">dis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indentlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pickletools.dis" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 pickle 的符号化反汇编数据输出到文件型对象 <em>out</em>，默认为 <code class="docutils literal notranslate"><span class="pre">sys.stdout</span></code>。 <em>pickle</em> 可以是一个字符串或一个文件型对象。 <em>memo</em> 可以是一个将被用作 pickle 的备忘记录的 Python 字典；它可被用来对由同一封存器创建的多个封存对象执行反汇编。 由 <code class="docutils literal notranslate"><span class="pre">MARK</span></code> 操作码指明的每个连续级别将会缩进 <em>indentlevel</em> 个空格。 如果为 <em>annotate</em> 指定了一个非零值，则输出中的每个操作码将以一个简短描述来标注。 <em>annotate</em> 的值会被用作标注所应开始的列的提示。</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.2 版本发生变更: </span>增加了 <em>annotate</em> 形参。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pickletools.genops">
+<span class="sig-prename descclassname"><span class="pre">pickletools.</span></span><span class="sig-name descname"><span class="pre">genops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pickletools.genops" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">提供包含 pickle 中所有操作码的 <a class="reference internal" href="../glossary.html#term-iterator"><span class="xref std std-term">iterator</span></a>，返回一个 <code class="docutils literal notranslate"><span class="pre">(opcode,</span> <span class="pre">arg,</span> <span class="pre">pos)</span></code> 三元组的序列。 <em>opcode</em> 是 <code class="xref py py-class docutils literal notranslate"><span class="pre">OpcodeInfo</span></code> 类的一个实例；<em>arg</em> 是 Python 对象形式的 opcode 参数的已解码值；<em>pos</em> 是 opcode 所在的位置。 <em>pickle</em> 可以是一个字符串或一个文件型对象。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pickletools.optimize">
+<span class="sig-prename descclassname"><span class="pre">pickletools.</span></span><span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">picklestring</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pickletools.optimize" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">在消除未使用的 <code class="docutils literal notranslate"><span class="pre">PUT</span></code> 操作码之后返回一个新的等效 pickle 字符串。 优化后的 pickle 将更为简短，耗费更少的传输时间，要求更少的存储空间并能更高效地解封。</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickletools</span></code> --- pickle 开发者工具</a><ul>
+<li><a class="reference internal" href="#command-line-usage">命令行用法</a><ul>
+<li><a class="reference internal" href="#command-line-options">命令行选项</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#programmatic-interface">编程接口</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="dis.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dis</span></code> --- Python 字节码反汇编器</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="windows.html"
+                          title="下一章">Windows 系统相关模块</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/pickletools.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/pickletools.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/pickletools.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="windows.html" title="Windows 系统相关模块"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="dis.html" title="dis --- Python 字节码反汇编器"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="language.html" >Python 语言服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickletools</span></code> --- pickle 开发者工具</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

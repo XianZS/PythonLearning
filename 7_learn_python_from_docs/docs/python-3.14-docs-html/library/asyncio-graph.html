@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Call graph introspection" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/asyncio-graph.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/asyncio/graph.py asyncio 具有强大的运行时调用图内省工具，可以跟踪正在运行的 协程 或 任务 或挂起的 future 的整个调用图。这些工具和底层机制可以在 Python 程序中使用，也可以由外部性能分析器和调试器使用。 底层实用工具函数: 要内省一个异步调用图，asyncio 需要控制流结构的配合，比如 shield() 或 TaskGroup 。..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_asyncio-graph_e62e9095.png" />
+<meta property="og:image:alt" content="源代码: Lib/asyncio/graph.py asyncio 具有强大的运行时调用图内省工具，可以跟踪正在运行的 协程 或 任务 或挂起的 future 的整个调用图。这些工具和底层机制可以在 Python 程序中使用，也可以由外部性能分析器和调试器使用。 底层实用工具函数: 要内省一个异步调用图，asyncio 需要控制流结构的配合，比如 shield() 或 TaskGroup 。..." />
+<meta name="description" content="源代码: Lib/asyncio/graph.py asyncio 具有强大的运行时调用图内省工具，可以跟踪正在运行的 协程 或 任务 或挂起的 future 的整个调用图。这些工具和底层机制可以在 Python 程序中使用，也可以由外部性能分析器和调试器使用。 底层实用工具函数: 要内省一个异步调用图，asyncio 需要控制流结构的配合，比如 shield() 或 TaskGroup 。..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>Call graph introspection &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="Command-line introspection tools" href="asyncio-tools.html" />
+    <link rel="prev" title="异常" href="asyncio-exceptions.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/asyncio-graph.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Call graph introspection</a><ul>
+<li><a class="reference internal" href="#low-level-utility-functions">底层实用工具函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-exceptions.html"
+                          title="上一章">异常</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-tools.html"
+                          title="下一章">Command-line introspection tools</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-graph.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-graph.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-graph.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-tools.html" title="Command-line introspection tools"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-exceptions.html" title="异常"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Call graph introspection</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="call-graph-introspection">
+<span id="asyncio-graph"></span><h1 class="untranslated">Call graph introspection<a class="headerlink" href="#call-graph-introspection" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/asyncio/graph.py">Lib/asyncio/graph.py</a></p>
+<hr class="docutils" />
+<p class="translated">asyncio 具有强大的运行时调用图内省工具，可以跟踪正在运行的 <em>协程</em> 或 <em>任务</em> 或挂起的 <em>future</em> 的整个调用图。这些工具和底层机制可以在 Python 程序中使用，也可以由外部性能分析器和调试器使用。</p>
+<div class="admonition seealso">
+<p class="admonition-title">参见</p>
+<dl class="simple">
+<dt class="untranslated"><a class="reference internal" href="asyncio-tools.html#asyncio-introspection-tools"><span class="std std-ref">Command-line introspection tools</span></a></dt><dd><p class="untranslated">Command-line tools for inspecting tasks in another running Python
+process.</p>
+</dd>
+</dl>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.14.</span></p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.print_call_graph">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">print_call_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.print_call_graph" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">打印当前任务或提供的 <a class="reference internal" href="asyncio-task.html#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 或 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 的异步调用图。</p>
+<p class="translated">此函数从顶部帧开始打印条目，并向下打印到调用点。</p>
+<p class="translated">该函数接收一个可选的 <em>future</em> 参数。如果没有传入，则使用当前运行的任务。</p>
+<p class="translated">如果在 <em>当前任务</em> 上调用该函数，可选的仅限关键字 <em>depth</em> 参数可用于从堆栈顶部跳过指定的帧数。</p>
+<p class="translated">如果提供了可选的仅限关键字 <em>limit</em> 参数，则结果图中的每个调用堆栈将被截断，以最多包含 <code class="docutils literal notranslate"><span class="pre">abs(limit)</span></code> 项。如果 <em>limit</em> 为正数，则剩下的条目是最接近调用点的。如果 <em>limit</em> 为负数，则保留最上面的项。如果 <em>limit</em> 省略或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则所有条目都存在。如果 <em>limit</em> 为 <code class="docutils literal notranslate"><span class="pre">0</span></code>，则根本不打印调用堆栈，只打印“awaited by”信息。</p>
+<p class="translated">如果 <em>file</em> 省略或为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，该函数将打印到 <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>。</p>
+<p class="translated"><strong>示例:</strong></p>
+<p class="translated">以下 Python 代码：</p>
+<div class="translated highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">():</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">print_call_graph</span><span class="p">()</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">test</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="translated">将打印:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">Task</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mh">0x1039f0fe0</span><span class="p">)</span>
+<span class="o">+</span> <span class="n">Call</span> <span class="n">stack</span><span class="p">:</span>
+<span class="o">|</span>   <span class="n">File</span> <span class="s1">&#39;t2.py&#39;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">4</span><span class="p">,</span> <span class="ow">in</span> <span class="k">async</span> <span class="n">test</span><span class="p">()</span>
+<span class="o">+</span> <span class="n">Awaited</span> <span class="n">by</span><span class="p">:</span>
+   <span class="o">*</span> <span class="n">Task</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Task-1&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mh">0x103a5e060</span><span class="p">)</span>
+      <span class="o">+</span> <span class="n">Call</span> <span class="n">stack</span><span class="p">:</span>
+      <span class="o">|</span>   <span class="n">File</span> <span class="s1">&#39;taskgroups.py&#39;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">107</span><span class="p">,</span> <span class="ow">in</span> <span class="k">async</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">()</span>
+      <span class="o">|</span>   <span class="n">File</span> <span class="s1">&#39;t2.py&#39;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">7</span><span class="p">,</span> <span class="ow">in</span> <span class="k">async</span> <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.format_call_graph">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">format_call_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.format_call_graph" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">类似于 <a class="reference internal" href="#asyncio.print_call_graph" title="asyncio.print_call_graph"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_call_graph()</span></code></a>，但返回一个字符串。如果 <em>future</em> 为 <code class="docutils literal notranslate"><span class="pre">None</span></code> 并且没有当前任务，则该函数返回一个空字符串。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.capture_call_graph">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">capture_call_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.capture_call_graph" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">捕获当前任务或提供的 <a class="reference internal" href="asyncio-task.html#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 或 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 的异步调用图。</p>
+<p class="translated">该函数接收一个可选的 <em>future</em> 参数。如果没有传入，则使用当前运行的任务。如果当前没有任务，该函数返回 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<p class="translated">如果在 <em>当前任务</em> 上调用该函数，可选的仅限关键字 <em>depth</em> 参数可用于从堆栈顶部跳过指定的帧数。</p>
+<p class="translated">返回一个 <code class="docutils literal notranslate"><span class="pre">FutureCallGraph</span></code> 数据类对象：</p>
+<ul>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">FutureCallGraph(future,</span> <span class="pre">call_stack,</span> <span class="pre">awaited_by)</span></code></p>
+<blockquote>
+<div><p class="translated">其中 <em>future</em> 是一个指向 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 或 <a class="reference internal" href="asyncio-task.html#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> (或其子类) 的引用。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">call_stack</span></code> 是一个 <code class="docutils literal notranslate"><span class="pre">FrameCallGraphEntry</span></code> 对象的元组。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">awaited_by</span></code> 是一个 <code class="docutils literal notranslate"><span class="pre">FutureCallGraph</span></code> 对象的元组。</p>
+</div></blockquote>
+</li>
+<li><p class="translated"><code class="docutils literal notranslate"><span class="pre">FrameCallGraphEntry(frame)</span></code></p>
+<blockquote>
+<div><p class="translated">其中 <em>frame</em> 是调用栈中常规 Python 函数的帧对象。</p>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+<section id="low-level-utility-functions">
+<h2 class="translated">底层实用工具函数<a class="headerlink" href="#low-level-utility-functions" title="Link to this heading">¶</a></h2>
+<p class="translated">要内省一个异步调用图，asyncio 需要控制流结构的配合，比如 <a class="reference internal" href="asyncio-task.html#asyncio.shield" title="asyncio.shield"><code class="xref py py-func docutils literal notranslate"><span class="pre">shield()</span></code></a> 或 <a class="reference internal" href="asyncio-task.html#asyncio.TaskGroup" title="asyncio.TaskGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskGroup</span></code></a>。 任何时候涉及到具有底层 API (如 <a class="reference internal" href="asyncio-future.html#asyncio.Future.add_done_callback" title="asyncio.Future.add_done_callback"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Future.add_done_callback()</span></code></a>) 的中间 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 对象时，都应该使用以下两个函数来通知 asyncio 这些中间 Future 对象是如何与它们包装或控制的任务连接的。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.future_add_to_awaited_by">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">future_add_to_awaited_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waiter</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.future_add_to_awaited_by" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">记录 <em>future</em> 被 <em>waiter</em> 等待。</p>
+<p class="translated"><em>future</em> 和 <em>waiter</em> 都必须是 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 或 <a class="reference internal" href="asyncio-task.html#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 或它们的子类的实例，否则该调用将不起作用。</p>
+<p class="translated">调用 <code class="docutils literal notranslate"><span class="pre">future_add_to_awaited_by()</span></code> 必须随后使用相同的参数最终调用 <a class="reference internal" href="#asyncio.future_discard_from_awaited_by" title="asyncio.future_discard_from_awaited_by"><code class="xref py py-func docutils literal notranslate"><span class="pre">future_discard_from_awaited_by()</span></code></a> 函数。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="asyncio.future_discard_from_awaited_by">
+<span class="sig-prename descclassname"><span class="pre">asyncio.</span></span><span class="sig-name descname"><span class="pre">future_discard_from_awaited_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waiter</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncio.future_discard_from_awaited_by" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">记录 <em>future</em> 不再被 <em>waiter</em> 等待。</p>
+<p class="translated"><em>future</em> 和 <em>waiter</em> 都必须是 <a class="reference internal" href="asyncio-future.html#asyncio.Future" title="asyncio.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> 或 <a class="reference internal" href="asyncio-task.html#asyncio.Task" title="asyncio.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> 或它们的子类的实例，否则该调用将不起作用。</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Call graph introspection</a><ul>
+<li><a class="reference internal" href="#low-level-utility-functions">底层实用工具函数</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="asyncio-exceptions.html"
+                          title="上一章">异常</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="asyncio-tools.html"
+                          title="下一章">Command-line introspection tools</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/asyncio-graph.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/asyncio-graph.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/asyncio-graph.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="asyncio-tools.html" title="Command-line introspection tools"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="asyncio-exceptions.html" title="异常"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ipc.html" >网络和进程间通信</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="asyncio.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code> --- 异步 I/O</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Call graph introspection</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

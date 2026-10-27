@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="textwrap --- 文本自动换行与填充" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/library/textwrap.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="源代码: Lib/textwrap.py textwrap 模块提供了一些便捷函数，以及 TextWrapper ——负责完成所有工作的类。 如果你只是要对一两个文本字符串进行自动换行或填充，便捷函数应该就够用了；否则的话，你应该使用 TextWrapper 的实例来提高效率。 wrap(), fill() 和 shorten() 的作用方式为创建一个 TextWrapper 实例并在其上调..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_library_textwrap_a7df413c.png" />
+<meta property="og:image:alt" content="源代码: Lib/textwrap.py textwrap 模块提供了一些便捷函数，以及 TextWrapper ——负责完成所有工作的类。 如果你只是要对一两个文本字符串进行自动换行或填充，便捷函数应该就够用了；否则的话，你应该使用 TextWrapper 的实例来提高效率。 wrap(), fill() 和 shorten() 的作用方式为创建一个 TextWrapper 实例并在其上调..." />
+<meta name="description" content="源代码: Lib/textwrap.py textwrap 模块提供了一些便捷函数，以及 TextWrapper ——负责完成所有工作的类。 如果你只是要对一两个文本字符串进行自动换行或填充，便捷函数应该就够用了；否则的话，你应该使用 TextWrapper 的实例来提高效率。 wrap(), fill() 和 shorten() 的作用方式为创建一个 TextWrapper 实例并在其上调..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>textwrap --- 文本自动换行与填充 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="unicodedata --- Unicode 数据库" href="unicodedata.html" />
+    <link rel="prev" title="difflib --- 计算差异的辅助工具" href="difflib.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/library/textwrap.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="difflib.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">difflib</span></code> --- 计算差异的辅助工具</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="unicodedata.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unicodedata</span></code> --- Unicode 数据库</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/textwrap.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/textwrap.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/textwrap.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="unicodedata.html" title="unicodedata --- Unicode 数据库"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="difflib.html" title="difflib --- 计算差异的辅助工具"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="text.html" accesskey="U">文本处理服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">textwrap</span></code> --- 文本自动换行与填充</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-textwrap">
+<span id="textwrap-text-wrapping-and-filling"></span><h1 class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">textwrap</span></code> --- 文本自动换行与填充<a class="headerlink" href="#module-textwrap" title="Link to this heading">¶</a></h1>
+<p class="translated"><strong>源代码:</strong> <a class="extlink-source reference external" href="https://github.com/python/cpython/tree/3.14/Lib/textwrap.py">Lib/textwrap.py</a></p>
+<hr class="docutils" />
+<p class="translated"><code class="xref py py-mod docutils literal notranslate"><span class="pre">textwrap</span></code> 模块提供了一些便捷函数，以及 <a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a>——负责完成所有工作的类。 如果你只是要对一两个文本字符串进行自动换行或填充，便捷函数应该就够用了；否则的话，你应该使用 <code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code> 的实例来提高效率。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="textwrap.wrap">
+<span class="sig-prename descclassname"><span class="pre">textwrap.</span></span><span class="sig-name descname"><span class="pre">wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">70</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsequent_indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_tabs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace_whitespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_sentence_endings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_long_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_whitespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_on_hyphens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tabsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">[...]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.wrap" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对 <em>text</em> (字符串) 中的单独段落自动换行以使每行长度最多为 <em>width</em> 个字符。返回由输出行组成的列表，行尾不带换行符。</p>
+<p class="translated">与 <a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 的实例属性对应的可选的关键字参数，具体文档见下。</p>
+<p class="translated">请参阅 <a class="reference internal" href="#textwrap.TextWrapper.wrap" title="textwrap.TextWrapper.wrap"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TextWrapper.wrap()</span></code></a> 方法了解有关 <a class="reference internal" href="#textwrap.wrap" title="textwrap.wrap"><code class="xref py py-func docutils literal notranslate"><span class="pre">wrap()</span></code></a> 行为的详细信息。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="textwrap.fill">
+<span class="sig-prename descclassname"><span class="pre">textwrap.</span></span><span class="sig-name descname"><span class="pre">fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">70</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsequent_indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_tabs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace_whitespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_sentence_endings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_long_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_whitespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_on_hyphens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tabsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">[...]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.fill" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对 <em>text</em> 中的单独段落自动换行，并返回一个包含被自动换行段落的单独字符串。 <a class="reference internal" href="#textwrap.fill" title="textwrap.fill"><code class="xref py py-func docutils literal notranslate"><span class="pre">fill()</span></code></a> 是以下语句的快捷方式</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="o">...</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="translated">特别要说明的是，<a class="reference internal" href="#textwrap.fill" title="textwrap.fill"><code class="xref py py-func docutils literal notranslate"><span class="pre">fill()</span></code></a> 接受与 <a class="reference internal" href="#textwrap.wrap" title="textwrap.wrap"><code class="xref py py-func docutils literal notranslate"><span class="pre">wrap()</span></code></a> 完全相同的关键字参数。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="textwrap.shorten">
+<span class="sig-prename descclassname"><span class="pre">textwrap.</span></span><span class="sig-name descname"><span class="pre">shorten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_sentence_endings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_long_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_on_hyphens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">[...]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.shorten" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">折叠并截短给定的 <em>text</em> 以符合给定的 <em>width</em>。</p>
+<p class="translated">首先 <em>text</em> 中的空白符会被折叠（所有连续空白符会替换为单个空格）。如果结果能适合 <em>width</em>，它将被返回。 在其他情况下，将在末尾丢弃足够数量的单词以使剩余的单词加 <em>placeholder</em> 能适合 <em>width</em>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">textwrap</span><span class="o">.</span><span class="n">shorten</span><span class="p">(</span><span class="s2">&quot;Hello  world!&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="go">&#39;Hello world!&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">textwrap</span><span class="o">.</span><span class="n">shorten</span><span class="p">(</span><span class="s2">&quot;Hello  world!&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="go">&#39;Hello [...]&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">textwrap</span><span class="o">.</span><span class="n">shorten</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="go">&#39;Hello...&#39;</span>
+</pre></div>
+</div>
+<p class="translated">可选的关键字参数对应于 <a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 的实例属性，具体见下文。请注意文本在被传入 <code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code> 的 <a class="reference internal" href="#textwrap.fill" title="textwrap.fill"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fill()</span></code></a> 函数之前会被折叠，因此改变 <a class="reference internal" href="#textwrap.TextWrapper.tabsize" title="textwrap.TextWrapper.tabsize"><code class="xref py py-attr docutils literal notranslate"><span class="pre">tabsize</span></code></a>, <a class="reference internal" href="#textwrap.TextWrapper.expand_tabs" title="textwrap.TextWrapper.expand_tabs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">expand_tabs</span></code></a>, <a class="reference internal" href="#textwrap.TextWrapper.drop_whitespace" title="textwrap.TextWrapper.drop_whitespace"><code class="xref py py-attr docutils literal notranslate"><span class="pre">drop_whitespace</span></code></a> 和 <a class="reference internal" href="#textwrap.TextWrapper.replace_whitespace" title="textwrap.TextWrapper.replace_whitespace"><code class="xref py py-attr docutils literal notranslate"><span class="pre">replace_whitespace</span></code></a> 的值将没有任何效果。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="textwrap.dedent">
+<span class="sig-prename descclassname"><span class="pre">textwrap.</span></span><span class="sig-name descname"><span class="pre">dedent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.dedent" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">移除 <em>text</em> 中每一行的任何相同前缀空白符。</p>
+<p class="translated">这可以用来清除三重引号字符串行左侧空格，而仍然在源码中显示为缩进格式。</p>
+<p class="translated">请注意制表符和空格符都被视为是空白符，但它们并不相等：以下两行 <code class="docutils literal notranslate"><span class="pre">&quot;</span>&#160; <span class="pre">hello&quot;</span></code> 和 <code class="docutils literal notranslate"><span class="pre">&quot;\thello&quot;</span></code> 不会被视为具有相同的前缀空白符。</p>
+<p class="translated">只包含空白符的行会在输入时被忽略并在输出时被标准化为单个换行符。</p>
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">():</span>
+    <span class="c1"># 第一行以 \ 结束以避免出现空行！</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1">    hello</span>
+<span class="s1">      world</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>          <span class="c1"># prints &#39;    hello\n      world\n    &#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">dedent</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>  <span class="c1"># prints &#39;hello\n  world\n&#39;</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">在 3.14 版本发生变更: </span>现在 <code class="xref py py-func docutils literal notranslate"><span class="pre">dedent()</span></code> 函数将能正确地规范化仅包含空白符的空行。在之前版本中，其实现只能规范化包含制表符和空格符的空行。</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="textwrap.indent">
+<span class="sig-prename descclassname"><span class="pre">textwrap.</span></span><span class="sig-name descname"><span class="pre">indent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.indent" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">将 <em>prefix</em> 添加到 <em>text</em> 中选定行的开头。</p>
+<p class="translated">通过调用 <code class="docutils literal notranslate"><span class="pre">text.splitlines(True)</span></code> 来对行进行拆分。</p>
+<p class="translated">默认情况下，<em>prefix</em> 会被添加到所有不是只由空白符（包括任何行结束符）组成的行。</p>
+<p class="translated">例如:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;hello</span><span class="se">\n\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">world&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indent</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;  &#39;</span><span class="p">)</span>
+<span class="go">&#39;  hello\n\n \n  world&#39;</span>
+</pre></div>
+</div>
+<p class="translated">可选的 <em>predicate</em> 参数可用来控制哪些行要缩进。例如，可以很容易地为空行或只有空白符的行添加 <em>prefix</em>:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">indent</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;+ &#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="kc">True</span><span class="p">))</span>
+<span class="go">+ hello</span>
+<span class="go">+</span>
+<span class="go">+</span>
+<span class="go">+ world</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#textwrap.wrap" title="textwrap.wrap"><code class="xref py py-func docutils literal notranslate"><span class="pre">wrap()</span></code></a>, <a class="reference internal" href="#textwrap.fill" title="textwrap.fill"><code class="xref py py-func docutils literal notranslate"><span class="pre">fill()</span></code></a> 和 <a class="reference internal" href="#textwrap.shorten" title="textwrap.shorten"><code class="xref py py-func docutils literal notranslate"><span class="pre">shorten()</span></code></a> 的作用方式为创建一个 <a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 实例并在其上调用单个方法。该实例不会被重用，因此对于要使用 <code class="xref py py-func docutils literal notranslate"><span class="pre">wrap()</span></code> 和/或 <code class="xref py py-func docutils literal notranslate"><span class="pre">fill()</span></code> 来处理许多文本字符串的应用来说，创建你自己的 <code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code> 对象可能会更有效率。</p>
+<p class="translated">文本最好在空白符位置自动换行，包括带连字符单词的连字符之后；长单词仅在必要时会被拆分，除非 <a class="reference internal" href="#textwrap.TextWrapper.break_long_words" title="textwrap.TextWrapper.break_long_words"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TextWrapper.break_long_words</span></code></a> 被设为假值。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="textwrap.TextWrapper">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">textwrap.</span></span><span class="sig-name descname"><span class="pre">TextWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.TextWrapper" title="Link to this definition">¶</a></dt>
+<dd><p class="translated"><a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 构造器接受多个可选的关键字参数。每个关键字参数对应一个实例属性，比如说</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">wrapper</span> <span class="o">=</span> <span class="n">TextWrapper</span><span class="p">(</span><span class="n">initial_indent</span><span class="o">=</span><span class="s2">&quot;* &quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">相当于：</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">wrapper</span> <span class="o">=</span> <span class="n">TextWrapper</span><span class="p">()</span>
+<span class="n">wrapper</span><span class="o">.</span><span class="n">initial_indent</span> <span class="o">=</span> <span class="s2">&quot;* &quot;</span>
+</pre></div>
+</div>
+<p class="translated">你可以多次重用相同的 <a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 对象，并且你也可以在使用期间通过直接向实例属性赋值来修改它的任何选项。</p>
+<p class="translated"><a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 的实例属性（以及构造器的关键字参数）如下所示：</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.width">
+<span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#textwrap.TextWrapper.width" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">70</span></code>) 自动换行的最大行长度。只要输入文本中没有长于 <a class="reference internal" href="#textwrap.TextWrapper.width" title="textwrap.TextWrapper.width"><code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code></a> 的单个单词，<a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 就能保证没有长于 <code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code> 个字符的输出行。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.expand_tabs">
+<span class="sig-name descname"><span class="pre">expand_tabs</span></span><a class="headerlink" href="#textwrap.TextWrapper.expand_tabs" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认值：<code class="docutils literal notranslate"><span class="pre">True</span></code>) 如果为真值，则 <em>text</em> 中的所有制表符将使用 <em>text</em> 的 <a class="reference internal" href="stdtypes.html#str.expandtabs" title="str.expandtabs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expandtabs()</span></code></a> 方法扩展为空格符。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.tabsize">
+<span class="sig-name descname"><span class="pre">tabsize</span></span><a class="headerlink" href="#textwrap.TextWrapper.tabsize" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">8</span></code>) 如果 <a class="reference internal" href="#textwrap.TextWrapper.expand_tabs" title="textwrap.TextWrapper.expand_tabs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">expand_tabs</span></code></a> 为真值，则 <em>text</em> 中所有的制表符将扩展为零个或多个空格，具体取决于当前列位置和给定的制表宽度。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.3.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.replace_whitespace">
+<span class="sig-name descname"><span class="pre">replace_whitespace</span></span><a class="headerlink" href="#textwrap.TextWrapper.replace_whitespace" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">True</span></code>) 如果为真值，在制表符扩展之后、自动换行之前，<a class="reference internal" href="#textwrap.wrap" title="textwrap.wrap"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wrap()</span></code></a> 方法将把每个空白字符都替换为单个空格。 会被替换的空白字符如下：制表，换行，垂直制表，进纸和回车 (<code class="docutils literal notranslate"><span class="pre">'\t\n\v\f\r'</span></code>)。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果 <a class="reference internal" href="#textwrap.TextWrapper.expand_tabs" title="textwrap.TextWrapper.expand_tabs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">expand_tabs</span></code></a> 为假值且 <a class="reference internal" href="#textwrap.TextWrapper.replace_whitespace" title="textwrap.TextWrapper.replace_whitespace"><code class="xref py py-attr docutils literal notranslate"><span class="pre">replace_whitespace</span></code></a> 为真值，每个制表符将被替换为单个空格，这与制表符扩展是 <em>不</em> 一样的。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">如果 <a class="reference internal" href="#textwrap.TextWrapper.replace_whitespace" title="textwrap.TextWrapper.replace_whitespace"><code class="xref py py-attr docutils literal notranslate"><span class="pre">replace_whitespace</span></code></a> 为假值，在一行的中间有可能出现换行符并导致怪异的输出。因此，文本应当（使用 <a class="reference internal" href="stdtypes.html#str.splitlines" title="str.splitlines"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.splitlines()</span></code></a> 或类似方法）拆分为段落并分别进行自动换行。</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.drop_whitespace">
+<span class="sig-name descname"><span class="pre">drop_whitespace</span></span><a class="headerlink" href="#textwrap.TextWrapper.drop_whitespace" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">True</span></code>) 如果为真值，每一行开头和末尾的空白字符（在包装之后、缩进之前）会被丢弃。 但是段落开头的空白字符如果后面不带任何非空白字符则不会被丢弃。如果被丢弃的空白字符占据了一个整行，则该整行将被丢弃。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.initial_indent">
+<span class="sig-name descname"><span class="pre">initial_indent</span></span><a class="headerlink" href="#textwrap.TextWrapper.initial_indent" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">''</span></code>) 将被添加到被自动换行输出内容的第一行的字符串。其长度会被计入第一行的长度。空字符串不会被缩进。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.subsequent_indent">
+<span class="sig-name descname"><span class="pre">subsequent_indent</span></span><a class="headerlink" href="#textwrap.TextWrapper.subsequent_indent" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">''</span></code>) 将被添加到被自动换行输出内容除第一行外的所有行的字符串。其长度会被计入除第一行外的所有行的长度。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.fix_sentence_endings">
+<span class="sig-name descname"><span class="pre">fix_sentence_endings</span></span><a class="headerlink" href="#textwrap.TextWrapper.fix_sentence_endings" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认值: <code class="docutils literal notranslate"><span class="pre">False</span></code>) 如果为真值，<a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 将尝试检测句子结尾并确保句子间总是以恰好两个空格符分隔。 对于使用等宽字体的文本来说通常都需要这样。 但是句子检测算法并不完美：它假定句子结尾是一个小写字母加字符 <code class="docutils literal notranslate"><span class="pre">'.'</span></code>, <code class="docutils literal notranslate"><span class="pre">'!'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">'?'</span></code> 之一，并可能跟一个 <code class="docutils literal notranslate"><span class="pre">'&quot;'</span></code> 或 <code class="docutils literal notranslate"><span class="pre">&quot;'&quot;</span></code>，再跟一个空格。 此算法的一个问题是它无法区分以下文本中的 “Dr.”</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="n">Dr</span><span class="o">.</span> <span class="n">Frankenstein</span><span class="s1">&#39;s monster [...]</span>
+</pre></div>
+</div>
+<p class="translated">和以下文本中的 “Spot.”</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="n">See</span> <span class="n">Spot</span><span class="o">.</span> <span class="n">See</span> <span class="n">Spot</span> <span class="n">run</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p class="translated"><a class="reference internal" href="#textwrap.TextWrapper.fix_sentence_endings" title="textwrap.TextWrapper.fix_sentence_endings"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fix_sentence_endings</span></code></a> 默认为假值。</p>
+<p class="translated">由于句子检测算法依赖于 <code class="docutils literal notranslate"><span class="pre">string.lowercase</span></code> 来确定“小写字母”，以及约定在句点后使用两个空格来分隔处于同一行的句子，因此只适用于英语文本。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.break_long_words">
+<span class="sig-name descname"><span class="pre">break_long_words</span></span><a class="headerlink" href="#textwrap.TextWrapper.break_long_words" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">True</span></code>) 如果为真值，则长度超过 <a class="reference internal" href="#textwrap.TextWrapper.width" title="textwrap.TextWrapper.width"><code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code></a> 的单词将被分开以保证行的长度不会超过 <code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code>。 如果为假值，超长单词不会被分开，因而某些行的长度可能会超过 <code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code>。 （超长单词将被单独作为一行，以尽量减少超出 <code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code> 的情况。）</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.break_on_hyphens">
+<span class="sig-name descname"><span class="pre">break_on_hyphens</span></span><a class="headerlink" href="#textwrap.TextWrapper.break_on_hyphens" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">True</span></code>) 如果为真值，将根据英语的惯例首选在空白符和复合词的连字符之后自动换行。 如果为假值，则只有空白符会被视为合适的潜在断行位置，但如果你确实不希望出现分开的单词则你必须将 <a class="reference internal" href="#textwrap.TextWrapper.break_long_words" title="textwrap.TextWrapper.break_long_words"><code class="xref py py-attr docutils literal notranslate"><span class="pre">break_long_words</span></code></a> 设为假值。之前版本的默认行为总是允许分开带有连字符的单词。</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.max_lines">
+<span class="sig-name descname"><span class="pre">max_lines</span></span><a class="headerlink" href="#textwrap.TextWrapper.max_lines" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">None</span></code>) 如果不为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，则输出内容将最多包含 <em>max_lines</em> 行，并使 <em>placeholder</em> 出现在输出内容的末尾。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute" id="index-0">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.placeholder">
+<span class="sig-name descname"><span class="pre">placeholder</span></span><a class="headerlink" href="#textwrap.TextWrapper.placeholder" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">(默认：<code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">[...]'</span></code>) 该文本将在输出文本被截短时出现在文本末尾。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.4.</span></p>
+</div>
+</dd></dl>
+
+<p class="translated"><a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 还提供了一些公有方法，类似于模块层级的便捷函数：</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.wrap">
+<span class="sig-name descname"><span class="pre">wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.TextWrapper.wrap" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对 <em>text</em> (字符串) 中的单独段落自动换行以使每行长度最多为 <a class="reference internal" href="#textwrap.TextWrapper.width" title="textwrap.TextWrapper.width"><code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code></a> 个字符。所有自动换行选项均获取自 <a class="reference internal" href="#textwrap.TextWrapper" title="textwrap.TextWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextWrapper</span></code></a> 实例的实例属性。返回由输出行组成的列表，行尾不带换行符。如果自动换行输出结果没有任何内容，则返回空列表。</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="textwrap.TextWrapper.fill">
+<span class="sig-name descname"><span class="pre">fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#textwrap.TextWrapper.fill" title="Link to this definition">¶</a></dt>
+<dd><p class="translated">对 <em>text</em> 中的单独段落自动换行并返回包含被自动换行段落的单独字符串。</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="difflib.html"
+                          title="上一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">difflib</span></code> --- 计算差异的辅助工具</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="unicodedata.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unicodedata</span></code> --- Unicode 数据库</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "library/textwrap.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/library/textwrap.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/library/textwrap.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="unicodedata.html" title="unicodedata --- Unicode 数据库"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="difflib.html" title="difflib --- 计算差异的辅助工具"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="text.html" >文本处理服务</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">textwrap</span></code> --- 文本自动换行与填充</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

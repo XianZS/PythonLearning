@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Python 2.3 方法解析顺序" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/mro.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="By Michele Simionato. 摘要, 本文档的目标读者是那些希望理解 Python 2.3 中使用的 C3 方法解析顺序的 Python 程序员。 虽然它不是为新手准备的，但它具有很强的教学性，包含许多实用的例子。据我所知还没有其他公开文档涵盖相同的领域，因此它应该是有用的。,. 免责声明： 我将此文档捐赠给 Python 软件基金会，采用 Python 2.3 许可。如在这种..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_mro_7fa67ff4.png" />
+<meta property="og:image:alt" content="By Michele Simionato. 摘要, 本文档的目标读者是那些希望理解 Python 2.3 中使用的 C3 方法解析顺序的 Python 程序员。 虽然它不是为新手准备的，但它具有很强的教学性，包含许多实用的例子。据我所知还没有其他公开文档涵盖相同的领域，因此它应该是有用的。,. 免责声明： 我将此文档捐赠给 Python 软件基金会，采用 Python 2.3 许可。如在这种..." />
+<meta name="description" content="By Michele Simionato. 摘要, 本文档的目标读者是那些希望理解 Python 2.3 中使用的 C3 方法解析顺序的 Python 程序员。 虽然它不是为新手准备的，但它具有很强的教学性，包含许多实用的例子。据我所知还没有其他公开文档涵盖相同的领域，因此它应该是有用的。,. 免责声明： 我将此文档捐赠给 Python 软件基金会，采用 Python 2.3 许可。如在这种..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>Python 2.3 方法解析顺序 &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="Python 对自由线程的支持" href="free-threading-python.html" />
+    <link rel="prev" title="定时器文件描述符指南" href="timerfd.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/mro.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Python 2.3 方法解析顺序</a><ul>
+<li><a class="reference internal" href="#the-beginning">开始</a></li>
+<li><a class="reference internal" href="#the-c3-method-resolution-order">C3 方法解析顺序</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+<li><a class="reference internal" href="#bad-method-resolution-orders">坏的方法解析顺序</a></li>
+<li><a class="reference internal" href="#the-end">结束</a></li>
+<li><a class="reference internal" href="#resources">参考资源</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="timerfd.html"
+                          title="上一章">定时器文件描述符指南</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="free-threading-python.html"
+                          title="下一章">Python 对自由线程的支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/mro.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/mro.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/mro.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="free-threading-python.html" title="Python 对自由线程的支持"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="timerfd.html" title="定时器文件描述符指南"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Python 2.3 方法解析顺序</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="the-python-2-3-method-resolution-order">
+<span id="python-2-3-mro"></span><h1 class="translated">Python 2.3 方法解析顺序<a class="headerlink" href="#the-python-2-3-method-resolution-order" title="Link to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p class="translated">这是一份历史性的文档，作为官方文档的附录提供。这里所讨论的方法解析顺序在 Python 2.3 中 <em>被引入</em>，但在之后的版本中仍然被使用 -- 包括 Python 3.</p>
+</div>
+<p class="untranslated">By <a class="reference external" href="https://github.com/micheles">Michele Simionato</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd translated">摘要<span class="colon">:</span></dt>
+<dd class="field-odd translated"><p class="translated"><em>本文档的目标读者是那些希望理解 Python 2.3 中使用的 C3 方法解析顺序的 Python 程序员。 虽然它不是为新手准备的，但它具有很强的教学性，包含许多实用的例子。据我所知还没有其他公开文档涵盖相同的领域，因此它应该是有用的。</em></p>
+</dd>
+</dl>
+<p class="translated">免责声明：</p>
+<blockquote>
+<div><p class="translated"><em>我将此文档捐赠给 Python 软件基金会，采用 Python 2.3 许可。如在这种情况下通常做法，我警示读者下面的内容</em> 应该 <em>是正确的，但我不提供任何保证。请自行承担使用风险与损害！</em></p>
+</div></blockquote>
+<p class="translated">致谢：</p>
+<blockquote>
+<div><p class="translated"><em>Python 邮件列表中所有对我表示支持的人。Paul Foley，他指出了各种不精确之处并让我添加了本地优先排序的部分。David Goodger 在 reStructuredText 格式化方面的帮助。David Mertz 在编辑方面提供的帮助。最后，Guido van Rossum 热心地将本文档添加到官方 Python 2.3 主页。</em></p>
+</div></blockquote>
+<section id="the-beginning">
+<h2 class="translated">开始<a class="headerlink" href="#the-beginning" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><p class="translated"><em>Felix qui potuit rerum cognoscere causas</em> -- Virgilius</p>
+</div></blockquote>
+<p class="translated">事情开始于 Samuele Pedroni 在 Python 开发邮件列表上的一个帖子 <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>。在他的帖子里，Samuele 表示 Python 2.2 方法解析顺序不是单调的并提议用 C3 方法解析顺序来替代它。Guido 认同他的意见因此现在 Python 2.3 使用了 C3。C3 方法本身与 Python 没有关系，因为它由使用 Dylan 的人发明并在一篇针对 lisp 程序员的论文中描述 <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>。 本文给出了面向希望理解这项改变的理由的 Python 使用者的（尽可能）易读的 C3 算法相关讨论。</p>
+<p class="translated">首先，我要指出我即将介绍的情况仅作用于在 Python 2.2 中引入的 <em>新式类</em>: <em>经典类</em> 将保持其原有的方法解析顺序，深度优先并且从左至右。 因此，不存在对经典类原有代码的破坏；而且虽然在原理上存在对 Python 2.2 新式类代码的破坏，但在实践中 C3 解析顺序与 Python 2.2 方法解析顺序存在不同的情况是如此稀少以至于不会真正破坏原有代码。所以：</p>
+<blockquote>
+<div><p class="translated"><em>不必害怕！</em></p>
+</div></blockquote>
+<p class="translated">此外，除非你高强度地使用多重继承并且有复杂的层级结构，否则你就不需要理解 C3 算法，可以轻松地跳过本文。 另一方面，如果你真的想知道多重继承是如何工作的，那么本文就是为你准备的。好消息是事情并没有你想象的那么复杂。</p>
+<p class="translated">让我们从一些基本的定义开始。</p>
+<ol class="arabic simple">
+<li><p class="translated">在一个复杂的多重继承层级结构中给定一个类 C，要指明方法的覆盖顺序，即 C 的祖先的顺序是一项并不轻松的任务。</p></li>
+<li><p class="translated">类 C 的祖先列表（包括类本身）从最近的祖先到最远的祖先排序，称为类优先级列表或 C 的 <em>线性化</em>。</p></li>
+<li><p class="translated"><em>方法解析顺序</em> (MRO) 是构造线性化的规则集合。在 Python 的语境中，术语 &quot;C 的 MRO&quot; 也会被用作类 C 的线性化的同义词。</p></li>
+<li><p class="translated">举例来说，在单继承层级结构的情况下，如果 C 是 C1 的子类，而 C1 是 C2 的子类，那么 C 的线性化就是简单的列表 [C, C1 , C2]。 但是，对于多继承层级结构，线性化的构造就比较麻烦了，因为要构造一个尊重 <em>局部优先级排序</em> 和 <em>单调性</em> 的线性化将更为困难。</p></li>
+<li><p class="translated">我稍后会讨论局部优先级顺序问题，但我可以先在这里给出单调性的定义。当以下情况为真时一个 MRO 就是单调的：<em>如果在 C 的线性化中 C1 先于 C2，那么在 C 的任何子类的线性化中 C1 都先于 C2</em>。 在其他情况下，派生新类的无害操作就可能会改变方法的解析顺序，从而可能引入非常微妙的程序错误。稍后将举例说明这种情况。</p></li>
+<li><p class="translated">并非所有的类都允许线性化。在复杂的层级结构中，有些情况下不可能派生出一个类使其线性化遵循所有需要的属性。</p></li>
+</ol>
+<p class="translated">在此我举一个例子来说明这种情况。考虑以下层级结构</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">O</span> <span class="o">=</span> <span class="nb">object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">X</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Y</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">):</span> <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">它可以用以下继承图来表示，其中我用 O 来标记 <code class="docutils literal notranslate"><span class="pre">object</span></code> 类，它是任何新式类层级结构的起点：</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span> -----------
+|           |
+|    O      |
+|  /   \    |
+ - X    Y  /
+   |  / | /
+   | /  |/
+   A    B
+   \   /
+     ?
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">在此情况下，从 A 和 B 派生新类是不可能的，因为在 A 中 X 先于 Y，但在 B 中 Y 先于 X，因此在 C 中方法解析顺序将出现歧义。</p>
+<p class="translated">Python 2.3 在此情况下会引发异常 (TypeError:  MRO conflict among bases Y, X) 以防止程序员在无意中创建有歧义的层级结构。Python 2.2 不会引发异常，而是会选择一个 <em>临时</em> 顺序 (在本例中为 CABXYO)。</p>
+</section>
+<section id="the-c3-method-resolution-order">
+<h2 class="translated">C3 方法解析顺序<a class="headerlink" href="#the-c3-method-resolution-order" title="Link to this heading">¶</a></h2>
+<p class="translated">让我们引入一些适用于接下来的讨论的简单标记法。我会使用这样的快捷标记:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">C1</span> <span class="n">C2</span> <span class="o">...</span> <span class="n">CN</span>
+</pre></div>
+</div>
+<p class="translated">来表示类列表 [C1, C2, ... , CN]。</p>
+<p class="translated">列表的 <em>head</em> 是其第一个元素:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">head</span> <span class="o">=</span> <span class="n">C1</span>
+</pre></div>
+</div>
+<p class="translated">而 <em>tail</em> 则是列表的其余元素:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">tail</span> <span class="o">=</span> <span class="n">C2</span> <span class="o">...</span> <span class="n">CN</span><span class="o">.</span>
+</pre></div>
+</div>
+<p class="translated">我还将使用这样的标记:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="o">+</span> <span class="p">(</span><span class="n">C1</span> <span class="n">C2</span> <span class="o">...</span> <span class="n">CN</span><span class="p">)</span> <span class="o">=</span> <span class="n">C</span> <span class="n">C1</span> <span class="n">C2</span> <span class="o">...</span> <span class="n">CN</span>
+</pre></div>
+</div>
+<p class="translated">来表示列表 [C] + [C1，C2，...，CN] 的总和。</p>
+<p class="translated">现在我就可以解释 MRO 在 Python 2.3 中的工作原理了。</p>
+<p class="translated">考虑多重继承层级结构中的类 C，C 继承自基类 B1, B2, ... , BN。我们想要计算类 C 的线性化 L[C]。规则如下：</p>
+<blockquote>
+<div><p class="translated"><em>C 的线性化就是 C 加上对父类的线性化与父类列表进行合并的总和。</em></p>
+</div></blockquote>
+<p class="translated">使用符号标记法:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">C</span><span class="p">(</span><span class="n">B1</span> <span class="o">...</span> <span class="n">BN</span><span class="p">)]</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">B1</span><span class="p">]</span> <span class="o">...</span> <span class="n">L</span><span class="p">[</span><span class="n">BN</span><span class="p">],</span> <span class="n">B1</span> <span class="o">...</span> <span class="n">BN</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">特别地，如果 C 为 <code class="docutils literal notranslate"><span class="pre">object</span></code> 类，它是没有父类的，其线性化很简单:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span>
+</pre></div>
+</div>
+<p class="translated">不过，在通常情况下我们需要根据以下预设规则来计算合并结果：</p>
+<blockquote>
+<div><p class="translated"><em>取第一个列表的 head，即 L[B1][0]；如果这个 head 不在任何其他列表的 tail 内，则将其添加到 C 的线性化中，并在合并结果中将其从列表中移除，否则如果下一个列表的 head 是好的 head 则使用它。 然后重复上述操作直到所有类都被移除或是无法找到好的 head。在这种情况下将无法构造合并结果，Python 2.3 将拒绝创建类 C 并将引发 异常。</em></p>
+</div></blockquote>
+<p class="translated">这一预设规则可以确保合并操作 <em>保留</em> 顺序，如果顺序能被保留的话。 在另一方面，如果顺序无法被保留（如上文讨论的顺序严重不一致的例子）则无法计算合并结果。</p>
+<p class="translated">如果 C 只有一个父类（单一继承）则合并结果的计算将很简单；在这种情况下:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">C</span><span class="p">(</span><span class="n">B</span><span class="p">)]</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">B</span><span class="p">],</span><span class="n">B</span><span class="p">)</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">L</span><span class="p">[</span><span class="n">B</span><span class="p">]</span>
+</pre></div>
+</div>
+<p class="translated">不过，对于多重继承的情况事情就会比较麻烦，如果不举几个例子我估计你是无法理解具体规则的 ;-)</p>
+</section>
+<section id="examples">
+<h2 class="translated">例子<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p class="translated">第一个例子。考虑以下层级结构：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">O</span> <span class="o">=</span> <span class="nb">object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">F</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">在这种情况下继承图可以绘制为：</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>                          6
+                         ---
+Level 3                 | O |                  (more general)
+                      /  ---  \
+                     /    |    \                      |
+                    /     |     \                     |
+                   /      |      \                    |
+                  ---    ---    ---                   |
+Level 2        3 | D | 4| E |  | F | 5                |
+                  ---    ---    ---                   |
+                   \  \ _ /       |                   |
+                    \    / \ _    |                   |
+                     \  /      \  |                   |
+                      ---      ---                    |
+Level 1            1 | B |    | C | 2                 |
+                      ---      ---                    |
+                        \      /                      |
+                         \    /                      \ /
+                           ---
+Level 0                 0 | A |                (more specialized)
+                           ---
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">O、D、E 和 F 的线性化很简单:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">O</span><span class="p">]</span> <span class="o">=</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">D</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">E</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">F</span><span class="p">]</span> <span class="o">=</span> <span class="n">F</span> <span class="n">O</span>
+</pre></div>
+</div>
+<p class="translated">B 的线性化可以被计算为:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">B</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">DO</span><span class="p">,</span> <span class="n">EO</span><span class="p">,</span> <span class="n">DE</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">我们看到 D 是一个好的 head，因此我们使用它这样就可以简化为计算 <code class="docutils literal notranslate"><span class="pre">merge(O,EO,E)</span></code>。现在 O 不是一个好的 head，因为它在序列 EO 的 tail 内。在这种情况下规则要求我们必须跳到下一个序列。然后我们可以看到 E 是一个好的 head；我们使用它这样就可以简化为计算 <code class="docutils literal notranslate"><span class="pre">merge(O,O)</span></code> 从而得到 O。因此:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">B</span><span class="p">]</span> <span class="o">=</span>  <span class="n">B</span> <span class="n">D</span> <span class="n">E</span> <span class="n">O</span>
+</pre></div>
+</div>
+<p class="translated">使用同样的步骤我们将发现:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">C</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">DO</span><span class="p">,</span><span class="n">FO</span><span class="p">,</span><span class="n">DF</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">D</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">O</span><span class="p">,</span><span class="n">FO</span><span class="p">,</span><span class="n">F</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">D</span> <span class="o">+</span> <span class="n">F</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">O</span><span class="p">,</span><span class="n">O</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">C</span> <span class="n">D</span> <span class="n">F</span> <span class="n">O</span>
+</pre></div>
+</div>
+<p class="translated">现在我们可以计算:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">BDEO</span><span class="p">,</span><span class="n">CDFO</span><span class="p">,</span><span class="n">BC</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">DEO</span><span class="p">,</span><span class="n">CDFO</span><span class="p">,</span><span class="n">C</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">DEO</span><span class="p">,</span><span class="n">DFO</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span> <span class="o">+</span> <span class="n">D</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">EO</span><span class="p">,</span><span class="n">FO</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span> <span class="o">+</span> <span class="n">D</span> <span class="o">+</span> <span class="n">E</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">O</span><span class="p">,</span><span class="n">FO</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span> <span class="o">+</span> <span class="n">D</span> <span class="o">+</span> <span class="n">E</span> <span class="o">+</span> <span class="n">F</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">O</span><span class="p">,</span><span class="n">O</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">A</span> <span class="n">B</span> <span class="n">C</span> <span class="n">D</span> <span class="n">E</span> <span class="n">F</span> <span class="n">O</span>
+</pre></div>
+</div>
+<p class="translated">在这个例子中，线性化按照继承级别进行了良好的排序，即级别越低（即更特化的类）优先级越高（见继承图）。然而，这并不是一般的情况。</p>
+<p class="translated">我把计算第二个例子的线性化作为一个练习留给读者完成：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">O</span> <span class="o">=</span> <span class="nb">object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">F</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">E</span><span class="p">,</span><span class="n">D</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">与前一例子的唯一区别在于 B(D,E) --&gt; B(E,D)；然而即使是这样一个小小的改动也完全改变了层级结构的顺序：</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>                           6
+                          ---
+Level 3                  | O |
+                       /  ---  \
+                      /    |    \
+                     /     |     \
+                    /      |      \
+                  ---     ---    ---
+Level 2        2 | E | 4 | D |  | F | 5
+                  ---     ---    ---
+                   \      / \     /
+                    \    /   \   /
+                     \  /     \ /
+                      ---     ---
+Level 1            1 | B |   | C | 3
+                      ---     ---
+                       \       /
+                        \     /
+                          ---
+Level 0                0 | A |
+                          ---
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">请注意处在层级结构第二层级的类 E，它先于处在层级结构第一层级的类 C，也就是说，E 比 C 更特化，即便它处在更高的层级。</p>
+<p class="translated">懒惰的程序员可以直接获取 Python 2.2 的 MRO，因为在这种情况下它会与 Python 2.3 的线性化恰好一致。只需调用类 A 的 <a class="reference internal" href="../reference/datamodel.html#type.mro" title="type.mro"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mro()</span></code></a> 方法就够了：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="o">.</span><span class="n">mro</span><span class="p">()</span>
+<span class="go">[&lt;class &#39;A&#39;&gt;, &lt;class &#39;B&#39;&gt;, &lt;class &#39;E&#39;&gt;,</span>
+<span class="go">&lt;class &#39;C&#39;&gt;, &lt;class &#39;D&#39;&gt;, &lt;class &#39;F&#39;&gt;,</span>
+<span class="go">&lt;class &#39;object&#39;&gt;]</span>
+</pre></div>
+</div>
+<p class="translated">最后，让我来讲解第一小节所讨论的例子，其中涉及严重的顺序不一致问题。在这种情况下，可以直接计算 O、X、Y、A 和 B 的线性化：</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>L[O] = 0
+L[X] = X O
+L[Y] = Y O
+L[A] = A X Y O
+L[B] = B Y X O
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">然而，要计算继承自 A 和 B 的类 C 的线性化则是不可能的:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">C</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">AXYO</span><span class="p">,</span> <span class="n">BYXO</span><span class="p">,</span> <span class="n">AB</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">A</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">XYO</span><span class="p">,</span> <span class="n">BYXO</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+     <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">merge</span><span class="p">(</span><span class="n">XYO</span><span class="p">,</span> <span class="n">YXO</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">此时我们无法合并列表 XYO 和 YXO，因为 X 在 YXO 的 tail 内，而 Y 在 XYO 的 tail 内：因此没有好的 head 从而 C3 算法将停止。Python 2.3 将引发一个错误并拒绝创建类 C。</p>
+</section>
+<section id="bad-method-resolution-orders">
+<h2 class="translated">坏的方法解析顺序<a class="headerlink" href="#bad-method-resolution-orders" title="Link to this heading">¶</a></h2>
+<p class="translated">当一个 MRO 破坏了诸如局部优先顺序和单调性等基本属性时它就是 <em>坏的</em>。在本节中，我将证明 Python 2.2 中经典类的 MRO 和新式类的 MRO 都是坏的。</p>
+<p class="translated">从局部优先顺序开始会更简单。请看下面的例子：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">F</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;Food&#39;</span><span class="p">,(),{</span><span class="s1">&#39;remember2buy&#39;</span><span class="p">:</span><span class="s1">&#39;spam&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">E</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;Eggs&#39;</span><span class="p">,(</span><span class="n">F</span><span class="p">,),{</span><span class="s1">&#39;remember2buy&#39;</span><span class="p">:</span><span class="s1">&#39;eggs&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;GoodFood&#39;</span><span class="p">,(</span><span class="n">F</span><span class="p">,</span><span class="n">E</span><span class="p">),{})</span> <span class="c1"># under Python 2.3 this is an error!</span>
+</pre></div>
+</div>
+<p class="translated">继承图如下</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>             O
+             |
+(buy spam)   F
+             | \
+             | E   (buy eggs)
+             | /
+             G
+
+      (buy eggs or spam ?)
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">我们看到类 G 继承自 F 和 E，其中 F <em>先于</em> E：因此我们预期属性 <em>G.remember2buy</em> 会被 <em>F.remember2buy</em> 而不是被 <em>E.remember2buy</em> 所继承：然而 Python 2.2 给出的结果是</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">remember2buy</span>
+<span class="go">&#39;eggs&#39;</span>
+</pre></div>
+</div>
+<p class="translated">这是对局部优先顺序的破坏因为在 Python 2.2 对 G 进行线性化时，局部优先列表即 G 的父类列表中的顺序并不会被保留:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">G</span><span class="p">,</span><span class="n">P22</span><span class="p">]</span><span class="o">=</span> <span class="n">G</span> <span class="n">E</span> <span class="n">F</span> <span class="nb">object</span>   <span class="c1"># F 在 E *之后*</span>
+</pre></div>
+</div>
+<p class="translated">有人可能会说在 Python 2.2 的线性化中 F 在 E 之后的原因是 F 的特化程度低于 E，因为 F 是 E 的超类；然而打破局部优先排序是相当反直觉且容易导致错误的。这一点因为它与旧式类不同而尤其明显：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">:</span> <span class="n">remember2buy</span><span class="o">=</span><span class="s1">&#39;spam&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">F</span><span class="p">):</span> <span class="n">remember2buy</span><span class="o">=</span><span class="s1">&#39;eggs&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">G</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">remember2buy</span>
+<span class="go">&#39;spam&#39;</span>
+</pre></div>
+</div>
+<p class="translated">在这种情况下 MRO 为 GFEF 并保留了局部优先顺序。</p>
+<p class="translated">作为一般规则，应当避免像上面这样的层级结构，因为不清楚 F 是否应该重写 E，反之亦然。Python 2.3 通过在创建类 G 时引发异常解决了这个歧义性问题，有效地阻止了程序员生成有歧义的层级结构。其原因是 C3 算法在执行以下合并时将会失败:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">merge</span><span class="p">(</span><span class="n">FO</span><span class="p">,</span><span class="n">EFO</span><span class="p">,</span><span class="n">FE</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="translated">这是无法计算的，因为 F 在 EFO 的 tail 内而 E 在 FE 的 tail 内。</p>
+<p class="translated">真正的解决办法是设计一个无歧义的层级结构，即从 E 和 F（更特化的放在前面）而不是从 F 和 E 派生出 G；在这种情况下 MRO 毫无疑问就是 GEF。</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>           O
+           |
+           F (spam)
+         / |
+(eggs)   E |
+         \ |
+           G
+             (eggs, no doubt)
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">Python 2.3 会强迫程序员编写好的（或者，至少不那么容易出错的）层级结构。</p>
+<p class="translated">与此相关的一点，我要指出 Python 2.3 的算法足够聪明，它能识别明显的错误，比如父类列表中重复的类：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">A</span><span class="p">):</span> <span class="k">pass</span> <span class="c1"># error</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">?</span>
+<span class="gr">TypeError</span>: <span class="n">duplicate base class A</span>
+</pre></div>
+</div>
+<p class="translated">在这种情况下，Python 2.2（包括经典类和新式类）则不会引发任何异常。</p>
+<p class="translated">最后，我想指出我们从这个例子中汲取的两点教训：</p>
+<ol class="arabic simple">
+<li><p class="translated">尽管名称如此，MRO 是决定属性的解析顺序，而不仅仅是方法的解析顺序；</p></li>
+<li><p class="translated">Python 爱好者的默认食物是 spam !  (不过你已经知道这一点了 ;-)</p></li>
+</ol>
+<p class="translated">在讨论了局部优先顺序问题之后，现在再让我来讲解单调性。我的目标是证明经典类和 Python 2.2 新式类的 MRO 都不是单调的。</p>
+<p class="translated">要证明经典类的 MRO 是非单调的相当简单，只要看一下这个钻石形图就够了：</p>
+<blockquote>
+<div><div class="translated highlight-text notranslate"><div class="highlight"><pre><span></span>   C
+  / \
+ /   \
+A     B
+ \   /
+  \ /
+   D
+</pre></div>
+</div>
+</div></blockquote>
+<p class="translated">人们很容易发现其中的不一致性:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">B</span><span class="p">,</span><span class="n">P21</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span> <span class="n">C</span>        <span class="c1"># B 在 C 前 : B 的方法胜出</span>
+<span class="n">L</span><span class="p">[</span><span class="n">D</span><span class="p">,</span><span class="n">P21</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span> <span class="n">A</span> <span class="n">C</span> <span class="n">B</span> <span class="n">C</span>  <span class="c1"># B 在 C 之后  : C 的方法胜出！</span>
+</pre></div>
+</div>
+<p class="translated">另一方面，Python 2.2 和 Python 2.3 的 MRO 则没有问题，它们都将给出以下结果:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">D</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span> <span class="n">A</span> <span class="n">B</span> <span class="n">C</span>
+</pre></div>
+</div>
+<p class="translated">Guido 在他的文章 <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> 中指出经典的 MRO 在实践中并没有那么坏，因为人们通常可以避免经典类形成钻石形继承图。但是所有新式类都继承自 <code class="docutils literal notranslate"><span class="pre">object</span></code>，因此钻石形继承图是不可避免的并且在每个多重继承图中都会出现不一致性。</p>
+<p class="translated">Python 2.2 的 MRO 使打破单调性变得困难，但并非不可能。下面是最初由 Samuele Pedroni 提供的例子，显示 Python 2.2 的 MRO 是非单调的：</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">K1</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">K2</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">K3</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">A</span><span class="p">):</span>   <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Z</span><span class="p">(</span><span class="n">K1</span><span class="p">,</span><span class="n">K2</span><span class="p">,</span><span class="n">K3</span><span class="p">):</span> <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="translated">以下是根据 C3 MRO 进行的线性化 (读者应当将验证这些线性化作为练习并绘制继承图 ;-)</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">B</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">C</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">D</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">E</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">K1</span><span class="p">]</span><span class="o">=</span> <span class="n">K1</span> <span class="n">A</span> <span class="n">B</span> <span class="n">C</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">K2</span><span class="p">]</span><span class="o">=</span> <span class="n">K2</span> <span class="n">D</span> <span class="n">B</span> <span class="n">E</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">K3</span><span class="p">]</span><span class="o">=</span> <span class="n">K3</span> <span class="n">D</span> <span class="n">A</span> <span class="n">O</span>
+<span class="n">L</span><span class="p">[</span><span class="n">Z</span><span class="p">]</span> <span class="o">=</span> <span class="n">Z</span> <span class="n">K1</span> <span class="n">K2</span> <span class="n">K3</span> <span class="n">D</span> <span class="n">A</span> <span class="n">B</span> <span class="n">C</span> <span class="n">E</span> <span class="n">O</span>
+</pre></div>
+</div>
+<p class="translated">Python 2.2 对 A、B、C、D、E、K1、K2 和 K3 给出了完全相同的线性化，但对 Z 则给出了不同的线性化:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="p">[</span><span class="n">Z</span><span class="p">,</span><span class="n">P22</span><span class="p">]</span> <span class="o">=</span> <span class="n">Z</span> <span class="n">K1</span> <span class="n">K3</span> <span class="n">A</span> <span class="n">K2</span> <span class="n">D</span> <span class="n">B</span> <span class="n">C</span> <span class="n">E</span> <span class="n">O</span>
+</pre></div>
+</div>
+<p class="translated">很明显这种线性化是 <em>错误</em> 的，因为 A 在 D 之前，而在 K3 的线性化中 A 在 D 之后。换句话说，在 K3 中由 D 派生的方法会重写由 A 派生的方法，但在仍为 K3 子类的 Z 中，由 A 派生的方法会重写由 D 派生的方法！这破坏了单调性。此外，Z 的 Python 2.2 线性化也与局部优先顺序不一致，因为类 Z 的局部优先列表是 [K1, K2, K3] (K2 先于 K3)，而在 Z 的线性化中则是 K2 <em>跟随</em> K3。这些问题解释了为什么 2.2 规则被否定而改用 C3 规则。</p>
+</section>
+<section id="the-end">
+<h2 class="translated">结束<a class="headerlink" href="#the-end" title="Link to this heading">¶</a></h2>
+<p class="translated">本节是为没有耐心的读者准备的，他们会跳过前面的所有章节，直接跳到结尾。这部分也是为懒惰的程序员准备的，因为他们不想动脑筋。 最后，这部分也是为有些自负的程序员准备的，否则他/她就不会去阅读一篇关于多重继承层次结构中的 C3 方法解析顺序的论文了 ;-) 这三个优点合在一起（而 <em>不是</em> 分开）应该得到一个奖励：这个奖励就是一个简短的 Python 2.2 脚本，它可以在不影响你的大脑的情况下计算 2.3 MRO。 只需修改最后一行就可以尝试我在本文中讨论的各种示例:</p>
+<div class="translated highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#&lt;mro.py&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;C3 algorithm by Samuele Pedroni (with readability enhanced by me).&quot;&quot;&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">__metaclass__</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="s2">&quot;All classes are metamagically modified to be nicely printed&quot;</span>
+    <span class="fm">__repr__</span> <span class="o">=</span> <span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ex_2</span><span class="p">:</span>
+    <span class="s2">&quot;Serious order disagreement&quot;</span> <span class="c1">#From Guido</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">X</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Y</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Z</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">pass</span> <span class="c1">#creates Z(A,B) in Python 2.2</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span> <span class="c1"># Z(A,B) cannot be created in Python 2.3</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ex_5</span><span class="p">:</span>
+    <span class="s2">&quot;My first example&quot;</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">F</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ex_6</span><span class="p">:</span>
+    <span class="s2">&quot;My second example&quot;</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">F</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">E</span><span class="p">,</span><span class="n">D</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ex_9</span><span class="p">:</span>
+    <span class="s2">&quot;Difference between Python 2.2 MRO and C3&quot;</span> <span class="c1">#From Samuele</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">K1</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">K2</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">K3</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">A</span><span class="p">):</span> <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Z</span><span class="p">(</span><span class="n">K1</span><span class="p">,</span><span class="n">K2</span><span class="p">,</span><span class="n">K3</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span><span class="n">seqs</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">CPL[</span><span class="si">%s</span><span class="s1">]=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">seqs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">seqs</span><span class="p">),</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">nonemptyseqs</span><span class="o">=</span><span class="p">[</span><span class="n">seq</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">seqs</span> <span class="k">if</span> <span class="n">seq</span><span class="p">]</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">nonemptyseqs</span><span class="p">:</span> <span class="k">return</span> <span class="n">res</span>
+      <span class="n">i</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;round: candidates...&#39;</span><span class="p">,</span>
+      <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">nonemptyseqs</span><span class="p">:</span> <span class="c1"># find merge candidates among seq heads</span>
+          <span class="n">cand</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> <span class="nb">print</span> <span class="s1">&#39; &#39;</span><span class="p">,</span><span class="n">cand</span><span class="p">,</span>
+          <span class="n">nothead</span><span class="o">=</span><span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">nonemptyseqs</span> <span class="k">if</span> <span class="n">cand</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+          <span class="k">if</span> <span class="n">nothead</span><span class="p">:</span> <span class="n">cand</span><span class="o">=</span><span class="kc">None</span> <span class="c1">#reject candidate</span>
+          <span class="k">else</span><span class="p">:</span> <span class="k">break</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">cand</span><span class="p">:</span> <span class="k">raise</span> <span class="s2">&quot;Inconsistent hierarchy&quot;</span>
+      <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">nonemptyseqs</span><span class="p">:</span> <span class="c1"># remove cand</span>
+          <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cand</span><span class="p">:</span> <span class="k">del</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mro</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="s2">&quot;Compute the class precedence list (mro) according to C3&quot;</span>
+    <span class="k">return</span> <span class="n">merge</span><span class="p">([[</span><span class="n">C</span><span class="p">]]</span><span class="o">+</span><span class="nb">map</span><span class="p">(</span><span class="n">mro</span><span class="p">,</span><span class="n">C</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">)])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">print_mro</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">MRO[</span><span class="si">%s</span><span class="s1">]=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">mro</span><span class="p">(</span><span class="n">C</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">P22 MRO[</span><span class="si">%s</span><span class="s1">]=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">C</span><span class="o">.</span><span class="n">mro</span><span class="p">())</span>
+
+<span class="n">print_mro</span><span class="p">(</span><span class="n">ex_9</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span>
+
+<span class="c1">#&lt;/mro.py&gt;</span>
+</pre></div>
+</div>
+<p class="translated">就是这样了朋友们，</p>
+<blockquote>
+<div><p class="translated">好好享受吧！</p>
+</div></blockquote>
+</section>
+<section id="resources">
+<h2 class="translated">参考资源<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h2>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p class="translated">由 Samuele Pedroni 在 python-dev 发起的讨论：<a class="reference external" href="https://mail.python.org/pipermail/python-dev/2002-October/029035.html">https://mail.python.org/pipermail/python-dev/2002-October/029035.html</a></p>
+</aside>
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p class="translated">论文 <em>A Monotonic Superclass Linearization for Dylan</em>: <a class="reference external" href="https://doi.org/10.1145/236337.236343">https://doi.org/10.1145/236337.236343</a></p>
+</aside>
+<aside class="footnote brackets" id="id6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p class="translated">Guido van Rossum 的文章，<em>Unifying types and classes in Python 2.2</em>: <a class="reference external" href="https://web.archive.org/web/20140210194412/http://www.python.org/download/releases/2.2.2/descrintro">https://web.archive.org/web/20140210194412/http://www.python.org/download/releases/2.2.2/descrintro</a></p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Python 2.3 方法解析顺序</a><ul>
+<li><a class="reference internal" href="#the-beginning">开始</a></li>
+<li><a class="reference internal" href="#the-c3-method-resolution-order">C3 方法解析顺序</a></li>
+<li><a class="reference internal" href="#examples">例子</a></li>
+<li><a class="reference internal" href="#bad-method-resolution-orders">坏的方法解析顺序</a></li>
+<li><a class="reference internal" href="#the-end">结束</a></li>
+<li><a class="reference internal" href="#resources">参考资源</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="timerfd.html"
+                          title="上一章">定时器文件描述符指南</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="free-threading-python.html"
+                          title="下一章">Python 对自由线程的支持</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/mro.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/mro.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/mro.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="free-threading-python.html" title="Python 对自由线程的支持"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="timerfd.html" title="定时器文件描述符指南"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Python 2.3 方法解析顺序</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

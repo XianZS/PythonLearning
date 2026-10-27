@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="将 optparse 代码迁移至 argparse" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/argparse-optparse.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="argparse 模块提供了一些未获 optparse 模块原生支持的更高层级特性，包括： 处理位置参数。, 支持子命令。, 允许替代选项前缀例如+ 和/ 。, 处理零个或多个以及一个或多个风格的参数。, 生成更具信息量的用法消息。, 提供用于定制 type 和 action 的更为简单的接口。. 最初的时候， argparse 模块试图维持与 optparse 的兼容性。 不过，在支持声明..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_howto_argparse-optparse_8f34b092.png" />
+<meta property="og:image:alt" content="argparse 模块提供了一些未获 optparse 模块原生支持的更高层级特性，包括： 处理位置参数。, 支持子命令。, 允许替代选项前缀例如+ 和/ 。, 处理零个或多个以及一个或多个风格的参数。, 生成更具信息量的用法消息。, 提供用于定制 type 和 action 的更为简单的接口。. 最初的时候， argparse 模块试图维持与 optparse 的兼容性。 不过，在支持声明..." />
+<meta name="description" content="argparse 模块提供了一些未获 optparse 模块原生支持的更高层级特性，包括： 处理位置参数。, 支持子命令。, 允许替代选项前缀例如+ 和/ 。, 处理零个或多个以及一个或多个风格的参数。, 生成更具信息量的用法消息。, 提供用于定制 type 和 action 的更为简单的接口。. 最初的时候， argparse 模块试图维持与 optparse 的兼容性。 不过，在支持声明..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>将 optparse 代码迁移至 argparse &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="optparse --- 命令行选项的解析器" href="../library/optparse.html" />
+    <link rel="prev" title="argparse 教程" href="argparse.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/howto/argparse-optparse.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="argparse.html"
+                          title="上一章">argparse 教程</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="../library/optparse.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code> --- 命令行选项的解析器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/argparse-optparse.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/argparse-optparse.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/argparse-optparse.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="../library/optparse.html" title="optparse --- 命令行选项的解析器"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="argparse.html" title="argparse 教程"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="../library/index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../library/cmdlinelibs.html" >命令行界面库</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../library/argparse.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code> --- 用于命令行选项、参数和子命令的解析器</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">将 <code class="docutils literal notranslate"><span class="pre">optparse</span></code> 代码迁移至 <code class="docutils literal notranslate"><span class="pre">argparse</span></code></a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="migrating-optparse-code-to-argparse">
+<span id="migrating-optparse-code"></span><span id="upgrading-optparse-code"></span><h1 class="translated">将 <code class="docutils literal notranslate"><span class="pre">optparse</span></code> 代码迁移至 <code class="docutils literal notranslate"><span class="pre">argparse</span></code><a class="headerlink" href="#migrating-optparse-code-to-argparse" title="Link to this heading">¶</a></h1>
+<p class="translated"><a class="reference internal" href="../library/argparse.html#module-argparse" title="argparse: Command-line option and argument parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> 模块提供了一些未获 <a class="reference internal" href="../library/optparse.html#module-optparse" title="optparse: Command-line option parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code></a> 模块原生支持的更高层级特性，包括：</p>
+<ul class="simple">
+<li><p class="translated">处理位置参数。</p></li>
+<li><p class="translated">支持子命令。</p></li>
+<li><p class="translated">允许替代选项前缀例如 <code class="docutils literal notranslate"><span class="pre">+</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/</span></code>。</p></li>
+<li><p class="translated">处理零个或多个以及一个或多个风格的参数。</p></li>
+<li><p class="translated">生成更具信息量的用法消息。</p></li>
+<li><p class="translated">提供用于定制 <code class="docutils literal notranslate"><span class="pre">type</span></code> 和 <code class="docutils literal notranslate"><span class="pre">action</span></code> 的更为简单的接口。</p></li>
+</ul>
+<p class="translated">最初的时候，<a class="reference internal" href="../library/argparse.html#module-argparse" title="argparse: Command-line option and argument parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> 模块试图维持与 <a class="reference internal" href="../library/optparse.html#module-optparse" title="optparse: Command-line option parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code></a> 的兼容性。 不过，在支持声明式命令行选项处理（并将位置参数处理留给应用程序代码）以及在声明式界面中同时支持命名选项和位置参数之间底层设计方面的差异意味着其 API 逐渐与 <code class="docutils literal notranslate"><span class="pre">optparse</span></code> 的拉开了差距。</p>
+<p class="translated">正如 <a class="reference internal" href="../library/optparse.html#choosing-an-argument-parser"><span class="std std-ref">选择参数解析库</span></a> 中所描述的，目前使用 <a class="reference internal" href="../library/optparse.html#module-optparse" title="optparse: Command-line option parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code></a> 并且对其效果感到满意的应用程序完全可以继续使用 <code class="docutils literal notranslate"><span class="pre">optparse</span></code>。</p>
+<p class="translated">考虑迁移的应用程序开发者也应当先仔细查看在该章节中描述的内在行为差异列表再决定是否需要迁移。</p>
+<p class="translated">对于确定选择从 <a class="reference internal" href="../library/optparse.html#module-optparse" title="optparse: Command-line option parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code></a> 迁移到 <a class="reference internal" href="../library/argparse.html#module-argparse" title="argparse: Command-line option and argument parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> 的应用程序，下列建议应该会有帮助：</p>
+<ul class="simple">
+<li><p class="translated">将所有 <a class="reference internal" href="../library/optparse.html#optparse.OptionParser.add_option" title="optparse.OptionParser.add_option"><code class="xref py py-meth docutils literal notranslate"><span class="pre">optparse.OptionParser.add_option()</span></code></a> 调用替换为 <a class="reference internal" href="../library/argparse.html#argparse.ArgumentParser.add_argument" title="argparse.ArgumentParser.add_argument"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ArgumentParser.add_argument()</span></code></a> 调用。</p></li>
+<li><p class="translated">将 <code class="docutils literal notranslate"><span class="pre">(options,</span> <span class="pre">args)</span> <span class="pre">=</span> <span class="pre">parser.parse_args()</span></code> 替换为 <code class="docutils literal notranslate"><span class="pre">args</span> <span class="pre">=</span> <span class="pre">parser.parse_args()</span></code> 并为位置参数添加额外的 <a class="reference internal" href="../library/argparse.html#argparse.ArgumentParser.add_argument" title="argparse.ArgumentParser.add_argument"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ArgumentParser.add_argument()</span></code></a> 调用。 请注意之前所谓的 <code class="docutils literal notranslate"><span class="pre">options</span></code> 在 <a class="reference internal" href="../library/argparse.html#module-argparse" title="argparse: Command-line option and argument parsing library."><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> 上下文中被称为 <code class="docutils literal notranslate"><span class="pre">args</span></code>。</p></li>
+<li><p class="translated">通过使用 <a class="reference internal" href="../library/argparse.html#argparse.ArgumentParser.parse_intermixed_args" title="argparse.ArgumentParser.parse_intermixed_args"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_intermixed_args()</span></code></a> 而非 <a class="reference internal" href="../library/argparse.html#argparse.ArgumentParser.parse_args" title="argparse.ArgumentParser.parse_args"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_args()</span></code></a> 来替换 <a class="reference internal" href="../library/optparse.html#optparse.OptionParser.disable_interspersed_args" title="optparse.OptionParser.disable_interspersed_args"><code class="xref py py-meth docutils literal notranslate"><span class="pre">optparse.OptionParser.disable_interspersed_args()</span></code></a>。</p></li>
+<li><p class="translated">将回调动作和 <code class="docutils literal notranslate"><span class="pre">callback_*</span></code> 关键字参数替换为 <code class="docutils literal notranslate"><span class="pre">type</span></code> 或 <code class="docutils literal notranslate"><span class="pre">action</span></code> 参数。</p></li>
+<li><p class="translated">将 <code class="docutils literal notranslate"><span class="pre">type</span></code> 关键字参数字符串名称替换为相应的类型对象（例如 int, float, complex 等）。</p></li>
+<li><p class="translated">将 <a class="reference internal" href="../library/optparse.html#optparse.Values" title="optparse.Values"><code class="xref py py-class docutils literal notranslate"><span class="pre">optparse.Values</span></code></a> 替换为 <a class="reference internal" href="../library/argparse.html#argparse.Namespace" title="argparse.Namespace"><code class="xref py py-class docutils literal notranslate"><span class="pre">Namespace</span></code></a> 并将 <a class="reference internal" href="../library/optparse.html#optparse.OptionError" title="optparse.OptionError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">optparse.OptionError</span></code></a> 和 <a class="reference internal" href="../library/optparse.html#optparse.OptionValueError" title="optparse.OptionValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">optparse.OptionValueError</span></code></a> 替换为 <a class="reference internal" href="../library/argparse.html#argparse.ArgumentError" title="argparse.ArgumentError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ArgumentError</span></code></a>。</p></li>
+<li><p class="translated">将包含隐式参数的字符串如 <code class="docutils literal notranslate"><span class="pre">%default</span></code> 或 <code class="docutils literal notranslate"><span class="pre">%prog</span></code> 替换为使用标准 Python 字典格式化语法的字符串，即 <code class="docutils literal notranslate"><span class="pre">%(default)s</span></code> 和 <code class="docutils literal notranslate"><span class="pre">%(prog)s</span></code>。</p></li>
+<li><p class="translated">将 OptionParser 构造器 <code class="docutils literal notranslate"><span class="pre">version</span></code> 参数替换为对 <code class="docutils literal notranslate"><span class="pre">parser.add_argument('--version',</span> <span class="pre">action='version',</span> <span class="pre">version='&lt;the</span> <span class="pre">version&gt;')</span></code> 的调用。</p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="argparse.html"
+                          title="上一章">argparse 教程</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="../library/optparse.html"
+                          title="下一章"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code> --- 命令行选项的解析器</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "howto/argparse-optparse.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/argparse-optparse.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/howto/argparse-optparse.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="../library/optparse.html" title="optparse --- 命令行选项的解析器"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="argparse.html" title="argparse 教程"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="../library/index.html" >Python 标准库</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../library/cmdlinelibs.html" >命令行界面库</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../library/argparse.html" ><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code> --- 用于命令行选项、参数和子命令的解析器</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">将 <code class="docutils literal notranslate"><span class="pre">optparse</span></code> 代码迁移至 <code class="docutils literal notranslate"><span class="pre">argparse</span></code></a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>

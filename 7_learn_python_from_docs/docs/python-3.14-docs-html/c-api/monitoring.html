@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="监控 C API" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/c-api/monitoring.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="在 3.13 版中添加。 一个扩展可能需要与事件监视系统进行交互。订阅事件和注册回调都可通过在 sys.monitoring 中暴露的 Python API 来完成。 生成执行事件: 下面的函数使得扩展可以在模拟执行 Python 代码时触发监控事件。这样的函数都接受一个 PyMonitoringState 结构体，其中包含有关事件激活状态的简明信息以及事件参数，此类参数包括代表代码对象的 ..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://docs.python.org/3.14/zh-cn/_images/social_previews/summary_c-api_monitoring_16a2fa96.png" />
+<meta property="og:image:alt" content="在 3.13 版中添加。 一个扩展可能需要与事件监视系统进行交互。订阅事件和注册回调都可通过在 sys.monitoring 中暴露的 Python API 来完成。 生成执行事件: 下面的函数使得扩展可以在模拟执行 Python 代码时触发监控事件。这样的函数都接受一个 PyMonitoringState 结构体，其中包含有关事件激活状态的简明信息以及事件参数，此类参数包括代表代码对象的 ..." />
+<meta name="description" content="在 3.13 版中添加。 一个扩展可能需要与事件监视系统进行交互。订阅事件和注册回调都可通过在 sys.monitoring 中暴露的 Python API 来完成。 生成执行事件: 下面的函数使得扩展可以在模拟执行 Python 代码时触发监控事件。这样的函数都接受一个 PyMonitoringState 结构体，其中包含有关事件激活状态的简明信息以及事件参数，此类参数包括代表代码对象的 ..." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#3776ab">
+
+    <title>监控 C API &#8212; Python 3.14.7 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=234b1a7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?v=4365c8fe" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css?v=5349f25f" />
+    
+    <script src="../_static/documentation_options.js?v=d9c75848"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=beaddf03"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.14.7 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于此文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权" href="../copyright.html" />
+    <link rel="next" title="安装 Python 模块" href="../installing/index.html" />
+    <link rel="prev" title="API 和 ABI 版本管理" href="apiabiversion.html" />
+    
+      
+      <script defer file-types="bz2,epub,zip" data-domain="docs.python.org" src="https://analytics.python.org/js/script.file-downloads.outbound-links.js"></script>
+      
+      <link rel="canonical" href="https://docs.python.org/3/c-api/monitoring.html">
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg">
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+            <script type="text/javascript" src="../_static/rtd_switcher.js"></script>
+            <meta name="readthedocs-addons-api-version" content="1">
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="菜单">
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Python logo">
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q">
+                <input type="submit" value="转到">
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">监控 C API</a></li>
+<li><a class="reference internal" href="#generating-execution-events">生成执行事件</a><ul>
+<li><a class="reference internal" href="#managing-the-monitoring-state">管理监控状态</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="apiabiversion.html"
+                          title="上一章">API 和 ABI 版本管理</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="../installing/index.html"
+                          title="下一章">安装 Python 模块</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/monitoring.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/monitoring.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/monitoring.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="../installing/index.html" title="安装 Python 模块"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="apiabiversion.html" title="API 和 ABI 版本管理"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">监控 C API</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="monitoring-c-api">
+<span id="c-api-monitoring"></span><h1 class="translated">监控 C API<a class="headerlink" href="#monitoring-c-api" title="Link to this heading">¶</a></h1>
+<p class="translated">在 3.13 版中添加。</p>
+<p class="translated">一个扩展可能需要与事件监视系统进行交互。订阅事件和注册回调都可通过在 <a class="reference internal" href="../library/sys.monitoring.html#module-sys.monitoring" title="sys.monitoring: Access and control event monitoring"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys.monitoring</span></code></a> 中暴露的 Python API 来完成。</p>
+</section>
+<section id="generating-execution-events">
+<h1 class="translated">生成执行事件<a class="headerlink" href="#generating-execution-events" title="Link to this heading">¶</a></h1>
+<p class="translated">下面的函数使得扩展可以在模拟执行 Python 代码时触发监控事件。这样的函数都接受一个 <code class="docutils literal notranslate"><span class="pre">PyMonitoringState</span></code> 结构体，其中包含有关事件激活状态的简明信息以及事件参数，此类参数包括代表代码对象的 <code class="docutils literal notranslate"><span class="pre">PyObject*</span></code>、指令偏移量，有时还包括额外的、事件专属的参数（请参阅 <a class="reference internal" href="../library/sys.monitoring.html#module-sys.monitoring" title="sys.monitoring: Access and control event monitoring"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys.monitoring</span></code></a> 了解有关不同事件回调签名的详情）。<code class="docutils literal notranslate"><span class="pre">codelike</span></code> 参数应为 <a class="reference internal" href="../library/types.html#types.CodeType" title="types.CodeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.CodeType</span></code></a> 的实例或是某个模拟它的类型。</p>
+<p class="translated">VM 会在触发事件时禁用跟踪，因此用户不需要额外的操作。</p>
+<p class="translated">监控函数被调用时不应设置异常，除非是下面列出的用于处理当前异常的函数。</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.PyMonitoringState">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoringState</span></span></span><a class="headerlink" href="#c.PyMonitoringState" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">事件类型状态的表示形式。它由用户分配，但其内容则由下文描述的监控 API 函数来维护。</p>
+</dd></dl>
+
+<p class="translated">下面的所有函数均在成功时返回 0 并在失败时返回 -1 (同时设置一个异常)。</p>
+<p class="translated">请参阅 <a class="reference internal" href="../library/sys.monitoring.html#module-sys.monitoring" title="sys.monitoring: Access and control event monitoring"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys.monitoring</span></code></a> 获取事件的描述。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FirePyStartEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FirePyStartEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FirePyStartEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">PY_START</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FirePyResumeEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FirePyResumeEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FirePyResumeEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">PY_RESUME</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FirePyReturnEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FirePyReturnEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">retval</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FirePyReturnEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">PY_RETURN</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FirePyYieldEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FirePyYieldEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">retval</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FirePyYieldEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">PY_YIELD</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireCallEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireCallEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">callable</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">arg0</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireCallEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">CALL</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireLineEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireLineEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">lineno</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireLineEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">LINE</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireJumpEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireJumpEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">target_offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireJumpEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">JUMP</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireBranchLeftEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireBranchLeftEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">target_offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireBranchLeftEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">BRANCH_LEFT</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireBranchRightEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireBranchRightEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">target_offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireBranchRightEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">BRANCH_RIGHT</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireCReturnEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireCReturnEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">retval</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireCReturnEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">C_RETURN</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FirePyThrowEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FirePyThrowEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FirePyThrowEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用当前（即 <a class="reference internal" href="exceptions.html#c.PyErr_GetRaisedException" title="PyErr_GetRaisedException"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_GetRaisedException()</span></code></a> 返回的）异常发出 <code class="docutils literal notranslate"><span class="pre">PY_THROW</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireRaiseEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireRaiseEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireRaiseEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用当前（即 <a class="reference internal" href="exceptions.html#c.PyErr_GetRaisedException" title="PyErr_GetRaisedException"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_GetRaisedException()</span></code></a> 所返回的）异常发出 <code class="docutils literal notranslate"><span class="pre">RAISE</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireCRaiseEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireCRaiseEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireCRaiseEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用当前（即 <a class="reference internal" href="exceptions.html#c.PyErr_GetRaisedException" title="PyErr_GetRaisedException"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_GetRaisedException()</span></code></a> 所返回的）异常发出 <code class="docutils literal notranslate"><span class="pre">C_RAISE</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireReraiseEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireReraiseEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireReraiseEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用当前（即 <a class="reference internal" href="exceptions.html#c.PyErr_GetRaisedException" title="PyErr_GetRaisedException"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_GetRaisedException()</span></code></a> 所返回的）异常发出 <code class="docutils literal notranslate"><span class="pre">RERAISE</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireExceptionHandledEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireExceptionHandledEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireExceptionHandledEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用当前（即 <a class="reference internal" href="exceptions.html#c.PyErr_GetRaisedException" title="PyErr_GetRaisedException"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_GetRaisedException()</span></code></a> 所返回的）异常发出 <code class="docutils literal notranslate"><span class="pre">EXCEPTION_HANDLED</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FirePyUnwindEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FirePyUnwindEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FirePyUnwindEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">使用当前（即 <a class="reference internal" href="exceptions.html#c.PyErr_GetRaisedException" title="PyErr_GetRaisedException"><code class="xref c c-func docutils literal notranslate"><span class="pre">PyErr_GetRaisedException()</span></code></a> 所返回的）异常发出 <code class="docutils literal notranslate"><span class="pre">PY_UNWIND</span></code> 事件。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_FireStopIterationEvent">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_FireStopIterationEvent</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">codelike</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset</span></span>, <a class="reference internal" href="structures.html#c.PyObject" title="PyObject"><span class="n"><span class="pre">PyObject</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_FireStopIterationEvent" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">发出 <code class="docutils literal notranslate"><span class="pre">STOP_ITERATION</span></code> 事件。如果 <code class="docutils literal notranslate"><span class="pre">value</span></code> 是一个 <a class="reference internal" href="../library/exceptions.html#StopIteration" title="StopIteration"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StopIteration</span></code></a> 实例，它将被使用。在其他情况下，将新建一个 <code class="xref py py-exc docutils literal notranslate"><span class="pre">StopIteration</span></code> 实例并以 <code class="docutils literal notranslate"><span class="pre">value</span></code> 作为其参数。</p>
+</dd></dl>
+
+<section id="managing-the-monitoring-state">
+<h2 class="translated">管理监控状态<a class="headerlink" href="#managing-the-monitoring-state" title="Link to this heading">¶</a></h2>
+<p class="translated">监控状态可在监控作用域的协助下进行管理。一个作用域通常对应一个 Python 函数。</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_EnterScope">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_EnterScope</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.PyMonitoringState" title="PyMonitoringState"><span class="n"><span class="pre">PyMonitoringState</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">state_array</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">version</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">event_types</span></span>, <a class="reference internal" href="intro.html#c.Py_ssize_t" title="Py_ssize_t"><span class="n"><span class="pre">Py_ssize_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_EnterScope" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">进入一个监控作用域。<code class="docutils literal notranslate"><span class="pre">event_types</span></code> 是由可从该作用域发生事件的事件 ID 组成的数组。例如，<code class="docutils literal notranslate"><span class="pre">PY_START</span></code> 事件的 ID 值为 <code class="docutils literal notranslate"><span class="pre">PY_MONITORING_EVENT_PY_START</span></code>，其对应数字等于 <code class="docutils literal notranslate"><span class="pre">sys.monitoring.events.PY_START</span></code> 的以 2 为底的对数。<code class="docutils literal notranslate"><span class="pre">state_array</span></code> 是由对应 <code class="docutils literal notranslate"><span class="pre">event_types</span></code> 中每个事件的监控状态组成的数组，它由用户进行分配但是由 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyMonitoring_EnterScope()</span></code> 使用事件激活状态相关信息填充。<code class="docutils literal notranslate"><span class="pre">event_types</span></code> 的大小 (因而也是 <code class="docutils literal notranslate"><span class="pre">state_array</span></code> 的大小) 由 <code class="docutils literal notranslate"><span class="pre">length</span></code> 给出。</p>
+<p class="translated"><code class="docutils literal notranslate"><span class="pre">version</span></code> 参数是一个指针，指向应与 <code class="docutils literal notranslate"><span class="pre">state_array</span></code> 一起由用户分配并初始化为 0 的值，然后仅由 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyMonitoring_EnterScope()</span></code> 本身来设置。 它允许此函数确定事件状态自上次调用以来是否发生改变，并在它们未改变时立即返回。</p>
+<p class="translated">这里所称的作用域是词法意义下的作用域：一个函数、类或方法。 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyMonitoring_EnterScope()</span></code> 应当在进入词法作用域时被调用。在模拟一个递归 Python 函数之类的情况下，作用域可被重进入，并重用相同的 <em>state_array</em> 和 <em>version</em>。当某个代码执行暂停时，例如在模拟一个生成器时，此作用域需要被退出并重进入。</p>
+<p class="translated">对应 <em>event_types</em> 的宏如下：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p class="translated">宏</p></th>
+<th class="head"><p class="translated">事件</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_BRANCH_LEFT">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_BRANCH_LEFT</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_BRANCH_LEFT" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-BRANCH_LEFT"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">BRANCH_LEFT</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_BRANCH_RIGHT">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_BRANCH_RIGHT</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_BRANCH_RIGHT" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-BRANCH_RIGHT"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">BRANCH_RIGHT</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_CALL">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_CALL</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_CALL" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-CALL"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">CALL</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_C_RAISE">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_C_RAISE</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_C_RAISE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-C_RAISE"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">C_RAISE</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_C_RETURN">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_C_RETURN</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_C_RETURN" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-C_RETURN"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">C_RETURN</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_EXCEPTION_HANDLED">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_EXCEPTION_HANDLED</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_EXCEPTION_HANDLED" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-EXCEPTION_HANDLED"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">EXCEPTION_HANDLED</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_INSTRUCTION">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_INSTRUCTION</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_INSTRUCTION" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-INSTRUCTION"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">INSTRUCTION</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_JUMP">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_JUMP</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_JUMP" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-JUMP"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">JUMP</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_LINE">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_LINE</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_LINE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-LINE"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">LINE</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_PY_RESUME">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_PY_RESUME</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_PY_RESUME" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-PY_RESUME"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">PY_RESUME</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_PY_RETURN">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_PY_RETURN</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_PY_RETURN" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-PY_RETURN"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">PY_RETURN</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_PY_START">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_PY_START</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_PY_START" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-PY_START"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">PY_START</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_PY_THROW">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_PY_THROW</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_PY_THROW" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-PY_THROW"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">PY_THROW</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_PY_UNWIND">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_PY_UNWIND</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_PY_UNWIND" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-PY_UNWIND"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">PY_UNWIND</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_PY_YIELD">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_PY_YIELD</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_PY_YIELD" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-PY_YIELD"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">PY_YIELD</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_RAISE">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_RAISE</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_RAISE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-RAISE"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">RAISE</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_RERAISE">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_RERAISE</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_RERAISE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-RERAISE"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">RERAISE</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><dl class="c macro">
+<dt class="sig sig-object c" id="c.PY_MONITORING_EVENT_STOP_ITERATION">
+<span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_EVENT_STOP_ITERATION</span></span></span><a class="headerlink" href="#c.PY_MONITORING_EVENT_STOP_ITERATION" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</td>
+<td><p class="translated"><a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-STOP_ITERATION"><code class="xref std std-monitoring-event docutils literal notranslate"><span class="pre">STOP_ITERATION</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PyMonitoring_ExitScope">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PyMonitoring_ExitScope</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PyMonitoring_ExitScope" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">退出使用 <code class="xref c c-func docutils literal notranslate"><span class="pre">PyMonitoring_EnterScope()</span></code> 进入的上一个作用域。</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.PY_MONITORING_IS_INSTRUMENTED_EVENT">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PY_MONITORING_IS_INSTRUMENTED_EVENT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">ev</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.PY_MONITORING_IS_INSTRUMENTED_EVENT" title="Link to this definition">¶</a><br /></dt>
+<dd><p class="translated">如果对应事件 ID <em>ev</em> 的事件属于 <a class="reference internal" href="../library/sys.monitoring.html#monitoring-event-local"><span class="std std-ref">局部事件</span></a> 则返回真值。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 3.13.</span></p>
+</div>
+<div class="versionchanged soft-deprecated">
+<p><span class="versionmodified soft-deprecated">自 3.14 版起已处于 <a class="reference internal" href="../glossary.html#term-soft-deprecated">Soft deprecated</a> 状态.</span></p>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">监控 C API</a></li>
+<li><a class="reference internal" href="#generating-execution-events">生成执行事件</a><ul>
+<li><a class="reference internal" href="#managing-the-monitoring-state">管理监控状态</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一主题</h4>
+    <p class="topless"><a href="apiabiversion.html"
+                          title="上一章">API 和 ABI 版本管理</a></p>
+  </div>
+  <div>
+    <h4>下一主题</h4>
+    <p class="topless"><a href="../installing/index.html"
+                          title="下一章">安装 Python 模块</a></p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('meta[property="og:title"]').content;
+        const elements = document.querySelectorAll('.improvepage');
+        const pageurl = window.location.href.split('?')[0];
+        elements.forEach(element => {
+            const url = new URL(element.href.split('?')[0].replace("-nojs", ""));
+            url.searchParams.set('pagetitle', title);
+            url.searchParams.set('pageurl', pageurl);
+            url.searchParams.set('pagesource', "c-api/monitoring.rst");
+            element.href = url.toString();
+        });
+    });
+  </script>
+  <div role="note" aria-label="source link">
+    <h3>当前页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告代码错误</a></li>
+      <li><a class="improvepage" href="../improve-page-nojs.html">改进本页面</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/c-api/monitoring.rst?plain=1"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/python/python-docs-zh-CN/blob/3.14/c-api/monitoring.po?plain=1"
+           rel="nofollow">显示翻译源</a>
+      </li>
+      
+    </ul>
+  </div>
+        </div>
+<div id="sidebarbutton" title="折叠边栏">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="../installing/index.html" title="安装 Python 模块"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="apiabiversion.html" title="API 和 ABI 版本管理"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="Python logo" style="vertical-align: middle; margin-top: -1px"></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.14.7 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python/C API 参考手册</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">监控 C API</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box">
+          <input type="submit" value="转到">
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    主题
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>自动</option>
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权</a> 2001 Python Software Foundation.
+    <br>
+    本页面采用 Python 软件基金会许可证第 2 版授权。
+    <br>
+    文档中的示例、代码片段及其他代码内容额外采用零条款 BSD 许可证授权。
+    <br>
+    
+      更多信息请参阅《<a href="/license.html"> 历史与许可 </a>》。<br>
+    
+    
+    <br>
+
+    Python 软件基金会是一家非营利性公司。
+<a href="https://www.python.org/psf/donations/">请进行捐赠。</a>
+<br>
+    <br>
+      最后更新于8月 08, 2026 (09:43 UTC) 。
+    
+      <a href="/bugs.html">发现了错误</a>？
+    
+    <br>
+
+    使用<a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3 创建。
+    </div>
+
+  </body>
+</html>
